@@ -1,8 +1,10 @@
+// src/components/FeatureCard.tsx
+
 "use client";
 
 import React, { ReactNode, memo } from "react";
-import { motion, useReducedMotion } from "framer-motion";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { motion, useReducedMotion, Variants } from "framer-motion";
+import { Card, CardTitle, CardContent } from "@/components/ui/card";
 
 type FeatureCardProps = {
   icon: ReactNode;
@@ -11,6 +13,7 @@ type FeatureCardProps = {
   delay?: number;
 };
 
+// Use the memoized component for export
 function FeatureCardImpl({
   icon,
   title,
@@ -19,31 +22,51 @@ function FeatureCardImpl({
 }: FeatureCardProps) {
   const reduceMotion = useReducedMotion();
 
-  const cardVariants = reduceMotion
-    ? { offscreen: { y: 0, opacity: 1 }, onscreen: { y: 0, opacity: 1 } }
+  // Explicitly type variants for better TypeScript inference and safety
+  const cardVariants: Variants = reduceMotion
+    ? { offscreen: { opacity: 1 }, onscreen: { opacity: 1 } } // Simplified variant for reduced motion
     : {
-        offscreen: { y: 30, opacity: 0 },
+        offscreen: { y: 40, opacity: 0 },
         onscreen: {
           y: 0,
           opacity: 1,
-          transition: { stiffness: 90, damping: 18, delay, duration: 0.6 },
+          transition: {
+            type: "spring",
+            stiffness: 100,
+            damping: 20,
+            delay,
+          },
         },
       };
 
   return (
     <motion.div variants={cardVariants} className="h-full">
-      <Card className="h-full flex flex-col justify-between transition-transform duration-300 hover:-translate-y-2 hover:shadow-2xl bg-white/60 border border-slate-200 hover:border-indigo-300 p-6">
-        <div className="flex flex-col items-center text-center">
-          <div className="mb-4 rounded-full bg-indigo-50 p-5 text-indigo-600 shadow-inner flex items-center justify-center w-16 h-16">
-            {icon}
-          </div>
-          <CardTitle className="text-xl font-semibold text-gray-800 mb-3">
+      <Card
+        className="h-full p-6 flex flex-col items-center text-center
+                   bg-white/70 backdrop-blur-lg 
+                   border border-slate-200 
+                   transition-all duration-300 ease-in-out
+                   hover:-translate-y-2 hover:shadow-2xl hover:shadow-indigo-500/10 
+                   hover:ring-2 hover:ring-indigo-400 hover:ring-offset-2 hover:ring-offset-slate-50"
+      >
+        {/* Icon Container */}
+        <div
+          className="mb-5 flex h-16 w-16 items-center justify-center 
+                     rounded-full bg-indigo-100/70 border border-indigo-200/50 shadow-inner"
+        >
+          {/* Apply text-indigo-600 to the icon itself */}
+          <div className="text-indigo-600">{icon}</div>
+        </div>
+
+        {/* Text Content */}
+        <div className="flex flex-col gap-2">
+          <CardTitle className="text-xl font-bold text-gray-900">
             {title}
           </CardTitle>
-          <CardContent>
-            <p className="text-center text-gray-600 leading-relaxed">
-              {children}
-            </p>
+          <CardContent className="p-0">
+            {" "}
+            {/* Remove default padding */}
+            <p className="text-gray-600 leading-relaxed">{children}</p>
           </CardContent>
         </div>
       </Card>
@@ -51,4 +74,5 @@ function FeatureCardImpl({
   );
 }
 
+// Using memo for performance optimization, preventing re-renders if props haven't changed.
 export default memo(FeatureCardImpl);
