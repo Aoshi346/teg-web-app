@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "EVTG",
-  description: "EVTG - Evaluador de Trabajos Especiales de Grado",
+  title: "EVTEG",
+  description: "EVTEG - Evaluador de Trabajos Especiales de Grado",
 };
 
 export default function RootLayout({
