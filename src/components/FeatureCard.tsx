@@ -3,14 +3,12 @@
 "use client";
 
 import React, { ReactNode, memo } from "react";
-import { motion, useReducedMotion, Variants } from "framer-motion";
 import { Card, CardTitle, CardContent } from "@/components/ui/card";
 
 type FeatureCardProps = {
   icon: ReactNode;
   title: string;
   children: ReactNode;
-  delay?: number;
 };
 
 // Use the memoized component for export
@@ -18,29 +16,9 @@ function FeatureCardImpl({
   icon,
   title,
   children,
-  delay = 0,
 }: FeatureCardProps) {
-  const reduceMotion = useReducedMotion();
-
-  // Explicitly type variants for better TypeScript inference and safety
-  const cardVariants: Variants = reduceMotion
-    ? { offscreen: { opacity: 1 }, onscreen: { opacity: 1 } } // Simplified variant for reduced motion
-    : {
-        offscreen: { y: 40, opacity: 0 },
-        onscreen: {
-          y: 0,
-          opacity: 1,
-          transition: {
-            type: "spring",
-            stiffness: 100,
-            damping: 20,
-            delay,
-          },
-        },
-      };
-
   return (
-    <motion.div variants={cardVariants} className="h-full">
+    <div className="h-full">
       <Card
         className="h-full p-6 flex flex-col items-center text-center
                    bg-white/70 backdrop-blur-lg 
@@ -70,7 +48,7 @@ function FeatureCardImpl({
           </CardContent>
         </div>
       </Card>
-    </motion.div>
+    </div>
   );
 }
 

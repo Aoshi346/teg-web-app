@@ -2,8 +2,9 @@
 
 "use client";
 
-import React from "react";
-import { motion, Variants } from "framer-motion";
+import React, { useEffect, useRef } from "react";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import FeatureCard from "@/components/FeatureCard";
 import {
   ClipboardCheck,
@@ -14,36 +15,106 @@ import {
   Calendar,
 } from "lucide-react";
 
-// Animation variants for the header text (h2 and p)
-const headerVariants: Variants = {
-  offscreen: {
-    y: 30,
-    opacity: 0,
-  },
-  onscreen: {
-    y: 0,
-    opacity: 1,
-    transition: {
-      type: "spring",
-      duration: 0.8,
-    },
-  },
-};
+// Register ScrollTrigger plugin
+gsap.registerPlugin(ScrollTrigger);
 
 export default function FeaturesSection() {
+  const studentsSectionRef = useRef<HTMLElement>(null);
+  const studentsHeaderRef = useRef<HTMLDivElement>(null);
+  const studentsCardsRef = useRef<HTMLDivElement>(null);
+  const teachersSectionRef = useRef<HTMLElement>(null);
+  const teachersHeaderRef = useRef<HTMLDivElement>(null);
+  const teachersCardsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Students section animations
+    if (studentsSectionRef.current && studentsHeaderRef.current && studentsCardsRef.current) {
+      const studentsCards = studentsCardsRef.current.children;
+      
+      // Set initial states
+      gsap.set(studentsHeaderRef.current, { opacity: 0, y: 60, scale: 0.95 });
+      gsap.set(studentsCards, { opacity: 0, x: -120, scale: 0.9 });
+
+      // Create scroll trigger for students section
+      ScrollTrigger.create({
+        trigger: studentsSectionRef.current,
+        start: "top 85%",
+        onEnter: () => {
+          const tl = gsap.timeline();
+          
+          // Animate header with slower, more appealing timing
+          tl.to(studentsHeaderRef.current, {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            duration: 1.2,
+            ease: "power3.out"
+          })
+          // Animate cards from left with slower stagger
+          .to(studentsCards, {
+            opacity: 1,
+            x: 0,
+            scale: 1,
+            duration: 1.0,
+            stagger: 0.3,
+            ease: "power3.out"
+          }, "-=0.6");
+        }
+      });
+    }
+
+    // Teachers section animations
+    if (teachersSectionRef.current && teachersHeaderRef.current && teachersCardsRef.current) {
+      const teachersCards = teachersCardsRef.current.children;
+      
+      // Set initial states
+      gsap.set(teachersHeaderRef.current, { opacity: 0, y: 60, scale: 0.95 });
+      gsap.set(teachersCards, { opacity: 0, x: 120, scale: 0.9 });
+
+      // Create scroll trigger for teachers section
+      ScrollTrigger.create({
+        trigger: teachersSectionRef.current,
+        start: "top 85%",
+        onEnter: () => {
+          const tl = gsap.timeline();
+          
+          // Animate header with slower, more appealing timing
+          tl.to(teachersHeaderRef.current, {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            duration: 1.2,
+            ease: "power3.out"
+          })
+          // Animate cards from right with slower stagger
+          .to(teachersCards, {
+            opacity: 1,
+            x: 0,
+            scale: 1,
+            duration: 1.0,
+            stagger: 0.3,
+            ease: "power3.out"
+          }, "-=0.6");
+        }
+      });
+    }
+
+    // Cleanup function
+    return () => {
+      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+    };
+  }, []);
+
   return (
     <>
       {/* Students Section */}
-      <motion.section
-        className="container mx-auto py-24 md:py-32 px-4" // Increased vertical padding
-        initial="offscreen"
-        whileInView="onscreen"
-        viewport={{ once: true, amount: 0.2 }} // Trigger animation slightly earlier
-        transition={{ staggerChildren: 0.25 }} // More pronounced stagger
+      <section
+        ref={studentsSectionRef}
+        className="container mx-auto py-24 md:py-32 px-4"
       >
-        <motion.div
-          className="mb-16 text-center max-w-3xl mx-auto" // Center and constrain width
-          variants={headerVariants}
+        <div
+          ref={studentsHeaderRef}
+          className="mb-16 text-center max-w-3xl mx-auto"
         >
           <h2 className="text-4xl font-extrabold tracking-tight text-gray-900 md:text-5xl">
             Funcionalidades para Estudiantes
@@ -52,12 +123,11 @@ export default function FeaturesSection() {
             Herramientas pensadas para la gestión y evaluación del Trabajo
             Especial de Grado.
           </p>
-        </motion.div>
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3 items-stretch">
+        </div>
+        <div ref={studentsCardsRef} className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3 items-stretch">
           <FeatureCard
             title="Entregas y Plazos"
             icon={<ClipboardCheck size={32} />}
-            delay={0.1}
           >
             Mantén un registro de entregas y plazos del TEG. Visualiza fechas
             límite y el estado de tus entregas.
@@ -65,7 +135,6 @@ export default function FeaturesSection() {
           <FeatureCard
             title="Colaboración Fluida"
             icon={<Users size={32} />}
-            delay={0.2}
           >
             Comunícate con tutores y compañeros, comparte archivos y coordina
             revisiones de forma centralizada.
@@ -73,27 +142,23 @@ export default function FeaturesSection() {
           <FeatureCard
             title="Recursos Centralizados"
             icon={<BookOpen size={32} />}
-            delay={0.3}
           >
             Accede a guías, plantillas y material de soporte para la elaboración
             y defensa del TEG en un solo lugar.
           </FeatureCard>
         </div>
-      </motion.section>
+      </section>
 
       {/* Teachers Section Wrapper */}
       <div className="bg-slate-50/70 border-t border-slate-200">
-        <motion.section
+        <section
+          ref={teachersSectionRef}
           className="container mx-auto py-24 md:py-32 px-4"
-          initial="offscreen"
-          whileInView="onscreen"
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ staggerChildren: 0.25 }}
           aria-labelledby="teachers-heading"
         >
-          <motion.div
+          <div
+            ref={teachersHeaderRef}
             className="mb-16 text-center max-w-3xl mx-auto"
-            variants={headerVariants}
           >
             <h2
               id="teachers-heading"
@@ -105,13 +170,12 @@ export default function FeaturesSection() {
               Herramientas para la evaluación, gestión de jurados y coordinación
               de defensas.
             </p>
-          </motion.div>
+          </div>
 
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3 items-stretch">
+          <div ref={teachersCardsRef} className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3 items-stretch">
             <FeatureCard
               title="Gestión de Jurados"
               icon={<UserCheck size={32} />}
-              delay={0.1}
             >
               Organiza jurados, asigna evaluadores y gestiona convocatorias de
               defensa de manera sencilla y eficiente.
@@ -120,7 +184,6 @@ export default function FeaturesSection() {
             <FeatureCard
               title="Evaluación con Rúbricas"
               icon={<FileText size={32} />}
-              delay={0.2}
             >
               Define rúbricas personalizadas, registra calificaciones y
               proporciona retroalimentación estructurada.
@@ -129,13 +192,12 @@ export default function FeaturesSection() {
             <FeatureCard
               title="Calendario de Defensas"
               icon={<Calendar size={32} />}
-              delay={0.3}
             >
               Programa fechas de defensa, sincroniza eventos y notifica a
               estudiantes y jurados automáticamente.
             </FeatureCard>
           </div>
-        </motion.section>
+        </section>
       </div>
     </>
   );

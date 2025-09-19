@@ -2,48 +2,73 @@
 
 "use client";
 
-import React from "react";
-import { motion, Variants } from "framer-motion";
+import React, { useEffect, useRef } from "react";
+import { gsap } from "gsap";
 import { ArrowDown } from "lucide-react";
 
-// Animation variants for the container to orchestrate children animations
-const containerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.3, // Time delay between each child animating in
-    },
-  },
-};
-
-// Animation variants for the text elements
-const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 40 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.8,
-      // Use an easing array (cubic-bezier) to satisfy the Typescript types
-      ease: [0.22, 1, 0.36, 1],
-    },
-  },
-};
-
 export default function Hero() {
+  const heroRef = useRef<HTMLElement>(null);
+  const backgroundRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const subtitleRef = useRef<HTMLParagraphElement>(null);
+  const arrowRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (heroRef.current && backgroundRef.current && contentRef.current && titleRef.current && subtitleRef.current && arrowRef.current) {
+      // Set initial states
+      gsap.set([titleRef.current, subtitleRef.current], { opacity: 0, y: 60 });
+      gsap.set(arrowRef.current, { opacity: 0, y: 20 });
+      
+      // Create entrance timeline
+      const tl = gsap.timeline();
+      
+      // Animate content in
+      tl.to(titleRef.current, {
+        opacity: 1,
+        y: 0,
+        duration: 1.2,
+        ease: "power3.out"
+      })
+      .to(subtitleRef.current, {
+        opacity: 1,
+        y: 0,
+        duration: 1.2,
+        ease: "power3.out"
+      }, "-=0.8")
+      .to(arrowRef.current, {
+        opacity: 1,
+        y: 0,
+        duration: 0.8,
+        ease: "power2.out"
+      }, "-=0.4");
+
+      // Continuous background animation
+      gsap.to(backgroundRef.current, {
+        scale: 1.05,
+        duration: 20,
+        ease: "none",
+        repeat: -1,
+        yoyo: true
+      });
+
+      // Continuous arrow bounce
+      gsap.to(arrowRef.current, {
+        y: -15,
+        duration: 1.5,
+        ease: "power2.inOut",
+        repeat: -1,
+        yoyo: true
+      });
+    }
+  }, []);
   return (
-    <section className="relative h-[90vh] w-full flex items-center justify-center text-white overflow-hidden">
+    <section ref={heroRef} className="relative h-[90vh] w-full flex items-center justify-center text-white overflow-hidden">
       {/* Background Image with Ken Burns Effect */}
-      <motion.div
+      <div
+        ref={backgroundRef}
         className="absolute inset-0 pointer-events-none"
         aria-hidden
-        animate={{ scale: [1, 1.05, 1] }}
-        transition={{
-          duration: 30,
-          repeat: Infinity,
-          ease: [0.42, 0, 0.58, 1],
-        }}
         style={{
           zIndex: 0,
           backgroundImage: "url('/usm_hero.jpg')",
@@ -55,51 +80,44 @@ export default function Hero() {
       {/* Darkening Overlay */}
       <div
         className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/70 pointer-events-none"
-        style={{ zIndex: 1 }}               // overlay sits above bg but below content
+        style={{ zIndex: 1 }}
       />
 
       {/* Content Container */}
-      <motion.div
-        className="relative z-20 flex flex-col items-center px-4 text-center" // higher z to ensure visibility
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
+      <div
+        ref={contentRef}
+        className="relative z-20 flex flex-col items-center px-4 text-center"
       >
-        <motion.h1
+        <h1
+          ref={titleRef}
           className="text-4xl md:text-6xl font-extrabold tracking-tight leading-tight text-white"
           style={{ textShadow: "0px 4px 12px rgba(0, 0, 0, 0.5)" }}
-          variants={itemVariants}
         >
           Sistema de evaluación para el{" "}
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-blue-700">
             Trabajo Especial de Grado (TEG)
           </span>
-        </motion.h1>
+        </h1>
 
-        <motion.p
+        <p
+          ref={subtitleRef}
           className="mt-6 max-w-3xl text-lg md:text-xl text-slate-200"
           style={{ textShadow: "0px 2px 8px rgba(0, 0, 0, 0.5)" }}
-          variants={itemVariants}
         >
           Gestiona, entrega y evalúa los proyectos de grado de forma segura y
           colaborativa. Facilita la comunicación entre estudiantes, tutores y
           jurados, y centraliza calificaciones y comentarios.
-        </motion.p>
-      </motion.div>
+        </p>
+      </div>
 
       {/* Bouncing Arrow Indicator */}
-      <motion.div
+      <div
+        ref={arrowRef}
         className="absolute bottom-10 z-20"
         aria-hidden
-        animate={{ y: [0, 15, 0] }}
-        transition={{
-          duration: 2,
-          repeat: Infinity,
-          ease: [0.42, 0, 0.58, 1],
-        }}
       >
         <ArrowDown className="h-10 w-10 text-white/70" />
-      </motion.div>
+      </div>
     </section>
   );
 }
