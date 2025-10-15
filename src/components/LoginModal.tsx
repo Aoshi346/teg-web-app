@@ -430,13 +430,13 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                   {/* Text Overlays */}
                   <div className="absolute inset-0 flex flex-col justify-center items-center text-white p-8">
                     <h3 className="text-4xl font-bold uppercase tracking-wider mb-2">
-                      MENS WEAR
+                      TEG FLOW
                     </h3>
                     <h4 className="text-4xl font-bold uppercase tracking-wider mb-4 text-yellow-400">
-                      FAS
+                      USM
                     </h4>
                     <p className="text-lg uppercase tracking-wide text-center">
-                      SUITS & COATS FOR MEN
+                      GESTIÓN DEL TRABAJO ESPECIAL DE GRADO
                     </p>
                   </div>
             </div>
