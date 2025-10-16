@@ -2,8 +2,8 @@
 
 import { LogIn, X } from "lucide-react";
 import React, { useState, useEffect, useRef, useLayoutEffect } from "react";
-// GSAP will be loaded from a CDN via a script tag, so we declare it globally for TypeScript
-declare const gsap: any;
+import Link from 'next/link';
+import { gsap } from 'gsap';
 import LoginModal from "@/components/LoginModal";
 
 
@@ -218,7 +218,7 @@ export default function Header() {
         >
           <div className="container mx-auto flex h-full items-center justify-between px-4 sm:px-6 lg:px-8">
             {/* Logo and Brand Name */}
-            <a href="/" className="logo-anim flex items-center gap-2 no-underline" aria-label="TesisFar home">
+            <Link href="/" className="logo-anim flex items-center gap-2 no-underline" aria-label="TesisFar home">
               <div className="flex-shrink-0 rounded-full bg-white p-1 shadow-md">
                 <img
                   src="/usmlogo.png"
@@ -235,7 +235,7 @@ export default function Header() {
                   Gestión del Trabajo Especial de Grado
                 </span>
               </div>
-            </a>
+            </Link>
 
             {/* Desktop Action Button */}
             <div className="hidden md:block desktop-btn-anim">

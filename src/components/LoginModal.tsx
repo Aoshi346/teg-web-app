@@ -292,7 +292,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                     onClick={switchFormMode}
                     className="text-gray-600 hover:text-black text-sm font-medium"
                   >
-                    Don't have an account? <span className="text-orange-500 hover:text-orange-600">Register here</span>
+                    Don&apos;t have an account? <span className="text-orange-500 hover:text-orange-600">Register here</span>
                   </button>
                 </div>
               </form>

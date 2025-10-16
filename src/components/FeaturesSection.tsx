@@ -5,6 +5,7 @@
 import React, { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import SplitType from "split-type";
 import FeatureCard from "@/components/FeatureCard";
 import {
   ClipboardCheck,
@@ -27,80 +28,131 @@ export default function FeaturesSection() {
   const teachersCardsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Students section animations
-    if (studentsSectionRef.current && studentsHeaderRef.current && studentsCardsRef.current) {
-      const studentsCards = studentsCardsRef.current.children;
-      
-      // Set initial states
-      gsap.set(studentsHeaderRef.current, { opacity: 0, y: 60, scale: 0.95 });
-      gsap.set(studentsCards, { opacity: 0, x: -120, scale: 0.9 });
+  // track SplitType instances so we can revert them on unmount
+  const splitInstances: Array<{ revert?: () => void }> = [];
+    // Use gsap.context and matchMedia so animations are scoped and responsive
+    const ctx = gsap.context(() => {
+      const mm = gsap.matchMedia();
 
-      // Create scroll trigger for students section
-      ScrollTrigger.create({
-        trigger: studentsSectionRef.current,
-        start: "top 85%",
-        onEnter: () => {
-          const tl = gsap.timeline();
-          
-          // Animate header with slower, more appealing timing
-          tl.to(studentsHeaderRef.current, {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            duration: 1.2,
-            ease: "power3.out"
-          })
-          // Animate cards from left with slower stagger
-          .to(studentsCards, {
-            opacity: 1,
-            x: 0,
-            scale: 1,
-            duration: 1.0,
-            stagger: 0.3,
-            ease: "power3.out"
-          }, "-=0.6");
+      // Desktop/tablet: cards slide from sides
+      mm.add("(min-width: 768px)", () => {
+        if (studentsSectionRef.current && studentsHeaderRef.current && studentsCardsRef.current) {
+          const studentsCards = studentsCardsRef.current.children;
+          // header elements
+          const studentsH2 = studentsHeaderRef.current.querySelector('h2') as HTMLElement | null;
+          const studentsP = studentsHeaderRef.current.querySelector('p') as HTMLElement | null;
+
+          // keep the header container visible; we'll animate the title/paragraph children
+          gsap.set(studentsHeaderRef.current, { opacity: 1 });
+          gsap.set(studentsCards, { opacity: 0, x: -140, scale: 0.94, rotate: -1 });
+          const tl = gsap.timeline({
+            scrollTrigger: {
+              trigger: studentsSectionRef.current,
+              start: 'top 85%',
+              toggleActions: 'play none none none'
+            }
+          });
+
+          // Character-based reveal using SplitType
+          if (studentsH2) {
+            // split by characters to create a per-char stagger
+            const titleSplit = new SplitType(studentsH2, { types: 'chars', tagName: 'span' });
+            splitInstances.push(titleSplit);
+            const chars = titleSplit.chars as HTMLElement[];
+            gsap.set(chars, { autoAlpha: 0, y: 14, display: 'inline-block' });
+            tl.to(chars, { autoAlpha: 1, y: 0, duration: 0.7, stagger: 0.02, ease: 'power3.out' }, 0);
+          } else {
+            tl.to(studentsHeaderRef.current, { opacity: 1, y: 0, scale: 1, duration: 1.0, ease: 'power3.out' }, 0);
+          }
+
+          // reveal paragraph slightly after
+          if (studentsP) tl.to(studentsP, { autoAlpha: 1, y: 0, duration: 0.6, ease: 'power2.out' }, '+=0.05');
+
+          tl.to(studentsCards, { opacity: 1, x: 0, scale: 1, rotate: 0, duration: 0.9, stagger: 0.16, ease: 'power3.out' }, '-=0.4');
+        }
+
+        if (teachersSectionRef.current && teachersHeaderRef.current && teachersCardsRef.current) {
+          const teachersCards = teachersCardsRef.current.children;
+          const teachersH2 = teachersHeaderRef.current.querySelector('h2') as HTMLElement | null;
+          const teachersP = teachersHeaderRef.current.querySelector('p') as HTMLElement | null;
+
+          // keep the header container visible; animate title/paragraph children instead
+          gsap.set(teachersHeaderRef.current, { opacity: 1 });
+          gsap.set(teachersCards, { opacity: 0, x: 140, scale: 0.94, rotate: 1 });
+
+          const tl2 = gsap.timeline({
+            scrollTrigger: {
+              trigger: teachersSectionRef.current,
+              start: 'top 85%',
+              toggleActions: 'play none none none'
+            }
+          });
+
+          if (teachersH2) {
+            const titleSplit = new SplitType(teachersH2, { types: 'chars', tagName: 'span' });
+            splitInstances.push(titleSplit);
+            const chars = titleSplit.chars as HTMLElement[];
+            gsap.set(chars, { autoAlpha: 0, y: 14, display: 'inline-block' });
+            tl2.to(chars, { autoAlpha: 1, y: 0, duration: 0.7, stagger: 0.02, ease: 'power3.out' }, 0);
+          } else {
+            tl2.to(teachersHeaderRef.current, { opacity: 1, y: 0, scale: 1, duration: 1.0, ease: 'power3.out' }, 0);
+          }
+
+          if (teachersP) tl2.to(teachersP, { autoAlpha: 1, y: 0, duration: 0.6, ease: 'power2.out' }, '+=0.05');
+
+          tl2.to(teachersCards, { opacity: 1, x: 0, scale: 1, rotate: 0, duration: 0.9, stagger: 0.16, ease: 'power3.out' }, '-=0.4');
         }
       });
-    }
 
-    // Teachers section animations
-    if (teachersSectionRef.current && teachersHeaderRef.current && teachersCardsRef.current) {
-      const teachersCards = teachersCardsRef.current.children;
-      
-      // Set initial states
-      gsap.set(teachersHeaderRef.current, { opacity: 0, y: 60, scale: 0.95 });
-      gsap.set(teachersCards, { opacity: 0, x: 120, scale: 0.9 });
+      // Mobile: cards slide up from bottom with gentler motion
+      mm.add("(max-width: 767px)", () => {
+        if (studentsSectionRef.current && studentsHeaderRef.current && studentsCardsRef.current) {
+          const studentsCards = studentsCardsRef.current.children;
+          // keep the header container visible for scramble reveal; animate children
+          gsap.set(studentsHeaderRef.current, { opacity: 1 });
+          gsap.set(studentsCards, { opacity: 0, y: 40, scale: 0.98 });
 
-      // Create scroll trigger for teachers section
-      ScrollTrigger.create({
-        trigger: teachersSectionRef.current,
-        start: "top 85%",
-        onEnter: () => {
-          const tl = gsap.timeline();
-          
-          // Animate header with slower, more appealing timing
-          tl.to(teachersHeaderRef.current, {
-            opacity: 1,
-            y: 0,
-            scale: 1,
-            duration: 1.2,
-            ease: "power3.out"
+          gsap.timeline({
+            scrollTrigger: {
+              trigger: studentsSectionRef.current,
+              start: 'top 90%',
+              toggleActions: 'play none none none'
+            }
           })
-          // Animate cards from right with slower stagger
-          .to(teachersCards, {
-            opacity: 1,
-            x: 0,
-            scale: 1,
-            duration: 1.0,
-            stagger: 0.3,
-            ease: "power3.out"
-          }, "-=0.6");
+          .to(studentsHeaderRef.current, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' })
+          .to(studentsCards, { opacity: 1, y: 0, scale: 1, duration: 0.8, stagger: 0.14, ease: 'power3.out' }, '-=0.4');
+        }
+
+        if (teachersSectionRef.current && teachersHeaderRef.current && teachersCardsRef.current) {
+          const teachersCards = teachersCardsRef.current.children;
+          // keep the header container visible for scramble reveal; animate children
+          gsap.set(teachersHeaderRef.current, { opacity: 1 });
+          gsap.set(teachersCards, { opacity: 0, y: 40, scale: 0.98 });
+
+          gsap.timeline({
+            scrollTrigger: {
+              trigger: teachersSectionRef.current,
+              start: 'top 90%',
+              toggleActions: 'play none none none'
+            }
+          })
+          .to(teachersHeaderRef.current, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' })
+          .to(teachersCards, { opacity: 1, y: 0, scale: 1, duration: 0.8, stagger: 0.14, ease: 'power3.out' }, '-=0.4');
         }
       });
-    }
 
-    // Cleanup function
+      // Return mm cleanup
+      return () => mm.revert();
+    }, studentsSectionRef);
+
     return () => {
+      // revert SplitType instances
+      try {
+        splitInstances.forEach((s) => s && typeof s.revert === 'function' && s.revert());
+      } catch {
+        // ignore
+      }
+      ctx.revert();
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
   }, []);
