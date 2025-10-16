@@ -1,4 +1,4 @@
-# TEGFlow Frontend
+# Tesisfar Frontend
 
 Aplicación frontend para el sistema de gestión del Trabajo Especial de Grado (TEG), construida con Next.js 15, TypeScript y Tailwind CSS.
 

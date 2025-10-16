@@ -7,7 +7,7 @@ export default function Footer() {
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
           <div className="md:col-span-1">
-            <h3 className="text-2xl font-bold">EVTEG</h3>
+            <h3 className="text-2xl font-bold">TesisFar</h3>
             <p className="mt-2 text-gray-400">
               Plataforma para la gestión, entrega y evaluación del Trabajo
               Especial de Grado.

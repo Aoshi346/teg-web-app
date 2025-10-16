@@ -120,3 +120,22 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Prevent horizontal scrolling site-wide while allowing vertical scroll */
+/* Prevent horizontal scrolling site-wide while allowing vertical scroll */
+html, body, #__next {
+  width: 100%;
+  overflow-x: hidden !important;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+main {
+  overflow-x: hidden;
+  overflow-y: visible;
+}
+
+/* Debug helper: add .outline-debug to any element to visualize bounding boxes while diagnosing overflow */
+.outline-debug {
+  outline: 2px dashed rgba(255,0,0,0.5);
+}
