@@ -60,7 +60,7 @@ export default function Hero() {
         gsap.set(gradientSplit.words, { opacity: 0, y: 40, rotationX: -75, transformOrigin: "50% 50%" });
         gradientSplit.words.forEach((w) => {
           const el = w as HTMLElement;
-          el.style.backgroundImage = "linear-gradient(90deg,#38bdf8,#1e40af)";
+          el.style.backgroundImage = "linear-gradient(90deg,#67e8f9,#3b82f6)";
           el.style.setProperty("-webkit-background-clip", "text");
           el.style.setProperty("background-clip", "text");
           el.style.setProperty("-webkit-text-fill-color", "transparent");
@@ -153,13 +153,17 @@ export default function Hero() {
           "-=0.4"
         )
         .add(() => {
-          gsap.to(arrowRef.current, {
-            y: -14,
-            duration: 1.6,
-            ease: "power2.inOut",
-            repeat: -1,
-            yoyo: true
-          });
+          gsap.fromTo(
+            arrowRef.current,
+            { y: -16 },
+            {
+              y: 16,
+              duration: 1.2,
+              ease: "power2.inOut",
+              repeat: -1,
+              yoyo: true,
+            },
+          );
         });
 
       gsap.to(backgroundRef.current, {
@@ -215,7 +219,7 @@ export default function Hero() {
           style={{ textShadow: "0px 4px 12px rgba(0, 0, 0, 0.5)" }}
         >
           Gestiona tu
-          <span ref={gradientRef} className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-blue-700">
+          <span ref={gradientRef} className="text-transparent bg-clip-text bg-gradient-to-r from-sky-300 to-blue-500">
             {" "}
             Trabajo Especial de Grado
             {" "}
@@ -247,7 +251,20 @@ export default function Hero() {
         className="absolute bottom-10 z-20"
         aria-hidden
       >
-        <ArrowDown className="h-10 w-10 text-white/70" />
+        <svg
+          className="h-12 w-12 text-white/70"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={1.5}
+            d="M19 14l-7 7m0 0l-7-7m7 7V3"
+          />
+        </svg>
       </div>
     </section>
   );
