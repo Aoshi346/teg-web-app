@@ -1,10 +1,300 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect, useRef } from "react";
-import { gsap } from "gsap";
-import { X, Eye, EyeOff } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import React, { useState, useEffect, useRef } from 'react';
+import { X, Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import Toast from '@/components/ui/Toast';
+import { login as demoLogin } from '@/features/auth/clientAuth';
+
+// --- Particle Animation Utility ---
+function runParticleAnimation(container: HTMLDivElement): () => void {
+  const canvas = document.createElement('canvas');
+  container.appendChild(canvas);
+  const ctx = canvas.getContext('2d')!;
+  if (!ctx) {
+    console.error("2D context not supported");
+    return () => {};
+  }
+
+  let animationFrameId: number;
+  const particles: Particle[] = [];
+  const particleCount = 40;
+  const connectDistance = 80;
+
+  const mouse = {
+    x: -1000,
+    y: -1000,
+    radius: 60,
+  };
+
+  const handleMouseMove = (event: MouseEvent) => {
+    const rect = canvas.getBoundingClientRect();
+    mouse.x = event.clientX - rect.left;
+    mouse.y = event.clientY - rect.top;
+  };
+  
+  const handleMouseOut = () => {
+    mouse.x = -1000;
+    mouse.y = -1000;
+  };
+
+  container.addEventListener('mousemove', handleMouseMove);
+  container.addEventListener('mouseout', handleMouseOut);
+
+
+  const colors = {
+    blue: '#3b82f6',
+    green: '#10b981',
+    lightBlue: '#bfdbfe',
+    lightGreen: '#a7f3d0',
+    white: '#ffffff',
+    darkBlue: '#1e40af',
+  };
+
+  class Particle {
+    x: number;
+    y: number;
+    baseSize: number;
+    size: number;
+    speedX: number;
+    speedY: number;
+    color1: string;
+    color2: string | null;
+    shape: 'pill' | 'capsule' | 'cross' | 'molecule';
+    rotation: number;
+    rotationSpeed: number;
+    pulseAngle: number;
+    pulseSpeed: number;
+
+    constructor() {
+      this.baseSize = 6;
+      this.x = Math.random() * (canvas.width - this.baseSize * 2) + this.baseSize;
+      this.y = Math.random() * (canvas.height - this.baseSize * 2) + this.baseSize;
+      this.speedX = (Math.random() - 0.5) * 0.4;
+      this.speedY = (Math.random() - 0.5) * 0.4;
+      this.rotation = Math.random() * Math.PI * 2;
+      this.rotationSpeed = (Math.random() - 0.5) * 0.01;
+      this.pulseAngle = Math.random() * Math.PI * 2;
+      this.pulseSpeed = (Math.random() - 0.5) * 0.02;
+
+      const shapeType = Math.random();
+      if (shapeType < 0.4) { // 40% pill
+        this.shape = 'pill';
+        this.color1 = Math.random() < 0.5 ? colors.blue : colors.green;
+        this.color2 = null;
+        this.baseSize = Math.random() * 5 + 5;
+      } else if (shapeType < 0.7) { // 30% capsule
+        this.shape = 'capsule';
+        this.color1 = colors.lightBlue;
+        this.color2 = colors.blue;
+        this.baseSize = Math.random() * 6 + 7;
+      } else if (shapeType < 0.9) { // 20% cross
+        this.shape = 'cross';
+        this.color1 = colors.green;
+        this.color2 = null;
+        this.baseSize = Math.random() * 4 + 5;
+      } else { // 10% molecule
+        this.shape = 'molecule';
+        this.color1 = colors.lightGreen;
+        this.color2 = colors.darkBlue;
+        this.baseSize = Math.random() * 8 + 8;
+      }
+      this.size = this.baseSize;
+
+      const reduced = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+      if (reduced) {
+        this.speedX *= 0.1;
+        this.speedY *= 0.1;
+        this.rotationSpeed = 0;
+        this.pulseSpeed = 0;
+      }
+    }
+
+    update() {
+      // Mouse interaction
+      const dx = this.x - mouse.x;
+      const dy = this.y - mouse.y;
+      const distance = Math.hypot(dx, dy);
+      const forceDirectionX = dx / distance;
+      const forceDirectionY = dy / distance;
+      const force = (mouse.radius - distance) / mouse.radius;
+      
+      if (distance < mouse.radius) {
+        this.x += forceDirectionX * force * 2.5;
+        this.y += forceDirectionY * force * 2.5;
+      }
+
+      // Wall collision
+      if (this.x > canvas.width + 10 || this.x < -10) this.speedX = -this.speedX;
+      if (this.y > canvas.height + 10 || this.y < -10) this.speedY = -this.speedY;
+      
+      this.x += this.speedX;
+      this.y += this.speedY;
+      this.rotation += this.rotationSpeed;
+
+      // Pulsing effect
+      this.pulseAngle += this.pulseSpeed;
+      this.size = this.baseSize + Math.sin(this.pulseAngle) * (this.baseSize * 0.1);
+    }
+
+    draw() {
+      ctx.save();
+      ctx.translate(this.x, this.y);
+      ctx.rotate(this.rotation);
+      ctx.shadowColor = 'rgba(0,0,0,0.1)';
+      ctx.shadowBlur = 8;
+
+      if (this.shape === 'pill') {
+        const s = this.size;
+        ctx.fillStyle = this.color1;
+        ctx.beginPath();
+        ctx.arc(0, 0, s, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(-s * 0.5, 0);
+        ctx.lineTo(s * 0.5, 0);
+        ctx.stroke();
+
+      } else if (this.shape === 'capsule') {
+        const width = this.size * 1.8;
+        const height = this.size;
+        const radius = height / 2;
+
+        // First half
+        ctx.fillStyle = this.color1;
+        ctx.beginPath();
+        ctx.arc(-width / 4, 0, radius, Math.PI / 2, -Math.PI / 2);
+        ctx.rect(-width/4, -radius, width/4, height);
+        ctx.fill();
+        
+        // Second half
+        ctx.fillStyle = this.color2!;
+        ctx.beginPath();
+        ctx.arc(width / 4, 0, radius, -Math.PI / 2, Math.PI / 2);
+        ctx.rect(0, -radius, width/4, height);
+        ctx.fill();
+
+      } else if (this.shape === 'cross') {
+        const armLength = this.size * 1.5;
+        const armWidth = this.size * 0.5;
+        ctx.fillStyle = this.color1;
+        ctx.globalAlpha = 0.8;
+        ctx.fillRect(-armLength / 2, -armWidth / 2, armLength, armWidth);
+        ctx.fillRect(-armWidth / 2, -armLength / 2, armWidth, armLength);
+        ctx.globalAlpha = 1;
+
+      } else if (this.shape === 'molecule') {
+        ctx.strokeStyle = this.color1;
+        ctx.fillStyle = this.color2!;
+        ctx.lineWidth = 1.5;
+
+        const r = this.size / 3;
+        const positions = [
+          { x: 0, y: 0 },
+          { x: this.size, y: 0 },
+          { x: this.size / 2, y: this.size * Math.sqrt(3) / 2 }
+        ];
+        
+        ctx.beginPath();
+        ctx.moveTo(positions[0].x, positions[0].y);
+        ctx.lineTo(positions[1].x, positions[1].y);
+        ctx.lineTo(positions[2].x, positions[2].y);
+        ctx.closePath();
+        ctx.stroke();
+
+        positions.forEach(p => {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, r, 0, 2 * Math.PI);
+          ctx.fill();
+        });
+      }
+      
+      ctx.restore();
+    }
+  }
+
+  const init = () => {
+    particles.length = 0;
+    const rect = container.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = rect.height;
+    canvas.style.position = 'absolute';
+    canvas.style.inset = '0';
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
+
+    for (let i = 0; i < particleCount; i++) {
+      particles.push(new Particle());
+    }
+  };
+
+  const connect = () => {
+    for (let a = 0; a < particles.length; a++) {
+      for (let b = a + 1; b < particles.length; b++) {
+        const distance = Math.hypot(particles[a].x - particles[b].x, particles[a].y - particles[b].y);
+
+        if (distance < connectDistance) {
+          const opacity = 1 - distance / connectDistance;
+          ctx.strokeStyle = `rgba(191, 219, 254, ${opacity * 0.6})`;
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(particles[a].x, particles[a].y);
+          ctx.lineTo(particles[b].x, particles[b].y);
+          ctx.stroke();
+        }
+      }
+    }
+  };
+
+  const animate = () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => {
+      p.update();
+      p.draw();
+    });
+    connect();
+    animationFrameId = requestAnimationFrame(animate);
+  };
+
+  const debouncedInit = () => {
+    cancelAnimationFrame(animationFrameId);
+    init();
+    animate();
+  };
+
+  init();
+  animate();
+
+  window.addEventListener('resize', debouncedInit);
+
+  return () => {
+    window.removeEventListener('resize', debouncedInit);
+    container.removeEventListener('mousemove', handleMouseMove);
+    container.removeEventListener('mouseout', handleMouseOut);
+    cancelAnimationFrame(animationFrameId);
+    if (container.contains(canvas)) {
+      container.removeChild(canvas);
+    }
+  };
+}
+
+// --- React Components ---
+const ParticleCanvas = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      const cleanup = runParticleAnimation(containerRef.current);
+      return cleanup;
+    }
+  }, []);
+
+  return <div ref={containerRef} className="absolute inset-0 h-full w-full" />;
+};
+
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -13,432 +303,218 @@ interface LoginModalProps {
 
 export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const [isLoginMode, setIsLoginMode] = useState(true);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [fullName, setFullName] = useState("");
+  // Form states
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [registerFullName, setRegisterFullName] = useState('');
+  const [registerEmail, setRegisterEmail] = useState('');
+  const [registerPassword, setRegisterPassword] = useState('');
+  const [registerConfirmPassword, setRegisterConfirmPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  
-  const modalRef = useRef<HTMLDivElement>(null);
-  const backdropRef = useRef<HTMLDivElement>(null);
-  const formRef = useRef<HTMLDivElement>(null);
-  const imageRef = useRef<HTMLDivElement>(null);
-  const loginFormRef = useRef<HTMLDivElement>(null);
-  const registerFormRef = useRef<HTMLDivElement>(null);
+  const [loginShowPassword, setLoginShowPassword] = useState(false);
+  const [registerShowPassword, setRegisterShowPassword] = useState(false);
+  const [registerShowConfirmPassword, setRegisterShowConfirmPassword] = useState(false);
 
-  useEffect(() => {
-    if (isOpen) {
-      // Set initial states
-      gsap.set([modalRef.current, backdropRef.current], { opacity: 0 });
-      gsap.set(modalRef.current, { scale: 0.8, y: 50 });
-      gsap.set([formRef.current, imageRef.current], { opacity: 0, y: 30 });
+  const [toastState, setToastState] = useState<{ visible: boolean; message: string; type: 'error' | 'success' | 'info' }>({
+    visible: false,
+    message: '',
+    type: 'error',
+  });
 
-      // Create timeline for entrance animation
-      const tl = gsap.timeline();
-      
-      tl.to(backdropRef.current, {
-        opacity: 1,
-        duration: 0.3,
-        ease: "power2.out"
-      })
-      .to(modalRef.current, {
-        opacity: 1,
-        scale: 1,
-        y: 0,
-        duration: 0.4,
-        ease: "back.out(1.7)"
-      }, "-=0.2")
-      .to([formRef.current, imageRef.current], {
-        opacity: 1,
-        y: 0,
-        duration: 0.5,
-        stagger: 0.1,
-        ease: "power2.out"
-      }, "-=0.3");
-    }
-  }, [isOpen]);
+  // Animation state
+  const [isClosing, setIsClosing] = useState(false);
 
   const handleClose = () => {
-    if (modalRef.current && backdropRef.current) {
-      const tl = gsap.timeline({
-        onComplete: onClose
-      });
-      
-      tl.to([formRef.current, imageRef.current], {
-        opacity: 0,
-        y: -30,
-        duration: 0.2,
-        stagger: 0.05,
-        ease: "power2.in"
-      })
-      .to(modalRef.current, {
-        opacity: 0,
-        scale: 0.8,
-        y: 50,
-        duration: 0.3,
-        ease: "power2.in"
-      }, "-=0.1")
-      .to(backdropRef.current, {
-        opacity: 0,
-        duration: 0.2,
-        ease: "power2.in"
-      }, "-=0.2");
-    }
+    setIsClosing(true);
+    setTimeout(() => {
+      onClose();
+      setIsClosing(false);
+    }, 300); // Corresponds to animation duration
   };
 
-  const switchFormMode = () => {
-    const currentForm = isLoginMode ? loginFormRef.current : registerFormRef.current;
-    const nextForm = isLoginMode ? registerFormRef.current : loginFormRef.current;
-    
-    if (currentForm && nextForm) {
-      const tl = gsap.timeline();
-      
-      // Slide out current form
-      tl.to(currentForm, {
-        x: isLoginMode ? -50 : 50,
-        opacity: 0,
-        duration: 0.3,
-        ease: "power2.in"
-      })
-      // Set next form initial position
-      .set(nextForm, {
-        x: isLoginMode ? 50 : -50,
-        opacity: 0
-      })
-      // Slide in next form
-      .to(nextForm, {
-        x: 0,
-        opacity: 1,
-        duration: 0.3,
-        ease: "power2.out"
-      });
-      
-      setIsLoginMode(!isLoginMode);
-    }
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') handleClose();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
+  const showToast = (message: string, type: 'error' | 'success' | 'info' = 'error') => {
+    setToastState({ visible: true, message, type });
   };
+
+  const hideToast = () => setToastState((t) => ({ ...t, visible: false }));
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Add button animation on submit
-    const submitButton = e.currentTarget.querySelector('button[type="submit"]');
-    if (submitButton) {
-      gsap.to(submitButton, {
-        scale: 0.95,
-        duration: 0.1,
-        yoyo: true,
-        repeat: 1,
-        ease: "power2.inOut"
-      });
-    }
-    
     if (isLoginMode) {
-      console.log("Login attempt:", { email, password, rememberMe });
-    } else {
-      if (password !== confirmPassword) {
-        alert("Passwords do not match!");
+      if (!loginEmail.trim() || !loginPassword.trim()) {
+        showToast('Por favor ingresa correo y contraseña.', 'error');
         return;
       }
-      console.log("Register attempt:", { fullName, email, password });
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(loginEmail)) {
+        showToast('Por favor ingresa una dirección de correo válida.', 'error');
+        return;
+      }
+      const result = demoLogin(loginEmail, loginPassword);
+      if (!result.success) {
+        showToast(result.message || 'Credenciales incorrectas.', 'error');
+        return;
+      }
+      showToast('Inicio de sesión exitoso.', 'success');
+      setTimeout(() => {
+        handleClose();
+      }, 600);
+    } else {
+      if (!registerFullName.trim() || !registerEmail.trim() || !registerPassword.trim() || !registerConfirmPassword.trim()) {
+        showToast('Por favor completa todos los campos de registro.', 'error');
+        return;
+      }
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(registerEmail)) {
+        showToast('Por favor ingresa una dirección de correo válida.', 'error');
+        return;
+      }
+      if (registerPassword !== registerConfirmPassword) {
+        showToast('Las contraseñas no coinciden.', 'error');
+        return;
+      }
+      console.log('Intento de registro:', { fullName: registerFullName, email: registerEmail, password: registerPassword });
+      showToast('Registro demo realizado.', 'success');
+      setIsLoginMode(true);
     }
   };
 
-  const handleInputFocus = (e: React.FocusEvent<HTMLInputElement>) => {
-    gsap.to(e.target, {
-      scale: 1.02,
-      duration: 0.2,
-      ease: "power2.out"
-    });
-  };
+  if (!isOpen && !isClosing) return null;
 
-  const handleInputBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    gsap.to(e.target, {
-      scale: 1,
-      duration: 0.2,
-      ease: "power2.out"
-    });
-  };
-
-  if (!isOpen) return null;
+  const show = isOpen && !isClosing;
+  const backdropClasses = show ? 'opacity-100' : 'opacity-0';
+  const modalClasses = show ? 'opacity-100 scale-100' : 'opacity-0 scale-95';
 
   return (
     <>
-      {/* Backdrop */}
+      <Toast visible={toastState.visible} message={toastState.message} type={toastState.type} onClose={hideToast} />
       <div
-        ref={backdropRef}
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
+        className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-50 transition-opacity duration-300 ${backdropClasses}`}
         onClick={handleClose}
       />
-      
-      {/* Modal */}
-      <div
-        ref={modalRef}
-        className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      >
-        <div className="bg-white rounded-lg shadow-2xl w-full max-w-4xl h-[600px] flex overflow-hidden">
-          {/* Left Section - Forms */}
-          <div ref={formRef} className="flex-1 p-8 flex flex-col justify-center relative overflow-hidden">
-            {/* Close Button */}
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
+        <div
+          onClick={(e) => e.stopPropagation()}
+          className={`bg-white rounded-2xl shadow-2xl w-full max-w-4xl flex overflow-hidden transition-all duration-300 ease-in-out ${modalClasses}`}
+        >
+          {/* Left Side: Forms */}
+          <div className="flex-1 p-8 sm:p-12 flex flex-col justify-center">
             <button
               onClick={handleClose}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors z-10"
-              onMouseEnter={(e) => {
-                gsap.to(e.currentTarget, {
-                  scale: 1.1,
-                  rotation: 90,
-                  duration: 0.2,
-                  ease: "power2.out"
-                });
-              }}
-              onMouseLeave={(e) => {
-                gsap.to(e.currentTarget, {
-                  scale: 1,
-                  rotation: 0,
-                  duration: 0.2,
-                  ease: "power2.out"
-                });
-              }}
+              className="absolute top-4 right-4 p-1.5 text-gray-400 hover:text-gray-800 hover:bg-gray-100 rounded-full transition-all duration-200 ease-in-out hover:rotate-90 z-20"
             >
               <X className="h-6 w-6" />
             </button>
 
-            {/* Login Form */}
-            <div ref={loginFormRef} className={`absolute inset-0 p-8 flex flex-col justify-center ${isLoginMode ? 'block' : 'hidden'}`}>
-              {/* Title */}
-              <div className="mb-8">
-                <h2 className="text-2xl font-bold text-black uppercase tracking-wide">
-                  SIGN IN
-                </h2>
-                <div className="w-12 h-0.5 bg-yellow-400 mt-2"></div>
+            <div className="w-full">
+              <div className="flex border-b mb-8">
+                <button
+                  onClick={() => setIsLoginMode(true)}
+                  className={`flex-1 py-3 text-center font-semibold transition-colors duration-300 ${isLoginMode ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-800'}`}
+                >
+                  Iniciar sesión
+                </button>
+                <button
+                  onClick={() => setIsLoginMode(false)}
+                  className={`flex-1 py-3 text-center font-semibold transition-colors duration-300 ${!isLoginMode ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-800'}`}
+                >
+                  Registrarse
+                </button>
               </div>
 
-              {/* Form */}
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Email Field */}
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-black uppercase">
-                    E-MAIL ADDRESS<span className="text-red-500">*</span>
-                  </label>
-                  <Input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    onFocus={handleInputFocus}
-                    onBlur={handleInputBlur}
-                    placeholder="enter your email address"
-                    className="w-full h-12 border-gray-300 focus:border-black focus:ring-black"
-                    required
-                  />
+              <div className="relative h-[450px] overflow-hidden">
+                {/* Login Form */}
+                <div className={`absolute inset-0 p-4 transition-all duration-500 ease-in-out ${isLoginMode ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-full pointer-events-none'}`}>
+                  <form onSubmit={handleSubmit} className="space-y-6" noValidate>
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold text-gray-600">Correo electrónico</label>
+                      <div className="relative">
+                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                        <Input type="email" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} placeholder="nombre@correo.com" className="pl-10 h-12" required />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold text-gray-600">Contraseña</label>
+                      <div className="relative">
+                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                        <Input type={loginShowPassword ? 'text' : 'password'} value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} placeholder="Ingresa tu contraseña" className="pl-10 pr-10 h-12" required />
+                        <button type="button" onClick={() => setLoginShowPassword(!loginShowPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                          {loginShowPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                        </button>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <label className="flex items-center gap-2 text-gray-600 cursor-pointer"><input type="checkbox" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" />Recuérdame</label>
+                      <button type="button" className="font-medium text-blue-600 hover:text-blue-700">¿Olvidaste tu contraseña?</button>
+                    </div>
+                    <Button type="submit" className="w-full h-12 text-base font-semibold bg-blue-600 text-white hover:bg-blue-700">Iniciar sesión</Button>
+                  </form>
                 </div>
 
-                {/* Password Field */}
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-black uppercase">
-                    PASSWORD<span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <Input
-                      type={showPassword ? "text" : "password"}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      onFocus={handleInputFocus}
-                      onBlur={handleInputBlur}
-                      className="w-full h-12 border-gray-300 focus:border-black focus:ring-black pr-12"
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                    >
-                      {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                    </button>
-                  </div>
+                {/* Register Form */}
+                <div className={`absolute inset-0 p-4 transition-all duration-500 ease-in-out ${!isLoginMode ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-full pointer-events-none'}`}>
+                  <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold text-gray-600">Nombre completo</label>
+                      <div className="relative">
+                        <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                        <Input type="text" value={registerFullName} onChange={(e) => setRegisterFullName(e.target.value)} placeholder="Ingresa tu nombre completo" className="pl-10 h-12" required />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold text-gray-600">Correo electrónico</label>
+                      <div className="relative">
+                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                        <Input type="email" value={registerEmail} onChange={(e) => setRegisterEmail(e.target.value)} placeholder="nombre@correo.com" className="pl-10 h-12" required />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold text-gray-600">Contraseña</label>
+                      <div className="relative">
+                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                        <Input type={registerShowPassword ? 'text' : 'password'} value={registerPassword} onChange={(e) => setRegisterPassword(e.target.value)} placeholder="Crea una contraseña segura" className="pl-10 pr-10 h-12" required />
+                        <button type="button" onClick={() => setRegisterShowPassword(!registerShowPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                          {registerShowPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                        </button>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold text-gray-600">Confirmar contraseña</label>
+                      <div className="relative">
+                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                        <Input type={registerShowConfirmPassword ? 'text' : 'password'} value={registerConfirmPassword} onChange={(e) => setRegisterConfirmPassword(e.target.value)} placeholder="Vuelve a ingresar la contraseña" className="pl-10 pr-10 h-12" required />
+                        <button type="button" onClick={() => setRegisterShowConfirmPassword(!registerShowConfirmPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                          {registerShowConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                        </button>
+                      </div>
+                    </div>
+                    <Button type="submit" className="w-full h-12 text-base font-semibold bg-blue-600 text-white hover:bg-blue-700">Registrarse</Button>
+                  </form>
                 </div>
-
-                {/* Remember Me & Forgot Password */}
-                <div className="flex items-center justify-between">
-                  <label className="flex items-center space-x-2 text-gray-600">
-                    <input
-                      type="checkbox"
-                      checked={rememberMe}
-                      onChange={(e) => setRememberMe(e.target.checked)}
-                      className="w-4 h-4 text-black border-gray-300 rounded focus:ring-black"
-                    />
-                    <span className="text-sm">Remember me!</span>
-                  </label>
-                  <button
-                    type="button"
-                    className="text-orange-500 hover:text-orange-600 text-sm font-medium"
-                  >
-                    Forgot password?
-                  </button>
-                </div>
-
-                {/* Sign In Button */}
-                <Button
-                  type="submit"
-                  className="w-full h-12 bg-black text-white hover:bg-gray-800 font-medium uppercase tracking-wide"
-                >
-                  SIGN IN
-                </Button>
-
-                {/* Switch to Register */}
-                <div className="text-center">
-                  <button
-                    type="button"
-                    onClick={switchFormMode}
-                    className="text-gray-600 hover:text-black text-sm font-medium"
-                  >
-                    Don&apos;t have an account? <span className="text-orange-500 hover:text-orange-600">Register here</span>
-                  </button>
-                </div>
-              </form>
-            </div>
-
-            {/* Register Form */}
-            <div ref={registerFormRef} className={`absolute inset-0 p-8 flex flex-col justify-center ${!isLoginMode ? 'block' : 'hidden'}`}>
-              {/* Title */}
-              <div className="mb-8">
-                <h2 className="text-2xl font-bold text-black uppercase tracking-wide">
-                  REGISTER
-                </h2>
-                <div className="w-12 h-0.5 bg-yellow-400 mt-2"></div>
               </div>
-
-              {/* Form */}
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Full Name Field */}
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-black uppercase">
-                    FULL NAME<span className="text-red-500">*</span>
-                  </label>
-                  <Input
-                    type="text"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    onFocus={handleInputFocus}
-                    onBlur={handleInputBlur}
-                    placeholder="enter your full name"
-                    className="w-full h-12 border-gray-300 focus:border-black focus:ring-black"
-                    required
-                  />
-                </div>
-
-                {/* Email Field */}
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-black uppercase">
-                    E-MAIL ADDRESS<span className="text-red-500">*</span>
-                  </label>
-                  <Input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    onFocus={handleInputFocus}
-                    onBlur={handleInputBlur}
-                    placeholder="enter your email address"
-                    className="w-full h-12 border-gray-300 focus:border-black focus:ring-black"
-                    required
-                  />
-                </div>
-
-                {/* Password Field */}
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-black uppercase">
-                    PASSWORD<span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <Input
-                      type={showPassword ? "text" : "password"}
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      onFocus={handleInputFocus}
-                      onBlur={handleInputBlur}
-                      className="w-full h-12 border-gray-300 focus:border-black focus:ring-black pr-12"
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                    >
-                      {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Confirm Password Field */}
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-black uppercase">
-                    CONFIRM PASSWORD<span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <Input
-                      type={showConfirmPassword ? "text" : "password"}
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      onFocus={handleInputFocus}
-                      onBlur={handleInputBlur}
-                      className="w-full h-12 border-gray-300 focus:border-black focus:ring-black pr-12"
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                    >
-                      {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Register Button */}
-                <Button
-                  type="submit"
-                  className="w-full h-12 bg-black text-white hover:bg-gray-800 font-medium uppercase tracking-wide"
-                >
-                  REGISTER
-                </Button>
-
-                {/* Switch to Login */}
-                <div className="text-center">
-                  <button
-                    type="button"
-                    onClick={switchFormMode}
-                    className="text-gray-600 hover:text-black text-sm font-medium"
-                  >
-                    Already have an account? <span className="text-orange-500 hover:text-orange-600">Sign in here</span>
-                  </button>
-                </div>
-              </form>
             </div>
           </div>
 
-          {/* Right Section - Promotional Image */}
-          <div ref={imageRef} className="flex-1 relative">
-                <div
-                  className="w-full h-full bg-cover bg-center bg-no-repeat"
-                  style={{
-                    backgroundImage: "url('/usm_hero.jpg')",
-                  }}
-                >
-                  {/* Overlay */}
-                  <div className="absolute inset-0 bg-black/40"></div>
-                  
-                  {/* Text Overlays */}
-                  <div className="absolute inset-0 flex flex-col justify-center items-center text-white p-8">
-                    <h3 className="text-4xl font-bold uppercase tracking-wider mb-2">
-                      TEG FLOW
-                    </h3>
-                    <h4 className="text-4xl font-bold uppercase tracking-wider mb-4 text-yellow-400">
-                      USM
-                    </h4>
-                    <p className="text-lg uppercase tracking-wide text-center">
-                      GESTIÓN DEL TRABAJO ESPECIAL DE GRADO
-                    </p>
-                  </div>
+          {/* Right Side: Info */}
+          <div className="flex-1 relative hidden md:block bg-gray-900 animated-gradient">
+            <ParticleCanvas />
+            <div className="relative h-full flex flex-col justify-center items-center p-12 text-center">
+              <div className="text-white">
+                <h3 className="text-6xl font-bold drop-shadow-lg">
+                  TesisFar
+                </h3>
+                <p className="text-lg font-light tracking-wider mt-4 opacity-80 drop-shadow-md">
+                  Gestión del Trabajo Especial de Grado
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -446,4 +522,3 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
     </>
   );
 }
-

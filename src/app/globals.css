@@ -139,3 +139,21 @@ main {
 .outline-debug {
   outline: 2px dashed rgba(255,0,0,0.5);
 }
+
+.animated-gradient {
+  background: linear-gradient(-45deg, #1e3a8a, #111827, #1e3a8a, #111827);
+  background-size: 400% 400%;
+  animation: gradient 15s ease infinite;
+}
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
