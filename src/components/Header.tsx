@@ -219,14 +219,12 @@ export default function Header() {
           <div className="container mx-auto flex h-full items-center justify-between px-4 sm:px-6 lg:px-8">
             {/* Logo and Brand Name */}
             <Link href="/" className="logo-anim flex items-center gap-2 no-underline" aria-label="TesisFar home">
-              <div className="flex-shrink-0 rounded-full bg-white p-1 shadow-md">
-                <img
-                  src="/usmlogo.png"
-                  alt="TesisFar logo"
-                  className="h-10 w-10 object-contain rounded-full"
-                  onError={(e) => { e.currentTarget.src = 'https://placehold.co/40x40/6366F1/FFFFFF?text=TF&font=sans'; }}
-                />
-              </div>
+              <img
+                src="/tesisfar_logo.png"
+                alt="TesisFar logo"
+                className="h-12 w-12 object-contain"
+                onError={(e) => { e.currentTarget.src = 'https://placehold.co/40x40/6366F1/FFFFFF?text=TF&font=sans'; }}
+              />
               <div className="flex flex-col leading-tight">
                 <span className="text-xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-500">
                   TesisFar
