@@ -6,7 +6,6 @@ import React, { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrambleTextPlugin } from "gsap/ScrambleTextPlugin";
 import SplitType from "split-type";
-import { ArrowDown } from "lucide-react";
 
 export default function Hero() {
   const heroRef = useRef<HTMLElement>(null);

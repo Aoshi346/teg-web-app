@@ -3,6 +3,7 @@
 import { LogIn, X } from "lucide-react";
 import React, { useState, useEffect, useRef, useLayoutEffect } from "react";
 import Link from 'next/link';
+import Image from 'next/image';
 import { gsap } from 'gsap';
 import LoginModal from "@/components/LoginModal";
 
@@ -11,7 +12,7 @@ import LoginModal from "@/components/LoginModal";
  * A custom animated menu icon that transitions between a hamburger and an X.
  * It uses GSAP for smooth animations.
  */
-const AnimatedMenuIcon = ({ isOpen, onClick }: { isOpen: boolean; onClick: () => void; }) => {
+const AnimatedMenuIcon = ({ isOpen }: { isOpen: boolean; }) => {
   const iconRef = useRef<SVGSVGElement>(null);
   const tl = useRef<gsap.core.Timeline | null>(null);
 
@@ -42,49 +43,35 @@ const AnimatedMenuIcon = ({ isOpen, onClick }: { isOpen: boolean; onClick: () =>
   }, [isOpen]);
 
   return (
-    <button
-      onClick={onClick}
-      className="p-2 rounded-full text-gray-700 hover:text-indigo-600 hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-indigo-500 transition-colors duration-300"
-      aria-label="Toggle menu"
+    <svg
+      ref={iconRef}
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className="overflow-visible"
+      aria-hidden="true"
+      role="img"
     >
-      <svg
-        ref={iconRef}
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        className="overflow-visible"
-      >
-        <line className="line-top" x1="3" y1="6" x2="21" y2="6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-        <line className="line-middle" x1="3" y1="12" x2="21" y2="12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-        <line className="line-bottom" x1="3" y1="18" x2="21" y2="18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      </svg>
-    </button>
+      <line className="line-top" x1="3" y1="6" x2="21" y2="6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <line className="line-middle" x1="3" y1="12" x2="21" y2="12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <line className="line-bottom" x1="3" y1="18" x2="21" y2="18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
   );
 };
 
 export default function Header() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [gsapLoaded, setGsapLoaded] = useState(false);
 
   const componentRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const mobileMenuTimeline = useRef<gsap.core.Timeline | null>(null);
   
-  // Load GSAP from CDN
-  useEffect(() => {
-    const script = document.createElement('script');
-    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js';
-    script.async = true;
-    script.onload = () => setGsapLoaded(true);
-    document.head.appendChild(script);
-    return () => {
-        document.head.removeChild(script);
-    }
-  }, []);
+  // We import GSAP directly; no CDN injection required. Keep animations available immediately.
+  const gsapLoaded = true;
 
   // Set up all animations in a useLayoutEffect to prevent flashes of unstyled content
   useLayoutEffect(() => {
@@ -170,9 +157,9 @@ export default function Header() {
   const handleButtonHover = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (!gsapLoaded) return;
     gsap.to(e.currentTarget, {
-        y: -3,
-        scale: 1.05,
-        duration: 0.25,
+        y: -2,
+        scale: 1.02,
+        duration: 0.18,
         ease: "power2.out"
     });
   };
@@ -182,24 +169,20 @@ export default function Header() {
     gsap.to(e.currentTarget, {
         y: 0,
         scale: 1,
-        duration: 0.25,
+        duration: 0.18,
         ease: "power2.out"
     });
   };
 
   const handleButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    // Always open the login modal; if GSAP is available, play a small button animation first
+    // Always open the login modal; play a subtle micro-interaction
     setIsLoginModalOpen(true);
-    // eslint-disable-next-line no-console
-    console.log('Login button clicked. gsapLoaded=', gsapLoaded);
     if (!gsapLoaded) return;
-    gsap.to(e.currentTarget, {
-      scale: 0.95,
-      duration: 0.1,
-      yoyo: true,
-      repeat: 1,
-      ease: "power2.inOut",
-    });
+    gsap.fromTo(
+      e.currentTarget,
+      { scale: 1 },
+      { scale: 0.97, duration: 0.08, yoyo: true, repeat: 1, ease: 'power2.inOut' }
+    );
   };
 
   // Ensure body overflow isn't stuck from previous runs
@@ -207,6 +190,22 @@ export default function Header() {
     document.body.style.overflow = '';
     return () => { document.body.style.overflow = ''; };
   }, []);
+
+  // Smooth-scroll to the features section and optionally close mobile menu
+  const handleScrollToFeatures = (e: React.MouseEvent, closeMobile = false) => {
+    e.preventDefault();
+    const el = document.getElementById('features');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      try {
+        // update URL hash without causing an instant jump
+        history.replaceState(null, '', '#features');
+      } catch {
+        // ignore
+      }
+    }
+    if (closeMobile) setIsMobileMenuOpen(false);
+  };
 
   return (
     <>
@@ -219,11 +218,12 @@ export default function Header() {
           <div className="container mx-auto flex h-full items-center justify-between px-4 sm:px-6 lg:px-8">
             {/* Logo and Brand Name */}
             <Link href="/" className="logo-anim flex items-center gap-2 no-underline" aria-label="TesisFar home">
-              <img
+              <Image
                 src="/tesisfar_logo.png"
                 alt="TesisFar logo"
-                className="h-12 w-12 object-contain"
-                onError={(e) => { e.currentTarget.src = 'https://placehold.co/40x40/6366F1/FFFFFF?text=TF&font=sans'; }}
+                width={48}
+                height={48}
+                className="object-contain rounded-full"
               />
               <div className="flex flex-col leading-tight">
                 <span className="text-xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-500">
@@ -236,30 +236,38 @@ export default function Header() {
             </Link>
 
             {/* Desktop Action Button */}
-            <div className="hidden md:block desktop-btn-anim">
-              <button
-                onMouseEnter={handleButtonHover}
-                onMouseLeave={handleButtonLeave}
-                onClick={handleButtonClick}
-                className="inline-flex items-center gap-2 px-5 py-2.5 text-white text-sm font-semibold
-                      bg-gradient-to-r from-indigo-600 to-blue-500 hover:from-indigo-700 hover:to-blue-600
-                      rounded-full shadow-lg hover:shadow-indigo-500/30
-                      focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-indigo-500
-                      transition-all duration-300 transform-gpu"
-                aria-label="Ingresar"
-                title="Ingresar"
-              >
-                <LogIn className="h-4 w-4" aria-hidden />
-                <span>Ingresar</span>
-              </button>
-            </div>
+            <nav className="hidden md:flex items-center gap-6">
+              <Link href="#features" onClick={(e) => handleScrollToFeatures(e, false)} className="text-sm text-gray-700 hover:text-gray-900">Funciones</Link>
+              <Link href="#contact" className="text-sm text-gray-700 hover:text-gray-900">Contacto</Link>
+              <div className="desktop-btn-anim">
+                <button
+                  onMouseEnter={handleButtonHover}
+                  onMouseLeave={handleButtonLeave}
+                  onClick={handleButtonClick}
+                  className="inline-flex items-center gap-3 px-5 py-2.5 text-sm font-semibold text-white
+                        bg-gradient-to-r from-indigo-600 to-blue-500 hover:from-indigo-700 hover:to-blue-600
+                        rounded-full shadow-md hover:shadow-indigo-500/20
+                        focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-indigo-500
+                        transition-transform duration-200 will-change-transform"
+                  aria-label="Ingresar"
+                  title="Ingresar"
+                >
+                  <LogIn className="h-4 w-4" aria-hidden />
+                  <span>Ingresar</span>
+                </button>
+              </div>
+            </nav>
 
             {/* Mobile Menu Button */}
             <div className="md:hidden mobile-btn-anim">
-                <AnimatedMenuIcon 
-                    isOpen={isMobileMenuOpen}
-                    onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                />
+                <button
+                  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                  aria-expanded={isMobileMenuOpen}
+                  aria-controls="mobile-menu"
+                  className="p-2 rounded-full text-gray-700 hover:text-indigo-600 hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-indigo-500"
+                >
+                    <AnimatedMenuIcon isOpen={isMobileMenuOpen} />
+                </button>
             </div>
           </div>
         </header>
@@ -270,18 +278,31 @@ export default function Header() {
           className="md:hidden fixed top-[72px] left-0 w-full h-[calc(100vh-72px)] bg-white/95 backdrop-blur-lg z-30"
           style={{ visibility: 'hidden' }}
         >
-          <div className="container mx-auto px-6 pt-10">
-            <button
-              onClick={() => {
-                setIsMobileMenuOpen(false);
-                setIsLoginModalOpen(true);
-              }}
-              className="mobile-menu-btn-anim w-full inline-flex items-center justify-center gap-2 px-5 py-2.5 text-white text-sm font-semibold
-                    bg-gradient-to-r from-indigo-600 to-blue-500 rounded-full shadow-lg"
-            >
-              <LogIn className="h-4 w-4" />
-              Ingresar
-            </button>
+          <div className="container mx-auto px-6 pt-6">
+            <div className="flex items-center justify-end mb-4">
+              <button
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="p-2 rounded-md text-gray-700 hover:bg-gray-100 focus:outline-none"
+                aria-label="Cerrar menú"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <Link href="#features" onClick={(e) => handleScrollToFeatures(e, true)} className="block text-lg font-medium text-gray-800">Funciones</Link>
+              <Link href="#contact" className="block text-lg font-medium text-gray-800">Contacto</Link>
+            </div>
+
+            <div className="mt-8">
+              <button
+                onClick={() => { setIsMobileMenuOpen(false); setIsLoginModalOpen(true); }}
+                className="w-full inline-flex items-center justify-center gap-3 px-5 py-3 bg-indigo-600 text-white rounded-lg shadow-md"
+              >
+                <LogIn className="h-4 w-4" />
+                Ingresar
+              </button>
+            </div>
           </div>
         </div>
       </div>

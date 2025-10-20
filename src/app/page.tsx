@@ -15,7 +15,6 @@ export default function Home() {
 
     const log = () => {
       // Log helpful diagnostic info to the console
-      // eslint-disable-next-line no-console
       console.log('DEBUG: body.overflow=', document.body.style.overflow,
         'doc.scrollHeight=', document.documentElement.scrollHeight,
         'vw=', window.innerWidth, 'vh=', window.innerHeight);

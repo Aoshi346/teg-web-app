@@ -161,6 +161,7 @@ export default function FeaturesSection() {
     <>
       {/* Students Section */}
       <section
+        id="features"
         ref={studentsSectionRef}
         className="container mx-auto py-24 md:py-32 px-4"
       >
