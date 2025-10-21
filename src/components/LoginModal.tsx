@@ -5,7 +5,9 @@ import { X, Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Toast from '@/components/ui/Toast';
+import LoginLoading from '@/components/ui/LoginLoading';
 import { login as demoLogin } from '@/features/auth/clientAuth';
+import { useRouter } from 'next/navigation';
 
 // --- Particle Animation Utility ---
 function runParticleAnimation(container: HTMLDivElement): () => void {
@@ -302,6 +304,7 @@ interface LoginModalProps {
 }
 
 export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
+  const router = useRouter();
   const [isLoginMode, setIsLoginMode] = useState(true);
   // Form states
   const [loginEmail, setLoginEmail] = useState('');
@@ -320,6 +323,8 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
     message: '',
     type: 'error',
   });
+
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   // Animation state
   const [isClosing, setIsClosing] = useState(false);
@@ -364,9 +369,17 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
         return;
       }
       showToast('Inicio de sesión exitoso.', 'success');
+      // show a brief loading animation before redirecting
+      setIsLoggingIn(true);
       setTimeout(() => {
-        handleClose();
-      }, 600);
+        try {
+          router.push('/dashboard');
+        } catch (err) {
+          window.location.href = '/dashboard';
+        }
+      }, 1500);
+      // close modal after a short delay so user sees the animation
+      setTimeout(() => handleClose(), 1550);
     } else {
       if (!registerFullName.trim() || !registerEmail.trim() || !registerPassword.trim() || !registerConfirmPassword.trim()) {
         showToast('Por favor completa todos los campos de registro.', 'error');
@@ -395,6 +408,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
   return (
     <>
+      <LoginLoading visible={isLoggingIn} />
       <Toast visible={toastState.visible} message={toastState.message} type={toastState.type} onClose={hideToast} />
       <div
         className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-50 transition-opacity duration-300 ${backdropClasses}`}

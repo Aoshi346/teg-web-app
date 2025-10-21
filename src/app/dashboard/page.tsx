@@ -2,18 +2,19 @@
 
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Dashboard from './Dashboard';
+import Dashboard from '../modules/Dashboard';
 import { isAuthenticated } from '@/features/auth/clientAuth';
 
-export default function PageWrapper() {
+export default function DashboardPage() {
   const router = useRouter();
 
   useEffect(() => {
-    // redirect legacy /modules route to /dashboard
-    try {
-      router.replace('/dashboard');
-    } catch {
-      window.location.href = '/dashboard';
+    if (!isAuthenticated()) {
+      try {
+        router.push('/');
+      } catch {
+        window.location.href = '/';
+      }
     }
   }, [router]);
 
