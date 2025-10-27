@@ -5,6 +5,13 @@ Aplicación frontend para el sistema de gestión del Trabajo Especial de Grado (
 ## 🚀 Características
 
 - **Framework**: Next.js 15 con App Router
+### Tesisfar Frontend
+
+Aplicación frontend para el sistema de gestión del Trabajo Especial de Grado (TEG), construida con Next.js 15, TypeScript y Tailwind CSS.
+
+## 🚀 Características
+
+- **Framework**: Next.js 15 con App Router
 - **Lenguaje**: TypeScript para tipado estático
 - **Estilos**: Tailwind CSS con diseño responsive
 - **Componentes**: shadcn/ui para componentes modernos
@@ -240,3 +247,71 @@ MIT License - ver LICENSE para detalles.
 ---
 
 **Desarrollado con ❤️ para la Universidad Santa María**
+
+## 🎯 Objetivos y Alcance del Proyecto
+
+### Objetivo General de la APP
+
+La aplicación TesisFar tiene como objetivo general proporcionar una plataforma web integrada, segura y accesible para la gestión completa del Trabajo Especial de Grado (TEG). Busca centralizar y automatizar el flujo de trabajo entre estudiantes, tutores, jurados y personal administrativo, facilitando la entrega de documentos, la evaluación mediante rúbricas, la programación de defensas y la generación de reportes institucionales. La plataforma pretende mejorar la trazabilidad, reducir errores administrativos y ofrecer herramientas analíticas que apoyen la toma de decisiones académicas.
+
+### Objetivos Específicos
+
+- Proveer un portal de usuario con roles (estudiante, tutor/docente, jurado, administrador) y control de acceso granular.
+- Permitir la subida y gestión de entregables (documentos, anexos, versiones) con control de versiones y metadatos.
+- Implementar un sistema de plazos y recordatorios automáticos (notificaciones por correo y notificaciones en la interfaz) que reduzca incumplimientos de fechas.
+- Facilitar la evaluación mediante rúbricas configurables, registro de calificaciones y comentarios estructurados por entregable.
+- Soportar la organización y notificación de convocatorias y defensas (calendario, asignación de jurados, comunicación con participantes).
+- Generar reportes exportables (CSV / PDF) para seguimiento académico y auditoría administrativa.
+- Mantener trazabilidad y registro de acciones (audit logs) para cumplir requisitos institucionales de control y seguridad.
+- Garantizar una experiencia accesible y responsive para dispositivos móviles y de escritorio, con buenas prácticas de usabilidad.
+
+### Alcances Esperados (Qué incluye y qué queda fuera)
+
+Incluido (in-scope):
+
+- Módulo de autenticación y gestión de sesiones (registro, inicio de sesión, roles) con integración básica a proveedores (ej. Supabase como demo).
+- Interfaz pública (landing page) y sección privada (dashboard) que muestra información contextualizada por rol.
+- Flujo de entregas: creación de entregables, subida de archivos, control de versiones y metadatos (título, fecha, estado).
+- Sistema de plazos y notificaciones: recordatorios programados, alertas en la UI y envío de correos mediante adaptadores configurables.
+- Rúbricas: creación/edición de rúbricas por administradores, uso de rúbricas por jurados y tutores para evaluación.
+- Gestión de jurados y programación de defensas: invitaciones, confirmaciones y vista de calendario.
+- Generación de reportes: listados filtrables, exportación CSV, y plantilla básica para PDF (por ejemplo, actas de evaluación).
+- Registro de auditaría (quién hizo qué y cuándo) para entregables y calificaciones.
+- Calidad de experiencia: accesibilidad básica (WCAG-level considerations), responsive design, y rendimiento frontend optimizado.
+
+Fuera de alcance (out-of-scope inicialmente):
+
+- Integración profunda y bidireccional con sistemas externos institucionales (SIS/ERP) que requieran adaptadores específicos o SSO corporativo avanzado.
+- Funcionalidades avanzadas de detección automática de plagio, análisis semántico o calificación automática por IA.
+- Videoconferencias integradas o streaming en vivo de defensas (se pueden integrar mediante enlaces externos, pero no se provee infraestructura de videoconferencia).
+- Soporte offline avanzado o sincronización compleja entre dispositivos sin conexión.
+
+Restricciones y supuestos clave:
+
+- La primera fase asume almacenamiento de archivos en el proveedor configurado (p. ej. Supabase Storage o bucket S3) y un límite razonable por archivo (ej. 50 MB por archivo), ampliable según necesidades.
+- La seguridad del sistema dependerá de la correcta configuración de variables de entorno y de los controles del proveedor (TLS, políticas CORS, reglas de almacenamiento).
+- La solución está pensada como MVP/POC: prioriza estabilidad, seguridad y facilidad de despliegue; funcionalidades avanzadas pueden planificarse en iteraciones posteriores.
+
+Criterios de aceptación y métricas de éxito:
+
+- Usuarios (estudiantes/tutores) pueden completar el flujo de entrega y confirmación de recepción en menos de 5 pasos.
+- Jurados pueden evaluar un entregable usando una rúbrica y dejar retroalimentación en menos de 10 minutos por evaluación promedio.
+- El sistema envía notificaciones de recordatorio con al menos 95% de entrega en entorno de pruebas (dependiente del proveedor de correo configurado).
+- Métricas de rendimiento objetivo: LCP < 2.5s, CLS < 0.1 en escenarios típicos de laboratorio.
+- Trazabilidad mínima: todas las acciones críticas (subida, evaluación, cambios de estado) registradas con user-id y timestamp.
+
+Entregables esperados al finalizar la primera versión (MVP):
+
+- Código fuente frontend con documentación de despliegue y configuración (.env.example). 
+- Componentes clave: autenticación, panel de usuario, módulos de entrega, rúbricas, calendario de defensas y generación básica de reportes.
+- Documentación de uso y guía rápida para administradores y docentes.
+- Tests básicos (unitarios/integ.) para los flujos críticos y verificación de tipado mediante TypeScript.
+
+Roadmap sugerido (alto nivel):
+
+1. MVP: autenticación, entrega de documentos, evaluación con rúbricas, notificaciones básicas y reportes exportables.
+2. Integraciones: almacenamiento escalable, correo institucional, SSO (opcional) y sincronización con calendarios institucionales.
+3. Mejora UX/Accesibilidad y optimizaciones de rendimiento.
+4. Funcionalidades avanzadas (plagio, analítica avanzada, automatizaciones) y soporte a gran escala.
+
+---
