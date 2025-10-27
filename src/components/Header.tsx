@@ -145,6 +145,8 @@ export default function Header() {
   // Effect for scroll-based header changes
   useEffect(() => {
     if (!gsapLoaded) return;
+    // keep a CSS var in sync with the header height so other components (Hero) can adapt
+    document.documentElement.style.setProperty('--header-height', '88px');
     const onScroll = () => {
       if (window.scrollY > 20) {
         gsap.to(headerRef.current, {
@@ -154,6 +156,7 @@ export default function Header() {
           duration: 0.3,
           ease: 'power2.out',
         });
+        document.documentElement.style.setProperty('--header-height', '72px');
       } else {
         gsap.to(headerRef.current, {
           height: 88,
@@ -162,6 +165,7 @@ export default function Header() {
           duration: 0.3,
           ease: 'power2.out',
         });
+        document.documentElement.style.setProperty('--header-height', '88px');
       }
     };
     window.addEventListener('scroll', onScroll, { passive: true });
@@ -227,8 +231,9 @@ export default function Header() {
       <div ref={componentRef}>
         <header
           ref={headerRef}
-          className="fixed top-0 z-40 w-full bg-white/85 backdrop-blur-lg shadow-sm"
-          style={{ height: 88 }}
+          // make header initially transparent so hero background shows underneath
+          className="fixed top-0 z-40 w-full bg-transparent backdrop-blur-lg"
+          style={{ height: 88, ['--header-height' as any]: '88px' }}
         >
           <div className="container mx-auto flex h-full items-center justify-between px-4 sm:px-6 lg:px-8">
             {/* Logo and Brand Name */}

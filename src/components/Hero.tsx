@@ -180,7 +180,11 @@ export default function Hero() {
     };
   }, []);
   return (
-    <section ref={heroRef} className="relative h-[90vh] w-full flex items-center justify-center text-white overflow-x-hidden overflow-hidden">
+    <section
+      ref={heroRef}
+      className="relative w-full flex items-center justify-center text-white overflow-visible"
+      style={{ minHeight: 'calc(100vh - var(--header-height, 88px))', paddingTop: 'var(--header-height, 88px)', boxSizing: 'border-box' }}
+    >
       {/* Background Image with Ken Burns Effect */}
       <div
         ref={backgroundRef}
@@ -242,28 +246,23 @@ export default function Hero() {
           Coordina a estudiantes, tutores y jurados con comunicación fluida y
           seguimiento en tiempo real.
         </p>
-      </div>
-
-      {/* Bouncing Arrow Indicator */}
-      <div
-        ref={arrowRef}
-        className="absolute bottom-10 z-20"
-        aria-hidden
-      >
-        <svg
-          className="h-12 w-12 text-white/70"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={1.5}
-            d="M19 14l-7 7m0 0l-7-7m7 7V3"
-          />
-        </svg>
+        {/* Bouncing Arrow Indicator (in-flow, placed after content to avoid overlap) */}
+        <div ref={arrowRef} className="mt-8 flex justify-center" aria-hidden>
+          <svg
+            className="h-12 w-12 text-white/70"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.5}
+              d="M19 14l-7 7m0 0l-7-7m7 7V3"
+            />
+          </svg>
+        </div>
       </div>
     </section>
   );
