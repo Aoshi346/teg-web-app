@@ -66,27 +66,29 @@ const StatCard: React.FC<StatCardProps> = ({
   return (
     <div
       ref={cardRef}
-      className={`kbi-card rounded-2xl p-6 shadow-md shadow-gray-900/5 opacity-0 ${
+      className={`kbi-card rounded-2xl p-6 sm:p-6 shadow-lg shadow-gray-900/10 opacity-0 ${
         isColorful
-          ? `${bgClass ?? 'bg-gradient-to-br from-emerald-500 via-emerald-600 to-green-700'} border border-transparent`
-          : 'bg-white border border-gray-200/80'
+          ? `${bgClass ?? 'bg-gradient-to-br from-emerald-500 via-emerald-600 to-green-700'} border border-transparent ring-1 ring-white/20`
+          : 'bg-white border border-gray-200/80 ring-1 ring-gray-200/80'
       }`}
     >
       <div className="flex items-center gap-5">
-        <div className="flex-shrink-0">{icon}</div>
+        <div className={`flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center shadow-inner ${
+          isColorful ? 'bg-white/15 text-white' : 'bg-blue-50 text-blue-600'
+        }`}>{icon}</div>
         <div className="flex-1">
-          <h3 className={`text-base font-semibold ${isColorful ? 'text-white/90' : 'text-gray-500'}`}>{title}</h3>
+          <h3 className={`text-sm sm:text-base font-semibold ${isColorful ? 'text-white/90' : 'text-gray-600'}`}>{title}</h3>
           <div className="flex items-baseline gap-2 mt-2">
-            <p ref={mainValueRef} className={`text-4xl font-bold ${isColorful ? 'text-white' : 'text-gray-800'}`}>{mainValue}</p>
-            <p className={`text-sm font-medium ${isColorful ? 'text-white/80' : 'text-gray-600'}`}>{mainLabel}</p>
+            <p ref={mainValueRef} className={`text-3xl sm:text-4xl xl:text-5xl font-bold leading-tight ${isColorful ? 'text-white' : 'text-gray-800'}`}>{mainValue}</p>
+            <p className={`text-xs sm:text-sm font-medium ${isColorful ? 'text-white/80' : 'text-gray-600'}`}>{mainLabel}</p>
           </div>
         </div>
       </div>
-      <div className={`mt-6 pt-4 flex flex-col sm:flex-row sm:justify-around gap-4 ${
+      <div className={`mt-6 pt-4 flex flex-wrap sm:flex-row sm:justify-around gap-4 gap-y-3 ${
         isColorful ? 'border-t border-white/20' : 'border-t border-gray-200/75'
       }`}>
         {secondaryStats.map((stat) => (
-          <div key={stat.label} className="flex items-center gap-2">
+          <div key={stat.label} className="flex items-center gap-2 min-w-[40%] sm:min-w-0">
             <div style={{ color: isColorful ? 'white' : stat.color }}>{stat.icon}</div>
             <span className={`text-lg font-bold ${isColorful ? 'text-white' : 'text-gray-700'}`}>{stat.value}</span>
             <span className={`text-sm ${isColorful ? 'text-white/80' : 'text-gray-500'}`}>{stat.label}</span>
@@ -276,7 +278,7 @@ const Dashboard: React.FC = () => {
 
             {/* Two equal columns for symmetry */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
-              <div className="content-section bg-white rounded-2xl p-6 shadow-md shadow-gray-900/5 border border-gray-200/80">
+              <div className="content-section bg-white rounded-2xl p-4 sm:p-6 shadow-md shadow-gray-900/5 border border-gray-200/80">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-xl font-bold text-gray-900">Revisión de Proyectos</h3>
                   <button className="text-sm text-blue-700 border border-blue-700 rounded-md px-3 py-1 font-semibold hover:bg-blue-700 hover:text-white transition-all duration-200">
@@ -287,16 +289,16 @@ const Dashboard: React.FC = () => {
                   {projectsToReview.map((project, index) => (
                     <div
                       key={index}
-                      className="flex items-center gap-4 p-4 rounded-xl hover:bg-gray-100 transition-all duration-200 cursor-pointer group"
+                      className="flex flex-col sm:flex-row sm:items-center items-start gap-3 sm:gap-4 p-4 rounded-xl hover:bg-gray-100 transition-all duration-200 cursor-pointer group"
                       style={{ animationDelay: `${index * 100}ms` }}
                     >
-                      <div className="flex-1 min-w-0">
+                      <div className="flex-1 min-w-0 w-full">
                         <p className="text-sm font-semibold text-gray-800 truncate">{project.title}</p>
                         <p className="text-sm text-gray-500">
                           {project.student} - <span className="text-xs">{project.date}</span>
                         </p>
                       </div>
-                      <button className="flex-shrink-0 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-all duration-200 shadow-md shadow-blue-600/20 hover:shadow-lg transform hover:scale-105">
+                      <button className="w-full sm:w-auto sm:flex-shrink-0 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-all duration-200 shadow-md shadow-blue-600/20 hover:shadow-lg transform hover:scale-105">
                         Revisar Ahora
                       </button>
                     </div>
@@ -304,7 +306,7 @@ const Dashboard: React.FC = () => {
                 </div>
               </div>
 
-              <div className="content-section bg-white rounded-2xl p-6 shadow-md shadow-gray-900/5 border border-gray-200/80">
+              <div className="content-section bg-white rounded-2xl p-4 sm:p-6 shadow-md shadow-gray-900/5 border border-gray-200/80">
                   <h3 className="text-xl font-bold text-gray-900 mb-4">Seguimiento de Progreso</h3>
                   <div className="space-y-6">
                     {progressFeed.map((item, index) => (
