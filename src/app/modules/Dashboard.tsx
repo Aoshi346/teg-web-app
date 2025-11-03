@@ -153,7 +153,7 @@ const Dashboard: React.FC = () => {
         { label: 'Rechazados', value: 7, color: '#EF4444', icon: <XCircle size={20} /> },
       ],
       variant: 'colorful' as const,
-      bgClass: 'bg-gradient-to-br from-sky-500 via-indigo-500 to-purple-600',
+      bgClass: 'bg-gradient-to-br from-sky-500 via-blue-600 to-cyan-500',
     },
     {
       title: 'Tesis de Grado (TEG)',
@@ -165,7 +165,7 @@ const Dashboard: React.FC = () => {
         { label: 'Pend. Jurado', value: 9, color: '#F59E0B', icon: <Clock size={20} /> },
       ],
       variant: 'colorful' as const,
-      bgClass: 'bg-gradient-to-br from-blue-500 via-indigo-600 to-cyan-600',
+      bgClass: 'bg-gradient-to-br from-rose-500 via-red-600 to-orange-500',
     },
   ];
 
