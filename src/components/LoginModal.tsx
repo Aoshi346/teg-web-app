@@ -337,6 +337,17 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
     }, 300); // Corresponds to animation duration
   };
 
+  // Prevent body from scrolling when the modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+    // Cleanup on unmount
+    return () => { document.body.style.overflow = 'auto'; };
+  }, [isOpen]);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') handleClose();
@@ -403,24 +414,24 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   if (!isOpen && !isClosing) return null;
 
   const show = isOpen && !isClosing;
-  const backdropClasses = show ? 'opacity-100' : 'opacity-0';
-  const modalClasses = show ? 'opacity-100 scale-100' : 'opacity-0 scale-95';
+  const backdropClasses = show ? 'opacity-100' : 'opacity-0 pointer-events-none';
+  const modalClasses = show ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none';
 
   return (
     <>
       <LoginLoading visible={isLoggingIn} />
       <Toast visible={toastState.visible} message={toastState.message} type={toastState.type} onClose={hideToast} />
       <div
-        className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-50 transition-opacity duration-300 ${backdropClasses}`}
+        className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-50 transition-opacity ease-in-out duration-300 ${backdropClasses}`}
         onClick={handleClose}
       />
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
         <div
           onClick={(e) => e.stopPropagation()}
-          className={`bg-white rounded-2xl shadow-2xl w-full max-w-4xl flex overflow-hidden transition-all duration-300 ease-in-out ${modalClasses}`}
+          className={`bg-white rounded-2xl shadow-2xl w-full max-w-md md:max-w-2xl lg:max-w-4xl flex overflow-hidden transition-all ease-in-out duration-300 ${modalClasses}`}
         >
           {/* Left Side: Forms */}
-          <div className="flex-1 p-8 sm:p-12 flex flex-col justify-center">
+          <div className="flex-1 p-8 lg:p-12 flex flex-col justify-center">
             <button
               onClick={handleClose}
               className="absolute top-4 right-4 p-1.5 text-gray-400 hover:text-gray-800 hover:bg-gray-100 rounded-full transition-all duration-200 ease-in-out hover:rotate-90 z-20"
@@ -444,7 +455,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                 </button>
               </div>
 
-              <div className="relative h-[450px] overflow-hidden">
+              <div className="relative min-h-[450px] overflow-hidden">
                 {/* Login Form */}
                 <div className={`absolute inset-0 p-4 transition-all duration-500 ease-in-out ${isLoginMode ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-full pointer-events-none'}`}>
                   <form onSubmit={handleSubmit} className="space-y-6" noValidate>
@@ -475,7 +486,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
                 {/* Register Form */}
                 <div className={`absolute inset-0 p-4 transition-all duration-500 ease-in-out ${!isLoginMode ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-full pointer-events-none'}`}>
-                  <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+                  <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4" noValidate>
                     <div className="space-y-2">
                       <label className="text-sm font-semibold text-gray-600">Nombre completo</label>
                       <div className="relative">
@@ -518,7 +529,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
           </div>
 
           {/* Right Side: Info */}
-          <div className="flex-1 relative hidden md:block bg-gray-900 animated-gradient">
+          <div className="flex-1 relative hidden lg:block bg-gray-900 animated-gradient">
             <ParticleCanvas />
             <div className="relative h-full flex flex-col justify-center items-center p-12 text-center">
               <div className="text-white">

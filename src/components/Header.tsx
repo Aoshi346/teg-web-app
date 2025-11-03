@@ -84,6 +84,8 @@ export default function Header() {
   const headerRef = useRef<HTMLElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const mobileMenuTimeline = useRef<gsap.core.Timeline | null>(null);
+  // Track whether the header is in its condensed (scrolled) state to avoid re-tweening on every scroll tick
+  const isCondensedRef = useRef(false);
   
   // We import GSAP directly; no CDN injection required. Keep animations available immediately.
   const gsapLoaded = true;
@@ -145,31 +147,62 @@ export default function Header() {
   // Effect for scroll-based header changes
   useEffect(() => {
     if (!gsapLoaded) return;
-    // keep a CSS var in sync with the header height so other components (Hero) can adapt
-    document.documentElement.style.setProperty('--header-height', '88px');
-    const onScroll = () => {
-      if (window.scrollY > 20) {
+
+    // helper to keep a CSS var in sync with the header height so other components (Hero) can adapt
+    const updateHeaderHeight = () => {
+      const h = headerRef.current ? headerRef.current.offsetHeight : 88;
+      document.documentElement.style.setProperty('--header-height', `${h}px`);
+    };
+
+    // Initialize measured value and keep it up-to-date on resize
+    updateHeaderHeight();
+    const onResize = () => updateHeaderHeight();
+    window.addEventListener('resize', onResize, { passive: true });
+
+    // Apply condensed/non-condensed only when threshold changes to prevent constant tweens and layout thrash
+    const applyCondensed = (condensed: boolean) => {
+      // Update ref first to prevent re-entry
+      isCondensedRef.current = condensed;
+      if (condensed) {
+        // Immediately set the CSS var so dependent layouts (Hero) don't lag
+        document.documentElement.style.setProperty('--header-height', '72px');
         gsap.to(headerRef.current, {
           height: 72,
           boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
           backgroundColor: 'rgba(255, 255, 255, 0.9)',
-          duration: 0.3,
+          duration: 0.25,
           ease: 'power2.out',
+          onComplete: updateHeaderHeight,
         });
-        document.documentElement.style.setProperty('--header-height', '72px');
       } else {
+        document.documentElement.style.setProperty('--header-height', '88px');
         gsap.to(headerRef.current, {
           height: 88,
           boxShadow: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
           backgroundColor: 'rgba(255, 255, 255, 0.85)',
-          duration: 0.3,
+          duration: 0.25,
           ease: 'power2.out',
+          onComplete: updateHeaderHeight,
         });
-        document.documentElement.style.setProperty('--header-height', '88px');
       }
     };
+
+    const onScroll = () => {
+      const nextCondensed = window.scrollY > 20;
+      if (nextCondensed !== isCondensedRef.current) {
+        applyCondensed(nextCondensed);
+      }
+    };
+
     window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
+
+    // Set initial state based on current scroll without animating repeatedly
+    onScroll();
+
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onResize);
+    };
   }, [gsapLoaded]);
 
 
@@ -287,10 +320,10 @@ export default function Header() {
         </header>
 
         {/* Mobile Menu Panel */}
-        <div 
-          ref={mobileMenuRef} 
-          className="md:hidden fixed top-[72px] left-0 w-full h-[calc(100vh-72px)] bg-white/95 backdrop-blur-lg z-30"
-          style={{ visibility: 'hidden' }}
+        <div
+          ref={mobileMenuRef}
+          className="md:hidden fixed left-0 w-full bg-white/95 backdrop-blur-lg z-30"
+          style={{ top: 'var(--header-height)', height: 'calc(100vh - var(--header-height))', visibility: 'hidden' }}
         >
           <div className="container mx-auto px-6 pt-6">
             <div className="flex items-center justify-end mb-4">

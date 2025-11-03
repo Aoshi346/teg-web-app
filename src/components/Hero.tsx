@@ -183,7 +183,13 @@ export default function Hero() {
     <section
       ref={heroRef}
       className="relative w-full flex items-center justify-center text-white overflow-visible"
-      style={{ minHeight: 'calc(100vh - var(--header-height, 88px))', paddingTop: 'var(--header-height, 88px)', boxSizing: 'border-box' }}
+      style={{
+        // Use 100svh to avoid layout shifts when mobile browser UI shows/hides while scrolling.
+        // Keep a responsive top gap so the badge isn't cramped under the header.
+        minHeight: 'calc(100svh - var(--header-height, 88px) - clamp(16px, 2.8vh, 56px))',
+        paddingTop: 'calc(var(--header-height, 88px) + clamp(16px, 2.8vh, 56px))',
+        boxSizing: 'border-box',
+      }}
     >
       {/* Background Image with Ken Burns Effect */}
       <div
