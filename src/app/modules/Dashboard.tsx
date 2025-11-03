@@ -14,6 +14,7 @@ import {
   Activity
 } from 'lucide-react';
 import Sidebar from './Sidebar';
+import LoginLoading from '@/components/ui/LoginLoading';
 
 interface StatCardProps {
   title: string;
@@ -69,8 +70,18 @@ const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 800);
-    return () => clearTimeout(timer);
+    // If navigation came from the login modal, skip showing a second loader
+    try {
+      const just = sessionStorage.getItem('justLoggedIn');
+      if (just) {
+        sessionStorage.removeItem('justLoggedIn');
+        setLoading(false);
+        return;
+      }
+    } catch {}
+
+    const timer = window.setTimeout(() => setLoading(false), 800);
+    return () => window.clearTimeout(timer);
   }, []);
 
   const stats = [
@@ -140,14 +151,8 @@ const Dashboard: React.FC = () => {
   ];
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-blue-50">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
-          <p className="text-gray-600 font-medium">Loading dashboard...</p>
-        </div>
-      </div>
-    );
+    // Use the same loading overlay used by the login modal for visual consistency across the app
+    return <LoginLoading visible={true} message="Cargando panel..." />;
   }
 
   return (

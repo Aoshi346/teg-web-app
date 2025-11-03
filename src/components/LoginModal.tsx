@@ -382,6 +382,8 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
       showToast('Inicio de sesión exitoso.', 'success');
       // show a brief loading animation before redirecting
       setIsLoggingIn(true);
+      // Mark this navigation so the dashboard can skip showing a second loader
+      try { sessionStorage.setItem('justLoggedIn', '1'); } catch {}
       setTimeout(() => {
         try {
           router.push('/dashboard');
