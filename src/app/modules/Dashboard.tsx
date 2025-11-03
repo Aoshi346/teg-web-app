@@ -12,7 +12,9 @@ import {
   XCircle,
   Clock,
   Check,
-  MessageSquare
+  MessageSquare,
+  Menu,
+  ChevronsLeft
 } from 'lucide-react';
 import Sidebar from './Sidebar';
 import LoginLoading from '@/components/ui/LoginLoading';
@@ -21,9 +23,12 @@ interface StatCardProps {
   title: string;
   mainValue: string;
   mainLabel: string;
-  secondaryStats: { label: string; value: number; color: string, icon: React.ReactNode }[];
+  secondaryStats: { label: string; value: number; color: string; icon: React.ReactNode }[];
   icon: React.ReactNode;
   delay: number;
+  // When variant is "colorful", apply gradient background and switch texts to white for contrast
+  variant?: 'default' | 'colorful';
+  bgClass?: string; // Tailwind classes for gradient/background when variant is colorful
 }
 
 const StatCard: React.FC<StatCardProps> = ({
@@ -33,6 +38,8 @@ const StatCard: React.FC<StatCardProps> = ({
   secondaryStats,
   icon,
   delay,
+  variant = 'default',
+  bgClass,
 }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const mainValueRef = useRef<HTMLParagraphElement>(null);
@@ -54,27 +61,35 @@ const StatCard: React.FC<StatCardProps> = ({
     }
   }, [mainValue, delay]);
 
+  const isColorful = variant === 'colorful';
+
   return (
     <div
       ref={cardRef}
-      className="kbi-card bg-white rounded-2xl p-6 shadow-md shadow-gray-900/5 border border-gray-200/80 opacity-0"
+      className={`kbi-card rounded-2xl p-6 shadow-md shadow-gray-900/5 opacity-0 ${
+        isColorful
+          ? `${bgClass ?? 'bg-gradient-to-br from-emerald-500 via-emerald-600 to-green-700'} border border-transparent`
+          : 'bg-white border border-gray-200/80'
+      }`}
     >
       <div className="flex items-center gap-5">
         <div className="flex-shrink-0">{icon}</div>
         <div className="flex-1">
-          <h3 className="text-base font-semibold text-gray-500">{title}</h3>
+          <h3 className={`text-base font-semibold ${isColorful ? 'text-white/90' : 'text-gray-500'}`}>{title}</h3>
           <div className="flex items-baseline gap-2 mt-2">
-            <p ref={mainValueRef} className="text-4xl font-bold text-gray-800">{mainValue}</p>
-            <p className="text-sm text-gray-600 font-medium">{mainLabel}</p>
+            <p ref={mainValueRef} className={`text-4xl font-bold ${isColorful ? 'text-white' : 'text-gray-800'}`}>{mainValue}</p>
+            <p className={`text-sm font-medium ${isColorful ? 'text-white/80' : 'text-gray-600'}`}>{mainLabel}</p>
           </div>
         </div>
       </div>
-      <div className="mt-6 pt-4 border-t border-gray-200/75 flex flex-col sm:flex-row sm:justify-around gap-4">
+      <div className={`mt-6 pt-4 flex flex-col sm:flex-row sm:justify-around gap-4 ${
+        isColorful ? 'border-t border-white/20' : 'border-t border-gray-200/75'
+      }`}>
         {secondaryStats.map((stat) => (
           <div key={stat.label} className="flex items-center gap-2">
-            <div style={{ color: stat.color }}>{stat.icon}</div>
-            <span className="text-lg font-bold text-gray-700">{stat.value}</span>
-            <span className="text-sm text-gray-500">{stat.label}</span>
+            <div style={{ color: isColorful ? 'white' : stat.color }}>{stat.icon}</div>
+            <span className={`text-lg font-bold ${isColorful ? 'text-white' : 'text-gray-700'}`}>{stat.value}</span>
+            <span className={`text-sm ${isColorful ? 'text-white/80' : 'text-gray-500'}`}>{stat.label}</span>
           </div>
         ))}
       </div>
@@ -85,6 +100,7 @@ const StatCard: React.FC<StatCardProps> = ({
 const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const mainContentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -131,21 +147,25 @@ const Dashboard: React.FC = () => {
       title: 'Proyectos de Tesis (PTEG)',
       mainValue: '12',
       mainLabel: 'En Revisión',
-      icon: <FileText className="w-10 h-10 text-blue-600" />,
+      icon: <FileText className="w-10 h-10 text-white" />,
       secondaryStats: [
         { label: 'Aprobados', value: 58, color: '#10B981', icon: <Check size={20} /> },
         { label: 'Rechazados', value: 7, color: '#EF4444', icon: <XCircle size={20} /> },
       ],
+      variant: 'colorful' as const,
+      bgClass: 'bg-gradient-to-br from-sky-500 via-indigo-500 to-purple-600',
     },
     {
       title: 'Tesis de Grado (TEG)',
       mainValue: '43',
       mainLabel: 'En Progreso',
-      icon: <BookOpen className="w-10 h-10 text-violet-700" />,
+      icon: <BookOpen className="w-10 h-10 text-white" />,
       secondaryStats: [
         { label: 'Completadas', value: 21, color: '#10B981', icon: <Check size={20} /> },
         { label: 'Pend. Jurado', value: 9, color: '#F59E0B', icon: <Clock size={20} /> },
       ],
+      variant: 'colorful' as const,
+      bgClass: 'bg-gradient-to-br from-blue-500 via-indigo-600 to-cyan-600',
     },
   ];
 
@@ -196,37 +216,57 @@ const Dashboard: React.FC = () => {
   return (
     <div className="min-h-screen w-full flex bg-gray-100">
       <div className="sidebar-container">
-        <Sidebar isCollapsed={isSidebarCollapsed} setIsCollapsed={setIsSidebarCollapsed} />
+        <Sidebar
+          isCollapsed={isSidebarCollapsed}
+          setIsCollapsed={setIsSidebarCollapsed}
+          mobileOpen={isMobileSidebarOpen}
+          setMobileOpen={setIsMobileSidebarOpen}
+        />
       </div>
       <div ref={mainContentRef} className="flex-1 flex flex-col overflow-hidden transition-all duration-300">
         <header className="header-container bg-white border-b border-gray-200 sticky top-0 z-20 h-[89px] flex-shrink-0">
-          <div className="px-8 h-full">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <h2 className="text-3xl font-bold text-gray-900">Dashboard</h2>
-              <div className="flex items-center gap-2 bg-gray-100 p-1.5 rounded-full">
-                <button className="relative p-2 rounded-full hover:bg-gray-200/70 transition-all duration-200 group">
-                  <Bell className="w-5 h-5 text-gray-600 group-hover:text-blue-600 transition-colors" />
-                  <span className="absolute top-2 right-2 flex h-4 w-4 items-center justify-center">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
-                  </span>
-                </button>
-                <div className="relative group">
-                  <div className="flex items-center gap-2 cursor-pointer p-1 pr-2 rounded-full hover:bg-gray-200/70 transition-colors">
-                    <img
-                      src="https://i.pravatar.cc/300"
-                      alt="User avatar"
-                      className="w-8 h-8 rounded-full border-2 border-white shadow-sm"
-                    />
-                    <ChevronDown className="w-4 h-4 text-gray-500" />
-                  </div>
+          <div className="px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <button
+                className="lg:hidden inline-flex items-center justify-center p-2 rounded-md hover:bg-gray-100 transition-colors"
+                aria-label="Abrir menú"
+                onClick={() => setIsMobileSidebarOpen(true)}
+              >
+                <Menu className="w-6 h-6 text-gray-700" />
+              </button>
+              <button
+                className="hidden lg:inline-flex items-center justify-center p-2 rounded-md hover:bg-gray-100 transition-colors"
+                aria-label="Colapsar barra lateral"
+                onClick={() => setIsSidebarCollapsed((v) => !v)}
+                title={isSidebarCollapsed ? 'Expandir barra lateral' : 'Colapsar barra lateral'}
+              >
+                <ChevronsLeft className={`w-5 h-5 ${isSidebarCollapsed ? 'rotate-180 transition-transform' : 'transition-transform'}`} />
+              </button>
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">Dashboard</h2>
+            </div>
+            <div className="flex items-center gap-2 bg-gray-100 p-1.5 rounded-full">
+              <button className="relative p-2 rounded-full hover:bg-gray-200/70 transition-all duration-200 group">
+                <Bell className="w-5 h-5 text-gray-600 group-hover:text-blue-600 transition-colors" />
+                <span className="absolute top-2 right-2 flex h-4 w-4 items-center justify-center">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                </span>
+              </button>
+              <div className="relative group">
+                <div className="flex items-center gap-2 cursor-pointer p-1 pr-2 rounded-full hover:bg-gray-200/70 transition-colors">
+                  <img
+                    src="https://i.pravatar.cc/300"
+                    alt="User avatar"
+                    className="w-8 h-8 rounded-full border-2 border-white shadow-sm"
+                  />
+                  <ChevronDown className="w-4 h-4 text-gray-500" />
                 </div>
               </div>
             </div>
           </div>
         </header>
 
-        <main className="flex-1 p-8 overflow-y-auto bg-gray-50">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto bg-gray-50">
           <div className="max-w-7xl mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
               {stats.map((stat, index) => (
@@ -234,11 +274,12 @@ const Dashboard: React.FC = () => {
               ))}
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-              <div className="content-section lg:col-span-3 bg-white rounded-2xl p-6 shadow-md shadow-gray-900/5 border border-gray-200/80">
+            {/* Two equal columns for symmetry */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+              <div className="content-section bg-white rounded-2xl p-6 shadow-md shadow-gray-900/5 border border-gray-200/80">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-xl font-bold text-gray-900">Revisión de Proyectos</h3>
-                  <button className="text-sm text-violet-700 border border-violet-700 rounded-md px-3 py-1 font-semibold hover:bg-violet-700 hover:text-white transition-all duration-200">
+                  <button className="text-sm text-blue-700 border border-blue-700 rounded-md px-3 py-1 font-semibold hover:bg-blue-700 hover:text-white transition-all duration-200">
                     Ver todos los proyectos
                   </button>
                 </div>
@@ -255,7 +296,7 @@ const Dashboard: React.FC = () => {
                           {project.student} - <span className="text-xs">{project.date}</span>
                         </p>
                       </div>
-                      <button className="flex-shrink-0 bg-violet-700 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-violet-800 transition-all duration-200 shadow-md shadow-violet-700/20 hover:shadow-lg transform hover:scale-105">
+                      <button className="flex-shrink-0 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-all duration-200 shadow-md shadow-blue-600/20 hover:shadow-lg transform hover:scale-105">
                         Revisar Ahora
                       </button>
                     </div>
@@ -263,7 +304,7 @@ const Dashboard: React.FC = () => {
                 </div>
               </div>
 
-              <div className="content-section lg:col-span-2 bg-white rounded-2xl p-6 shadow-md shadow-gray-900/5 border border-gray-200/80">
+              <div className="content-section bg-white rounded-2xl p-6 shadow-md shadow-gray-900/5 border border-gray-200/80">
                   <h3 className="text-xl font-bold text-gray-900 mb-4">Seguimiento de Progreso</h3>
                   <div className="space-y-6">
                     {progressFeed.map((item, index) => (
