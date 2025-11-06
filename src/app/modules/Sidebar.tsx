@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -23,6 +23,21 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, mobileOpen, setMobileOpen }) => {
   const pathname = usePathname();
+  const closeBtnRef = useRef<HTMLButtonElement>(null);
+
+  // Lock body scroll when mobile drawer is open and focus the close button
+  useEffect(() => {
+    if (mobileOpen) {
+      try {
+        document.body.style.overflow = 'hidden';
+        // Focus close button for accessibility
+        setTimeout(() => closeBtnRef.current?.focus(), 0);
+      } catch {}
+    } else {
+      try { document.body.style.overflow = ''; } catch {}
+    }
+    return () => { try { document.body.style.overflow = ''; } catch {} };
+  }, [mobileOpen]);
 
   const menuItems = [
     { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
@@ -36,13 +51,16 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, mobileOp
 
   return (
     <>
-      {/* Mobile dropdown (top) */}
+      {/* Mobile drawer (left off-canvas) */}
       <div
-        className={`lg:hidden fixed top-0 left-0 w-full z-50 bg-white border-b border-gray-200 shadow-xl transform transition-transform duration-300 ease-out ${
-          mobileOpen ? 'translate-y-0' : '-translate-y-full'
+        className={`lg:hidden fixed inset-y-0 left-0 z-50 w-[85vw] max-w-xs sm:max-w-sm bg-white border-r border-gray-200 shadow-2xl transform transition-transform duration-300 ease-out ${
+          mobileOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Menú de navegación"
       >
-        <div className="flex flex-col max-h-[80vh]">
+        <div className="flex flex-col h-full pt-[env(safe-area-inset-top)]">
           <div className="p-4 flex items-center justify-between border-b border-gray-200">
             <div className="flex items-center gap-3 min-w-0">
               <div className="w-10 h-10 rounded-xl flex items-center justify-center">
@@ -54,6 +72,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, mobileOp
               </div>
             </div>
             <button
+              ref={closeBtnRef}
               onClick={() => setMobileOpen(false)}
               className="p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
               aria-label="Cerrar menú"
@@ -62,7 +81,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, mobileOp
             </button>
           </div>
           <nav className="flex-1 p-4 overflow-y-auto" aria-label="Main navigation">
-            <ul className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            <ul className="space-y-1">
               {menuItems.map((item, index) => {
                 const isActive = pathname ? pathname.startsWith(item.href) : false;
                 return (
@@ -70,13 +89,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, mobileOp
                     <Link
                       href={item.href}
                       onClick={() => setMobileOpen(false)}
-                      className={`group w-full flex items-center justify-start gap-2 py-3 px-2 rounded-lg transition-colors duration-200 ${
+                      className={`w-full flex items-center gap-3 py-3 px-3 rounded-lg transition-colors duration-200 ${
                         isActive ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30' : 'text-gray-700 hover:bg-gray-100'
                       }`}
                       title={item.label}
                     >
                       <item.icon className="w-5 h-5 flex-shrink-0" />
-                      <span className="text-xs sm:text-sm font-medium whitespace-nowrap overflow-hidden">{item.label}</span>
+                      <span className="text-sm font-medium whitespace-nowrap overflow-hidden">{item.label}</span>
                     </Link>
                   </li>
                 );
@@ -128,12 +147,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, mobileOp
         </nav>
       </aside>
 
-      {mobileOpen && (
-        <div
-          className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40 transition-opacity duration-300"
-          onClick={() => setMobileOpen(false)}
-        />
-      )}
+      <div
+        className={`lg:hidden fixed inset-0 z-40 bg-black/50 transition-opacity duration-300 ${mobileOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+        onClick={() => setMobileOpen(false)}
+      />
     </>
   );
 };
