@@ -27,8 +27,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, mobileOp
 
   const menuItems = [
     { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
-    { icon: FileText, label: 'Proyectos (PTEG)', href: '/dashboard/projects' },
-    { icon: BookOpen, label: 'Tesis (TEG)', href: '/dashboard/theses' },
+    { icon: FileText, label: 'Proyecto (PTEG)', href: '/dashboard/projects' },
+    { icon: BookOpen, label: 'Trabajo Especial (TEG)', href: '/dashboard/theses' },
     { icon: ScanLine, label: 'Escanear Documento', href: '/dashboard/scan' },
     { icon: TrendingUp, label: 'Seguimiento', href: '/dashboard/tracking' },
     { icon: BarChart3, label: 'Analíticas', href: '/dashboard/analytics' },
@@ -47,8 +47,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, mobileOp
         <div className="flex flex-col h-full">
           <div className={`p-4 h-[89px] flex items-center ${isCollapsed ? 'justify-center' : 'justify-start'} border-b border-gray-200 ${isCollapsed ? 'px-3' : 'px-6'}`}>
             <div className={`flex items-center ${isCollapsed ? 'gap-0' : 'gap-3'} min-w-0 transition-all duration-300`}>
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-cyan-500 rounded-xl flex items-center justify-center">
-                <GraduationCap className="w-6 h-6 text-white" />
+              <div className="w-10 h-10 bg-transparent rounded-xl flex items-center justify-center">
+                <img
+                  src="/tesisfar_logo.svg"
+                  alt="Tesisfar logo"
+                  className="w-8 h-8 object-contain drop-shadow-sm"
+                  draggable={false}
+                />
               </div>
               <div className={`overflow-hidden transition-all duration-200 ${isCollapsed ? 'w-0' : 'w-auto'}`}>
                 <h1 className="text-lg font-bold text-gray-900">Tesisfar</h1>
