@@ -229,12 +229,17 @@ const Dashboard: React.FC = () => {
         <header className="header-container bg-white border-b border-gray-200 sticky top-0 z-20 h-[89px] flex-shrink-0">
           <div className="px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">
             <div className="flex items-center gap-3">
+              {/* Mobile menu toggle (hidden on large screens) */}
               <button
-                className="lg:hidden inline-flex items-center justify-center p-2 rounded-md hover:bg-gray-100 transition-colors"
-                aria-label="Abrir menú"
-                onClick={() => setIsMobileSidebarOpen(true)}
+                className={`lg:hidden inline-flex items-center justify-center p-3 rounded-md border transition-colors ${
+                  isMobileSidebarOpen
+                    ? 'bg-blue-600 border-blue-600 text-white'
+                    : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
+                }`}
+                aria-label={isMobileSidebarOpen ? 'Cerrar menú' : 'Abrir menú'}
+                onClick={() => setIsMobileSidebarOpen(prev => !prev)}
               >
-                <Menu className="w-6 h-6 text-gray-700" />
+                <Menu className="w-6 h-6" />
               </button>
               <button
                 className="hidden lg:inline-flex items-center justify-center p-2 rounded-md hover:bg-gray-100 transition-colors"
