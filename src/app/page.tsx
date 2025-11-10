@@ -1,8 +1,8 @@
 import React from "react";
-import Header from "@/components/Header";
-import Hero from "@/components/Hero";
-import FeaturesSection from "@/components/FeaturesSection";
-import Footer from "@/components/Footer";
+import Header from "@/components/layout/Header";
+import Hero from "@/components/landing/Hero";
+import FeaturesSection from "@/components/landing/FeaturesSection";
+import Footer from "@/components/layout/Footer";
 
 export default function Home() {
   return (

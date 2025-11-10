@@ -1,4 +1,4 @@
-// src/components/FeaturesSection.tsx
+// src/components/landing/FeaturesSection.tsx
 
 "use client";
 
@@ -255,3 +255,4 @@ export default function FeaturesSection() {
     </>
   );
 }
+

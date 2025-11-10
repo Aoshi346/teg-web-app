@@ -1,0 +1,68 @@
+"use client";
+
+import React from "react";
+import {
+  Bell,
+  ChevronDown,
+  Menu,
+  ChevronsLeft,
+} from "lucide-react";
+
+interface DashboardHeaderProps {
+  pageTitle: string;
+  isSidebarCollapsed: boolean;
+  isMobileSidebarOpen: boolean;
+  onMobileSidebarToggle: () => void;
+  onSidebarCollapse: () => void;
+}
+
+const DashboardHeader: React.FC<DashboardHeaderProps> = ({ pageTitle, isSidebarCollapsed, isMobileSidebarOpen, onMobileSidebarToggle, onSidebarCollapse }) => {
+  return (
+    <header className="header-container bg-white border-b border-gray-200 sticky top-0 z-10 h-16 sm:h-20 md:h-[89px] flex-shrink-0">
+      <div className="px-3 sm:px-4 md:px-6 lg:px-8 h-full flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+          <button
+            className={`lg:hidden inline-flex items-center justify-center p-2 sm:p-3 rounded-md border transition-colors touch-manipulation ${
+              isMobileSidebarOpen
+                ? "bg-blue-600 border-blue-600 text-white"
+                : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50 active:bg-gray-100"
+            }`}
+            aria-label={isMobileSidebarOpen ? "Cerrar menú" : "Abrir menú"}
+            onClick={onMobileSidebarToggle}
+          >
+            <Menu className="w-5 h-5 sm:w-6 sm:h-6" />
+          </button>
+          <button
+            className="hidden lg:inline-flex items-center justify-center p-2 rounded-md hover:bg-gray-100 active:bg-gray-200 transition-colors touch-manipulation"
+            aria-label="Colapsar barra lateral"
+            onClick={onSidebarCollapse}
+            title={isSidebarCollapsed ? "Expandir barra lateral" : "Colapsar barra lateral"}
+          >
+            <ChevronsLeft className={`w-5 h-5 ${isSidebarCollapsed ? "rotate-180 transition-transform" : "transition-transform"}`} />
+          </button>
+          <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 truncate">
+            {pageTitle}
+          </h2>
+        </div>
+        <div className="flex items-center gap-1 sm:gap-2 bg-gray-100 p-1 sm:p-1.5 rounded-full flex-shrink-0">
+          <button className="relative p-1.5 sm:p-2 rounded-full hover:bg-gray-200/70 active:bg-gray-300 transition-all duration-200 group touch-manipulation">
+            <Bell className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600 group-hover:text-blue-600 transition-colors" />
+            <span className="absolute top-1 right-1 sm:top-2 sm:right-2 flex h-3 w-3 sm:h-4 sm:w-4 items-center justify-center">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 sm:h-3 sm:w-3 bg-red-500"></span>
+            </span>
+          </button>
+          <div className="relative group">
+            <button className="flex items-center gap-1 sm:gap-2 p-1 pr-1.5 sm:pr-2 rounded-full hover:bg-gray-200/70 active:bg-gray-300 transition-colors touch-manipulation">
+              <img src="https://i.pravatar.cc/300" alt="User avatar" className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border-2 border-white shadow-sm" />
+              <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4 text-gray-500 hidden sm:block" />
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+};
+
+export default DashboardHeader;
+

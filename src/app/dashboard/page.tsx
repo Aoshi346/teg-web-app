@@ -1,26 +1,28 @@
 "use client";
 
-import React, { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Dashboard from '../modules/Dashboard';
-import { isAuthenticated } from '@/features/auth/clientAuth';
+import React from 'react';
+import Dashboard from '@/components/dashboard/Dashboard';
 
-export default function DashboardPage() {
-  const router = useRouter();
+// This page receives props from the layout component
+interface DashboardPageProps {
+  handleSidebarCollapse?: () => void;
+  handleMobileSidebarToggle?: () => void;
+  isSidebarCollapsed?: boolean;
+  isMobileSidebarOpen?: boolean;
+}
 
-  useEffect(() => {
-    if (!isAuthenticated()) {
-      try {
-        router.push('/');
-      } catch {
-        window.location.href = '/';
-      }
-    }
-  }, [router]);
-
+export default function DashboardPage({
+  handleSidebarCollapse = () => {},
+  handleMobileSidebarToggle = () => {},
+  isSidebarCollapsed = false,
+  isMobileSidebarOpen = false,
+}: DashboardPageProps) {
   return (
-    <main className="min-h-screen bg-gray-50">
-      <Dashboard />
-    </main>
+    <Dashboard
+      handleSidebarCollapse={handleSidebarCollapse}
+      handleMobileSidebarToggle={handleMobileSidebarToggle}
+      isSidebarCollapsed={isSidebarCollapsed}
+      isMobileSidebarOpen={isMobileSidebarOpen}
+    />
   );
 }

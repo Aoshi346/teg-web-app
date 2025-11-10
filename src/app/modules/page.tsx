@@ -1,25 +1,10 @@
 "use client";
 
-import React, { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Dashboard from './Dashboard';
-import { isAuthenticated } from '@/features/auth/clientAuth';
+import { redirect } from 'next/navigation';
 
 export default function PageWrapper() {
-  const router = useRouter();
-
-  useEffect(() => {
-    // redirect legacy /modules route to /dashboard
-    try {
-      router.replace('/dashboard');
-    } catch {
-      window.location.href = '/dashboard';
-    }
-  }, [router]);
-
-  return (
-    <main className="min-h-screen bg-gray-50">
-      <Dashboard />
-    </main>
-  );
+  // This is a legacy route, permanently redirect to the correct dashboard URL.
+  // Using the redirect function from next/navigation is the recommended approach.
+  redirect('/dashboard');
+  return null; // This component will not render anything.
 }

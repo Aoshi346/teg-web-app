@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { createPortal } from 'react-dom';
+import { gsap } from 'gsap';
 import {
   LayoutDashboard,
   BookOpen,
@@ -24,8 +25,10 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, mobileOpen, setMobileOpen }) => {
   const pathname = usePathname();
+  const router = useRouter();
   const closeBtnRef = useRef<HTMLButtonElement>(null);
   const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
+  const linkRefs = useRef<Map<string, HTMLAnchorElement>>(new Map());
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -56,6 +59,60 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, mobileOp
     { icon: BarChart3, label: 'Analíticas', href: '/dashboard/analytics' },
     { icon: Settings, label: 'Configuración', href: '/dashboard/settings' },
   ];
+
+  // Prefetch routes on hover for instant navigation
+  const handleLinkHover = useCallback((href: string) => {
+    router.prefetch(href);
+  }, [router]);
+
+  // Animate menu items on mount and pathname change
+  useEffect(() => {
+    const menuItems = document.querySelectorAll('.sidebar-menu-item');
+    if (menuItems.length > 0) {
+      gsap.fromTo(
+        menuItems,
+        {
+          opacity: 0,
+          x: -20,
+        },
+        {
+          opacity: 1,
+          x: 0,
+          duration: 0.3,
+          stagger: 0.05,
+          ease: 'power2.out',
+        }
+      );
+    }
+  }, [pathname]);
+
+  // Keyboard shortcuts for navigation (1-7 for menu items)
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      // Only handle if not typing in an input/textarea
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        return;
+      }
+
+      // Alt/Cmd + 1-7 for navigation
+      if ((e.altKey || e.metaKey) && e.key >= '1' && e.key <= '7') {
+        e.preventDefault();
+        const index = parseInt(e.key) - 1;
+        if (menuItems[index]) {
+          router.push(menuItems[index].href);
+          setMobileOpen(false);
+        }
+      }
+
+      // Escape to close mobile menu
+      if (e.key === 'Escape' && mobileOpen) {
+        setMobileOpen(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [router, mobileOpen, setMobileOpen, menuItems]);
 
   return (
     <div className="sidebar-container">
@@ -100,17 +157,27 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, mobileOp
                           : pathname.startsWith(item.href)
                         : false;
                       return (
-                        <li key={index}>
+                        <li key={index} className="sidebar-menu-item">
                           <Link
+                            ref={(el) => {
+                              if (el) linkRefs.current.set(item.href, el);
+                            }}
                             href={item.href}
                             onClick={() => setMobileOpen(false)}
-                            className={`w-full flex items-center gap-3 py-3 px-3 rounded-lg transition-colors duration-200 ${
-                              isActive ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30' : 'text-gray-700 hover:bg-gray-100'
+                            onMouseEnter={() => handleLinkHover(item.href)}
+                            prefetch={true}
+                            className={`w-full flex items-center gap-3 py-3 px-3 rounded-lg transition-all duration-200 relative group ${
+                              isActive 
+                                ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30' 
+                                : 'text-gray-700 hover:bg-gray-100 hover:translate-x-1'
                             }`}
-                            title={item.label}
+                            title={`${item.label} (Alt+${index + 1})`}
                           >
-                            <item.icon className="w-5 h-5 flex-shrink-0" />
+                            <item.icon className={`w-5 h-5 flex-shrink-0 transition-transform duration-200 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} />
                             <span className="text-sm font-medium whitespace-nowrap overflow-hidden">{item.label}</span>
+                            {isActive && (
+                              <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-white rounded-r-full" />
+                            )}
                           </Link>
                         </li>
                       );
@@ -154,20 +221,30 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, mobileOp
             {menuItems.map((item, index) => {
               const isActive = pathname
                 ? item.href === '/dashboard'
-                  ? pathname === item.href
+                  ? item.href === pathname
                   : pathname.startsWith(item.href)
                 : false;
               return (
-                <li key={index}>
+                <li key={index} className="sidebar-menu-item">
                   <Link
+                    ref={(el) => {
+                      if (el) linkRefs.current.set(item.href, el);
+                    }}
                     href={item.href}
-                    className={`w-full flex items-center ${isCollapsed ? 'justify-center gap-0 px-3' : 'gap-3 px-4'} py-3 rounded-lg transition-colors duration-200 ${
-                      isActive ? 'bg-blue-700 text-white shadow-lg shadow-blue-500/30' : 'text-gray-700 hover:bg-gray-100'
+                    onMouseEnter={() => handleLinkHover(item.href)}
+                    prefetch={true}
+                    className={`w-full flex items-center ${isCollapsed ? 'justify-center gap-0 px-3' : 'gap-3 px-4'} py-3 rounded-lg transition-all duration-200 relative group ${
+                      isActive 
+                        ? 'bg-blue-700 text-white shadow-lg shadow-blue-500/30' 
+                        : 'text-gray-700 hover:bg-gray-100 hover:translate-x-1'
                     }`}
-                    title={isCollapsed ? item.label : undefined}
+                    title={isCollapsed ? `${item.label} (Alt+${index + 1})` : `Alt+${index + 1}`}
                   >
-                    <item.icon className="w-5 h-5 flex-shrink-0" />
+                    <item.icon className={`w-5 h-5 flex-shrink-0 transition-transform duration-200 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} />
                     <span className={`font-medium whitespace-nowrap overflow-hidden transition-all duration-200 ${isCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'}`}>{item.label}</span>
+                    {isActive && !isCollapsed && (
+                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-white rounded-r-full" />
+                    )}
                   </Link>
                 </li>
               );
@@ -181,3 +258,4 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, mobileOp
 };
 
 export default Sidebar;
+
