@@ -1,6 +1,7 @@
 "use client";
 
-import React from "react";
+import React, { useContext } from "react";
+import SidebarContext, { SidebarContextType } from "./SidebarContext";
 import {
   Bell,
   ChevronDown,
@@ -10,35 +11,65 @@ import {
 
 interface DashboardHeaderProps {
   pageTitle: string;
-  isSidebarCollapsed: boolean;
-  isMobileSidebarOpen: boolean;
-  onMobileSidebarToggle: () => void;
-  onSidebarCollapse: () => void;
+  isSidebarCollapsed?: boolean;
+  isMobileSidebarOpen?: boolean;
+  onMobileSidebarToggle?: () => void;
+  onSidebarCollapse?: () => void;
 }
 
 const DashboardHeader: React.FC<DashboardHeaderProps> = ({ pageTitle, isSidebarCollapsed, isMobileSidebarOpen, onMobileSidebarToggle, onSidebarCollapse }) => {
+  // Read sidebar context as a fallback when props are not passed through cloneElement
+  const sidebarCtx = useContext(SidebarContext) as SidebarContextType | undefined;
+
+  const effectiveIsCollapsed = typeof isSidebarCollapsed !== "undefined" ? isSidebarCollapsed : sidebarCtx?.isCollapsed ?? false;
+  const effectiveIsMobileOpen = typeof isMobileSidebarOpen !== "undefined" ? isMobileSidebarOpen : sidebarCtx?.mobileOpen ?? false;
+  const effectiveOnMobileToggle = onMobileSidebarToggle ?? sidebarCtx?.toggleMobile ?? (() => {});
+  const effectiveOnCollapse = onSidebarCollapse ?? sidebarCtx?.toggleCollapse ?? (() => {});
+
   return (
     <header className="header-container bg-white border-b border-gray-200 sticky top-0 z-10 h-16 sm:h-20 md:h-[89px] flex-shrink-0">
       <div className="px-3 sm:px-4 md:px-6 lg:px-8 h-full flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
           <button
             className={`lg:hidden inline-flex items-center justify-center p-2 sm:p-3 rounded-md border transition-colors touch-manipulation ${
-              isMobileSidebarOpen
+              effectiveIsMobileOpen
                 ? "bg-blue-600 border-blue-600 text-white"
                 : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50 active:bg-gray-100"
             }`}
-            aria-label={isMobileSidebarOpen ? "Cerrar menú" : "Abrir menú"}
-            onClick={onMobileSidebarToggle}
+            aria-label={effectiveIsMobileOpen ? "Cerrar menú" : "Abrir menú"}
+            onClick={effectiveOnMobileToggle}
           >
             <Menu className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
           <button
             className="hidden lg:inline-flex items-center justify-center p-2 rounded-md hover:bg-gray-100 active:bg-gray-200 transition-colors touch-manipulation"
             aria-label="Colapsar barra lateral"
-            onClick={onSidebarCollapse}
-            title={isSidebarCollapsed ? "Expandir barra lateral" : "Colapsar barra lateral"}
+            onClick={() => {
+              try {
+                // eslint-disable-next-line no-console
+                console.debug('[DashboardHeader] collapse click - calling effectiveOnCollapse');
+              } catch {}
+              try {
+                effectiveOnCollapse();
+              } catch (err) {
+                try { console.debug('[DashboardHeader] effectiveOnCollapse threw', err); } catch {}
+              }
+
+              // Fallback: if context exists and the effective handler is not the same as the
+              // context toggle, call setIsCollapsed directly to ensure UI updates.
+              try {
+                if (sidebarCtx && typeof sidebarCtx.setIsCollapsed === 'function' && effectiveOnCollapse !== sidebarCtx.toggleCollapse) {
+                  // eslint-disable-next-line no-console
+                  console.debug('[DashboardHeader] fallback: toggling context.setIsCollapsed directly');
+                  sidebarCtx.setIsCollapsed(!sidebarCtx.isCollapsed);
+                }
+              } catch (err) {
+                try { console.debug('[DashboardHeader] fallback threw', err); } catch {}
+              }
+            }}
+            title={effectiveIsCollapsed ? "Expandir barra lateral" : "Colapsar barra lateral"}
           >
-            <ChevronsLeft className={`w-5 h-5 ${isSidebarCollapsed ? "rotate-180 transition-transform" : "transition-transform"}`} />
+            <ChevronsLeft className={`w-5 h-5 ${effectiveIsCollapsed ? "rotate-180 transition-transform" : "transition-transform"}`} />
           </button>
           <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 truncate">
             {pageTitle}

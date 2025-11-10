@@ -14,6 +14,7 @@ import {
   ScanLine,
   TrendingUp,
   X,
+  ChevronsLeft,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -251,6 +252,23 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, mobileOp
             })}
           </ul>
         </nav>
+        {/* Collapse control - visible on desktop, sticks to bottom */}
+        <div className={`p-4 border-t border-gray-200 flex items-center justify-center ${isCollapsed ? 'px-2' : 'px-6'}`}>
+          <button
+            onClick={() => {
+              try {
+                // eslint-disable-next-line no-console
+                console.debug('[Sidebar] footer collapse click - toggling setIsCollapsed');
+              } catch {}
+              setIsCollapsed(!isCollapsed);
+            }}
+            aria-label={isCollapsed ? 'Expandir barra lateral' : 'Colapsar barra lateral'}
+            title={isCollapsed ? 'Expandir barra lateral' : 'Colapsar barra lateral'}
+            className="inline-flex items-center justify-center rounded-md p-2 hover:bg-gray-100 active:bg-gray-200 transition-colors"
+          >
+            <ChevronsLeft className={`w-5 h-5 transition-transform ${isCollapsed ? 'rotate-180' : ''}`} />
+          </button>
+        </div>
       </aside>
 
     </div>

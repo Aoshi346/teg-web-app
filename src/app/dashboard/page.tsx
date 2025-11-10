@@ -11,18 +11,6 @@ interface DashboardPageProps {
   isMobileSidebarOpen?: boolean;
 }
 
-export default function DashboardPage({
-  handleSidebarCollapse = () => {},
-  handleMobileSidebarToggle = () => {},
-  isSidebarCollapsed = false,
-  isMobileSidebarOpen = false,
-}: DashboardPageProps) {
-  return (
-    <Dashboard
-      handleSidebarCollapse={handleSidebarCollapse}
-      handleMobileSidebarToggle={handleMobileSidebarToggle}
-      isSidebarCollapsed={isSidebarCollapsed}
-      isMobileSidebarOpen={isMobileSidebarOpen}
-    />
-  );
+export default function DashboardPage(props: DashboardPageProps) {
+  return <Dashboard {...props} />;
 }

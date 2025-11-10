@@ -190,12 +190,13 @@ interface DashboardProps {
   isMobileSidebarOpen?: boolean;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({
-  handleSidebarCollapse = () => {},
-  handleMobileSidebarToggle = () => {},
-  isSidebarCollapsed = false,
-  isMobileSidebarOpen = false,
-}) => {
+const Dashboard: React.FC<DashboardProps> = (props) => {
+  const {
+    handleSidebarCollapse,
+    handleMobileSidebarToggle,
+    isSidebarCollapsed,
+    isMobileSidebarOpen,
+  } = props;
   const mainContentRef = useRef<HTMLDivElement>(null);
   const animationsRef = useRef<gsap.core.Tween[]>([]);
   const hasAnimatedRef = useRef(false);

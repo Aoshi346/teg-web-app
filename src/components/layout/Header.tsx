@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { gsap } from 'gsap';
 import LoginModal from "@/components/auth/LoginModal";
 
+type HeaderInlineStyle = React.CSSProperties & { "--header-height": string };
+
 
 /**
  * A custom animated menu icon that transitions between a hamburger and an X.
@@ -77,6 +79,10 @@ const Logo = ({ className }: { className?: string }) => (
 );
 
 export default function Header() {
+  const headerInlineStyle: HeaderInlineStyle = {
+    height: 88,
+    "--header-height": "88px",
+  };
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -266,7 +272,7 @@ export default function Header() {
           ref={headerRef}
           // make header initially transparent so hero background shows underneath
           className="fixed top-0 z-40 w-full bg-transparent backdrop-blur-lg"
-          style={{ height: 88, ['--header-height' as any]: '88px' }}
+          style={headerInlineStyle}
         >
           <div className="container mx-auto flex h-full items-center justify-between px-4 sm:px-6 lg:px-8">
             {/* Logo and Brand Name */}

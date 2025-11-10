@@ -31,7 +31,13 @@ interface TesisPageProps {
   isMobileSidebarOpen?: boolean;
 }
 
-export default function TesisPage({ handleSidebarCollapse = () => {}, handleMobileSidebarToggle = () => {}, isSidebarCollapsed = false, isMobileSidebarOpen = false }: TesisPageProps) {
+export default function TesisPage(props: TesisPageProps = {}) {
+  const {
+    handleSidebarCollapse,
+    handleMobileSidebarToggle,
+    isSidebarCollapsed,
+    isMobileSidebarOpen,
+  } = props;
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState<"all" | "checked" | "pending">("all");
   const animationsRef = useRef<gsap.core.Tween[]>([]);
