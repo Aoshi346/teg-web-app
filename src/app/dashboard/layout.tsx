@@ -39,7 +39,6 @@ export default function DashboardLayout({
     setIsSidebarCollapsed((prev) => !prev);
     try {
       // debug: log when layout toggle is invoked
-      // eslint-disable-next-line no-console
       console.debug('[layout] handleSidebarCollapse invoked');
     } catch {}
   }, []);
@@ -56,7 +55,6 @@ export default function DashboardLayout({
   // Debug: log state changes to help verify handlers
   useEffect(() => {
     try {
-      // eslint-disable-next-line no-console
       console.debug('[layout] isSidebarCollapsed ->', isSidebarCollapsed);
     } catch {}
   }, [isSidebarCollapsed]);

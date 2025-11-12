@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { createPortal } from 'react-dom';
@@ -51,7 +52,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, mobileOp
     return () => { try { document.body.style.overflow = ''; } catch {} };
   }, [mobileOpen]);
 
-  const menuItems = [
+  const menuItems = useMemo(() => [
     { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
     { icon: FileText, label: 'Proyecto (PTEG)', href: '/dashboard/projects' },
     { icon: BookOpen, label: 'Trabajo Especial (TEG)', href: '/dashboard/tesis' },
@@ -59,7 +60,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, mobileOp
     { icon: TrendingUp, label: 'Seguimiento', href: '/dashboard/tracking' },
     { icon: BarChart3, label: 'Analíticas', href: '/dashboard/analytics' },
     { icon: Settings, label: 'Configuración', href: '/dashboard/settings' },
-  ];
+  ], []);
 
   // Prefetch routes on hover for instant navigation
   const handleLinkHover = useCallback((href: string) => {
@@ -132,8 +133,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, mobileOp
               <div className="flex flex-col h-full pt-[env(safe-area-inset-top)]">
                 <div className="p-4 flex items-center justify-between border-b border-gray-200">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center">
-                      <img src="/tesisfar_logo.svg" alt="Tesisfar logo" className="w-8 h-8 object-contain drop-shadow-sm" draggable={false} />
+                      <div className="w-10 h-10 rounded-xl flex items-center justify-center">
+                      <Image src="/tesisfar_logo.svg" alt="Tesisfar logo" width={32} height={32} className="w-8 h-8 object-contain drop-shadow-sm" draggable={false} />
                     </div>
                     <div>
                       <h1 className="text-lg font-bold text-gray-900">Tesisfar</h1>
@@ -207,7 +208,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, mobileOp
         <div className={`p-4 h-[89px] flex items-center border-b border-gray-200 ${isCollapsed ? 'px-3 justify-center' : 'px-6 justify-start'}`}>
           <div className={`flex items-center gap-3 min-w-0 transition-all duration-300 ${isCollapsed ? 'gap-0' : ''}`}>
             <div className="w-10 h-10 rounded-xl flex items-center justify-center">
-              <img src="/tesisfar_logo.svg" alt="Tesisfar logo" className="w-8 h-8 object-contain drop-shadow-sm" draggable={false} />
+              <Image src="/tesisfar_logo.svg" alt="Tesisfar logo" width={32} height={32} className="w-8 h-8 object-contain drop-shadow-sm" draggable={false} />
             </div>
             {!isCollapsed && (
               <div className="overflow-hidden transition-all duration-200">
@@ -257,7 +258,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, mobileOp
           <button
             onClick={() => {
               try {
-                // eslint-disable-next-line no-console
                 console.debug('[Sidebar] footer collapse click - toggling setIsCollapsed');
               } catch {}
               setIsCollapsed(!isCollapsed);

@@ -2,6 +2,7 @@
 
 import React, { useContext } from "react";
 import SidebarContext, { SidebarContextType } from "./SidebarContext";
+import Image from 'next/image';
 import {
   Bell,
   ChevronDown,
@@ -46,7 +47,6 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ pageTitle, isSidebarC
             aria-label="Colapsar barra lateral"
             onClick={() => {
               try {
-                // eslint-disable-next-line no-console
                 console.debug('[DashboardHeader] collapse click - calling effectiveOnCollapse');
               } catch {}
               try {
@@ -59,7 +59,6 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ pageTitle, isSidebarC
               // context toggle, call setIsCollapsed directly to ensure UI updates.
               try {
                 if (sidebarCtx && typeof sidebarCtx.setIsCollapsed === 'function' && effectiveOnCollapse !== sidebarCtx.toggleCollapse) {
-                  // eslint-disable-next-line no-console
                   console.debug('[DashboardHeader] fallback: toggling context.setIsCollapsed directly');
                   sidebarCtx.setIsCollapsed(!sidebarCtx.isCollapsed);
                 }
@@ -85,7 +84,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ pageTitle, isSidebarC
           </button>
           <div className="relative group">
             <button className="flex items-center gap-1 sm:gap-2 p-1 pr-1.5 sm:pr-2 rounded-full hover:bg-gray-200/70 active:bg-gray-300 transition-colors touch-manipulation">
-              <img src="https://i.pravatar.cc/300" alt="User avatar" className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border-2 border-white shadow-sm" />
+              <Image src="https://i.pravatar.cc/300" alt="User avatar" width={32} height={32} className="rounded-full border-2 border-white shadow-sm" />
               <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4 text-gray-500 hidden sm:block" />
             </button>
           </div>
