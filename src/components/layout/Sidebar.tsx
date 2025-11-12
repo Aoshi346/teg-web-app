@@ -15,7 +15,6 @@ import {
   ScanLine,
   TrendingUp,
   X,
-  ChevronsLeft,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -25,7 +24,7 @@ interface SidebarProps {
   setMobileOpen: (open: boolean) => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, mobileOpen, setMobileOpen }) => {
+const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, mobileOpen, setMobileOpen }) => {
   const pathname = usePathname();
   const router = useRouter();
   const closeBtnRef = useRef<HTMLButtonElement>(null);
@@ -54,7 +53,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, mobileOp
 
   const menuItems = useMemo(() => [
     { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
-    { icon: FileText, label: 'Proyecto (PTEG)', href: '/dashboard/projects' },
+    { icon: FileText, label: 'Proyecto (PTEG)', href: '/dashboard/proyectos' },
     { icon: BookOpen, label: 'Trabajo Especial (TEG)', href: '/dashboard/tesis' },
     { icon: ScanLine, label: 'Escanear Documento', href: '/dashboard/scan' },
     { icon: TrendingUp, label: 'Seguimiento', href: '/dashboard/tracking' },
@@ -201,7 +200,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, mobileOp
 
       {/* Desktop persistent side rail */}
       <aside
-        className={`hidden lg:flex lg:flex-col lg:sticky top-0 lg:relative lg:z-40 h-screen bg-white border-r border-gray-200 shadow-none ${
+        className={`hidden lg:flex lg:flex-col lg:sticky top-0 lg:relative lg:z-40 min-h-screen bg-white border-r border-gray-200 shadow-none ${
           isCollapsed ? 'w-20' : 'w-64'
         }`}
       >
@@ -253,22 +252,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed, mobileOp
             })}
           </ul>
         </nav>
-        {/* Collapse control - visible on desktop, sticks to bottom */}
-        <div className={`p-4 border-t border-gray-200 flex items-center justify-center ${isCollapsed ? 'px-2' : 'px-6'}`}>
-          <button
-            onClick={() => {
-              try {
-                console.debug('[Sidebar] footer collapse click - toggling setIsCollapsed');
-              } catch {}
-              setIsCollapsed(!isCollapsed);
-            }}
-            aria-label={isCollapsed ? 'Expandir barra lateral' : 'Colapsar barra lateral'}
-            title={isCollapsed ? 'Expandir barra lateral' : 'Colapsar barra lateral'}
-            className="inline-flex items-center justify-center rounded-md p-2 hover:bg-gray-100 active:bg-gray-200 transition-colors"
-          >
-            <ChevronsLeft className={`w-5 h-5 transition-transform ${isCollapsed ? 'rotate-180' : ''}`} />
-          </button>
-        </div>
+        {/* Removed footer collapse button to allow sidebar to extend fully */}
       </aside>
 
     </div>

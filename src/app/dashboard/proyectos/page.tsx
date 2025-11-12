@@ -25,14 +25,14 @@ interface Project {
   score?: number;
 }
 
-interface TesisPageProps {
+interface ProyectosPageProps {
   handleSidebarCollapse?: () => void;
   handleMobileSidebarToggle?: () => void;
   isSidebarCollapsed?: boolean;
   isMobileSidebarOpen?: boolean;
 }
 
-export default function TesisPage(props: TesisPageProps = {}) {
+export default function ProyectosPage(props: ProyectosPageProps = {}) {
   const {
     handleSidebarCollapse,
     handleMobileSidebarToggle,
@@ -43,17 +43,17 @@ export default function TesisPage(props: TesisPageProps = {}) {
   const [filterStatus, setFilterStatus] = useState<"all" | "checked" | "pending" | "rejected">("all");
   const animationsRef = useRef<gsap.core.Tween[]>([]);
 
-  // Mock data for TEG projects
+  // Mock data for generic projects (reusing sample structure)
   const allProjects = useMemo<Project[]>(
     () => [
-      { id: 1, title: "Impacto de la IA en la farmacovigilancia", student: "Ana Pérez", advisor: "Dr. Carlos Medina", submittedDate: "2024-05-10", reviewDate: "2024-05-15", status: "checked", score: 95 },
-      { id: 2, title: "Desarrollo de un nuevo agente antibacteriano", student: "Luis Rodríguez", advisor: "Dra. María González", submittedDate: "2024-05-09", reviewDate: "2024-05-14", status: "checked", score: 88 },
-      { id: 3, title: "Análisis de la adherencia terapéutica en pacientes crónicos", student: "Carla Gómez", advisor: "Dr. Roberto Silva", submittedDate: "2024-05-09", status: "pending" },
-      { id: 4, title: "Evaluación farmacoeconómica de nuevos tratamientos oncológicos", student: "Miguel Torres", advisor: "Dra. Laura Ramírez", submittedDate: "2024-05-08", status: "pending" },
-      { id: 5, title: "Optimización de formulaciones de liberación controlada", student: "Sofia Martínez", advisor: "Dr. Pedro Álvarez", submittedDate: "2024-05-07", reviewDate: "2024-05-12", status: "checked", score: 92 },
-      { id: 6, title: "Estudio de interacciones medicamentosas en terapias combinadas", student: "Daniel Castro", advisor: "Dra. Isabel Fernández", submittedDate: "2024-05-06", status: "pending" },
-      { id: 7, title: "Ensayo de estabilidad no concluyente", student: "Lucía Herrera", advisor: "Dr. Álvaro Rivas", submittedDate: "2024-05-05", reviewDate: "2024-05-11", status: "rejected" },
-      { id: 8, title: "Metodología sin validez estadística", student: "Jorge Pérez", advisor: "Dra. Elena Duarte", submittedDate: "2024-05-04", status: "rejected" },
+      { id: 1, title: "Optimización de cadena de suministro farmacéutica", student: "Ana Pérez", advisor: "Dr. Carlos Medina", submittedDate: "2024-05-10", reviewDate: "2024-05-15", status: "checked", score: 95 },
+      { id: 2, title: "Plataforma web para gestión académica", student: "Luis Rodríguez", advisor: "Dra. María González", submittedDate: "2024-05-09", reviewDate: "2024-05-14", status: "checked", score: 88 },
+      { id: 3, title: "Sistema de análisis de datos clínicos", student: "Carla Gómez", advisor: "Dr. Roberto Silva", submittedDate: "2024-05-09", status: "pending" },
+      { id: 4, title: "Aplicación móvil para seguimiento terapéutico", student: "Miguel Torres", advisor: "Dra. Laura Ramírez", submittedDate: "2024-05-08", status: "pending" },
+      { id: 5, title: "Modelo predictivo de adherencia médica", student: "Sofia Martínez", advisor: "Dr. Pedro Álvarez", submittedDate: "2024-05-07", reviewDate: "2024-05-12", status: "checked", score: 92 },
+      { id: 6, title: "Automatización de reportes regulatorios", student: "Daniel Castro", advisor: "Dra. Isabel Fernández", submittedDate: "2024-05-06", status: "pending" },
+      { id: 7, title: "Integración fallida con sistema externo", student: "María López", advisor: "Dr. Ernesto Díaz", submittedDate: "2024-05-05", reviewDate: "2024-05-11", status: "rejected" },
+      { id: 8, title: "Pruebas sin documentación suficiente", student: "José Ramírez", advisor: "Dra. Patricia Suárez", submittedDate: "2024-05-04", status: "rejected" },
     ],
     []
   );
@@ -89,10 +89,7 @@ export default function TesisPage(props: TesisPageProps = {}) {
   const hasAnimatedRef = useRef(false);
   
   useEffect(() => {
-    // Skip if already animated (for instant display on navigation)
     if (hasAnimatedRef.current) return;
-    
-    // Check if we just navigated - skip animations for instant display
     let skipAnimations = false;
     try {
       const justLoggedIn = sessionStorage.getItem("justLoggedIn");
@@ -101,7 +98,6 @@ export default function TesisPage(props: TesisPageProps = {}) {
       }
     } catch {}
 
-    // Wait for DOM to be ready
     const timer = setTimeout(() => {
       animationsRef.current.forEach((tween) => tween.kill());
       animationsRef.current = [];
@@ -109,21 +105,14 @@ export default function TesisPage(props: TesisPageProps = {}) {
       const cards = gsap.utils.toArray<HTMLElement>(".project-card");
       const sections = gsap.utils.toArray<HTMLElement>(".section-container");
 
-      // Always ensure elements are visible first
-      cards.forEach((card) => {
-        if (card) gsap.set(card, { opacity: 1, y: 0 });
-      });
-      sections.forEach((section) => {
-        if (section) gsap.set(section, { opacity: 1, y: 0 });
-      });
+      cards.forEach((card) => { if (card) gsap.set(card, { opacity: 1, y: 0 }); });
+      sections.forEach((section) => { if (section) gsap.set(section, { opacity: 1, y: 0 }); });
 
-      // If skipping animations or no elements found, we're done
       if (skipAnimations || (cards.length === 0 && sections.length === 0)) {
         hasAnimatedRef.current = true;
         return;
       }
 
-      // Set initial state for animation
       gsap.set([...cards, ...sections], { opacity: 0, y: 20 });
 
       if (sections.length > 0) {
@@ -151,19 +140,19 @@ export default function TesisPage(props: TesisPageProps = {}) {
       }
 
       hasAnimatedRef.current = true;
-    }, 10); // Small delay to ensure DOM is ready
+    }, 10);
 
     return () => {
       clearTimeout(timer);
       animationsRef.current.forEach((tween) => tween.kill());
       animationsRef.current = [];
     };
-  }, []); // Only run once on mount
+  }, []);
 
   return (
     <>
       <DashboardHeader
-        pageTitle="Trabajo Especial de Grado (TEG)"
+        pageTitle="Proyectos"
         isSidebarCollapsed={isSidebarCollapsed}
         isMobileSidebarOpen={isMobileSidebarOpen}
         onMobileSidebarToggle={handleMobileSidebarToggle}
@@ -171,10 +160,8 @@ export default function TesisPage(props: TesisPageProps = {}) {
       />
 
       <PageTransition>
-          {/* Main Content */}
           <main className="flex-1 p-3 sm:p-4 md:p-6 lg:p-8 overflow-y-auto bg-gray-50">
             <div className="max-w-7xl mx-auto">
-              {/* Search and Filter Bar */}
               <div className="section-container mb-6 sm:mb-8 flex flex-col sm:flex-row gap-3 sm:gap-4">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -230,7 +217,6 @@ export default function TesisPage(props: TesisPageProps = {}) {
                 </div>
               </div>
 
-              {/* Checked Projects Section */}
               {(filterStatus === "all" || filterStatus === "checked") && checkedProjects.length > 0 && (
                 <div className="section-container mb-8">
                   <div className="flex items-center justify-between mb-4 sm:mb-6">
@@ -283,7 +269,6 @@ export default function TesisPage(props: TesisPageProps = {}) {
                 </div>
               )}
 
-              {/* Pending Projects Section */}
               {(filterStatus === "all" || filterStatus === "pending") && pendingProjects.length > 0 && (
                 <div className="section-container">
                   <div className="flex items-center justify-between mb-4 sm:mb-6">
@@ -334,7 +319,6 @@ export default function TesisPage(props: TesisPageProps = {}) {
                 </div>
               )}
 
-              {/* Rejected Projects Section */}
               {(filterStatus === "all" || filterStatus === "rejected") && rejectedProjects.length > 0 && (
                 <div className="section-container mt-8">
                   <div className="flex items-center justify-between mb-4 sm:mb-6">
@@ -385,7 +369,6 @@ export default function TesisPage(props: TesisPageProps = {}) {
                 </div>
               )}
 
-              {/* Empty State */}
               {filteredProjects.length === 0 && (
                 <div className="section-container text-center py-12">
                   <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
