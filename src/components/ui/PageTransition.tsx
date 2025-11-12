@@ -56,7 +56,7 @@ export default function PageTransition({ children, className = '' }: PageTransit
   }, [pathname]);
 
   return (
-    <div ref={contentRef} className={className} style={{ opacity: 1 }}>
+    <div ref={contentRef} className={`flex flex-col flex-1 min-h-0 ${className}`} style={{ opacity: 1 }}>
       {children}
     </div>
   );

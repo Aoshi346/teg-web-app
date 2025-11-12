@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { gsap } from "gsap";
 import {
   Search,
@@ -84,6 +85,7 @@ export default function ProyectosPage(props: ProyectosPageProps = {}) {
     () => filteredProjects.filter((p) => p.status === "rejected"),
     [filteredProjects]
   );
+  const router = useRouter();
 
   // Entrance animations - only on initial mount, not on filter changes
   const hasAnimatedRef = useRef(false);
@@ -310,7 +312,10 @@ export default function ProyectosPage(props: ProyectosPageProps = {}) {
                             <span><strong>Entregado:</strong> {project.submittedDate}</span>
                           </div>
                         </div>
-                        <button className="mt-4 w-full bg-blue-600 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-blue-700 active:bg-blue-800 transition-all duration-200 shadow-md touch-manipulation">
+                        <button
+                          onClick={() => router.push(`/dashboard/proyectos/evaluar?projectId=${project.id}`)}
+                          className="mt-4 w-full bg-blue-600 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-blue-700 active:bg-blue-800 transition-all duration-200 shadow-md touch-manipulation"
+                        >
                           Revisar Ahora
                         </button>
                       </div>
