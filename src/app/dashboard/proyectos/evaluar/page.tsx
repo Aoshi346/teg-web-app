@@ -5,80 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Star } from "lucide-react";
 import PageTransition from "@/components/ui/PageTransition";
 import DashboardHeader from "@/components/layout/DashboardHeader";
-
-type AnswerType = 'yesno' | 'frequency' | 'stars';
-
-type Question = {
-  id: string;
-  label: string;
-  helper?: string;
-  section?: string;
-  answerType: AnswerType;
-};
-
-const QUESTIONS: Question[] = [
-  // Section 1: Presentación y Estructura - Yes/No
-  { id: "q1", label: "Claridad de presentación", helper: "¿El proyecto está bien estructurado y presenta sus objetivos claramente?", section: "Presentación y Estructura", answerType: 'yesno' },
-  { id: "q2", label: "Organización del contenido", helper: "¿La información está organizada de manera lógica y coherente?", section: "Presentación y Estructura", answerType: 'yesno' },
-  { id: "q3", label: "Calidad de la redacción", helper: "¿El lenguaje es claro, preciso y académico?", section: "Presentación y Estructura", answerType: 'yesno' },
-  { id: "q4", label: "Formato y presentación visual", helper: "¿El formato es profesional y facilita la lectura?", section: "Presentación y Estructura", answerType: 'yesno' },
-  { id: "q5", label: "Consistencia en el estilo", helper: "¿Se mantiene un estilo consistente a lo largo del documento?", section: "Presentación y Estructura", answerType: 'yesno' },
-  { id: "q6", label: "Claridad de objetivos", helper: "¿Los objetivos están claramente definidos y son específicos?", section: "Presentación y Estructura", answerType: 'yesno' },
-  { id: "q7", label: "Estructura de capítulos", helper: "¿Los capítulos están bien delimitados y conectados?", section: "Presentación y Estructura", answerType: 'yesno' },
-  { id: "q8", label: "Resumen ejecutivo", helper: "¿El resumen presenta adecuadamente el contenido del proyecto?", section: "Presentación y Estructura", answerType: 'yesno' },
-
-  // Section 2: Metodología - Frequency
-  { id: "q9", label: "Rigor metodológico", helper: "¿La metodología es adecuada y está correctamente aplicada?", section: "Metodología", answerType: 'frequency' },
-  { id: "q10", label: "Diseño de investigación", helper: "¿El diseño metodológico es apropiado para los objetivos?", section: "Metodología", answerType: 'frequency' },
-  { id: "q11", label: "Técnicas de recolección de datos", helper: "¿Las técnicas utilizadas son válidas y confiables?", section: "Metodología", answerType: 'frequency' },
-  { id: "q12", label: "Análisis de datos", helper: "¿Los métodos de análisis son correctos y apropiados?", section: "Metodología", answerType: 'frequency' },
-  { id: "q13", label: "Herramientas y software", helper: "¿Se utilizan herramientas adecuadas para el análisis?", section: "Metodología", answerType: 'frequency' },
-  { id: "q14", label: "Consideraciones éticas", helper: "¿Se han considerado aspectos éticos en la investigación?", section: "Metodología", answerType: 'frequency' },
-  { id: "q15", label: "Limitaciones metodológicas", helper: "¿Se identifican y discuten las limitaciones del método?", section: "Metodología", answerType: 'frequency' },
-  { id: "q16", label: "Replicabilidad", helper: "¿El método permite replicar el estudio?", section: "Metodología", answerType: 'frequency' },
-
-  // Section 3: Contenido y Resultados - Stars (5-point scale)
-  { id: "q17", label: "Pertinencia del contenido", helper: "¿Los resultados y conclusiones son relevantes y fundamentados?", section: "Contenido y Resultados", answerType: 'stars' },
-  { id: "q18", label: "Profundidad del análisis", helper: "¿El análisis es profundo y va más allá de lo superficial?", section: "Contenido y Resultados", answerType: 'stars' },
-  { id: "q19", label: "Interpretación de resultados", helper: "¿Los resultados se interpretan correctamente?", section: "Contenido y Resultados", answerType: 'stars' },
-  { id: "q20", label: "Conclusiones fundamentadas", helper: "¿Las conclusiones están bien fundamentadas en los datos?", section: "Contenido y Resultados", answerType: 'stars' },
-  { id: "q21", label: "Contribución al conocimiento", helper: "¿El trabajo aporta al avance del conocimiento en el área?", section: "Contenido y Resultados", answerType: 'stars' },
-  { id: "q22", label: "Aplicabilidad práctica", helper: "¿Los resultados tienen aplicación práctica?", section: "Contenido y Resultados", answerType: 'stars' },
-  { id: "q23", label: "Comparación con literatura", helper: "¿Se compara adecuadamente con trabajos previos?", section: "Contenido y Resultados", answerType: 'stars' },
-  { id: "q24", label: "Validez de los hallazgos", helper: "¿Los hallazgos son válidos y confiables?", section: "Contenido y Resultados", answerType: 'stars' },
-
-  // Section 4: Originalidad e Innovación - Stars (5-point scale)
-  { id: "q25", label: "Originalidad", helper: "¿El trabajo aporta ideas o enfoques novedosos?", section: "Originalidad e Innovación", answerType: 'stars' },
-  { id: "q26", label: "Creatividad en la solución", helper: "¿Se demuestra creatividad en la resolución de problemas?", section: "Originalidad e Innovación", answerType: 'stars' },
-  { id: "q27", label: "Enfoque innovador", helper: "¿El enfoque utilizado es innovador?", section: "Originalidad e Innovación", answerType: 'stars' },
-  { id: "q28", label: "Contribución única", helper: "¿Qué aporta este trabajo que no exista en la literatura?", section: "Originalidad e Innovación", answerType: 'stars' },
-  { id: "q29", label: "Impacto potencial", helper: "¿Cuál es el potencial impacto del trabajo?", section: "Originalidad e Innovación", answerType: 'stars' },
-  { id: "q30", label: "Avance tecnológico", helper: "¿Incorpora avances tecnológicos relevantes?", section: "Originalidad e Innovación", answerType: 'stars' },
-  { id: "q31", label: "Sostenibilidad de la solución", helper: "¿La solución propuesta es sostenible a largo plazo?", section: "Originalidad e Innovación", answerType: 'stars' },
-  { id: "q32", label: "Escalabilidad", helper: "¿La solución puede escalarse o generalizarse?", section: "Originalidad e Innovación", answerType: 'stars' },
-
-  // Section 5: Documentación y Calidad - Yes/No
-  { id: "q33", label: "Calidad de la documentación", helper: "¿La documentación, referencias y anexos son suficientes y correctos?", section: "Documentación y Calidad", answerType: 'yesno' },
-  { id: "q34", label: "Referencias bibliográficas", helper: "¿Las referencias son actuales, relevantes y correctamente citadas?", section: "Documentación y Calidad", answerType: 'yesno' },
-  { id: "q35", label: "Anexos y apéndices", helper: "¿Los anexos complementan adecuadamente el contenido?", section: "Documentación y Calidad", answerType: 'yesno' },
-  { id: "q36", label: "Corrección ortográfica", helper: "¿El documento está libre de errores ortográficos?", section: "Documentación y Calidad", answerType: 'yesno' },
-  { id: "q37", label: "Precisión técnica", helper: "¿Los términos técnicos se usan correctamente?", section: "Documentación y Calidad", answerType: 'yesno' },
-  { id: "q38", label: "Calidad de gráficos", helper: "¿Los gráficos, tablas y figuras son claros y profesionales?", section: "Documentación y Calidad", answerType: 'yesno' },
-  { id: "q39", label: "Índice y navegación", helper: "¿El índice facilita la navegación por el documento?", section: "Documentación y Calidad", answerType: 'yesno' },
-  { id: "q40", label: "Cumplimiento de normas", helper: "¿Se cumplen las normas de presentación requeridas?", section: "Documentación y Calidad", answerType: 'yesno' },
-];
-
-const FREQUENCY_OPTIONS = [
-  { value: 1, label: 'Muy Poco/Nunca', color: 'bg-red-100 text-red-700 border-red-300' },
-  { value: 2, label: 'A veces', color: 'bg-yellow-100 text-yellow-700 border-yellow-300' },
-  { value: 3, label: 'Sí/Siempre', color: 'bg-green-100 text-green-700 border-green-300' },
-  { value: 4, label: 'No aplica', color: 'bg-gray-100 text-gray-700 border-gray-300' },
-];
-
-const YESNO_OPTIONS = [
-  { value: 1, label: 'No', color: 'bg-red-100 text-red-700 border-red-300' },
-  { value: 2, label: 'Sí', color: 'bg-green-100 text-green-700 border-green-300' },
-];
+import { QUESTIONS, FREQUENCY_OPTIONS, YESNO_OPTIONS, Question } from "@/lib/questions/questions";
 
 interface EvaluarProps {
   handleSidebarCollapse?: () => void;
@@ -247,6 +174,28 @@ export default function EvaluarProyectoPage({
     setIsSubmitting(false);
   };
 
+  // Derived section/subsection helpers for the selector
+  const allSections = [...new Set(QUESTIONS.map((q) => q.section).filter(Boolean))] as string[];
+  const pageQuestions = QUESTIONS.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const sectionsInPage = [...new Set(pageQuestions.map(q => q.section))];
+  const currentSection = sectionsInPage.length > 0 ? sectionsInPage[0] : undefined;
+  const subsectionsOfCurrent = currentSection
+    ? [...new Set(QUESTIONS.filter(q => q.section === currentSection).map(q => q.subsection))]
+    : [];
+
+  // Helpers to find the page for a specific section or subsection
+  const getPageForSection = (section?: string) => {
+    if (!section) return 1;
+    const idx = QUESTIONS.findIndex((q) => q.section === section);
+    return Math.max(1, Math.floor(idx / PAGE_SIZE) + 1);
+  };
+
+  const getPageForSubsection = (sub?: string) => {
+    if (!sub) return 1;
+    const idx = QUESTIONS.findIndex((q) => q.subsection === sub);
+    return Math.max(1, Math.floor(idx / PAGE_SIZE) + 1);
+  };
+
   return (
     <>
       <DashboardHeader
@@ -272,7 +221,7 @@ export default function EvaluarProyectoPage({
               <p className="text-sm sm:text-base text-gray-600">
                 Complete la evaluación respondiendo las <strong>{QUESTIONS.length} preguntas</strong> organizadas en{' '}
                 <strong>{[...new Set(QUESTIONS.map(q => q.section))].length} secciones</strong>.
-                Use el sistema de calificación de 1-5 estrellas.
+                {' '}Las preguntas utilizan diferentes escalas: Sí/No, frecuencia, y estrellas (1-5).
               </p>
             </div>
 
@@ -280,52 +229,113 @@ export default function EvaluarProyectoPage({
               <form onSubmit={handleSubmit} className="bg-white p-4 sm:p-6 lg:p-8 rounded-xl shadow-lg">
                 <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,1fr)_300px] xl:grid-cols-[minmax(0,1fr)_340px] lg:gap-8">
                   <div className="space-y-6 min-w-0">
-                    {/* Progress / Page selector */}
-                    <div className="space-y-3">
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-2">
-                        <div className="text-sm text-gray-600 font-medium">
-                          Página {page} de {totalPages}
-                          <span className="hidden sm:inline">
-                            {(() => {
-                              const pageQuestions = QUESTIONS.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-                              const sectionsInPage = [...new Set(pageQuestions.map(q => q.section))];
-                              return sectionsInPage.length > 0 ? ` - ${sectionsInPage.join(', ')}` : '';
-                            })()}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                          {Array.from({ length: totalPages }).map((_, idx) => {
-                            const p = idx + 1;
-                            const pageQuestions = QUESTIONS.slice((p - 1) * PAGE_SIZE, p * PAGE_SIZE);
-                            const sectionsInPage = [...new Set(pageQuestions.map(q => q.section))];
-                            const sectionAbbrev = sectionsInPage.length > 0 ? sectionsInPage[0]?.split(' ')[0] : '';
+                    {/* Navigation Card: Section & Subsection Selector */}
+                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100 p-4 shadow-sm">
+                      {/* Top-level section tabs */}
+                      <div className="mb-4">
+                        <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2 block">
+                          Secciones
+                        </label>
+                        <div className="flex gap-2 overflow-x-auto pb-1">
+                          {allSections.map((s) => {
+                            const pageForSection = getPageForSection(s as string);
+                            const count = QUESTIONS.filter(q => q.section === s).length;
+                            const isActive = currentSection === s;
                             return (
                               <button
-                                key={p}
+                                key={s}
                                 type="button"
-                                onClick={() => setPage(p)}
-                                aria-current={p === page}
-                                title={`Página ${p}: ${sectionsInPage.join(', ')}`}
-                                className={`min-w-[2rem] h-8 px-2 rounded-lg text-xs sm:text-sm font-medium inline-flex items-center justify-center transition-all ${
-                                  p === page 
+                                onClick={() => setPage(pageForSection)}
+                                className={`flex-shrink-0 px-4 py-2.5 rounded-lg font-medium text-sm transition-all ${
+                                  isActive 
                                     ? 'bg-blue-600 text-white shadow-md' 
-                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow-sm'
+                                    : 'bg-white text-gray-700 hover:bg-blue-50 border border-gray-200'
                                 }`}
                               >
-                                {sectionAbbrev || p}
+                                <div className="flex items-center gap-2">
+                                  <span>{s}</span>
+                                  <span className={`text-xs px-2 py-0.5 rounded-full ${
+                                    isActive 
+                                      ? 'bg-blue-500 text-white' 
+                                      : 'bg-gray-100 text-gray-600'
+                                  }`}>
+                                    {count}
+                                  </span>
+                                </div>
                               </button>
                             );
                           })}
                         </div>
                       </div>
-                      <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+
+                      {/* Subsections chips for current section */}
+                      {subsectionsOfCurrent.length > 0 && (
+                        <div>
+                          <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2 block">
+                            Subsecciones de {currentSection}
+                          </label>
+                          <div className="flex flex-wrap gap-2">
+                            {subsectionsOfCurrent.map((sub) => {
+                              const subPage = getPageForSubsection(String(sub));
+                              const isCurrentSubPage = subPage === page;
+                              return (
+                                <button
+                                  key={String(sub)}
+                                  type="button"
+                                  onClick={() => setPage(subPage)}
+                                  className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                                    isCurrentSubPage
+                                      ? 'bg-blue-600 text-white'
+                                      : 'bg-white text-gray-700 hover:bg-blue-50 border border-gray-200'
+                                  }`}
+                                >
+                                  {sub}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Progress / Page selector */}
+                    <div className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+                        <div className="text-sm font-medium text-gray-700">
+                          <span className="text-blue-600 font-bold">Página {page}</span> de {totalPages}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          Preguntas {((page - 1) * PAGE_SIZE) + 1}-{Math.min(page * PAGE_SIZE, QUESTIONS.length)} de {QUESTIONS.length}
+                        </div>
+                      </div>
+                      
+                      {/* Progress bar */}
+                      <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden mb-4">
                         <div 
-                          className="h-2 bg-blue-600 rounded-full transition-all duration-300" 
+                          className="h-2 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full transition-all duration-300" 
                           style={{ width: `${Math.round((page / totalPages) * 100)}%` }} 
                         />
                       </div>
-                      <div className="text-xs text-gray-500">
-                        Preguntas {((page - 1) * PAGE_SIZE) + 1}-{Math.min(page * PAGE_SIZE, QUESTIONS.length)} de {QUESTIONS.length}
+
+                      {/* Page number buttons */}
+                      <div className="flex items-center justify-center gap-1.5 flex-wrap">
+                        {Array.from({ length: totalPages }).map((_, idx) => {
+                          const p = idx + 1;
+                          return (
+                            <button
+                              key={p}
+                              type="button"
+                              onClick={() => setPage(p)}
+                              className={`min-w-[2.5rem] h-10 px-3 rounded-lg font-semibold text-sm transition-all ${
+                                p === page 
+                                  ? 'bg-blue-600 text-white shadow-md scale-105' 
+                                  : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200'
+                              }`}
+                            >
+                              {p}
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
 
@@ -376,39 +386,50 @@ export default function EvaluarProyectoPage({
                     </div>
 
                     <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-4 border-t border-gray-200">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-3 flex-1">
                         <button
                           type="button"
                           onClick={() => setPage((p) => Math.max(1, p - 1))}
                           disabled={page === 1}
-                          className="flex-1 sm:flex-initial px-4 py-2.5 rounded-lg bg-gray-100 text-sm font-medium text-gray-700 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                          className="flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-white border-2 border-gray-300 text-sm font-semibold text-gray-700 hover:bg-gray-50 hover:border-gray-400 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                         >
-                          ← Anterior
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                          </svg>
+                          Anterior
                         </button>
                         {page < totalPages ? (
                           <button
                             type="button"
                             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                            className="flex-1 sm:flex-initial px-4 py-2.5 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition-all shadow-sm"
+                            className="flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-all shadow-sm hover:shadow-md"
                           >
-                            Siguiente →
+                            Siguiente
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
                           </button>
                         ) : (
                           <button
                             type="submit"
                             disabled={isSubmitting}
-                            className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 bg-green-600 text-white px-6 py-2.5 rounded-lg font-medium hover:bg-green-700 disabled:opacity-60 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg"
+                            className="flex items-center justify-center gap-2 bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 disabled:opacity-60 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg"
                           >
                             {isSubmitting ? (
                               <>
-                                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
                                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
                                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
                                 </svg>
                                 Enviando...
                               </>
                             ) : (
-                              '✓ Enviar evaluación'
+                              <>
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
+                                Enviar evaluación
+                              </>
                             )}
                           </button>
                         )}
@@ -417,7 +438,7 @@ export default function EvaluarProyectoPage({
                       <button
                         type="button"
                         onClick={() => router.back()}
-                        className="text-sm text-gray-600 hover:text-gray-800 hover:underline font-medium transition-colors"
+                        className="text-sm text-gray-600 hover:text-gray-900 font-medium transition-colors px-3 py-2"
                       >
                         Cancelar
                       </button>
