@@ -30,14 +30,17 @@ export default function EvaluarProyectoPage({
   const router = useRouter();
   const searchParams = useSearchParams();
   const projectId = searchParams?.get("projectId");
+  const typeParam = (searchParams?.get("type") || 'proyecto').toLowerCase();
+  const documentType = typeParam === 'tesis' ? 'Tesis' : 'Proyecto';
+  const filteredQuestions = QUESTIONS.filter(q => !q.documentType || q.documentType === 'Both' || q.documentType === documentType);
   const [ratings, setRatings] = useState<Record<string, number>>(() => {
     const r: Record<string, number> = {};
-    for (const q of QUESTIONS) r[q.id] = 0;
+    for (const q of filteredQuestions) r[q.id] = 0;
     return r;
   });
   // Pagination for long forms: show more questions per page on wide screens
   const PAGE_SIZE = 8;
-  const totalPages = Math.max(1, Math.ceil(QUESTIONS.length / PAGE_SIZE));
+  const totalPages = Math.max(1, Math.ceil(filteredQuestions.length / PAGE_SIZE));
   const [page, setPage] = useState<number>(1);
   const [comments, setComments] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -151,7 +154,7 @@ export default function EvaluarProyectoPage({
     e.preventDefault();
     setIsSubmitting(true);
     // Simple validation: ensure all ratings provided
-    const missingIndex = QUESTIONS.findIndex((q) => !ratings[q.id] || ratings[q.id] <= 0);
+    const missingIndex = filteredQuestions.findIndex((q) => !ratings[q.id] || ratings[q.id] <= 0);
     if (missingIndex !== -1) {
       // Move to the page that contains the first missing answer so the user can complete it
       const missingPage = Math.floor(missingIndex / PAGE_SIZE) + 1;
@@ -175,31 +178,31 @@ export default function EvaluarProyectoPage({
   };
 
   // Derived section/subsection helpers for the selector
-  const allSections = [...new Set(QUESTIONS.map((q) => q.section).filter(Boolean))] as string[];
-  const pageQuestions = QUESTIONS.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const allSections = [...new Set(filteredQuestions.map((q) => q.section).filter(Boolean))] as string[];
+  const pageQuestions = filteredQuestions.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
   const sectionsInPage = [...new Set(pageQuestions.map(q => q.section))];
   const currentSection = sectionsInPage.length > 0 ? sectionsInPage[0] : undefined;
   const subsectionsOfCurrent = currentSection
-    ? [...new Set(QUESTIONS.filter(q => q.section === currentSection).map(q => q.subsection))]
+    ? [...new Set(filteredQuestions.filter(q => q.section === currentSection).map(q => q.subsection))]
     : [];
 
   // Helpers to find the page for a specific section or subsection
   const getPageForSection = (section?: string) => {
     if (!section) return 1;
-    const idx = QUESTIONS.findIndex((q) => q.section === section);
+    const idx = filteredQuestions.findIndex((q) => q.section === section);
     return Math.max(1, Math.floor(idx / PAGE_SIZE) + 1);
   };
 
   const getPageForSubsection = (sub?: string) => {
     if (!sub) return 1;
-    const idx = QUESTIONS.findIndex((q) => q.subsection === sub);
+    const idx = filteredQuestions.findIndex((q) => q.subsection === sub);
     return Math.max(1, Math.floor(idx / PAGE_SIZE) + 1);
   };
 
   return (
     <>
       <DashboardHeader
-        pageTitle="Evaluar Proyecto"
+        pageTitle={`Evaluar ${documentType}`}
         isSidebarCollapsed={isSidebarCollapsed}
         isMobileSidebarOpen={isMobileSidebarOpen}
         onMobileSidebarToggle={handleMobileSidebarToggle}
@@ -211,16 +214,16 @@ export default function EvaluarProyectoPage({
           <div className="max-w-7xl mx-auto">
             <div className="mb-6">
               <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
-                Evaluación del Proyecto {projectId ? `#${projectId}` : ''}
+                Evaluación del {documentType} {projectId ? `#${projectId}` : ''}
               </h2>
               {projectId && (
                 <p className="text-sm text-gray-600 mb-2">
-                  Calificando proyecto con id <strong className="text-blue-600">{projectId}</strong>
+                  Calificando {documentType.toLowerCase()} con id <strong className="text-blue-600">{projectId}</strong>
                 </p>
               )}
-              <p className="text-sm sm:text-base text-gray-600">
-                Complete la evaluación respondiendo las <strong>{QUESTIONS.length} preguntas</strong> organizadas en{' '}
-                <strong>{[...new Set(QUESTIONS.map(q => q.section))].length} secciones</strong>.
+                <p className="text-sm sm:text-base text-gray-600">
+                Complete la evaluación respondiendo las <strong>{filteredQuestions.length} preguntas</strong> organizadas en{' '}
+                <strong>{[...new Set(filteredQuestions.map(q => q.section))].length} secciones</strong>.
                 {' '}Las preguntas utilizan diferentes escalas: Sí/No, frecuencia, y estrellas (1-5).
               </p>
             </div>
@@ -239,7 +242,7 @@ export default function EvaluarProyectoPage({
                         <div className="flex gap-2 overflow-x-auto pb-1">
                           {allSections.map((s) => {
                             const pageForSection = getPageForSection(s as string);
-                            const count = QUESTIONS.filter(q => q.section === s).length;
+                                    const count = filteredQuestions.filter(q => q.section === s).length;
                             const isActive = currentSection === s;
                             return (
                               <button
@@ -304,8 +307,8 @@ export default function EvaluarProyectoPage({
                         <div className="text-sm font-medium text-gray-700">
                           <span className="text-blue-600 font-bold">Página {page}</span> de {totalPages}
                         </div>
-                        <div className="text-xs text-gray-500">
-                          Preguntas {((page - 1) * PAGE_SIZE) + 1}-{Math.min(page * PAGE_SIZE, QUESTIONS.length)} de {QUESTIONS.length}
+                          <div className="text-xs text-gray-500">
+                          Preguntas {((page - 1) * PAGE_SIZE) + 1}-{Math.min(page * PAGE_SIZE, filteredQuestions.length)} de {filteredQuestions.length}
                         </div>
                       </div>
                       
@@ -342,7 +345,7 @@ export default function EvaluarProyectoPage({
                     {/* Questions for current page */}
                     <div className="space-y-6">
                       {(() => {
-                        const pageQuestions = QUESTIONS.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+                        const pageQuestions = filteredQuestions.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
                         const sectionsInPage = [...new Set(pageQuestions.map(q => q.section))];
 
                         return sectionsInPage.map(section => {
@@ -381,7 +384,7 @@ export default function EvaluarProyectoPage({
                         onChange={(e) => setComments(e.target.value)}
                         rows={4}
                         className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none"
-                        placeholder="Agregue observaciones generales sobre el proyecto..."
+                        placeholder={`Agregue observaciones generales sobre el ${documentType.toLowerCase()}...`}
                       />
                     </div>
 
@@ -510,7 +513,7 @@ export default function EvaluarProyectoPage({
                     Resumen de respuestas
                   </h4>
                   <div className="bg-white rounded-lg p-4 border border-gray-200 space-y-3 max-h-96 overflow-y-auto">
-                    {QUESTIONS.map((q) => (
+                    {filteredQuestions.map((q) => (
                       <div key={q.id} className="pb-3 border-b border-gray-100 last:border-0 last:pb-0">
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex-1 min-w-0">

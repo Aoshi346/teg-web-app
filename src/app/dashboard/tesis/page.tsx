@@ -329,7 +329,7 @@ export default function TesisPage(props: TesisPageProps = {}) {
                           </div>
                         </div>
                         <button
-                          onClick={() => router.push(`/dashboard/proyectos/evaluar?projectId=${project.id}`)}
+                          onClick={() => router.push(`/dashboard/tesis/evaluar?projectId=${project.id}`)}
                           className="mt-4 w-full bg-blue-600 text-white py-2.5 rounded-lg text-sm font-semibold hover:bg-blue-700 active:bg-blue-800 transition-all duration-200 shadow-md touch-manipulation"
                         >
                           Revisar Ahora
