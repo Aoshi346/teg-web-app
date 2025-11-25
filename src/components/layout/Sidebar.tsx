@@ -200,9 +200,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, mobileOpen, setMobileOpe
 
       {/* Desktop persistent side rail */}
       <aside
-        className={`hidden lg:flex lg:flex-col h-screen bg-white border-r border-gray-200 shadow-none ${
+        className={`hidden lg:flex lg:flex-col h-screen bg-white border-r border-gray-200 shadow-none z-50 ${
           isCollapsed ? 'w-20' : 'w-64'
         }`}
+        style={{ position: 'relative' }}
       >
         <div className={`p-4 h-[89px] flex items-center flex-shrink-0 border-b border-gray-200 ${isCollapsed ? 'px-3 justify-center' : 'px-6 justify-start'}`}>
           <div className={`flex items-center gap-3 min-w-0 transition-all duration-300 ${isCollapsed ? 'gap-0' : ''}`}>
