@@ -108,10 +108,21 @@ export const PROJECT_QUESTIONS: Question[] = [
   { id: "q56", label: "Referencias - Pertinencia", helper: "Se citaron las obras más pertinentes al campo de conocimiento.", section: "Contenido", subsection: "Referencias bibliográficas", documentType: 'Proyecto', answerType: 'frequency' },
 ];
 
-export const TESIS_QUESTIONS: Question[] = [
+export const TESIS_STAGE1_QUESTIONS: Question[] = [
   // Diagramacion - General aggregated checks for Tesis (only)
   { id: "q57", label: "D.1 - Elementos preliminares", helper: "¿El documento cuenta con portada, página de presentación, acta de aprobación del tutor (firmada), declaración de derecho de autor, índice general, índices específicos (si aplica), lista de símbolos y abreviaturas (si aplica) y glosario de términos (si aplica)?", section: "Diagramacion", subsection: "General", documentType: 'Tesis', answerType: 'yesno' },
   { id: "q58", label: "D.2 - Formato en la totalidad del documento", helper: "¿El documento en su totalidad cumple con el formato establecido para márgenes, títulos, subtítulos, interlineado, tipo, estilo y tamaño de letra, así como la identificación de la portada, página preliminar, tablas, cuadros y figuras?", section: "Diagramacion", subsection: "General", documentType: 'Tesis', answerType: 'yesno' },
   { id: "q59", label: "D.3 - Reglas ortográficas", helper: "¿En la totalidad del documento se cumple con cada una de las reglas ortográficas?", section: "Diagramacion", subsection: "General", documentType: 'Tesis', answerType: 'yesno' },
   { id: "q60", label: "D.4 - Redacción y coherencia", helper: "¿La redacción del documento presenta un lenguaje coherente, claro, técnicamente adecuado y organizado, y hay transiciones claras entre los párrafos y las secciones del texto?", section: "Diagramacion", subsection: "General", documentType: 'Tesis', answerType: 'yesno' },
 ];
+
+export const TESIS_STAGE2_QUESTIONS: Question[] = [
+  // Placeholder for Stage 2 (Content)
+  { id: "q61", label: "C.1 - Planteamiento del Problema", helper: "¿El planteamiento del problema es claro, preciso y está bien delimitado?", section: "Contenido", subsection: "Capítulo I", documentType: 'Tesis', answerType: 'yesno' },
+  { id: "q62", label: "C.2 - Objetivos", helper: "¿Los objetivos son medibles, alcanzables y coherentes con el problema planteado?", section: "Contenido", subsection: "Capítulo I", documentType: 'Tesis', answerType: 'yesno' },
+  { id: "q63", label: "C.3 - Marco Teórico", helper: "¿El marco teórico sustenta adecuadamente la investigación con fuentes actuales y relevantes?", section: "Contenido", subsection: "Capítulo II", documentType: 'Tesis', answerType: 'yesno' },
+  { id: "q64", label: "C.4 - Metodología", helper: "¿La metodología descrita es adecuada para alcanzar los objetivos propuestos?", section: "Contenido", subsection: "Capítulo III", documentType: 'Tesis', answerType: 'yesno' },
+];
+
+// Alias for backward compatibility (points to Stage 1)
+export const TESIS_QUESTIONS = TESIS_STAGE1_QUESTIONS;

@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Star } from "lucide-react";
 import { FREQUENCY_OPTIONS, YESNO_OPTIONS, Question } from "@/lib/questions/questions";
+import { calculateScore, getPassStatus, MAX_SCORE, PASSING_SCORE } from "@/lib/questions/scoring";
 
 interface EvaluationFormProps {
   projectId?: string | null;
@@ -15,6 +16,8 @@ type SubmittedData = {
   ratings: Record<string, number>;
   comments: string;
   gradedAt: string;
+  score: number;
+  passStatus: 'Pass' | 'Fail';
 } | null;
 
 export default function EvaluationForm({ projectId, typeParam = 'proyecto', questions }: EvaluationFormProps) {
@@ -151,11 +154,23 @@ export default function EvaluationForm({ projectId, typeParam = 'proyecto', ques
       return;
     }
 
-    const payload = {
+    const score = calculateScore(ratings, filteredQuestions);
+    const passStatus = getPassStatus(score);
+
+    const payload: SubmittedData = {
       ratings,
       comments,
       gradedAt: new Date().toISOString(),
+      score,
+      passStatus,
     };
+
+    // Demo: If this is Tesis Stage 1 (inferred by question ID q57), update session storage
+    if (documentType === 'Tesis' && projectId && filteredQuestions.some(q => q.id === 'q57')) {
+        if (passStatus === 'Pass') {
+            sessionStorage.setItem(`project_${projectId}_stage1_passed`, 'true');
+        }
+    }
 
     await new Promise((res) => setTimeout(res, 600));
     setSubmittedData(payload);
@@ -202,6 +217,7 @@ export default function EvaluationForm({ projectId, typeParam = 'proyecto', ques
 
       {!submittedData ? (
         <form onSubmit={handleSubmit} className="bg-white p-4 sm:p-6 lg:p-8 rounded-xl shadow-lg">
+          {/* ... form content ... */}
           <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,1fr)_300px] xl:grid-cols-[minmax(0,1fr)_340px] lg:gap-8">
             <div className="space-y-6 min-w-0">
               <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100 p-4 shadow-sm">
@@ -457,15 +473,27 @@ export default function EvaluationForm({ projectId, typeParam = 'proyecto', ques
       ) : (
         <div className="bg-white p-6 sm:p-8 rounded-xl shadow-lg space-y-6">
           <div className="flex items-center gap-3 pb-4 border-b border-gray-200">
-            <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
-              <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
+            <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+              submittedData.passStatus === 'Pass' ? 'bg-green-100' : 'bg-red-100'
+            }`}>
+              {submittedData.passStatus === 'Pass' ? (
+                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              ) : (
+                <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              )}
             </div>
             <div>
-              <h3 className="text-xl font-bold text-gray-900">Evaluación enviada exitosamente</h3>
+              <h3 className="text-xl font-bold text-gray-900">
+                Evaluación completada: {submittedData.passStatus === 'Pass' ? 'Aprobado' : 'Reprobado'}
+              </h3>
               <p className="text-sm text-gray-600 mt-1">
-                La evaluación se ha registrado localmente (demo). Reemplace con su API para guardar en el servidor.
+                Puntaje obtenido: <strong className={submittedData.passStatus === 'Pass' ? 'text-green-600' : 'text-red-600'}>
+                  {submittedData.score} / {MAX_SCORE}
+                </strong> (Mínimo requerido: {PASSING_SCORE})
               </p>
             </div>
           </div>
@@ -502,7 +530,7 @@ export default function EvaluationForm({ projectId, typeParam = 'proyecto', ques
 
           <div className="flex flex-col sm:flex-row gap-3 pt-4">
             <button 
-              onClick={() => router.push(typeParam === 'tesis' ? '/dashboard/tesis' : '/dashboard/proyectos')} 
+              onClick={() => router.push(typeParam === 'tesis' ? '/dashboard/tesis/evaluar' : '/dashboard/proyectos')} 
               className="flex-1 sm:flex-initial bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-all shadow-sm hover:shadow-md"
             >
               ← Volver
