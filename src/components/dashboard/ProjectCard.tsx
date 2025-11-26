@@ -56,14 +56,40 @@ export default function ProjectCard({ project, primaryHref, primaryLabel, classN
     }
   };
 
+  const getCardHoverStyles = () => {
+    switch (project.status) {
+      case "checked":
+        return "hover:border-green-300";
+      case "pending":
+        return "hover:border-amber-300";
+      case "rejected":
+        return "hover:border-red-300";
+      default:
+        return "hover:border-blue-300";
+    }
+  };
+
+  const getTitleHoverStyles = () => {
+    switch (project.status) {
+      case "checked":
+        return "group-hover:text-green-600";
+      case "pending":
+        return "group-hover:text-amber-600";
+      case "rejected":
+        return "group-hover:text-red-600";
+      default:
+        return "group-hover:text-blue-600";
+    }
+  };
+
   return (
     <div
       key={project.id}
-      className={("project-card bg-white rounded-xl p-4 sm:p-6 shadow-md shadow-gray-900/5 border border-gray-200 hover:shadow-lg transition-all duration-200 cursor-pointer group ") + (className ?? "")}
+      className={`project-card bg-white rounded-xl p-4 sm:p-6 shadow-md shadow-gray-900/5 border border-gray-200 hover:shadow-lg transition-all duration-200 cursor-pointer group ${getCardHoverStyles()} ${className ?? ""}`}
     >
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1 min-w-0">
-          <h4 className="text-base sm:text-lg font-bold text-gray-900 line-clamp-2 group-hover:text-blue-600 transition-colors">
+          <h4 className={`text-base sm:text-lg font-bold text-gray-900 line-clamp-2 transition-colors ${getTitleHoverStyles()}`}>
             {project.title}
           </h4>
         </div>
