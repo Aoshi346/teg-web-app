@@ -1,17 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useMemo } from "react";
-import { useRouter } from "next/navigation";
 import { gsap } from "gsap";
-import {
-  Search,
-  CheckCircle,
-  Clock,
-  XCircle,
-  Calendar,
-  User,
-  FileText,
-} from "lucide-react";
+import { Search, CheckCircle, Clock, XCircle, FileText } from "lucide-react";
 import DashboardHeader from "@/components/layout/DashboardHeader";
 import PageTransition from "@/components/ui/PageTransition";
 import { mockTesis, Project } from "@/lib/data/mockData";
@@ -32,14 +23,13 @@ export default function TesisPage(props: TesisPageProps = {}) {
     isMobileSidebarOpen,
   } = props;
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterStatus, setFilterStatus] = useState<"all" | "checked" | "pending" | "rejected">("all");
+  const [filterStatus, setFilterStatus] = useState<
+    "all" | "checked" | "pending" | "rejected"
+  >("all");
   const animationsRef = useRef<gsap.core.Tween[]>([]);
 
   // Mock data for TEG projects
-  const allProjects = useMemo<Project[]>(
-    () => mockTesis,
-    []
-  );
+  const allProjects = useMemo<Project[]>(() => mockTesis, []);
 
   const filteredProjects = useMemo(() => {
     return allProjects.filter((project) => {
@@ -48,7 +38,8 @@ export default function TesisPage(props: TesisPageProps = {}) {
         project.student.toLowerCase().includes(searchQuery.toLowerCase()) ||
         project.advisor.toLowerCase().includes(searchQuery.toLowerCase());
 
-      const matchesFilter = filterStatus === "all" || project.status === filterStatus;
+      const matchesFilter =
+        filterStatus === "all" || project.status === filterStatus;
       return matchesSearch && matchesFilter;
     });
   }, [allProjects, searchQuery, filterStatus]);
@@ -63,8 +54,6 @@ export default function TesisPage(props: TesisPageProps = {}) {
     [filteredProjects]
   );
 
-  const router = useRouter();
-
   const rejectedProjects = useMemo(
     () => filteredProjects.filter((p) => p.status === "rejected"),
     [filteredProjects]
@@ -72,11 +61,11 @@ export default function TesisPage(props: TesisPageProps = {}) {
 
   // Entrance animations - only on initial mount, not on filter changes
   const hasAnimatedRef = useRef(false);
-  
+
   useEffect(() => {
     // Skip if already animated (for instant display on navigation)
     if (hasAnimatedRef.current) return;
-    
+
     // Check if we just navigated - skip animations for instant display
     let skipAnimations = false;
     try {
@@ -156,67 +145,68 @@ export default function TesisPage(props: TesisPageProps = {}) {
       />
 
       <PageTransition>
-          {/* Main Content */}
-          <main className="flex-1 p-3 sm:p-4 md:p-6 lg:p-8 overflow-y-auto bg-gray-50">
-            <div className="max-w-7xl mx-auto">
-              {/* Search and Filter Bar */}
-              <div className="section-container mb-6 sm:mb-8 flex flex-col sm:flex-row gap-3 sm:gap-4">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder="Buscar por título, estudiante o tutor..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm sm:text-base"
-                  />
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setFilterStatus("all")}
-                    className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all touch-manipulation ${
-                      filterStatus === "all"
-                        ? "bg-blue-600 text-white shadow-md"
-                        : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
-                    }`}
-                  >
-                    Todos
-                  </button>
-                  <button
-                    onClick={() => setFilterStatus("checked")}
-                    className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all touch-manipulation ${
-                      filterStatus === "checked"
-                        ? "bg-green-600 text-white shadow-md"
-                        : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
-                    }`}
-                  >
-                    Revisados
-                  </button>
-                  <button
-                    onClick={() => setFilterStatus("pending")}
-                    className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all touch-manipulation ${
-                      filterStatus === "pending"
-                        ? "bg-amber-600 text-white shadow-md"
-                        : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
-                    }`}
-                  >
-                    Pendientes
-                  </button>
-                  <button
-                    onClick={() => setFilterStatus("rejected")}
-                    className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all touch-manipulation ${
-                      filterStatus === "rejected"
-                        ? "bg-red-600 text-white shadow-md"
-                        : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
-                    }`}
-                  >
-                    Rechazados
-                  </button>
-                </div>
+        {/* Main Content */}
+        <main className="flex-1 p-3 sm:p-4 md:p-6 lg:p-8 overflow-y-auto bg-gray-50">
+          <div className="max-w-7xl mx-auto">
+            {/* Search and Filter Bar */}
+            <div className="section-container mb-6 sm:mb-8 flex flex-col sm:flex-row gap-3 sm:gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Buscar por título, estudiante o tutor..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm sm:text-base"
+                />
               </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setFilterStatus("all")}
+                  className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all touch-manipulation ${
+                    filterStatus === "all"
+                      ? "bg-blue-600 text-white shadow-md"
+                      : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
+                  }`}
+                >
+                  Todos
+                </button>
+                <button
+                  onClick={() => setFilterStatus("checked")}
+                  className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all touch-manipulation ${
+                    filterStatus === "checked"
+                      ? "bg-green-600 text-white shadow-md"
+                      : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
+                  }`}
+                >
+                  Revisados
+                </button>
+                <button
+                  onClick={() => setFilterStatus("pending")}
+                  className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all touch-manipulation ${
+                    filterStatus === "pending"
+                      ? "bg-amber-600 text-white shadow-md"
+                      : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
+                  }`}
+                >
+                  Pendientes
+                </button>
+                <button
+                  onClick={() => setFilterStatus("rejected")}
+                  className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all touch-manipulation ${
+                    filterStatus === "rejected"
+                      ? "bg-red-600 text-white shadow-md"
+                      : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
+                  }`}
+                >
+                  Rechazados
+                </button>
+              </div>
+            </div>
 
-              {/* Checked Projects Section */}
-              {(filterStatus === "all" || filterStatus === "checked") && checkedProjects.length > 0 && (
+            {/* Checked Projects Section */}
+            {(filterStatus === "all" || filterStatus === "checked") &&
+              checkedProjects.length > 0 && (
                 <div className="section-container mb-8">
                   <div className="flex items-center justify-between mb-4 sm:mb-6">
                     <h3 className="text-xl sm:text-2xl font-bold text-gray-900 flex items-center gap-2">
@@ -240,8 +230,9 @@ export default function TesisPage(props: TesisPageProps = {}) {
                 </div>
               )}
 
-              {/* Pending Projects Section */}
-              {(filterStatus === "all" || filterStatus === "pending") && pendingProjects.length > 0 && (
+            {/* Pending Projects Section */}
+            {(filterStatus === "all" || filterStatus === "pending") &&
+              pendingProjects.length > 0 && (
                 <div className="section-container">
                   <div className="flex items-center justify-between mb-4 sm:mb-6">
                     <h3 className="text-xl sm:text-2xl font-bold text-gray-900 flex items-center gap-2">
@@ -257,7 +248,7 @@ export default function TesisPage(props: TesisPageProps = {}) {
                       <ProjectCard
                         key={project.id}
                         project={project}
-                        primaryHref={`/dashboard/tesis/evaluar?projectId=${project.id}`}
+                        primaryHref={`/dashboard/tesis/${project.id}/evaluar`}
                         primaryLabel="Revisar Ahora"
                       />
                     ))}
@@ -265,8 +256,9 @@ export default function TesisPage(props: TesisPageProps = {}) {
                 </div>
               )}
 
-              {/* Rejected Projects Section */}
-              {(filterStatus === "all" || filterStatus === "rejected") && rejectedProjects.length > 0 && (
+            {/* Rejected Projects Section */}
+            {(filterStatus === "all" || filterStatus === "rejected") &&
+              rejectedProjects.length > 0 && (
                 <div className="section-container mt-8">
                   <div className="flex items-center justify-between mb-4 sm:mb-6">
                     <h3 className="text-xl sm:text-2xl font-bold text-gray-900 flex items-center gap-2">
@@ -290,20 +282,20 @@ export default function TesisPage(props: TesisPageProps = {}) {
                 </div>
               )}
 
-              {/* Empty State */}
-              {filteredProjects.length === 0 && (
-                <div className="section-container text-center py-12">
-                  <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-gray-700 mb-2">
-                    No se encontraron proyectos
-                  </h3>
-                  <p className="text-gray-500">
-                    Intenta ajustar los filtros o la búsqueda
-                  </p>
-                </div>
-              )}
-            </div>
-          </main>
+            {/* Empty State */}
+            {filteredProjects.length === 0 && (
+              <div className="section-container text-center py-12">
+                <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-gray-700 mb-2">
+                  No se encontraron proyectos
+                </h3>
+                <p className="text-gray-500">
+                  Intenta ajustar los filtros o la búsqueda
+                </p>
+              </div>
+            )}
+          </div>
+        </main>
       </PageTransition>
     </>
   );
