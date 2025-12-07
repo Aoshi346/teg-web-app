@@ -23,20 +23,20 @@ export default function EvaluarProyectoPage({
 
       <PageTransition>
         <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto bg-gray-50">
-          <div className="max-w-4xl mx-auto mb-6">
+          <div className="max-w-7xl mx-auto">
             <button
               onClick={() => router.back()}
-              className="flex items-center text-gray-600 hover:text-gray-900 transition-colors"
+              className="flex items-center text-gray-600 hover:text-gray-900 transition-colors mb-6"
             >
               <ArrowLeft className="w-5 h-5 mr-2" />
               Volver
             </button>
+            <EvaluationForm
+              projectId={projectId}
+              typeParam={typeParam}
+              questions={PROJECT_QUESTIONS}
+            />
           </div>
-          <EvaluationForm
-            projectId={projectId}
-            typeParam={typeParam}
-            questions={PROJECT_QUESTIONS}
-          />
         </main>
       </PageTransition>
     </>

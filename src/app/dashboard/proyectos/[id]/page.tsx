@@ -71,7 +71,7 @@ export default function ProyectoDetailsPage() {
       <DashboardHeader pageTitle="Detalles del Proyecto" />
       <PageTransition>
         <main className="flex-1 p-4 md:p-8 overflow-y-auto bg-gray-50">
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-7xl mx-auto">
             <button
               onClick={() => router.back()}
               className="flex items-center text-gray-600 hover:text-gray-900 mb-6 transition-colors"
