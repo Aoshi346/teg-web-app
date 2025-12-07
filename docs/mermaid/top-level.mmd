@@ -1,0 +1,31 @@
+flowchart TD
+  subgraph Rol
+    U[Docente / Evaluador]
+  end
+
+  L[Login] --> D[Dashboard]
+  D --> PFiltros[Buscar / Filtrar / Ordenar]
+  D --> P[Proyectos]
+  D --> T[Tesis]
+
+  P --> PList[Listado de Proyectos]
+  T --> TList[Listado de Tesis]
+
+  PList --> PDet[Detalle de Proyecto]
+  TList --> TDet[Detalle de Tesis]
+
+  %% Proyectos
+  PDet --> PEval["Evaluar Proyecto"]
+  PEval --> PScore["Calcular puntaje 0-20"]
+  PScore --> PEstado["Asignar estado: Aprobado/Pendiente/Rechazado"]
+  PEstado --> PRes["Resultado mostrado"]
+
+  %% Tesis con dos fases
+  TDet --> F1["Fase 1 Evaluacion"]
+  F1 --> TScore1["Puntaje F1 0-20"]
+  TScore1 -->|">= 15"| SaveSession["Guardar pass en sessionStorage (demo)"]
+  SaveSession --> GatePass["Habilitar Fase 2"]
+  TScore1 -->|"< 15"| GateBlock["Bloqueo: sin acceso a F2"]
+  GatePass --> F2["Fase 2 Evaluacion"]
+  F2 --> TScore2["Puntaje F2 0-20"]
+  TScore2 --> TRes["Resultado final mostrado"]
