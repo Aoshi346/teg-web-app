@@ -1,4 +1,4 @@
-export type AnswerType = 'yesno' | 'frequency' | 'stars';
+export type AnswerType = 'yesno' | 'frequency' | 'stars' | 'text';
 
 export type Question = {
   id: string;
@@ -171,7 +171,7 @@ export const TESIS_STAGE1_QUESTIONS: Question[] = [
 
   // 5. Consideraciones Finales
   { id: "q98", label: "Aporte", helper: "¿Considera que el tema constituye un aporte valioso al campo del conocimiento? (Use la calificación y complemente en comentarios)", section: "Consideraciones Finales", subsection: "Aporte", documentType: 'Tesis', answerType: 'stars' },
-  { id: "q99", label: "Feedback", helper: "Espacio para observaciones, recomendaciones o comentarios para mejorar el documento (use la calificación y agregue detalles en el campo de comentarios).", section: "Consideraciones Finales", subsection: "Feedback", documentType: 'Tesis', answerType: 'stars' },
+  { id: "q99", label: "Feedback", helper: "Espacio para observaciones, recomendaciones o comentarios para mejorar el documento. Responda con texto libre.", section: "Consideraciones Finales", subsection: "Feedback", documentType: 'Tesis', answerType: 'text' },
 ];
 
 export const TESIS_STAGE2_QUESTIONS: Question[] = [

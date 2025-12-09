@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Star } from "lucide-react";
 import {
   FREQUENCY_OPTIONS,
   YESNO_OPTIONS,
@@ -14,6 +13,7 @@ import {
   MAX_SCORE,
   PASSING_SCORE,
 } from "@/lib/questions/scoring";
+import Banner from "@/components/ui/Banner";
 
 interface EvaluationFormProps {
   projectId?: string | null;
@@ -22,7 +22,7 @@ interface EvaluationFormProps {
 }
 
 type SubmittedData = {
-  ratings: Record<string, number>;
+  ratings: Record<string, number | string>;
   comments: string;
   gradedAt: string;
   score: number;
@@ -45,44 +45,74 @@ export default function EvaluationForm({
       q.documentType === documentType
   );
 
-  const [ratings, setRatings] = useState<Record<string, number>>(() => {
-    const r: Record<string, number> = {};
-    for (const q of filteredQuestions) r[q.id] = 0;
+  const [ratings, setRatings] = useState<Record<string, number | string>>(() => {
+    const r: Record<string, number | string> = {};
+    for (const q of filteredQuestions) {
+      r[q.id] = q.answerType === "text" ? "" : 0;
+    }
     return r;
   });
 
-  const PAGE_SIZE = 8;
-  const totalPages = Math.max(
-    1,
-    Math.ceil(filteredQuestions.length / PAGE_SIZE)
-  );
+  const sections = [
+    ...new Set(filteredQuestions.map((q) => q.section || "Sección")),
+  ];
+  const totalPages = Math.max(1, sections.length);
   const [page, setPage] = useState<number>(1);
   const [comments, setComments] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittedData, setSubmittedData] = useState<SubmittedData>(null);
+  const [bannerState, setBannerState] = useState<{
+    visible: boolean;
+    message: string;
+    type: "success" | "error" | "warning" | "info";
+  }>({ visible: false, message: "", type: "info" });
 
-  const setRating = (qid: string, value: number) => {
+  const setRating = (qid: string, value: number | string) => {
     setRatings((prev) => ({ ...prev, [qid]: value }));
   };
 
-  const getAnswerLabel = (question: Question, value: number): string => {
-    if (value === 0) return "Sin respuesta";
+  const SCORE_COLOR_MAP = [
+    "bg-red-50 text-red-700 border-red-200",
+    "bg-orange-50 text-orange-700 border-orange-200",
+    "bg-yellow-50 text-yellow-800 border-yellow-200",
+    "bg-sky-50 text-sky-700 border-sky-200",
+    "bg-green-50 text-green-700 border-green-200",
+  ];
+
+  const getAnswerLabel = (
+    question: Question,
+    value: number | string | undefined
+  ): string => {
+    if (question.answerType === "text") {
+      const textValue = typeof value === "string" ? value.trim() : "";
+      return textValue.length > 0 ? textValue : "Sin respuesta";
+    }
+
+    const numericValue = typeof value === "number" ? value : 0;
+    if (numericValue === 0) return "Sin respuesta";
     switch (question.answerType) {
       case "yesno":
-        const yesNoOption = YESNO_OPTIONS.find((opt) => opt.value === value);
+        const yesNoOption = YESNO_OPTIONS.find(
+          (opt) => opt.value === numericValue
+        );
         return yesNoOption?.label || "Sin respuesta";
       case "frequency":
-        const freqOption = FREQUENCY_OPTIONS.find((opt) => opt.value === value);
+        const freqOption = FREQUENCY_OPTIONS.find(
+          (opt) => opt.value === numericValue
+        );
         return freqOption?.label || "Sin respuesta";
       case "stars":
-        return `${value} de 5 estrellas`;
+        return `Puntuación ${numericValue} / 5`;
       default:
         return "Sin respuesta";
     }
   };
 
   const renderAnswerInput = (question: Question) => {
-    const currentRating = ratings[question.id] || 0;
+    const rawValue = ratings[question.id];
+    const currentRating =
+      typeof rawValue === "number" ? rawValue : Number(rawValue) || 0;
+    const currentText = typeof rawValue === "string" ? rawValue : "";
 
     switch (question.answerType) {
       case "yesno":
@@ -127,40 +157,51 @@ export default function EvaluationForm({
 
       case "stars":
         return (
-          <>
-            <div className="flex items-center justify-center gap-1 pt-2 border-t border-gray-100">
+          <div className="pt-2 space-y-2">
+            <div className="grid grid-cols-5 gap-2">
               {Array.from({ length: 5 }).map((_, i) => {
                 const val = i + 1;
-                const isSelected = currentRating >= val;
+                const isSelected = currentRating === val;
+                const palette = SCORE_COLOR_MAP[i];
                 return (
                   <button
                     key={val}
                     type="button"
                     onClick={() => setRating(question.id, val)}
-                    aria-label={`${val} estrellas`}
-                    className={`p-2 rounded-lg transition-all ${
+                    aria-label={`Puntuación ${val}`}
+                    className={`w-full px-3 py-2 rounded-lg text-sm font-semibold border-2 transition-all ${
                       isSelected
-                        ? "text-yellow-500 scale-110"
-                        : "text-gray-300 hover:text-yellow-400 hover:scale-105"
+                        ? `${palette} shadow-md scale-[1.02]`
+                        : "bg-white text-gray-700 border-gray-200 hover:border-blue-300 hover:bg-blue-50"
                     }`}
                   >
-                    <Star
-                      className={`w-6 h-6 sm:w-7 sm:h-7 ${
-                        isSelected ? "fill-current" : ""
-                      }`}
-                    />
+                    {val}
                   </button>
                 );
               })}
             </div>
             {currentRating > 0 && (
-              <div className="text-center mt-2">
-                <span className="inline-block px-3 py-1 bg-blue-50 text-blue-700 text-xs font-semibold rounded-full">
-                  {currentRating} de 5 estrellas
-                </span>
-              </div>
+              <p className="text-xs text-gray-600 text-center">
+                Puntuación seleccionada: {currentRating} / 5
+              </p>
             )}
-          </>
+          </div>
+        );
+
+      case "text":
+        return (
+          <div className="pt-2">
+            <textarea
+              value={currentText}
+              onChange={(e) => setRating(question.id, e.target.value)}
+              rows={4}
+              className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none"
+              placeholder="Escriba sus observaciones o recomendaciones"
+            />
+            <p className="text-xs text-gray-500 mt-2">
+              Este campo es de texto libre y no afecta el puntaje numérico.
+            </p>
+          </div>
         );
 
       default:
@@ -168,44 +209,48 @@ export default function EvaluationForm({
     }
   };
 
+  const isQuestionMissing = (question: Question) => {
+    if (question.answerType === "text") return false; // preguntas de texto son opcionales
+    const value = ratings[question.id];
+    const numericValue = typeof value === "number" ? value : Number(value);
+    return !numericValue || numericValue <= 0;
+  };
+
+  const findMissingIndexInSection = (section?: string) => {
+    const sectionQuestions = filteredQuestions.filter((q) => q.section === section);
+    return sectionQuestions.findIndex((q) => isQuestionMissing(q));
+  };
+
+  const handleNextSection = () => {
+    const missingOnCurrent = findMissingIndexInSection(currentSection);
+    if (missingOnCurrent !== -1) {
+      setBannerState({
+        visible: true,
+        message:
+          "Por favor califique todas las preguntas de esta sección antes de continuar.",
+        type: "error",
+      });
+      return;
+    }
+    setPage((p) => Math.min(totalPages, p + 1));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    // If this is not the final page, only validate questions on the current page
-    if (page < totalPages) {
-      const start = (page - 1) * PAGE_SIZE;
-      const end = page * PAGE_SIZE;
-      const currentPageQuestions = filteredQuestions.slice(start, end);
-      const missingOnCurrent = currentPageQuestions.findIndex(
-        (q) => !ratings[q.id] || ratings[q.id] <= 0
-      );
-      if (missingOnCurrent !== -1) {
-        const absoluteMissingIndex = start + missingOnCurrent;
-        const missingPage = Math.floor(absoluteMissingIndex / PAGE_SIZE) + 1;
-        setPage(missingPage);
-        alert(
-          "Por favor califique todas las preguntas en esta página antes de continuar. Se le redirigirá a la pregunta incompleta."
-        );
-        setIsSubmitting(false);
-        return;
-      }
 
-      // All questions on the current page are answered: go to the next page
-      setPage((p) => Math.min(totalPages, p + 1));
-      setIsSubmitting(false);
-      return;
-    }
-
-    // If this is the last page, run the global validation and final submit
-    const missingIndex = filteredQuestions.findIndex(
-      (q) => !ratings[q.id] || ratings[q.id] <= 0
+    // Global validation across sections
+    const missingSectionIndex = sections.findIndex(
+      (section) => findMissingIndexInSection(section) !== -1
     );
-    if (missingIndex !== -1) {
-      const missingPage = Math.floor(missingIndex / PAGE_SIZE) + 1;
-      setPage(missingPage);
-      alert(
-        "Por favor califique todas las preguntas antes de enviar. Se le redirigirá a la pregunta incompleta."
-      );
+    if (missingSectionIndex !== -1) {
+      setPage(missingSectionIndex + 1);
+      setBannerState({
+        visible: true,
+        message:
+          "Por favor califique todas las preguntas antes de enviar. Se le redirigirá a la sección incompleta.",
+        type: "error",
+      });
       setIsSubmitting(false);
       return;
     }
@@ -234,19 +279,17 @@ export default function EvaluationForm({
 
     await new Promise((res) => setTimeout(res, 600));
     setSubmittedData(payload);
+    setBannerState({ visible: true, message: "Evaluación enviada con éxito.", type: "success" });
     setIsSubmitting(false);
   };
 
   const allSections = [
     ...new Set(filteredQuestions.map((q) => q.section).filter(Boolean)),
   ] as string[];
-  const pageQuestions = filteredQuestions.slice(
-    (page - 1) * PAGE_SIZE,
-    page * PAGE_SIZE
+  const currentSection = sections[Math.max(0, Math.min(page - 1, sections.length - 1))];
+  const pageQuestions = filteredQuestions.filter(
+    (q) => q.section === currentSection
   );
-  const sectionsInPage = [...new Set(pageQuestions.map((q) => q.section))];
-  const currentSection =
-    sectionsInPage.length > 0 ? sectionsInPage[0] : undefined;
   const subsectionsOfCurrent = currentSection
     ? [
         ...new Set(
@@ -259,18 +302,33 @@ export default function EvaluationForm({
 
   const getPageForSection = (section?: string) => {
     if (!section) return 1;
-    const idx = filteredQuestions.findIndex((q) => q.section === section);
-    return Math.max(1, Math.floor(idx / PAGE_SIZE) + 1);
+    const idx = sections.findIndex((s) => s === section);
+    return idx === -1 ? 1 : idx + 1;
   };
 
   const getPageForSubsection = (sub?: string) => {
     if (!sub) return 1;
-    const idx = filteredQuestions.findIndex((q) => q.subsection === sub);
-    return Math.max(1, Math.floor(idx / PAGE_SIZE) + 1);
+    const sectionForSub = filteredQuestions.find((q) => q.subsection === sub)
+      ?.section;
+    return getPageForSection(sectionForSub);
   };
 
   return (
     <>
+      {bannerState.visible && (
+        <div className="fixed top-4 inset-x-0 z-[9999] flex justify-center px-4 pointer-events-none">
+          <div className="pointer-events-auto w-full max-w-3xl">
+            <Banner
+              visible={bannerState.visible}
+              message={bannerState.message}
+              type={bannerState.type}
+              onClose={() => setBannerState((s) => ({ ...s, visible: false }))}
+              autoHide={6000}
+            />
+          </div>
+        </div>
+      )}
+
       <div className="mb-6">
         <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
           Evaluación del {documentType} {projectId ? `#${projectId}` : ""}
@@ -288,8 +346,8 @@ export default function EvaluationForm({
             {[...new Set(filteredQuestions.map((q) => q.section))].length}{" "}
             secciones
           </strong>
-          . Las preguntas utilizan diferentes escalas: Sí/No, frecuencia, y
-          estrellas (1-5).
+          . Las preguntas utilizan diferentes escalas: Sí/No, frecuencia,
+          puntuación (1-5) y texto libre (opcional).
         </p>
       </div>
 
@@ -375,14 +433,13 @@ export default function EvaluationForm({
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
                   <div className="text-sm font-medium text-gray-700">
                     <span className="text-blue-600 font-bold">
-                      Página {page}
+                      Sección {page}
                     </span>{" "}
                     de {totalPages}
                   </div>
                   <div className="text-xs text-gray-500">
-                    Preguntas {(page - 1) * PAGE_SIZE + 1}-
-                    {Math.min(page * PAGE_SIZE, filteredQuestions.length)} de{" "}
-                    {filteredQuestions.length}
+                    {currentSection || "Sección"} · {pageQuestions.length} pregunta
+                    {pageQuestions.length !== 1 ? "s" : ""}
                   </div>
                 </div>
 
@@ -417,71 +474,61 @@ export default function EvaluationForm({
               </div>
 
               <div className="space-y-6">
-                {(() => {
-                  const pageQuestions = filteredQuestions.slice(
-                    (page - 1) * PAGE_SIZE,
-                    page * PAGE_SIZE
-                  );
-                  const sectionsInPage = [
-                    ...new Set(pageQuestions.map((q) => q.section)),
-                  ];
-
-                  return sectionsInPage.map((section) => {
-                    const sectionQuestions = pageQuestions.filter(
-                      (q) => q.section === section
-                    );
-                    return (
-                      <div key={section} className="space-y-4">
-                        <div className="bg-gradient-to-r from-blue-50 to-transparent border-l-4 border-blue-600 pl-4 pr-4 py-3 rounded-r-lg">
-                          <h3 className="text-lg sm:text-xl font-bold text-gray-900">
-                            {section}
-                          </h3>
-                          <p className="text-sm text-gray-600 mt-1">
-                            {sectionQuestions.length} pregunta
-                            {sectionQuestions.length !== 1 ? "s" : ""} en esta
-                            sección
-                          </p>
-                        </div>
-                        <div className="grid gap-4 sm:grid-cols-1 lg:grid-cols-2">
-                          {sectionQuestions.map((q) => (
-                            <div
-                              key={q.id}
-                              className="border border-gray-200 rounded-xl p-4 bg-white shadow-sm hover:shadow-md transition-all"
-                            >
-                              <div className="space-y-3">
-                                <div>
-                                  <h4 className="font-semibold text-sm sm:text-base text-gray-900">
-                                    {q.label}
-                                  </h4>
-                                  {q.helper && (
-                                    <p className="text-xs text-gray-600 mt-1.5 leading-relaxed">
-                                      {q.helper}
-                                    </p>
-                                  )}
-                                </div>
-                                {renderAnswerInput(q)}
-                              </div>
+                {currentSection && (
+                  <div className="space-y-4">
+                    <div className="bg-gradient-to-r from-blue-50 to-transparent border-l-4 border-blue-600 pl-4 pr-4 py-3 rounded-r-lg">
+                      <h3 className="text-lg sm:text-xl font-bold text-gray-900">
+                        {currentSection}
+                      </h3>
+                      <p className="text-sm text-gray-600 mt-1">
+                        {pageQuestions.length} pregunta
+                        {pageQuestions.length !== 1 ? "s" : ""} en esta
+                        sección
+                      </p>
+                    </div>
+                    <div className="grid gap-4 sm:grid-cols-1 lg:grid-cols-2">
+                      {pageQuestions.map((q) => (
+                        <div
+                          key={q.id}
+                          className="border border-gray-200 rounded-xl p-4 bg-white shadow-sm hover:shadow-md transition-all"
+                        >
+                          <div className="space-y-3">
+                            <div>
+                              <h4 className="font-semibold text-sm sm:text-base text-gray-900">
+                                {q.label}
+                              </h4>
+                              {q.helper && (
+                                <p className="text-xs text-gray-600 mt-1.5 leading-relaxed">
+                                  {q.helper}
+                                </p>
+                              )}
                             </div>
-                          ))}
+                            {renderAnswerInput(q)}
+                          </div>
                         </div>
-                      </div>
-                    );
-                  });
-                })()}
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Comentarios adicionales (opcional)
-                </label>
-                <textarea
-                  value={comments}
-                  onChange={(e) => setComments(e.target.value)}
-                  rows={4}
-                  className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none"
-                  placeholder={`Agregue observaciones generales sobre el ${documentType.toLowerCase()}...`}
-                />
-              </div>
+              {page === totalPages && (
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Comentarios adicionales (opcional)
+                  </label>
+                  <textarea
+                    value={comments}
+                    onChange={(e) => setComments(e.target.value)}
+                    rows={4}
+                    className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none"
+                    placeholder={`Agregue observaciones generales sobre el ${documentType.toLowerCase()}...`}
+                  />
+                  <p className="text-xs text-gray-500 mt-2">
+                    Este cuadro aparece solo en la última página para que sus observaciones sean lo último que complete.
+                  </p>
+                </div>
+              )}
 
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-4 border-t border-gray-200">
                 <div className="flex items-center gap-3 flex-1">
@@ -509,9 +556,7 @@ export default function EvaluationForm({
                   {page < totalPages ? (
                     <button
                       type="button"
-                      onClick={() =>
-                        setPage((p) => Math.min(totalPages, p + 1))
-                      }
+                      onClick={handleNextSection}
                       className="flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-all shadow-sm hover:shadow-md"
                     >
                       Siguiente
@@ -654,9 +699,7 @@ export default function EvaluationForm({
                   </li>
                   <li className="flex items-start gap-2">
                     <span className="text-blue-600 mt-0.5">•</span>
-                    <span>
-                      Las 5 estrellas se reservan para trabajos excepcionales.
-                    </span>
+                    <span>Use 5 solo para trabajos excepcionales.</span>
                   </li>
                 </ul>
               </div>
@@ -757,7 +800,7 @@ export default function EvaluationForm({
                       </p>
                     </div>
                     <span className="text-sm font-semibold text-blue-600 whitespace-nowrap">
-                      {getAnswerLabel(q, ratings[q.id] || 0)}
+                      {getAnswerLabel(q, ratings[q.id])}
                     </span>
                   </div>
                 </div>

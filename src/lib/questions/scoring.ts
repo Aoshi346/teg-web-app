@@ -6,14 +6,18 @@ export const PASSING_SCORE = 15;
 
 export type PassStatus = 'Pass' | 'Fail';
 
-export function calculateScore(ratings: Record<string, number>, questions: Question[]): number {
+export function calculateScore(
+  ratings: Record<string, number | string>,
+  questions: Question[]
+): number {
   let score = 0;
   
   // Filter questions that are actually in the ratings
   // We assume questions passed here are the ones being evaluated
   
   for (const question of questions) {
-    const rating = ratings[question.id] || 0;
+    const ratingRaw = ratings[question.id];
+    const rating = typeof ratingRaw === 'number' ? ratingRaw : Number(ratingRaw) || 0;
     
     // Logic: Yes (2) = 5 points, No (1) = 0 points.
     // If answerType is not yesno, we might need different logic.
