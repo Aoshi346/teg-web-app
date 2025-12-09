@@ -51,7 +51,7 @@ export default function EvaluarTesisFase2Page({
       <>
         <DashboardHeader pageTitle={`Evaluar Tesis - Fase 2`} />
         <PageTransition>
-          <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto bg-gray-50 flex items-center justify-center">
+          <main className="flex-1 p-4 sm:p-6 lg:p-8 bg-gray-50 flex items-center justify-center">
             <div className="max-w-md w-full bg-white p-8 rounded-xl shadow-lg text-center border border-gray-200">
               <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <AlertCircle className="w-8 h-8 text-red-600" />
@@ -91,7 +91,7 @@ export default function EvaluarTesisFase2Page({
       <DashboardHeader pageTitle={`Evaluar Tesis - Fase 2 (Contenido)`} />
 
       <PageTransition>
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto bg-gray-50">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 bg-gray-50">
           <div className="max-w-7xl mx-auto">
             <button
               onClick={() => router.back()}

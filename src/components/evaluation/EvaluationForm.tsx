@@ -14,6 +14,7 @@ import {
   PASSING_SCORE,
 } from "@/lib/questions/scoring";
 import Banner from "@/components/ui/Banner";
+import { EvaluationHelpSidebar } from "@/components/evaluation/EvaluationHelpSidebar";
 
 interface EvaluationFormProps {
   projectId?: string | null;
@@ -61,6 +62,7 @@ export default function EvaluationForm({
   const [comments, setComments] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittedData, setSubmittedData] = useState<SubmittedData>(null);
+  const [activeSubsection, setActiveSubsection] = useState<string | null>(null);
   const [bannerState, setBannerState] = useState<{
     visible: boolean;
     message: string;
@@ -70,6 +72,16 @@ export default function EvaluationForm({
   const setRating = (qid: string, value: number | string) => {
     setRatings((prev) => ({ ...prev, [qid]: value }));
   };
+
+  const slugify = (text: string) =>
+    text
+      .toString()
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(/[^\w-]/g, "")
+      .replace(/--+/g, "-")
+      .replace(/^-+|-+$/g, "");
 
   const SCORE_COLOR_MAP = [
     "bg-red-50 text-red-700 border-red-200",
@@ -221,6 +233,29 @@ export default function EvaluationForm({
     return sectionQuestions.findIndex((q) => isQuestionMissing(q));
   };
 
+  const goToPage = (nextPage: number, onSuccess?: () => void) => {
+    if (nextPage === page) return;
+    // Allow going backward freely
+    if (nextPage > page) {
+      const missingOnCurrent = findMissingIndexInSection(currentSection);
+      if (missingOnCurrent !== -1) {
+        setBannerState({
+          visible: true,
+          message:
+            "Por favor complete todas las preguntas de la sección actual antes de avanzar a otra sección.",
+          type: "error",
+        });
+        return;
+      }
+    }
+
+    const clamped = Math.max(1, Math.min(totalPages, nextPage));
+    setPage(clamped);
+    if (onSuccess) {
+      setTimeout(onSuccess, 50);
+    }
+  };
+
   const handleNextSection = () => {
     const missingOnCurrent = findMissingIndexInSection(currentSection);
     if (missingOnCurrent !== -1) {
@@ -297,7 +332,7 @@ export default function EvaluationForm({
             .filter((q) => q.section === currentSection)
             .map((q) => q.subsection)
         ),
-      ]
+      ].filter(Boolean) as string[]
     : [];
 
   const getPageForSection = (section?: string) => {
@@ -312,6 +347,40 @@ export default function EvaluationForm({
       ?.section;
     return getPageForSection(sectionForSub);
   };
+
+  const scrollToSubsection = (sub?: string) => {
+    if (!sub) return;
+    const targetId = `subsection-${slugify(sub)}`;
+    const el = document.getElementById(targetId);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
+  // Observe subsection elements to detect which subsection is in view (for dynamic help sidebar)
+  React.useEffect(() => {
+    const handler = (entries: IntersectionObserverEntry[]) => {
+      const visible = entries
+        .filter((e) => e.isIntersecting)
+        .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+      if (visible) {
+        const id = visible.target.id || null;
+        if (id && id.startsWith("subsection-")) {
+          const name = id.replace("subsection-", "");
+          setActiveSubsection(name);
+        }
+      }
+    };
+    const observer = new IntersectionObserver(handler, {
+      root: null,
+      rootMargin: "-20% 0px -40% 0px",
+      threshold: [0.25, 0.5, 0.75],
+    });
+
+    const nodes = Array.from(document.querySelectorAll("[id^=subsection-]") as NodeListOf<Element>);
+    nodes.forEach((n) => observer.observe(n));
+    return () => observer.disconnect();
+  }, [page]);
 
   return (
     <>
@@ -352,13 +421,12 @@ export default function EvaluationForm({
       </div>
 
       {!submittedData ? (
-        <form
-          onSubmit={handleSubmit}
-          className="bg-white p-4 sm:p-6 lg:p-8 rounded-xl shadow-lg"
-        >
-          {/* ... form content ... */}
-          <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,1fr)_300px] xl:grid-cols-[minmax(0,1fr)_340px] lg:gap-8">
-            <div className="space-y-6 min-w-0">
+        <div className="flex flex-col lg:flex-row gap-6 lg:gap-10 items-start">
+          <form
+            onSubmit={handleSubmit}
+            className="bg-white p-4 sm:p-6 lg:p-8 rounded-xl shadow-lg flex-1 min-w-0"
+          >
+            <div className="space-y-6">
               <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100 p-4 shadow-sm">
                 <div className="mb-4">
                   <label className="text-xs font-semibold text-gray-700 uppercase tracking-wide mb-2 block">
@@ -375,7 +443,7 @@ export default function EvaluationForm({
                         <button
                           key={s}
                           type="button"
-                          onClick={() => setPage(pageForSection)}
+                            onClick={() => goToPage(pageForSection)}
                           className={`flex-shrink-0 px-4 py-2.5 rounded-lg font-medium text-sm transition-all ${
                             isActive
                               ? "bg-blue-600 text-white shadow-md"
@@ -413,14 +481,22 @@ export default function EvaluationForm({
                           <button
                             key={String(sub)}
                             type="button"
-                            onClick={() => setPage(subPage)}
-                            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                            onClick={() => {
+                              goToPage(subPage, () => scrollToSubsection(String(sub)));
+                            }}
+                            className={`group flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[11px] font-semibold border transition-all shadow-sm ${
                               isCurrentSubPage
-                                ? "bg-blue-600 text-white"
-                                : "bg-white text-gray-700 hover:bg-blue-50 border border-gray-200"
+                                ? "bg-emerald-600 border-emerald-600 text-white shadow-md"
+                                : "bg-white/80 border-gray-200 text-gray-700 hover:bg-emerald-50 hover:border-emerald-200 hover:shadow"
                             }`}
                           >
-                            {sub}
+                            <span
+                              className={`w-1.5 h-1.5 rounded-full ${
+                                isCurrentSubPage ? "bg-white" : "bg-emerald-500"
+                              }`}
+                              aria-hidden
+                            />
+                            <span className="whitespace-nowrap">{sub}</span>
                           </button>
                         );
                       })}
@@ -459,7 +535,7 @@ export default function EvaluationForm({
                       <button
                         key={p}
                         type="button"
-                        onClick={() => setPage(p)}
+                        onClick={() => goToPage(p)}
                         className={`min-w-[2.5rem] h-10 px-3 rounded-lg font-semibold text-sm transition-all ${
                           p === page
                             ? "bg-blue-600 text-white shadow-md scale-105"
@@ -475,7 +551,7 @@ export default function EvaluationForm({
 
               <div className="space-y-6">
                 {currentSection && (
-                  <div className="space-y-4">
+                  <div className="space-y-6">
                     <div className="bg-gradient-to-r from-blue-50 to-transparent border-l-4 border-blue-600 pl-4 pr-4 py-3 rounded-r-lg">
                       <h3 className="text-lg sm:text-xl font-bold text-gray-900">
                         {currentSection}
@@ -486,28 +562,47 @@ export default function EvaluationForm({
                         sección
                       </p>
                     </div>
-                    <div className="grid gap-4 sm:grid-cols-1 lg:grid-cols-2">
-                      {pageQuestions.map((q) => (
-                        <div
-                          key={q.id}
-                          className="border border-gray-200 rounded-xl p-4 bg-white shadow-sm hover:shadow-md transition-all"
-                        >
-                          <div className="space-y-3">
-                            <div>
-                              <h4 className="font-semibold text-sm sm:text-base text-gray-900">
-                                {q.label}
+
+                    {[...new Set(pageQuestions.map((q) => q.subsection || "General"))].map(
+                      (sub) => {
+                        const subId = `subsection-${slugify(sub)}`;
+                        const questionsInSub = pageQuestions.filter(
+                          (q) => (q.subsection || "General") === sub
+                        );
+                        return (
+                          <div key={sub} id={subId} className="space-y-3">
+                            <div className="flex items-center gap-2">
+                              <div className="w-2 h-2 rounded-full bg-blue-500" aria-hidden />
+                              <h4 className="text-sm font-semibold text-gray-800">
+                                {sub}
                               </h4>
-                              {q.helper && (
-                                <p className="text-xs text-gray-600 mt-1.5 leading-relaxed">
-                                  {q.helper}
-                                </p>
-                              )}
                             </div>
-                            {renderAnswerInput(q)}
+                            <div className="grid gap-4 sm:grid-cols-1 lg:grid-cols-2">
+                              {questionsInSub.map((q) => (
+                                <div
+                                  key={q.id}
+                                  className="border border-gray-200 rounded-xl p-4 bg-white shadow-sm hover:shadow-md transition-all"
+                                >
+                                  <div className="space-y-3">
+                                    <div>
+                                      <h5 className="font-semibold text-sm sm:text-base text-gray-900">
+                                        {q.label}
+                                      </h5>
+                                      {q.helper && (
+                                        <p className="text-xs text-gray-600 mt-1.5 leading-relaxed">
+                                          {q.helper}
+                                        </p>
+                                      )}
+                                    </div>
+                                    {renderAnswerInput(q)}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
                           </div>
-                        </div>
-                      ))}
-                    </div>
+                        );
+                      }
+                    )}
                   </div>
                 )}
               </div>
@@ -634,78 +729,12 @@ export default function EvaluationForm({
                 </button>
               </div>
             </div>
+          </form>
 
-            <aside className="hidden lg:flex flex-col gap-4 sticky top-4 self-start">
-              <div className="rounded-xl border-2 border-dashed border-gray-300 bg-gradient-to-br from-gray-50 to-blue-50 p-6 text-center">
-                <div className="aspect-video mb-3 flex items-center justify-center rounded-lg bg-gradient-to-br from-blue-100 via-white to-blue-50 text-gray-400 shadow-inner">
-                  <div className="text-center">
-                    <svg
-                      className="w-12 h-12 mx-auto mb-2 opacity-50"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                      />
-                    </svg>
-                    <p className="text-sm font-medium text-gray-500">
-                      Guía visual
-                    </p>
-                  </div>
-                </div>
-                <p className="text-sm text-gray-600">
-                  Espacio reservado para una imagen de referencia o
-                  instrucciones para el evaluador.
-                </p>
-              </div>
-              <div className="rounded-xl border border-gray-200 p-4 bg-white shadow-sm">
-                <h4 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                  <svg
-                    className="w-5 h-5 text-blue-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                  Sugerencias
-                </h4>
-                <ul className="space-y-2 text-sm text-gray-700">
-                  <li className="flex items-start gap-2">
-                    <span className="text-blue-600 mt-0.5">•</span>
-                    <span>Revise todos los criterios antes de enviar.</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-blue-600 mt-0.5">•</span>
-                    <span>
-                      Puede navegar entre páginas sin perder sus respuestas.
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-blue-600 mt-0.5">•</span>
-                    <span>
-                      Use &ldquo;No aplica&rdquo; cuando la pregunta no sea
-                      relevante.
-                    </span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="text-blue-600 mt-0.5">•</span>
-                    <span>Use 5 solo para trabajos excepcionales.</span>
-                  </li>
-                </ul>
-              </div>
-            </aside>
+          <div className="hidden lg:block lg:w-[320px] xl:w-[360px] flex-shrink-0">
+            <EvaluationHelpSidebar currentSection={activeSubsection ?? currentSection} />
           </div>
-        </form>
+        </div>
       ) : (
         <div className="bg-white p-6 sm:p-8 rounded-xl shadow-lg space-y-6">
           <div className="flex items-center gap-3 pb-4 border-b border-gray-200">

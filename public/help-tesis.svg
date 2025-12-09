@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="600" viewBox="0 0 900 600" fill="none">
+  <rect width="900" height="600" rx="20" fill="#edf7ed"/>
+  <g transform="translate(120,100)">
+    <rect x="0" y="0" width="660" height="140" rx="10" fill="#fff" stroke="#c7f0ce"/>
+    <rect x="0" y="180" width="620" height="35" rx="6" fill="#fff" stroke="#c7f0ce"/>
+    <rect x="0" y="230" width="560" height="35" rx="6" fill="#fff" stroke="#c7f0ce"/>
+    <rect x="0" y="280" width="380" height="35" rx="6" fill="#fff" stroke="#c7f0ce"/>
+  </g>
+  <text x="110" y="360" font-family="Arial" font-size="28" fill="#15803d">Tesis: metodología y análisis</text>
+</svg>
