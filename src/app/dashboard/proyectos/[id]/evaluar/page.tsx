@@ -11,10 +11,10 @@ import { ArrowLeft } from "lucide-react";
 export default function EvaluarProyectoPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   const router = useRouter();
-  const projectId = params.id;
+  const { id: projectId } = React.use(params);
   const typeParam = "proyecto";
 
   return (

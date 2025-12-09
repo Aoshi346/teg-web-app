@@ -1,30 +1,19 @@
 "use client";
 
-import React, {
-  useEffect,
-  useState,
-  useRef,
-  useMemo,
-  memo,
-} from "react";
+import React, { useEffect, useRef, useMemo, memo } from "react";
 import { gsap } from "gsap";
 import {
-  Bell,
   AlertTriangle,
   CheckCircle,
   FileText,
   BookOpen,
-  ChevronDown,
   XCircle,
   Clock,
   Check,
   MessageSquare,
-  Menu,
-  ChevronsLeft,
 } from "lucide-react";
 import DashboardHeader from "@/components/layout/DashboardHeader";
 import PageTransition from "@/components/ui/PageTransition";
-import LoginLoading from "@/components/ui/LoginLoading";
 
 interface StatCardProps {
   title: string;

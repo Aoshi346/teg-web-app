@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { X, CheckCircle, AlertTriangle, Info } from "lucide-react";
 
 type ToastProps = {
@@ -32,6 +32,14 @@ const typeStyles = {
 export default function Toast({ visible, message, type = "info", duration = 4000, onClose }: ToastProps) {
   const [isExiting, setIsExiting] = useState(false);
 
+  const handleClose = useCallback(() => {
+    setIsExiting(true);
+    setTimeout(() => {
+      onClose();
+      setIsExiting(false);
+    }, 300); // Animation duration
+  }, [onClose]);
+
   useEffect(() => {
     if (visible) {
       const timer = setTimeout(() => {
@@ -40,14 +48,6 @@ export default function Toast({ visible, message, type = "info", duration = 4000
       return () => clearTimeout(timer);
     }
   }, [visible, duration, handleClose]);
-
-  function handleClose() {
-    setIsExiting(true);
-    setTimeout(() => {
-      onClose();
-      setIsExiting(false);
-    }, 300); // Animation duration
-  }
 
   if (!visible && !isExiting) {
     return null;

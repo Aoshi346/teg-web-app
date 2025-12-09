@@ -133,8 +133,8 @@ html, body, #__next {
 }
 
 main {
+  /* Keep horizontal overflow hidden but let per-page classes control vertical scrolling */
   overflow-x: hidden;
-  overflow-y: visible;
 }
 
 /* Debug helper: add .outline-debug to any element to visualize bounding boxes while diagnosing overflow */

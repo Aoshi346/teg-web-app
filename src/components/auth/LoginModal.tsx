@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { X, Eye, EyeOff, Mail, Lock, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -329,13 +329,13 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   // Animation state
   const [isClosing, setIsClosing] = useState(false);
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setIsClosing(true);
     setTimeout(() => {
       onClose();
       setIsClosing(false);
     }, 300); // Corresponds to animation duration
-  };
+  }, [onClose]);
 
   // Prevent body from scrolling when the modal is open
   useEffect(() => {
@@ -354,7 +354,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, []);
+  }, [handleClose]);
 
   const showToast = (message: string, type: 'error' | 'success' | 'info' = 'error') => {
     setToastState({ visible: true, message, type });
@@ -387,7 +387,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
       setTimeout(() => {
         try {
           router.push('/dashboard');
-        } catch (err) {
+        } catch {
           window.location.href = '/dashboard';
         }
       }, 1500);

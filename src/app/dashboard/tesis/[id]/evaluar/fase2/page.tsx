@@ -11,10 +11,10 @@ import { AlertCircle, ArrowLeft } from "lucide-react";
 export default function EvaluarTesisFase2Page({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   const router = useRouter();
-  const projectId = params.id;
+  const { id: projectId } = React.use(params);
   const [isAllowed, setIsAllowed] = useState<boolean | null>(null);
 
   useEffect(() => {

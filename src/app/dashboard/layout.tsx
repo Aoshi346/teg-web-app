@@ -66,14 +66,14 @@ export default function DashboardLayout({
   return (
     <>
       <RouteLoading />
-      <div className="h-screen w-full flex bg-gray-100 overflow-hidden">
+      <div className="h-screen w-full flex bg-gray-100 overflow-x-hidden">
         <Sidebar 
           isCollapsed={isSidebarCollapsed} 
           setIsCollapsed={setIsSidebarCollapsed} 
           mobileOpen={isMobileSidebarOpen} 
           setMobileOpen={setIsMobileSidebarOpen} 
         />
-        <div className="flex-1 flex flex-col min-h-0 overflow-hidden transition-all duration-300">
+        <div className="flex-1 flex flex-col min-h-0 overflow-y-auto overflow-x-hidden transition-all duration-300">
           {/* Provide sidebar state to children via context so header and other components can consume it */}
           <SidebarProvider
             value={{

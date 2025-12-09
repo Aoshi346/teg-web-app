@@ -9,10 +9,10 @@ import { FileText, CheckCircle, Lock, ArrowLeft } from "lucide-react";
 export default function EvaluarTesisPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   const router = useRouter();
-  const projectId = params.id;
+  const { id: projectId } = React.use(params);
   const [stage1Passed, setStage1Passed] = useState(false);
 
   useEffect(() => {
