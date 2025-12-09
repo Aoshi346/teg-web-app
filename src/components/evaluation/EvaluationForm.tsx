@@ -171,6 +171,32 @@ export default function EvaluationForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    // If this is not the final page, only validate questions on the current page
+    if (page < totalPages) {
+      const start = (page - 1) * PAGE_SIZE;
+      const end = page * PAGE_SIZE;
+      const currentPageQuestions = filteredQuestions.slice(start, end);
+      const missingOnCurrent = currentPageQuestions.findIndex(
+        (q) => !ratings[q.id] || ratings[q.id] <= 0
+      );
+      if (missingOnCurrent !== -1) {
+        const absoluteMissingIndex = start + missingOnCurrent;
+        const missingPage = Math.floor(absoluteMissingIndex / PAGE_SIZE) + 1;
+        setPage(missingPage);
+        alert(
+          "Por favor califique todas las preguntas en esta página antes de continuar. Se le redirigirá a la pregunta incompleta."
+        );
+        setIsSubmitting(false);
+        return;
+      }
+
+      // All questions on the current page are answered: go to the next page
+      setPage((p) => Math.min(totalPages, p + 1));
+      setIsSubmitting(false);
+      return;
+    }
+
+    // If this is the last page, run the global validation and final submit
     const missingIndex = filteredQuestions.findIndex(
       (q) => !ratings[q.id] || ratings[q.id] <= 0
     );

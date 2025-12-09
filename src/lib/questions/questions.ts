@@ -109,11 +109,69 @@ export const PROJECT_QUESTIONS: Question[] = [
 ];
 
 export const TESIS_STAGE1_QUESTIONS: Question[] = [
-  // Diagramacion - General aggregated checks for Tesis (only)
-  { id: "q57", label: "D.1 - Elementos preliminares", helper: "¿El documento cuenta con portada, página de presentación, acta de aprobación del tutor (firmada), declaración de derecho de autor, índice general, índices específicos (si aplica), lista de símbolos y abreviaturas (si aplica) y glosario de términos (si aplica)?", section: "Diagramacion", subsection: "General", documentType: 'Tesis', answerType: 'yesno' },
-  { id: "q58", label: "D.2 - Formato en la totalidad del documento", helper: "¿El documento en su totalidad cumple con el formato establecido para márgenes, títulos, subtítulos, interlineado, tipo, estilo y tamaño de letra, así como la identificación de la portada, página preliminar, tablas, cuadros y figuras?", section: "Diagramacion", subsection: "General", documentType: 'Tesis', answerType: 'yesno' },
-  { id: "q59", label: "D.3 - Reglas ortográficas", helper: "¿En la totalidad del documento se cumple con cada una de las reglas ortográficas?", section: "Diagramacion", subsection: "General", documentType: 'Tesis', answerType: 'yesno' },
-  { id: "q60", label: "D.4 - Redacción y coherencia", helper: "¿La redacción del documento presenta un lenguaje coherente, claro, técnicamente adecuado y organizado, y hay transiciones claras entre los párrafos y las secciones del texto?", section: "Diagramacion", subsection: "General", documentType: 'Tesis', answerType: 'yesno' },
+  // 3. Diagramación
+  { id: "q57", label: "Márgenes", helper: "¿El resumen respeta los márgenes (4cm izquierdo y 3cm superior, inferior y derecho)?", section: "Diagramación", subsection: "Formato", documentType: 'Tesis', answerType: 'yesno' },
+  { id: "q58", label: "Formato del Título", helper: "¿Está en mayúscula, negrillas, centrado, interlineado sencillo y letra Verdana 14?", section: "Diagramación", subsection: "Formato", documentType: 'Tesis', answerType: 'yesno' },
+  { id: "q59", label: "Formato del Subtítulo", helper: "¿Está en mayúscula, negrillas, centrado, interlineado sencillo, Verdana 12 y separado del título por espacio y medio?", section: "Diagramación", subsection: "Formato", documentType: 'Tesis', answerType: 'yesno' },
+  { id: "q60", label: "Leyenda del Título", helper: "¿Aparece debajo del título la leyenda \"Trabajo Especial de Grado presentado como requisito...\" con el formato correcto (centrada, Verdana 12, etc.)?", section: "Diagramación", subsection: "Formato", documentType: 'Tesis', answerType: 'yesno' },
+  { id: "q65", label: "Formato de Autores", helper: "¿Están los nombres alineados a la derecha, Verdana 12, precedidos por \"AUTORES:\" en mayúscula y negrita?", section: "Diagramación", subsection: "Formato", documentType: 'Tesis', answerType: 'yesno' },
+  { id: "q66", label: "Ciudad y Fecha", helper: "¿Se encuentra la ciudad, mes y año alineados a la derecha y en Verdana 12?", section: "Diagramación", subsection: "Formato", documentType: 'Tesis', answerType: 'yesno' },
+  { id: "q67", label: "Título \"RESUMEN\"", helper: "¿Aparece centrado, en mayúsculas, negritas y Verdana 12?", section: "Diagramación", subsection: "Resumen", documentType: 'Tesis', answerType: 'yesno' },
+  { id: "q68", label: "Cuerpo del Texto", helper: "¿El párrafo del resumen tiene interlineado sencillo, justificado y letra Verdana 12?", section: "Diagramación", subsection: "Resumen", documentType: 'Tesis', answerType: 'yesno' },
+  { id: "q69", label: "Palabras Clave", helper: "¿Hay un máximo de seis términos, ordenados alfabéticamente, justificados y en Verdana 12?", section: "Diagramación", subsection: "Resumen", documentType: 'Tesis', answerType: 'yesno' },
+  { id: "q70", label: "Pertinencia de Palabras Clave", helper: "¿Considera que los términos describen adecuadamente los aspectos relevantes de la investigación?", section: "Diagramación", subsection: "Resumen", documentType: 'Tesis', answerType: 'yesno' },
+  { id: "q71", label: "Extensión", helper: "¿El texto tiene una extensión igual o inferior a 300 palabras?", section: "Diagramación", subsection: "Resumen", documentType: 'Tesis', answerType: 'yesno' },
+  { id: "q72", label: "Redacción", helper: "¿Es fluida, clara, concisa y comprensible?", section: "Diagramación", subsection: "Resumen", documentType: 'Tesis', answerType: 'yesno' },
+  { id: "q73", label: "Gramática", helper: "¿Es adecuada (tiempos verbales en pasado, coherencia de género y número)?", section: "Diagramación", subsection: "Resumen", documentType: 'Tesis', answerType: 'yesno' },
+  { id: "q74", label: "Ortografía", helper: "¿Se cumplen todas las reglas ortográficas?", section: "Diagramación", subsection: "Resumen", documentType: 'Tesis', answerType: 'yesno' },
+
+  // 4. Contenido, Congruencia y Coherencia
+  // A. Título y Subtítulo
+  { id: "q75", label: "Título - Claridad y precisión", helper: "¿El título describe el contenido de manera clara y concisa?", section: "Contenido, Congruencia y Coherencia", subsection: "Título y Subtítulo", documentType: 'Tesis', answerType: 'yesno' },
+  { id: "q76", label: "Subtítulo - Complemento", helper: "¿El subtítulo complementa al título proporcionando información adicional para precisar el alcance?", section: "Contenido, Congruencia y Coherencia", subsection: "Título y Subtítulo", documentType: 'Tesis', answerType: 'yesno' },
+
+  // B. Planteamiento del Problema
+  { id: "q77", label: "Planteamiento - Claridad", helper: "¿Está formulado de manera clara y estructurada?", section: "Contenido, Congruencia y Coherencia", subsection: "Planteamiento del Problema", documentType: 'Tesis', answerType: 'yesno' },
+  { id: "q78", label: "Planteamiento - Matriz de evaluación", helper: "¿Está formulado con precisión, claridad y delimita el problema? ¿Es coherente con el planteamiento?", section: "Contenido, Congruencia y Coherencia", subsection: "Planteamiento del Problema", documentType: 'Tesis', answerType: 'yesno' },
+
+  // C. Justificación
+  { id: "q79", label: "Justificación", helper: "¿Se expone de manera clara la justificación y/o importancia de la investigación?", section: "Contenido, Congruencia y Coherencia", subsection: "Justificación", documentType: 'Tesis', answerType: 'yesno' },
+
+  // D. Objetivo General
+  { id: "q80", label: "Objetivo General - Matriz", helper: "¿Está formulado con precisión, claridad y delimita el problema? ¿Es coherente con el planteamiento?", section: "Contenido, Congruencia y Coherencia", subsection: "Objetivo General", documentType: 'Tesis', answerType: 'yesno' },
+
+  // E. Clasificación de la Investigación (Tipos de Investigación)
+  { id: "q81", label: "Clasificación - Propósito", helper: "¿Se especifica el propósito (pura o aplicada) y es congruente con el objetivo?", section: "Contenido, Congruencia y Coherencia", subsection: "Clasificación de la Investigación", documentType: 'Tesis', answerType: 'yesno' },
+  { id: "q82", label: "Clasificación - Enfoque/Paradigma", helper: "¿Se indica el enfoque (cualitativa, cuantitativa, mixta, holística o transcompleja) y es adecuado al objetivo?", section: "Contenido, Congruencia y Coherencia", subsection: "Clasificación de la Investigación", documentType: 'Tesis', answerType: 'yesno' },
+  { id: "q83", label: "Clasificación - Diseño (Recolección)", helper: "¿Se especifica el diseño (documental, experimental, cuasi-experimental, no experimental) y es adecuado al objetivo?", section: "Contenido, Congruencia y Coherencia", subsection: "Clasificación de la Investigación", documentType: 'Tesis', answerType: 'yesno' },
+  { id: "q84", label: "Clasificación - Alcance Temporal", helper: "¿Se indica el alcance temporal (longitudinal o transaccional) y es congruente con el objetivo?", section: "Contenido, Congruencia y Coherencia", subsection: "Clasificación de la Investigación", documentType: 'Tesis', answerType: 'yesno' },
+  { id: "q85", label: "Clasificación - Nivel de Análisis", helper: "¿Se especifica el nivel (exploratoria, descriptiva, explicativa, comparativa, predictiva, proyectiva, interactiva, confirmatoria, evaluativa) y es congruente con el objetivo?", section: "Contenido, Congruencia y Coherencia", subsection: "Clasificación de la Investigación", documentType: 'Tesis', answerType: 'yesno' },
+  { id: "q86", label: "Clasificación - Proyecto Factible", helper: "Si aplica, ¿se indica proyecto factible según el enfoque?", section: "Contenido, Congruencia y Coherencia", subsection: "Clasificación de la Investigación", documentType: 'Tesis', answerType: 'yesno' },
+  { id: "q87", label: "Clasificación - Congruencia", helper: "¿La clasificación es adecuada y congruente con el objetivo?", section: "Contenido, Congruencia y Coherencia", subsection: "Clasificación de la Investigación", documentType: 'Tesis', answerType: 'yesno' },
+
+  // F. Muestra
+  { id: "q88", label: "Muestra", helper: "¿En el texto se especifica la muestra empleada?", section: "Contenido, Congruencia y Coherencia", subsection: "Muestra", documentType: 'Tesis', answerType: 'yesno' },
+
+  // G. Técnicas, Métodos y Procedimientos
+  { id: "q89", label: "Técnicas y Procedimientos", helper: "¿Su descripción es clara y precisa? ¿Son adecuadas y coherentes con el objetivo general?", section: "Contenido, Congruencia y Coherencia", subsection: "Técnicas, Métodos y Procedimientos", documentType: 'Tesis', answerType: 'yesno' },
+
+  // H. Resultados Principales
+  { id: "q90", label: "Resultados - Claridad", helper: "¿Están expresados de manera clara y acompañados de valores cuantitativos (cuando corresponda)?", section: "Contenido, Congruencia y Coherencia", subsection: "Resultados Principales", documentType: 'Tesis', answerType: 'yesno' },
+  { id: "q91", label: "Resultados - Significancia", helper: "¿Se expresa la significancia estadística de manera adecuada?", section: "Contenido, Congruencia y Coherencia", subsection: "Resultados Principales", documentType: 'Tesis', answerType: 'yesno' },
+  { id: "q92", label: "Resultados - Coherencia", helper: "¿Son coherentes y adecuados con las técnicas empleadas?", section: "Contenido, Congruencia y Coherencia", subsection: "Resultados Principales", documentType: 'Tesis', answerType: 'yesno' },
+
+  // I. Análisis de Resultados y Conclusiones
+  { id: "q93", label: "Análisis y Conclusiones - Presentación", helper: "¿Están claramente presentadas?", section: "Contenido, Congruencia y Coherencia", subsection: "Análisis y Conclusiones", documentType: 'Tesis', answerType: 'yesno' },
+  { id: "q94", label: "Análisis y Conclusiones - Coherencia con objetivos", helper: "¿Son coherentes y adecuadas con el objetivo general?", section: "Contenido, Congruencia y Coherencia", subsection: "Análisis y Conclusiones", documentType: 'Tesis', answerType: 'yesno' },
+  { id: "q95", label: "Análisis y Conclusiones - Coherencia con métodos", helper: "¿Son coherentes con las técnicas y métodos empleados?", section: "Contenido, Congruencia y Coherencia", subsection: "Análisis y Conclusiones", documentType: 'Tesis', answerType: 'yesno' },
+
+  // J. Elementos Gráficos y Matemáticos
+  { id: "q96", label: "Figuras/Cuadros", helper: "¿Se citan figuras, cuadros o se hace referencia a ellos dentro del texto?", section: "Contenido, Congruencia y Coherencia", subsection: "Elementos Gráficos y Matemáticos", documentType: 'Tesis', answerType: 'yesno' },
+  { id: "q97", label: "Ecuaciones", helper: "¿Las ecuaciones incluidas son imprescindibles, justificadas o innecesarias?", section: "Contenido, Congruencia y Coherencia", subsection: "Elementos Gráficos y Matemáticos", documentType: 'Tesis', answerType: 'yesno' },
+
+  // 5. Consideraciones Finales
+  { id: "q98", label: "Aporte", helper: "¿Considera que el tema constituye un aporte valioso al campo del conocimiento? (Use la calificación y complemente en comentarios)", section: "Consideraciones Finales", subsection: "Aporte", documentType: 'Tesis', answerType: 'stars' },
+  { id: "q99", label: "Feedback", helper: "Espacio para observaciones, recomendaciones o comentarios para mejorar el documento (use la calificación y agregue detalles en el campo de comentarios).", section: "Consideraciones Finales", subsection: "Feedback", documentType: 'Tesis', answerType: 'stars' },
 ];
 
 export const TESIS_STAGE2_QUESTIONS: Question[] = [
