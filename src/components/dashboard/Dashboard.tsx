@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useMemo, memo } from "react";
+import React, { useEffect, useRef, useMemo, memo, useState } from "react";
 import { gsap } from "gsap";
 import {
   AlertTriangle,
@@ -11,9 +11,13 @@ import {
   Clock,
   Check,
   MessageSquare,
+  Calendar,
 } from "lucide-react";
 import DashboardHeader from "@/components/layout/DashboardHeader";
 import PageTransition from "@/components/ui/PageTransition";
+import SemesterSelector from "@/components/ui/SemesterSelector";
+import { mockTesis, mockProyectos } from "@/lib/data/mockData";
+import { getAvailableSemesters, getStoredSemester, setStoredSemester, formatSemesterLabel } from "@/lib/semesters";
 
 interface StatCardProps {
   title: string;
@@ -85,10 +89,10 @@ const StatCard: React.FC<StatCardProps> = memo(
       <div
         ref={cardRef}
         className={`kbi-card rounded-2xl p-4 sm:p-6 shadow-lg shadow-gray-900/10 ${isColorful
-            ? `${bgClass ??
-            "bg-gradient-to-br from-emerald-500 via-emerald-600 to-green-700"
-            } border border-transparent ring-1 ring-white/20`
-            : "bg-white border border-gray-200/80 ring-1 ring-gray-200/80"
+          ? `${bgClass ??
+          "bg-gradient-to-br from-emerald-500 via-emerald-600 to-green-700"
+          } border border-transparent ring-1 ring-white/20`
+          : "bg-white border border-gray-200/80 ring-1 ring-gray-200/80"
           }`}
       >
         <div className="flex items-center gap-3 sm:gap-5">
@@ -124,8 +128,8 @@ const StatCard: React.FC<StatCardProps> = memo(
         </div>
         <div
           className={`mt-4 sm:mt-6 pt-3 sm:pt-4 grid grid-cols-2 gap-3 sm:flex sm:flex-row sm:justify-around sm:gap-4 ${isColorful
-              ? "border-t border-white/20"
-              : "border-t border-gray-200/75"
+            ? "border-t border-white/20"
+            : "border-t border-gray-200/75"
             }`}
         >
           {secondaryStats.map((stat) => (
@@ -347,6 +351,27 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
           style={{ opacity: 1 }}
         >
           <div className="max-w-7xl mx-auto">
+            {/* Current Semester Indicator */}
+            <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-100">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                  <Calendar className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Período Actual</p>
+                  <p className="text-lg font-bold text-gray-900">{formatSemesterLabel(getStoredSemester())}</p>
+                </div>
+              </div>
+              <SemesterSelector
+                selectedSemester={getStoredSemester()}
+                availableSemesters={getAvailableSemesters([...mockTesis, ...mockProyectos])}
+                onSemesterChange={(sem) => {
+                  setStoredSemester(sem);
+                  window.location.reload(); // Refresh to apply new semester
+                }}
+              />
+            </div>
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 mb-6 sm:mb-8">
               {stats.map((stat, index) => (
                 <StatCard key={index} {...stat} delay={index * 100} />

@@ -5,7 +5,9 @@ import { gsap } from "gsap";
 import { Search, CheckCircle, Clock, XCircle, FileText } from "lucide-react";
 import DashboardHeader from "@/components/layout/DashboardHeader";
 import PageTransition from "@/components/ui/PageTransition";
+import SemesterSelector from "@/components/ui/SemesterSelector";
 import { mockTesis, Project } from "@/lib/data/mockData";
+import { getAvailableSemesters, getStoredSemester, setStoredSemester } from "@/lib/semesters";
 import ProjectCard from "@/components/dashboard/ProjectCard";
 
 interface TesisPageProps {
@@ -26,13 +28,28 @@ export default function TesisPage(props: TesisPageProps = {}) {
   const [filterStatus, setFilterStatus] = useState<
     "all" | "checked" | "pending" | "rejected"
   >("all");
-  const animationsRef = useRef<gsap.core.Tween[]>([]);
 
-  // Mock data for TEG projects
-  const allProjects = useMemo<Project[]>(() => mockTesis, []);
+  // Semester state - persisted in localStorage
+  const availableSemesters = useMemo(() => getAvailableSemesters(mockTesis), []);
+  const [selectedSemester, setSelectedSemester] = useState(() => {
+    const stored = getStoredSemester();
+    // If stored semester is not available in this data, use first available
+    return availableSemesters.includes(stored) ? stored : availableSemesters[0] || stored;
+  });
+
+  const handleSemesterChange = (semester: string) => {
+    setSelectedSemester(semester);
+    setStoredSemester(semester);
+  };
+
+  // Filter by semester first, then by search/status
+  const semesterProjects = useMemo<Project[]>(
+    () => mockTesis.filter((p) => p.semester === selectedSemester),
+    [selectedSemester]
+  );
 
   const filteredProjects = useMemo(() => {
-    return allProjects.filter((project) => {
+    return semesterProjects.filter((project) => {
       const matchesSearch =
         project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         project.student.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -42,7 +59,7 @@ export default function TesisPage(props: TesisPageProps = {}) {
         filterStatus === "all" || project.status === filterStatus;
       return matchesSearch && matchesFilter;
     });
-  }, [allProjects, searchQuery, filterStatus]);
+  }, [semesterProjects, searchQuery, filterStatus]);
 
   const checkedProjects = useMemo(
     () => filteredProjects.filter((p) => p.status === "checked"),
@@ -126,55 +143,88 @@ export default function TesisPage(props: TesisPageProps = {}) {
         {/* Main Content */}
         <main className="flex-1 p-3 sm:p-4 md:p-6 lg:p-8 overflow-y-auto bg-gray-50">
           <div className="max-w-7xl mx-auto">
-            {/* Search and Filter Bar */}
-            <div className="section-container mb-6 sm:mb-8 flex flex-col sm:flex-row gap-3 sm:gap-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Buscar por título, estudiante o tutor..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-sm sm:text-base"
-                />
+            {/* Modern Unified Header with Semester + Search + Filters */}
+            <div className="section-container mb-8">
+              {/* Top Row: Semester Selector with higher z-index */}
+              <div className="relative z-50 mb-5">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <SemesterSelector
+                    selectedSemester={selectedSemester}
+                    availableSemesters={availableSemesters}
+                    onSemesterChange={handleSemesterChange}
+                  />
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl border border-emerald-200/60">
+                      <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-sm shadow-emerald-500/50" />
+                      <span className="text-sm font-semibold text-emerald-700">
+                        {semesterProjects.length} tesis
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setFilterStatus("all")}
-                  className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all touch-manipulation ${filterStatus === "all"
-                      ? "bg-blue-600 text-white shadow-md"
-                      : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
-                    }`}
-                >
-                  Todos
-                </button>
-                <button
-                  onClick={() => setFilterStatus("checked")}
-                  className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all touch-manipulation ${filterStatus === "checked"
-                      ? "bg-green-600 text-white shadow-md"
-                      : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
-                    }`}
-                >
-                  Revisados
-                </button>
-                <button
-                  onClick={() => setFilterStatus("pending")}
-                  className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all touch-manipulation ${filterStatus === "pending"
-                      ? "bg-amber-600 text-white shadow-md"
-                      : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
-                    }`}
-                >
-                  Pendientes
-                </button>
-                <button
-                  onClick={() => setFilterStatus("rejected")}
-                  className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all touch-manipulation ${filterStatus === "rejected"
-                      ? "bg-red-600 text-white shadow-md"
-                      : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
-                    }`}
-                >
-                  Rechazados
-                </button>
+
+              {/* Bottom Row: Search and Filters with lower z-index */}
+              <div className="relative z-10 bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-200/80 shadow-sm p-4">
+                <div className="flex flex-col lg:flex-row gap-4">
+                  {/* Modern Search Input */}
+                  <div className="relative flex-1 group">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <Search className="w-5 h-5 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Buscar por título, estudiante o tutor..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full pl-12 pr-4 py-3.5 bg-gray-50/80 border-2 border-gray-200/80 rounded-xl focus:bg-white focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all text-sm placeholder:text-gray-400"
+                    />
+                  </div>
+
+                  {/* Modern Filter Pills */}
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider mr-1 hidden sm:block">Filtrar:</span>
+                    <button
+                      onClick={() => setFilterStatus("all")}
+                      className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${filterStatus === "all"
+                        ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/30 scale-[1.02]"
+                        : "bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-800"
+                        }`}
+                    >
+                      Todos
+                    </button>
+                    <button
+                      onClick={() => setFilterStatus("checked")}
+                      className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 flex items-center gap-1.5 ${filterStatus === "checked"
+                        ? "bg-gradient-to-r from-emerald-500 to-green-600 text-white shadow-lg shadow-emerald-500/30 scale-[1.02]"
+                        : "bg-gray-100 text-gray-600 hover:bg-emerald-50 hover:text-emerald-700"
+                        }`}
+                    >
+                      <CheckCircle className="w-4 h-4" />
+                      Revisados
+                    </button>
+                    <button
+                      onClick={() => setFilterStatus("pending")}
+                      className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 flex items-center gap-1.5 ${filterStatus === "pending"
+                        ? "bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-lg shadow-amber-500/30 scale-[1.02]"
+                        : "bg-gray-100 text-gray-600 hover:bg-amber-50 hover:text-amber-700"
+                        }`}
+                    >
+                      <Clock className="w-4 h-4" />
+                      Pendientes
+                    </button>
+                    <button
+                      onClick={() => setFilterStatus("rejected")}
+                      className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 flex items-center gap-1.5 ${filterStatus === "rejected"
+                        ? "bg-gradient-to-r from-red-500 to-rose-600 text-white shadow-lg shadow-red-500/30 scale-[1.02]"
+                        : "bg-gray-100 text-gray-600 hover:bg-red-50 hover:text-red-700"
+                        }`}
+                    >
+                      <XCircle className="w-4 h-4" />
+                      Rechazados
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
 
