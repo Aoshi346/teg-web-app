@@ -241,7 +241,7 @@ export default function TesisPage(props: TesisPageProps = {}) {
                       {checkedProjects.length} proyectos
                     </span>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 auto-rows-fr">
                     {checkedProjects.map((project) => (
                       <ProjectCard
                         key={project.id}
@@ -267,7 +267,7 @@ export default function TesisPage(props: TesisPageProps = {}) {
                       {pendingProjects.length} proyectos
                     </span>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 auto-rows-fr">
                     {pendingProjects.map((project) => (
                       <ProjectCard
                         key={project.id}
@@ -293,7 +293,7 @@ export default function TesisPage(props: TesisPageProps = {}) {
                       {rejectedProjects.length} proyectos
                     </span>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 auto-rows-fr">
                     {rejectedProjects.map((project) => (
                       <ProjectCard
                         key={project.id}

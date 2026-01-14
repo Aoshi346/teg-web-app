@@ -2,7 +2,7 @@
 
 import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { User, FileText, Calendar } from "lucide-react";
+import { Calendar, User, FileText, Clock, XCircle } from "lucide-react";
 import { Project } from "@/lib/data/mockData";
 
 interface ProjectCardProps {
@@ -22,107 +22,169 @@ export default function ProjectCard({ project, primaryHref, primaryLabel, classN
     }
   }, [primaryHref, router]);
 
-  const handlePrimary = () => {
+  const handlePrimary = (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (primaryHref) router.push(primaryHref);
   };
 
-  const statusBadge = () => {
-    if (project.status === "checked") {
-      return (
-        <span className="ml-2 flex-shrink-0 px-3 py-1 bg-green-100 text-green-800 text-sm font-bold rounded-full">
-          {typeof project.score === "number" ? project.score : "Revisado"}
-        </span>
-      );
-    }
-
-    if (project.status === "pending") {
-      return (
-        <span className="ml-2 flex-shrink-0 px-3 py-1 bg-amber-100 text-amber-800 text-xs font-semibold rounded-full">
-          Pendiente
-        </span>
-      );
-    }
-
-    return (
-      <span className="ml-2 flex-shrink-0 px-3 py-1 bg-red-100 text-red-800 text-xs font-semibold rounded-full">
-        Rechazado
-      </span>
-    );
-  };
-
-  const getButtonStyles = () => {
+  const getStatusConfig = () => {
     switch (project.status) {
       case "checked":
-        return "bg-green-600 hover:bg-green-700 active:bg-green-800 text-white";
+        return {
+          wrapper: "hover:border-emerald-300 hover:shadow-emerald-500/10",
+          title: "group-hover:text-emerald-700",
+          ringGradient: ["#10B981", "#34D399"], // Emerald 500 -> 400
+          scoreText: "text-emerald-600",
+          button: "bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/40 hover:-translate-y-0.5 border-transparent",
+          iconBg: "bg-emerald-50 text-emerald-600",
+        };
       case "pending":
-        return "bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white";
+        return {
+          wrapper: "hover:border-amber-300 hover:shadow-amber-500/10",
+          title: "group-hover:text-amber-700",
+          ringGradient: ["#F59E0B", "#FBBF24"], // Amber 500 -> 400
+          scoreText: "text-amber-600",
+          button: "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/30 hover:shadow-amber-500/40 hover:-translate-y-0.5 border-transparent",
+          iconBg: "bg-amber-50 text-amber-600",
+        };
       case "rejected":
-        return "bg-red-600 hover:bg-red-700 active:bg-red-800 text-white";
+        return {
+          wrapper: "hover:border-red-300 hover:shadow-red-500/10",
+          title: "group-hover:text-red-700",
+          ringGradient: ["#EF4444", "#F87171"], // Red 500 -> 400
+          scoreText: "text-red-600",
+          button: "bg-gradient-to-r from-red-600 to-rose-600 text-white shadow-lg shadow-red-500/30 hover:shadow-red-500/40 hover:-translate-y-0.5 border-transparent",
+          iconBg: "bg-red-50 text-red-600",
+        };
       default:
-        return "bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white";
-    }
-  };
-
-  const getCardHoverStyles = () => {
-    switch (project.status) {
-      case "checked":
-        return "hover:border-green-300";
-      case "pending":
-        return "hover:border-amber-300";
-      case "rejected":
-        return "hover:border-red-300";
-      default:
-        return "hover:border-blue-300";
+        return {
+          wrapper: "hover:border-blue-300 hover:shadow-blue-500/10",
+          title: "group-hover:text-blue-700",
+          ringGradient: ["#3B82F6", "#60A5FA"],
+          scoreText: "text-blue-600",
+          button: "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/30 hover:shadow-blue-500/40 hover:-translate-y-0.5 border-transparent",
+          iconBg: "bg-blue-50 text-blue-600",
+        };
     }
   };
 
-  const getTitleHoverStyles = () => {
-    switch (project.status) {
-      case "checked":
-        return "group-hover:text-green-600";
-      case "pending":
-        return "group-hover:text-amber-600";
-      case "rejected":
-        return "group-hover:text-red-600";
-      default:
-        return "group-hover:text-blue-600";
-    }
+  const config = getStatusConfig();
+  const gradientId = `grad-${project.id}`; // Unique ID for SVG gradient
+
+  // Helper to get initials
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map(n => n[0])
+      .slice(0, 2)
+      .join("")
+      .toUpperCase();
   };
 
   return (
     <div
-      key={project.id}
-      className={`project-card bg-white rounded-xl p-4 sm:p-6 shadow-md shadow-gray-900/5 border border-gray-200 hover:shadow-lg transition-all duration-200 cursor-pointer group ${getCardHoverStyles()} ${className ?? ""}`}
+      onClick={handlePrimary}
+      className={`project-card relative h-full flex flex-col bg-white rounded-3xl p-6 border border-gray-100 transition-all duration-300 shadow-sm hover:shadow-xl cursor-pointer group ${config.wrapper} ${className ?? ""}`}
     >
-      <div className="flex items-start justify-between mb-3">
-        <div className="flex-1 min-w-0">
-          <h4 className={`text-base sm:text-lg font-bold text-gray-900 line-clamp-2 transition-colors ${getTitleHoverStyles()}`}>
-            {project.title}
-          </h4>
+      {/* Header with Title and Score/Status */}
+      <div className="flex items-start justify-between gap-4 mb-6">
+        <h4
+          className={`text-xl font-extrabold text-gray-900 leading-tight line-clamp-3 transition-colors duration-300 ${config.title}`}
+          title={project.title}
+        >
+          {project.title}
+        </h4>
+
+        {/* Abstract Status Indicator - Circular for Score or Icon for others */}
+        <div className="flex-shrink-0">
+          {project.status === "checked" && typeof project.score === "number" ? (
+            <div className="relative w-16 h-16 flex items-center justify-center"> {/* Slightly larger */}
+              <svg className="absolute inset-0 w-full h-full -rotate-90 drop-shadow-sm" viewBox="0 0 36 36">
+                <defs>
+                  <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor={config.ringGradient[0]} />
+                    <stop offset="100%" stopColor={config.ringGradient[1]} />
+                  </linearGradient>
+                </defs>
+                {/* Track */}
+                <path
+                  className="text-gray-100"
+                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="3"
+                />
+                {/* Progress */}
+                <path
+                  stroke={`url(#${gradientId})`}
+                  strokeDasharray={`${(project.score / 20) * 100}, 100`}
+                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                  fill="none"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                />
+              </svg>
+              <div className="flex flex-col items-center justify-center leading-none">
+                <span className={`text-xl font-bold ${config.scoreText}`}>{project.score}</span>
+                <span className="text-[10px] uppercase font-bold text-gray-400 mt-0.5">/20</span>
+              </div>
+            </div>
+          ) : (
+            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-inner ${config.iconBg}`}>
+              {project.status === 'pending' && <Clock className="w-7 h-7" />}
+              {project.status === 'rejected' && <XCircle className="w-7 h-7" />}
+              {!['pending', 'rejected'].includes(project.status) && <Calendar className="w-7 h-7" />}
+            </div>
+          )}
         </div>
-        {statusBadge()}
       </div>
 
-      <div className="space-y-2 text-sm text-gray-600">
-        <div className="flex items-center gap-2">
-          <User className="w-4 h-4 text-gray-400 flex-shrink-0" />
-          <span className="truncate"><strong>Estudiante:</strong> {project.student}</span>
+      {/* Metadata Sections */}
+      <div className="flex-1 space-y-5 mb-8">
+        {/* Student */}
+        <div className="flex items-center gap-4 group/item">
+          <div className="w-12 h-12 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center text-sm font-bold text-gray-500 group-hover/item:bg-white group-hover/item:shadow-md group-hover/item:scale-110 transition-all duration-300">
+            {getInitials(project.student)}
+          </div>
+          <div>
+            <p className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-0.5">ESTUDIANTE</p>
+            <p className="font-bold text-gray-900 text-sm sm:text-base">{project.student}</p>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <FileText className="w-4 h-4 text-gray-400 flex-shrink-0" />
-          <span className="truncate"><strong>Tutor:</strong> {project.advisor}</span>
+
+        {/* Tutor */}
+        <div className="flex items-center gap-4 group/item">
+          <div className="w-12 h-12 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center text-sm font-bold text-gray-500 group-hover/item:bg-white group-hover/item:shadow-md group-hover/item:scale-110 transition-all duration-300">
+            {getInitials(project.advisor)}
+          </div>
+          <div>
+            <p className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-0.5">TUTOR</p>
+            <p className="font-bold text-gray-900 text-sm sm:text-base">{project.advisor}</p>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Calendar className="w-4 h-4 text-gray-400 flex-shrink-0" />
-          <span><strong>{project.reviewDate ? (project.status === "rejected" ? 'Rechazado:' : 'Revisado:') : 'Entregado:'}</strong> {project.reviewDate ?? project.submittedDate}</span>
+
+        {/* Date */}
+        <div className="flex items-center gap-4 group/item">
+          <div className="w-12 h-12 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center group-hover/item:bg-white group-hover/item:shadow-md group-hover/item:scale-110 transition-all duration-300">
+            <Calendar className="w-5 h-5 text-gray-400" />
+          </div>
+          <div>
+            <p className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-0.5">
+              {project.status === "rejected" ? 'RECHAZADO' : (project.reviewDate ? 'REVISADO' : 'ENTREGADO')}
+            </p>
+            <p className="font-bold text-gray-900 text-sm sm:text-base">
+              {project.reviewDate ?? project.submittedDate}
+            </p>
+          </div>
         </div>
       </div>
 
+      {/* Action Button - Gradient Style */}
       <button
         onClick={handlePrimary}
-        className={`mt-4 w-full py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 shadow-md touch-manipulation ${getButtonStyles()}`}
+        className={`mt-auto w-full py-3.5 rounded-2xl text-sm font-bold border transition-all duration-300 active:scale-[0.98] ${config.button}`}
       >
-        {primaryLabel ?? (project.status === "checked" ? "Ver Detalles" : project.status === "pending" ? "Revisar Ahora" : "Ver Motivo")}
+        {primaryLabel ?? (project.status === "checked" ? "Ver Detalles" : project.status === "pending" ? "Evaluar Proyecto" : "Ver Motivo")}
       </button>
     </div>
   );

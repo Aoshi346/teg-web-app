@@ -135,11 +135,10 @@ export default function EvaluationForm({
                 key={option.value}
                 type="button"
                 onClick={() => setRating(question.id, option.value)}
-                className={`flex-1 px-4 py-3 rounded-lg text-sm font-semibold border-2 transition-all ${
-                  currentRating === option.value
-                    ? `${option.color} shadow-md scale-105`
-                    : "bg-white text-gray-600 border-gray-200 hover:border-gray-300 hover:shadow-sm"
-                }`}
+                className={`flex-1 px-4 py-3 rounded-lg text-sm font-semibold border-2 transition-all ${currentRating === option.value
+                  ? `${option.color} shadow-md scale-105`
+                  : "bg-white text-gray-600 border-gray-200 hover:border-gray-300 hover:shadow-sm"
+                  }`}
               >
                 {option.label}
               </button>
@@ -155,11 +154,10 @@ export default function EvaluationForm({
                 key={option.value}
                 type="button"
                 onClick={() => setRating(question.id, option.value)}
-                className={`w-full px-4 py-2.5 rounded-lg text-sm font-medium border-2 transition-all text-left ${
-                  currentRating === option.value
-                    ? `${option.color} shadow-md`
-                    : "bg-white text-gray-600 border-gray-200 hover:border-gray-300 hover:shadow-sm"
-                }`}
+                className={`w-full px-4 py-2.5 rounded-lg text-sm font-medium border-2 transition-all text-left ${currentRating === option.value
+                  ? `${option.color} shadow-md`
+                  : "bg-white text-gray-600 border-gray-200 hover:border-gray-300 hover:shadow-sm"
+                  }`}
               >
                 {option.label}
               </button>
@@ -181,11 +179,10 @@ export default function EvaluationForm({
                     type="button"
                     onClick={() => setRating(question.id, val)}
                     aria-label={`Puntuación ${val}`}
-                    className={`w-full px-3 py-2 rounded-lg text-sm font-semibold border-2 transition-all ${
-                      isSelected
-                        ? `${palette} shadow-md scale-[1.02]`
-                        : "bg-white text-gray-700 border-gray-200 hover:border-blue-300 hover:bg-blue-50"
-                    }`}
+                    className={`w-full px-3 py-2 rounded-lg text-sm font-semibold border-2 transition-all ${isSelected
+                      ? `${palette} shadow-md scale-[1.02]`
+                      : "bg-white text-gray-700 border-gray-200 hover:border-blue-300 hover:bg-blue-50"
+                      }`}
                   >
                     {val}
                   </button>
@@ -222,8 +219,11 @@ export default function EvaluationForm({
   };
 
   const isQuestionMissing = (question: Question) => {
-    if (question.answerType === "text") return false; // preguntas de texto son opcionales
+    // Optional types or text don't count as missing
+    if (question.answerType === "text" || !["yesno", "frequency", "stars"].includes(question.answerType)) return false;
+
     const value = ratings[question.id];
+    // Strict check for 0 or falsy values for required number types
     const numericValue = typeof value === "number" ? value : Number(value);
     return !numericValue || numericValue <= 0;
   };
@@ -233,18 +233,39 @@ export default function EvaluationForm({
     return sectionQuestions.findIndex((q) => isQuestionMissing(q));
   };
 
+  const scrollToQuestion = (questionId: string) => {
+    setTimeout(() => {
+      const el = document.getElementById(`qt-${questionId}`);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        el.classList.add("ring-2", "ring-red-500", "ring-offset-2");
+        setTimeout(() => el.classList.remove("ring-2", "ring-red-500", "ring-offset-2"), 2000);
+      }
+    }, 100); // Small delay to allow page render
+  };
+
   const goToPage = (nextPage: number, onSuccess?: () => void) => {
-    if (nextPage === page) return;
+    if (nextPage === page) {
+      if (onSuccess) onSuccess();
+      return;
+    }
+
     // Allow going backward freely
     if (nextPage > page) {
-      const missingOnCurrent = findMissingIndexInSection(currentSection);
-      if (missingOnCurrent !== -1) {
+      const missingIndex = findMissingIndexInSection(currentSection);
+      if (missingIndex !== -1) {
+        const sectionQuestions = filteredQuestions.filter((q) => q.section === currentSection);
+        const missingQuestion = sectionQuestions[missingIndex];
+
         setBannerState({
           visible: true,
-          message:
-            "Por favor complete todas las preguntas de la sección actual antes de avanzar a otra sección.",
+          message: "Por favor complete todas las preguntas de la sección actual antes de avanzar.",
           type: "error",
         });
+
+        if (missingQuestion) {
+          scrollToQuestion(missingQuestion.id);
+        }
         return;
       }
     }
@@ -257,14 +278,21 @@ export default function EvaluationForm({
   };
 
   const handleNextSection = () => {
-    const missingOnCurrent = findMissingIndexInSection(currentSection);
-    if (missingOnCurrent !== -1) {
+    const missingIndex = findMissingIndexInSection(currentSection);
+
+    if (missingIndex !== -1) {
+      const sectionQuestions = filteredQuestions.filter((q) => q.section === currentSection);
+      const missingQuestion = sectionQuestions[missingIndex];
+
       setBannerState({
         visible: true,
-        message:
-          "Por favor califique todas las preguntas de esta sección antes de continuar.",
+        message: "Por favor califique todas las preguntas de esta sección antes de continuar.",
         type: "error",
       });
+
+      if (missingQuestion) {
+        scrollToQuestion(missingQuestion.id);
+      }
       return;
     }
     setPage((p) => Math.min(totalPages, p + 1));
@@ -275,17 +303,29 @@ export default function EvaluationForm({
     setIsSubmitting(true);
 
     // Global validation across sections
-    const missingSectionIndex = sections.findIndex(
-      (section) => findMissingIndexInSection(section) !== -1
-    );
-    if (missingSectionIndex !== -1) {
-      setPage(missingSectionIndex + 1);
+    let firstMissingQuestion: Question | undefined;
+    const missingSectionIndex = sections.findIndex((section) => {
+      const idx = findMissingIndexInSection(section);
+      if (idx !== -1) {
+        const sectionQuestions = filteredQuestions.filter((q) => q.section === section);
+        firstMissingQuestion = sectionQuestions[idx];
+        return true;
+      }
+      return false;
+    });
+
+    if (missingSectionIndex !== -1 && firstMissingQuestion) {
+      const targetPage = missingSectionIndex + 1;
+      setPage(targetPage);
+
       setBannerState({
         visible: true,
-        message:
-          "Por favor califique todas las preguntas antes de enviar. Se le redirigirá a la sección incompleta.",
+        message: "Por favor califique todas las preguntas obligatorias marcadas.",
         type: "error",
       });
+
+      // improved scroll logic
+      scrollToQuestion(firstMissingQuestion.id);
       setIsSubmitting(false);
       return;
     }
@@ -327,12 +367,12 @@ export default function EvaluationForm({
   );
   const subsectionsOfCurrent = currentSection
     ? [
-        ...new Set(
-          filteredQuestions
-            .filter((q) => q.section === currentSection)
-            .map((q) => q.subsection)
-        ),
-      ].filter(Boolean) as string[]
+      ...new Set(
+        filteredQuestions
+          .filter((q) => q.section === currentSection)
+          .map((q) => q.subsection)
+      ),
+    ].filter(Boolean) as string[]
     : [];
 
   const getPageForSection = (section?: string) => {
@@ -443,21 +483,19 @@ export default function EvaluationForm({
                         <button
                           key={s}
                           type="button"
-                            onClick={() => goToPage(pageForSection)}
-                          className={`flex-shrink-0 px-4 py-2.5 rounded-lg font-medium text-sm transition-all ${
-                            isActive
-                              ? "bg-blue-600 text-white shadow-md"
-                              : "bg-white text-gray-700 hover:bg-blue-50 border border-gray-200"
-                          }`}
+                          onClick={() => goToPage(pageForSection)}
+                          className={`flex-shrink-0 px-4 py-2.5 rounded-lg font-medium text-sm transition-all ${isActive
+                            ? "bg-blue-600 text-white shadow-md"
+                            : "bg-white text-gray-700 hover:bg-blue-50 border border-gray-200"
+                            }`}
                         >
                           <div className="flex items-center gap-2">
                             <span>{s}</span>
                             <span
-                              className={`text-xs px-2 py-0.5 rounded-full ${
-                                isActive
-                                  ? "bg-blue-500 text-white"
-                                  : "bg-gray-100 text-gray-600"
-                              }`}
+                              className={`text-xs px-2 py-0.5 rounded-full ${isActive
+                                ? "bg-blue-500 text-white"
+                                : "bg-gray-100 text-gray-600"
+                                }`}
                             >
                               {count}
                             </span>
@@ -484,16 +522,14 @@ export default function EvaluationForm({
                             onClick={() => {
                               goToPage(subPage, () => scrollToSubsection(String(sub)));
                             }}
-                            className={`group flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[11px] font-semibold border transition-all shadow-sm ${
-                              isCurrentSubPage
-                                ? "bg-emerald-600 border-emerald-600 text-white shadow-md"
-                                : "bg-white/80 border-gray-200 text-gray-700 hover:bg-emerald-50 hover:border-emerald-200 hover:shadow"
-                            }`}
+                            className={`group flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[11px] font-semibold border transition-all shadow-sm ${isCurrentSubPage
+                              ? "bg-emerald-600 border-emerald-600 text-white shadow-md"
+                              : "bg-white/80 border-gray-200 text-gray-700 hover:bg-emerald-50 hover:border-emerald-200 hover:shadow"
+                              }`}
                           >
                             <span
-                              className={`w-1.5 h-1.5 rounded-full ${
-                                isCurrentSubPage ? "bg-white" : "bg-emerald-500"
-                              }`}
+                              className={`w-1.5 h-1.5 rounded-full ${isCurrentSubPage ? "bg-white" : "bg-emerald-500"
+                                }`}
                               aria-hidden
                             />
                             <span className="whitespace-nowrap">{sub}</span>
@@ -536,11 +572,10 @@ export default function EvaluationForm({
                         key={p}
                         type="button"
                         onClick={() => goToPage(p)}
-                        className={`min-w-[2.5rem] h-10 px-3 rounded-lg font-semibold text-sm transition-all ${
-                          p === page
-                            ? "bg-blue-600 text-white shadow-md scale-105"
-                            : "bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200"
-                        }`}
+                        className={`min-w-[2.5rem] h-10 px-3 rounded-lg font-semibold text-sm transition-all ${p === page
+                          ? "bg-blue-600 text-white shadow-md scale-105"
+                          : "bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200"
+                          }`}
                       >
                         {p}
                       </button>
@@ -581,7 +616,8 @@ export default function EvaluationForm({
                               {questionsInSub.map((q) => (
                                 <div
                                   key={q.id}
-                                  className="border border-gray-200 rounded-xl p-4 bg-white shadow-sm hover:shadow-md transition-all"
+                                  id={`qt-${q.id}`}
+                                  className="border border-gray-200 rounded-xl p-4 bg-white shadow-sm hover:shadow-md transition-all scroll-mt-24"
                                 >
                                   <div className="space-y-3">
                                     <div>
@@ -739,11 +775,10 @@ export default function EvaluationForm({
         <div className="bg-white p-6 sm:p-8 rounded-xl shadow-lg space-y-6">
           <div className="flex items-center gap-3 pb-4 border-b border-gray-200">
             <div
-              className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                submittedData.passStatus === "Pass"
-                  ? "bg-green-100"
-                  : "bg-red-100"
-              }`}
+              className={`w-12 h-12 rounded-full flex items-center justify-center ${submittedData.passStatus === "Pass"
+                ? "bg-green-100"
+                : "bg-red-100"
+                }`}
             >
               {submittedData.passStatus === "Pass" ? (
                 <svg
