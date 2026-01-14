@@ -8,6 +8,7 @@ export type Question = {
   subsection?: string; // grouped subsection under the top-level section
   documentType?: 'Proyecto' | 'Tesis' | 'Both';
   answerType: AnswerType;
+  relatedImage?: string; // Optional URL/path to a visual aid for this specific question
 };
 
 // Keep explicit per-document-type question lists: PROJECT_QUESTIONS and TESIS_QUESTIONS below.
@@ -25,13 +26,36 @@ export const YESNO_OPTIONS = [
 ];
 
 // Derived per-document-type question sets for convenience
-// Explicit per-document-type question lists (manually separated)
-export const PROJECT_QUESTIONS: Question[] = [
+
+/**
+ * Generates a placeholder image URL for a question.
+ * Replace these with actual image paths when real reference images are available.
+ * The placeholder includes the question ID and a sanitized label for easy identification.
+ * 
+ * To replace with real images, update the `relatedImage` field for each question:
+ * - For local images: "/images/references/q1-logo-universidad.jpg"
+ * - For external images: "https://your-cdn.com/references/q1-logo-universidad.jpg"
+ */
+function getPlaceholderImage(id: string, label: string): string {
+  // Sanitize label for URL (remove special chars, replace spaces with +)
+  const sanitizedLabel = label
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "") // Remove accents
+    .replace(/[^a-zA-Z0-9\s]/g, "")  // Remove special chars
+    .replace(/\s+/g, "+")            // Replace spaces with +
+    .substring(0, 30);               // Limit length
+
+  // Use a placeholder service with the question ID and label
+  return `https://placehold.co/600x400/e2e8f0/475569?text=${id}:+${sanitizedLabel}`;
+}
+
+// Explicit per-document-type question lists (base definitions without images)
+const _PROJECT_QUESTIONS: Question[] = [
   // Diagramacion → Portada (Both)
-  { id: "q1", label: "Logo Universidad", helper: "Contiene a 3 cm del borde superior y de manera centrada el logo de la universidad en negro o azul (3,5 cm *1,3 cm)", section: "Diagramacion", subsection: "Portada", documentType: 'Both', answerType: 'yesno' },
-  { id: "q2", label: "Nombre de la Universidad", helper: "Inmediatamente debajo del Logo de la universidad, y separados por 0,5 cm; se encuentra el nombre de la misma en letra Arial tamaño", section: "Diagramacion", subsection: "Portada", documentType: 'Both', answerType: 'yesno' },
+  { id: "q1", label: "Logo Universidad", helper: "Contiene a 3 cm del borde superior y de manera centrada el logo de la universidad en negro o azul (3,5 cm *1,3 cm)", section: "Diagramacion", subsection: "Portada", documentType: 'Both', answerType: 'yesno', relatedImage: "https://via.placeholder.com/600x400/e2e8f0/475569?text=Ejemplo+Logo+Universidad" },
+  { id: "q2", label: "Nombre de la Universidad", helper: "Inmediatamente debajo del Logo de la universidad, y separados por 0,5 cm; se encuentra el nombre de la misma en letra Arial tamaño", section: "Diagramacion", subsection: "Portada", documentType: 'Both', answerType: 'yesno', relatedImage: "https://via.placeholder.com/600x400/e2e8f0/475569?text=Ejemplo+Nombre+Universidad" },
   { id: "q3", label: "Nombre de la Facultad", helper: "Inmediatamente debajo del nombre de la universidad, y separados por 0,5 cm; se encuentra el nombre de la Facultad en letra Arial tamaño", section: "Diagramacion", subsection: "Portada", documentType: 'Both', answerType: 'yesno' },
-  { id: "q4", label: "Título de la investigación", helper: "El título de la investigación está mayúscula y negrillas, centrado horizontal y verticalmente, con interlineado sencillo y en letra Verdana Tamaño 14", section: "Diagramacion", subsection: "Portada", documentType: 'Both', answerType: 'yesno' },
+  { id: "q4", label: "Título de la investigación", helper: "El título de la investigación está mayúscula y negrillas, centrado horizontal y verticalmente, con interlineado sencillo y en letra Verdana Tamaño 14", section: "Diagramacion", subsection: "Portada", documentType: 'Both', answerType: 'yesno', relatedImage: "https://via.placeholder.com/600x400/e2e8f0/475569?text=Ejemplo+Titulo" },
   { id: "q5", label: "Subtítulo de la investigación", helper: "En caso de existir subtítulo de la investigación, el mismo está mayúscula y negrillas, centrado horizontal y verticalmente, con interlineado sencillo, separado del título por espacio y medio; y en letra Verdana Tamaño 12", section: "Diagramacion", subsection: "Portada", documentType: 'Both', answerType: 'yesno' },
   { id: "q6", label: "Nombre del autor", helper: "El nombre del autor o autores y sus cédulas de identidad aparecen alineados a la derecha, en letra Verdana tamaño 12, e interlineado sencillo; precedido por la palabra Autor o Autores en negrillas, separada del primer autor por espacio y medio", section: "Diagramacion", subsection: "Portada", documentType: 'Both', answerType: 'yesno' },
   { id: "q7", label: "Ciudad y fecha", helper: "Aproximadamente a 3 cm del borde inferior de la hoja se encuentra la ciudad donde se realizó el trabajo, el mes y el año, centrados y en Verdana tamaño 12", section: "Diagramacion", subsection: "Portada", documentType: 'Both', answerType: 'yesno' },
@@ -108,7 +132,7 @@ export const PROJECT_QUESTIONS: Question[] = [
   { id: "q56", label: "Referencias - Pertinencia", helper: "Se citaron las obras más pertinentes al campo de conocimiento.", section: "Contenido", subsection: "Referencias bibliográficas", documentType: 'Proyecto', answerType: 'frequency' },
 ];
 
-export const TESIS_STAGE1_QUESTIONS: Question[] = [
+const _TESIS_STAGE1_QUESTIONS: Question[] = [
   // 3. Diagramación
   { id: "q57", label: "Márgenes", helper: "¿El resumen respeta los márgenes (4cm izquierdo y 3cm superior, inferior y derecho)?", section: "Diagramación", subsection: "Formato", documentType: 'Tesis', answerType: 'yesno' },
   { id: "q58", label: "Formato del Título", helper: "¿Está en mayúscula, negrillas, centrado, interlineado sencillo y letra Verdana 14?", section: "Diagramación", subsection: "Formato", documentType: 'Tesis', answerType: 'yesno' },
@@ -174,7 +198,7 @@ export const TESIS_STAGE1_QUESTIONS: Question[] = [
   { id: "q99", label: "Feedback", helper: "Espacio para observaciones, recomendaciones o comentarios para mejorar el documento. Responda con texto libre.", section: "Consideraciones Finales", subsection: "Feedback", documentType: 'Tesis', answerType: 'text' },
 ];
 
-export const TESIS_STAGE2_QUESTIONS: Question[] = [
+const _TESIS_STAGE2_QUESTIONS: Question[] = [
   // Placeholder for Stage 2 (Content)
   { id: "q61", label: "C.1 - Planteamiento del Problema", helper: "¿El planteamiento del problema es claro, preciso y está bien delimitado?", section: "Contenido", subsection: "Capítulo I", documentType: 'Tesis', answerType: 'yesno' },
   { id: "q62", label: "C.2 - Objetivos", helper: "¿Los objetivos son medibles, alcanzables y coherentes con el problema planteado?", section: "Contenido", subsection: "Capítulo I", documentType: 'Tesis', answerType: 'yesno' },
@@ -182,5 +206,26 @@ export const TESIS_STAGE2_QUESTIONS: Question[] = [
   { id: "q64", label: "C.4 - Metodología", helper: "¿La metodología descrita es adecuada para alcanzar los objetivos propuestos?", section: "Contenido", subsection: "Capítulo III", documentType: 'Tesis', answerType: 'yesno' },
 ];
 
-// Alias for backward compatibility (points to Stage 1)
+/**
+ * Applies placeholder images to all questions that don't already have a relatedImage.
+ * This ensures every question has a reference image for the hover popup.
+ */
+function applyPlaceholderImages(questions: Question[]): Question[] {
+  return questions.map(q => ({
+    ...q,
+    relatedImage: q.relatedImage || getPlaceholderImage(q.id, q.label),
+  }));
+}
+
+// Apply placeholder images to all question arrays
+const PROJECT_QUESTIONS_WITH_IMAGES = applyPlaceholderImages(_PROJECT_QUESTIONS);
+const TESIS_STAGE1_QUESTIONS_WITH_IMAGES = applyPlaceholderImages(_TESIS_STAGE1_QUESTIONS);
+const TESIS_STAGE2_QUESTIONS_WITH_IMAGES = applyPlaceholderImages(_TESIS_STAGE2_QUESTIONS);
+
+// Export with images applied
+export const PROJECT_QUESTIONS = PROJECT_QUESTIONS_WITH_IMAGES;
+export const TESIS_STAGE1_QUESTIONS = TESIS_STAGE1_QUESTIONS_WITH_IMAGES;
+export const TESIS_STAGE2_QUESTIONS = TESIS_STAGE2_QUESTIONS_WITH_IMAGES;
+
+// Alias for backward compatibility (points to Stage 1 with images)
 export const TESIS_QUESTIONS = TESIS_STAGE1_QUESTIONS;

@@ -14,7 +14,7 @@ import {
   PASSING_SCORE,
 } from "@/lib/questions/scoring";
 import Banner from "@/components/ui/Banner";
-import { EvaluationHelpSidebar } from "@/components/evaluation/EvaluationHelpSidebar";
+import { ImageTooltip } from "@/components/ui/ImageTooltip";
 
 interface EvaluationFormProps {
   projectId?: string | null;
@@ -59,10 +59,12 @@ export default function EvaluationForm({
   ];
   const totalPages = Math.max(1, sections.length);
   const [page, setPage] = useState<number>(1);
+  const [activeQuestion, setActiveQuestion] = useState<Question | null>(null);
   const [comments, setComments] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittedData, setSubmittedData] = useState<SubmittedData>(null);
   const [activeSubsection, setActiveSubsection] = useState<string | null>(null);
+
   const [bannerState, setBannerState] = useState<{
     visible: boolean;
     message: string;
@@ -129,20 +131,44 @@ export default function EvaluationForm({
     switch (question.answerType) {
       case "yesno":
         return (
-          <div className="flex items-center justify-center gap-2 pt-2">
-            {YESNO_OPTIONS.map((option) => (
-              <button
-                key={option.value}
-                type="button"
-                onClick={() => setRating(question.id, option.value)}
-                className={`flex-1 px-4 py-3 rounded-lg text-sm font-semibold border-2 transition-all ${currentRating === option.value
-                  ? `${option.color} shadow-md scale-105`
-                  : "bg-white text-gray-600 border-gray-200 hover:border-gray-300 hover:shadow-sm"
-                  }`}
-              >
-                {option.label}
-              </button>
-            ))}
+          <div className="grid grid-cols-2 gap-3 w-full">
+            {YESNO_OPTIONS.map((option) => {
+              const isActive = currentRating === option.value;
+              const isYes = option.label.toLowerCase() === 'sí' || option.label.toLowerCase() === 'si';
+
+              let activeClass = "";
+              if (isActive) {
+                // Determine color based on option (Yes usually Green/Blue, No usually Red/Gray)
+                // Assuming option.color might already bring classes, but let's override for a cleaner look if needed
+                // Or revert to using the provided option.color correctly but with better base styles
+                activeClass = isYes
+                  ? "bg-emerald-500 text-white border-emerald-500 shadow-md shadow-emerald-500/20"
+                  : "bg-rose-500 text-white border-rose-500 shadow-md shadow-rose-500/20";
+              } else {
+                activeClass = "bg-white text-gray-600 border-gray-200 hover:bg-gray-50 hover:border-gray-300";
+              }
+
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => setRating(question.id, option.value)}
+                  className={`relative flex items-center justify-center py-2.5 px-4 rounded-xl text-sm font-semibold border transition-all duration-200 active:scale-[0.98] ${activeClass}`}
+                >
+                  {/* Optional: Add icons if desired for friendly UI */}
+                  {isActive && (
+                    <span className="absolute left-3 animate-fade-in">
+                      {isYes ? (
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                      ) : (
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                      )}
+                    </span>
+                  )}
+                  {option.label}
+                </button>
+              );
+            })}
           </div>
         );
 
@@ -461,7 +487,7 @@ export default function EvaluationForm({
       </div>
 
       {!submittedData ? (
-        <div className="flex flex-col lg:flex-row gap-6 lg:gap-10 items-start">
+        <div className="flex flex-col lg:flex-row gap-6 lg:gap-10">
           <form
             onSubmit={handleSubmit}
             className="bg-white p-4 sm:p-6 lg:p-8 rounded-xl shadow-lg flex-1 min-w-0"
@@ -612,24 +638,35 @@ export default function EvaluationForm({
                                 {sub}
                               </h4>
                             </div>
-                            <div className="grid gap-4 sm:grid-cols-1 lg:grid-cols-2">
+                            <div className="grid gap-6 sm:grid-cols-1 lg:grid-cols-2 lg:auto-rows-fr">
                               {questionsInSub.map((q) => (
                                 <div
                                   key={q.id}
                                   id={`qt-${q.id}`}
-                                  className="border border-gray-200 rounded-xl p-4 bg-white shadow-sm hover:shadow-md transition-all scroll-mt-24"
+                                  onMouseEnter={() => setActiveQuestion(q)}
+                                  // Optional: clear on leave or keep persistent? Keeping persistent usually feels better
+                                  // onMouseLeave={() => setActiveQuestion(null)}
+                                  className="group flex flex-col h-full bg-white rounded-2xl border border-gray-100 p-5 shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-300 scroll-mt-32 focus-within:ring-2 focus-within:ring-blue-100 ring-offset-2"
                                 >
-                                  <div className="space-y-3">
-                                    <div>
-                                      <h5 className="font-semibold text-sm sm:text-base text-gray-900">
-                                        {q.label}
-                                      </h5>
-                                      {q.helper && (
-                                        <p className="text-xs text-gray-600 mt-1.5 leading-relaxed">
-                                          {q.helper}
-                                        </p>
+                                  <div className="mb-4 flex-1">
+                                    <h5 className="font-bold text-gray-900 leading-snug mb-2 flex items-start justify-between gap-2">
+                                      {q.label}
+                                      {q.relatedImage && (
+                                        <ImageTooltip imageUrl={q.relatedImage} title={q.label}>
+                                          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-600 border border-blue-100 hover:bg-blue-100 hover:border-blue-200 transition-colors cursor-help">
+                                            📷 IMG
+                                          </span>
+                                        </ImageTooltip>
                                       )}
-                                    </div>
+                                    </h5>
+                                    {q.helper && (
+                                      <p className="text-sm text-gray-500 leading-relaxed">
+                                        {q.helper}
+                                      </p>
+                                    )}
+                                  </div>
+
+                                  <div className="mt-auto pt-4 border-t border-gray-50">
                                     {renderAnswerInput(q)}
                                   </div>
                                 </div>
@@ -766,10 +803,6 @@ export default function EvaluationForm({
               </div>
             </div>
           </form>
-
-          <div className="hidden lg:block lg:w-[320px] xl:w-[360px] flex-shrink-0">
-            <EvaluationHelpSidebar currentSection={activeSubsection ?? currentSection} />
-          </div>
         </div>
       ) : (
         <div className="bg-white p-6 sm:p-8 rounded-xl shadow-lg space-y-6">

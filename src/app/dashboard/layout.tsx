@@ -23,7 +23,7 @@ export default function DashboardLayout({
   useEffect(() => {
     // Only check auth once on mount
     if (hasCheckedAuthRef.current) return;
-    
+
     // Check auth synchronously for instant response
     const authenticated = isAuthenticated();
     if (!authenticated) {
@@ -40,7 +40,7 @@ export default function DashboardLayout({
     try {
       // debug: log when layout toggle is invoked
       console.debug('[layout] handleSidebarCollapse invoked');
-    } catch {}
+    } catch { }
   }, []);
 
   const handleMobileSidebarToggle = useCallback(() => {
@@ -56,7 +56,7 @@ export default function DashboardLayout({
   useEffect(() => {
     try {
       console.debug('[layout] isSidebarCollapsed ->', isSidebarCollapsed);
-    } catch {}
+    } catch { }
   }, [isSidebarCollapsed]);
 
   if (isAuthenticating) {
@@ -67,11 +67,11 @@ export default function DashboardLayout({
     <>
       <RouteLoading />
       <div className="h-screen w-full flex bg-gray-100 overflow-x-hidden">
-        <Sidebar 
-          isCollapsed={isSidebarCollapsed} 
-          setIsCollapsed={setIsSidebarCollapsed} 
-          mobileOpen={isMobileSidebarOpen} 
-          setMobileOpen={setIsMobileSidebarOpen} 
+        <Sidebar
+          isCollapsed={isSidebarCollapsed}
+          setIsCollapsed={setIsSidebarCollapsed}
+          mobileOpen={isMobileSidebarOpen}
+          setMobileOpen={setIsMobileSidebarOpen}
         />
         <div className="flex-1 flex flex-col min-h-0 overflow-y-auto overflow-x-hidden transition-all duration-300">
           {/* Provide sidebar state to children via context so header and other components can consume it */}
@@ -87,11 +87,11 @@ export default function DashboardLayout({
           >
             {React.isValidElement(children)
               ? React.cloneElement(children, {
-                  handleSidebarCollapse,
-                  handleMobileSidebarToggle,
-                  isSidebarCollapsed,
-                  isMobileSidebarOpen,
-                } as unknown as Record<string, unknown>)
+                handleSidebarCollapse,
+                handleMobileSidebarToggle,
+                isSidebarCollapsed,
+                isMobileSidebarOpen,
+              } as unknown as Record<string, unknown>)
               : children}
           </SidebarProvider>
         </div>
