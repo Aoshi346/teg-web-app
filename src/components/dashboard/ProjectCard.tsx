@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { User, FileText, Calendar } from "lucide-react";
 import { Project } from "@/lib/data/mockData";
@@ -14,6 +14,13 @@ interface ProjectCardProps {
 
 export default function ProjectCard({ project, primaryHref, primaryLabel, className }: ProjectCardProps) {
   const router = useRouter();
+
+  // Prefetch the target route on mount for instant navigation
+  useEffect(() => {
+    if (primaryHref) {
+      router.prefetch(primaryHref);
+    }
+  }, [primaryHref, router]);
 
   const handlePrimary = () => {
     if (primaryHref) router.push(primaryHref);

@@ -18,14 +18,9 @@ export default function EvaluarTesisFase2Page({
   const [isAllowed, setIsAllowed] = useState<boolean | null>(null);
 
   useEffect(() => {
-    // Mock backend check
-    // In a real app, we would fetch the project status from the API
-    const checkStatus = async () => {
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
+    // Check stage 1 pass status - no delay for instant navigation
+    const checkStatus = () => {
       // For demonstration, we'll check a sessionStorage flag or default to false
-      // You can set 'mock_stage1_passed' to 'true' in console to test access
       const passed =
         sessionStorage.getItem(`project_${projectId}_stage1_passed`) === "true";
       setIsAllowed(passed);
