@@ -84,12 +84,14 @@ export default function ProjectCard({ project, primaryHref, primaryLabel, classN
   return (
     <div
       onClick={handlePrimary}
-      className={`project-card relative h-full flex flex-col bg-white rounded-3xl p-6 border border-gray-100 transition-all duration-300 shadow-sm hover:shadow-xl cursor-pointer group ${config.wrapper} ${className ?? ""}`}
+      // Reduced padding from p-6 to pi-5
+      className={`project-card relative h-full flex flex-col bg-white rounded-3xl p-5 border border-gray-100 transition-all duration-300 shadow-sm hover:shadow-xl cursor-pointer group ${config.wrapper} ${className ?? ""}`}
     >
       {/* Header with Title and Score/Status */}
-      <div className="flex items-start justify-between gap-4 mb-6">
+      <div className="flex items-start justify-between gap-3 mb-5">
         <h4
-          className={`text-xl font-extrabold text-gray-900 leading-tight line-clamp-3 transition-colors duration-300 ${config.title}`}
+          // Slightly smaller text and tighter leading
+          className={`text-lg font-extrabold text-gray-900 leading-snug line-clamp-3 transition-colors duration-300 ${config.title}`}
           title={project.title}
         >
           {project.title}
@@ -98,7 +100,8 @@ export default function ProjectCard({ project, primaryHref, primaryLabel, classN
         {/* Abstract Status Indicator - Circular for Score or Icon for others */}
         <div className="flex-shrink-0">
           {project.status === "checked" && typeof project.score === "number" ? (
-            <div className="relative w-16 h-16 flex items-center justify-center"> {/* Slightly larger */}
+            // Reduced size from w-16 h-16 to w-14 h-14
+            <div className="relative w-14 h-14 flex items-center justify-center">
               <svg className="absolute inset-0 w-full h-full -rotate-90 drop-shadow-sm" viewBox="0 0 36 36">
                 <defs>
                   <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
@@ -125,64 +128,66 @@ export default function ProjectCard({ project, primaryHref, primaryLabel, classN
                 />
               </svg>
               <div className="flex flex-col items-center justify-center leading-none">
-                <span className={`text-xl font-bold ${config.scoreText}`}>{project.score}</span>
-                <span className="text-[10px] uppercase font-bold text-gray-400 mt-0.5">/20</span>
+                <span className={`text-lg font-bold ${config.scoreText}`}>{project.score}</span>
+                <span className="text-[9px] uppercase font-bold text-gray-400 mt-0.5">/20</span>
               </div>
             </div>
           ) : (
-            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-inner ${config.iconBg}`}>
-              {project.status === 'pending' && <Clock className="w-7 h-7" />}
-              {project.status === 'rejected' && <XCircle className="w-7 h-7" />}
-              {!['pending', 'rejected'].includes(project.status) && <Calendar className="w-7 h-7" />}
+            // Reduced size from w-14 h-14 to w-12 h-12
+            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-inner ${config.iconBg}`}>
+              {project.status === 'pending' && <Clock className="w-6 h-6" />}
+              {project.status === 'rejected' && <XCircle className="w-6 h-6" />}
+              {!['pending', 'rejected'].includes(project.status) && <Calendar className="w-6 h-6" />}
             </div>
           )}
         </div>
       </div>
 
-      {/* Metadata Sections */}
-      <div className="flex-1 space-y-5 mb-8">
+      {/* Metadata Sections - Compact spacing */}
+      <div className="flex-1 space-y-4 mb-6">
         {/* Student */}
-        <div className="flex items-center gap-4 group/item">
-          <div className="w-12 h-12 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center text-sm font-bold text-gray-500 group-hover/item:bg-white group-hover/item:shadow-md group-hover/item:scale-110 transition-all duration-300">
+        <div className="flex items-center gap-3 group/item">
+          {/* Reduced avatar size from w-12 h-12 to w-10 h-10 */}
+          <div className="w-10 h-10 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center text-xs font-bold text-gray-500 group-hover/item:bg-white group-hover/item:shadow-md group-hover/item:scale-110 transition-all duration-300">
             {getInitials(project.student)}
           </div>
           <div>
             <p className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-0.5">ESTUDIANTE</p>
-            <p className="font-bold text-gray-900 text-sm sm:text-base">{project.student}</p>
+            <p className="font-bold text-gray-900 text-sm">{project.student}</p>
           </div>
         </div>
 
         {/* Tutor */}
-        <div className="flex items-center gap-4 group/item">
-          <div className="w-12 h-12 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center text-sm font-bold text-gray-500 group-hover/item:bg-white group-hover/item:shadow-md group-hover/item:scale-110 transition-all duration-300">
+        <div className="flex items-center gap-3 group/item">
+          <div className="w-10 h-10 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center text-xs font-bold text-gray-500 group-hover/item:bg-white group-hover/item:shadow-md group-hover/item:scale-110 transition-all duration-300">
             {getInitials(project.advisor)}
           </div>
           <div>
             <p className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-0.5">TUTOR</p>
-            <p className="font-bold text-gray-900 text-sm sm:text-base">{project.advisor}</p>
+            <p className="font-bold text-gray-900 text-sm">{project.advisor}</p>
           </div>
         </div>
 
         {/* Date */}
-        <div className="flex items-center gap-4 group/item">
-          <div className="w-12 h-12 rounded-2xl bg-gray-50 border border-gray-100 flex items-center justify-center group-hover/item:bg-white group-hover/item:shadow-md group-hover/item:scale-110 transition-all duration-300">
-            <Calendar className="w-5 h-5 text-gray-400" />
+        <div className="flex items-center gap-3 group/item">
+          <div className="w-10 h-10 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center group-hover/item:bg-white group-hover/item:shadow-md group-hover/item:scale-110 transition-all duration-300">
+            <Calendar className="w-4 h-4 text-gray-400" />
           </div>
           <div>
             <p className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-0.5">
               {project.status === "rejected" ? 'RECHAZADO' : (project.reviewDate ? 'REVISADO' : 'ENTREGADO')}
             </p>
-            <p className="font-bold text-gray-900 text-sm sm:text-base">
+            <p className="font-bold text-gray-900 text-sm">
               {project.reviewDate ?? project.submittedDate}
             </p>
           </div>
         </div>
       </div>
 
-      {/* Action Button - Gradient Style */}
+      {/* Action Button - Slightly reduced padding */}
       <button
         onClick={handlePrimary}
-        className={`mt-auto w-full py-3.5 rounded-2xl text-sm font-bold border transition-all duration-300 active:scale-[0.98] ${config.button}`}
+        className={`mt-auto w-full py-3 rounded-xl text-sm font-bold border transition-all duration-300 active:scale-[0.98] ${config.button}`}
       >
         {primaryLabel ?? (project.status === "checked" ? "Ver Detalles" : project.status === "pending" ? "Evaluar Proyecto" : "Ver Motivo")}
       </button>
