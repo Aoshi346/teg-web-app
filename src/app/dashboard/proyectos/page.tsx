@@ -59,73 +59,58 @@ export default function ProyectosPage(props: ProyectosPageProps = {}) {
     [filteredProjects]
   );
 
-  // Entrance animations - only on initial mount, not on filter changes
+  // Entrance animations - only on first visit per session, not on navigation
   const hasAnimatedRef = useRef(false);
 
   useEffect(() => {
+    // Skip if already animated this session
     if (hasAnimatedRef.current) return;
+
+    // Check if we've already visited this page in this session
+    const sessionKey = 'visited_proyectos_page';
+    const hasVisitedBefore = sessionStorage.getItem(sessionKey);
+
+    // Check if we just logged in or navigating within dashboard
     let skipAnimations = false;
     try {
       const justLoggedIn = sessionStorage.getItem("justLoggedIn");
-      if (justLoggedIn) {
+      if (justLoggedIn || hasVisitedBefore) {
         skipAnimations = true;
       }
-    } catch {}
+    } catch { }
 
-    const timer = setTimeout(() => {
-      animationsRef.current.forEach((tween) => tween.kill());
-      animationsRef.current = [];
+    // Mark as visited for future navigations
+    try {
+      sessionStorage.setItem(sessionKey, 'true');
+    } catch { }
 
-      const cards = gsap.utils.toArray<HTMLElement>(".project-card");
-      const sections = gsap.utils.toArray<HTMLElement>(".section-container");
+    const cards = gsap.utils.toArray<HTMLElement>(".project-card");
+    const sections = gsap.utils.toArray<HTMLElement>(".section-container");
 
-      cards.forEach((card) => {
-        if (card) gsap.set(card, { opacity: 1, y: 0 });
-      });
-      sections.forEach((section) => {
-        if (section) gsap.set(section, { opacity: 1, y: 0 });
-      });
+    // Always ensure elements are visible immediately
+    cards.forEach((card) => {
+      if (card) gsap.set(card, { opacity: 1, y: 0 });
+    });
+    sections.forEach((section) => {
+      if (section) gsap.set(section, { opacity: 1, y: 0 });
+    });
 
-      if (skipAnimations || (cards.length === 0 && sections.length === 0)) {
-        hasAnimatedRef.current = true;
-        return;
-      }
+    hasAnimatedRef.current = true;
 
-      gsap.set([...cards, ...sections], { opacity: 0, y: 20 });
+    // Skip animations for instant navigation
+    if (skipAnimations || (cards.length === 0 && sections.length === 0)) {
+      return;
+    }
 
-      if (sections.length > 0) {
-        const sectionsTween = gsap.to(sections, {
-          opacity: 1,
-          y: 0,
-          duration: 0.4,
-          stagger: 0.1,
-          ease: "power2.out",
-          delay: 0.05,
-        });
-        animationsRef.current.push(sectionsTween);
-      }
-
-      if (cards.length > 0) {
-        const cardsTween = gsap.to(cards, {
-          opacity: 1,
-          y: 0,
-          duration: 0.4,
-          stagger: 0.06,
-          ease: "power2.out",
-          delay: 0.2,
-        });
-        animationsRef.current.push(cardsTween);
-      }
-
-      hasAnimatedRef.current = true;
-    }, 10);
-
-    return () => {
-      clearTimeout(timer);
-      animationsRef.current.forEach((tween) => tween.kill());
-      animationsRef.current = [];
-    };
-  }, []);
+    // Only animate on very first visit - quick fade in
+    gsap.set([...cards, ...sections], { opacity: 0.8 });
+    gsap.to([...sections, ...cards], {
+      opacity: 1,
+      duration: 0.15,
+      stagger: 0.02,
+      ease: "power2.out",
+    });
+  }, []); // Only run once on mount
 
   return (
     <>
@@ -154,41 +139,37 @@ export default function ProyectosPage(props: ProyectosPageProps = {}) {
               <div className="flex gap-2">
                 <button
                   onClick={() => setFilterStatus("all")}
-                  className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all touch-manipulation ${
-                    filterStatus === "all"
+                  className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all touch-manipulation ${filterStatus === "all"
                       ? "bg-blue-600 text-white shadow-md"
                       : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
-                  }`}
+                    }`}
                 >
                   Todos
                 </button>
                 <button
                   onClick={() => setFilterStatus("checked")}
-                  className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all touch-manipulation ${
-                    filterStatus === "checked"
+                  className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all touch-manipulation ${filterStatus === "checked"
                       ? "bg-green-600 text-white shadow-md"
                       : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
-                  }`}
+                    }`}
                 >
                   Revisados
                 </button>
                 <button
                   onClick={() => setFilterStatus("pending")}
-                  className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all touch-manipulation ${
-                    filterStatus === "pending"
+                  className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all touch-manipulation ${filterStatus === "pending"
                       ? "bg-amber-600 text-white shadow-md"
                       : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
-                  }`}
+                    }`}
                 >
                   Pendientes
                 </button>
                 <button
                   onClick={() => setFilterStatus("rejected")}
-                  className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all touch-manipulation ${
-                    filterStatus === "rejected"
+                  className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all touch-manipulation ${filterStatus === "rejected"
                       ? "bg-red-600 text-white shadow-md"
                       : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
-                  }`}
+                    }`}
                 >
                   Rechazados
                 </button>

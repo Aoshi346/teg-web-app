@@ -44,11 +44,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, mobileOpen, setMobileOpe
         document.body.style.overflow = 'hidden';
         // Focus close button for accessibility
         setTimeout(() => closeBtnRef.current?.focus(), 0);
-      } catch {}
+      } catch { }
     } else {
-      try { document.body.style.overflow = ''; } catch {}
+      try { document.body.style.overflow = ''; } catch { }
     }
-    return () => { try { document.body.style.overflow = ''; } catch {} };
+    return () => { try { document.body.style.overflow = ''; } catch { } };
   }, [mobileOpen]);
 
   const menuItems = useMemo(() => [
@@ -66,26 +66,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, mobileOpen, setMobileOpe
     router.prefetch(href);
   }, [router]);
 
-  // Animate menu items on mount and pathname change
-  useEffect(() => {
-    const menuItems = document.querySelectorAll('.sidebar-menu-item');
-    if (menuItems.length > 0) {
-      gsap.fromTo(
-        menuItems,
-        {
-          opacity: 0,
-          x: -20,
-        },
-        {
-          opacity: 1,
-          x: 0,
-          duration: 0.3,
-          stagger: 0.05,
-          ease: 'power2.out',
-        }
-      );
-    }
-  }, [pathname]);
+  // Menu items are visible immediately - no animation on route changes for instant navigation
 
   // Keyboard shortcuts for navigation (1-7 for menu items)
   useEffect(() => {
@@ -122,9 +103,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, mobileOpen, setMobileOpe
           <>
             {/* Mobile drawer (left off-canvas) - rendered in portal to ensure it overlays app content */}
             <div
-              className={`lg:hidden fixed inset-y-0 left-0 z-[100] w-[85vw] max-w-xs sm:max-w-sm bg-white border-r border-gray-200 shadow-2xl transform transition-transform duration-300 ease-out ${
-                mobileOpen ? 'translate-x-0' : '-translate-x-full'
-              }`}
+              className={`lg:hidden fixed inset-y-0 left-0 z-[100] w-[85vw] max-w-xs sm:max-w-sm bg-white border-r border-gray-200 shadow-2xl transform transition-transform duration-300 ease-out ${mobileOpen ? 'translate-x-0' : '-translate-x-full'
+                }`}
               role="dialog"
               aria-modal="true"
               aria-label="Menú de navegación"
@@ -132,7 +112,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, mobileOpen, setMobileOpe
               <div className="flex flex-col h-full pt-[env(safe-area-inset-top)]">
                 <div className="p-4 flex items-center justify-between border-b border-gray-200">
                   <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-10 h-10 rounded-xl flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center">
                       <Image src="/tesisfar_logo.svg" alt="Tesisfar logo" width={32} height={32} className="w-8 h-8 object-contain drop-shadow-sm" draggable={false} />
                     </div>
                     <div>
@@ -167,11 +147,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, mobileOpen, setMobileOpe
                             onClick={() => setMobileOpen(false)}
                             onMouseEnter={() => handleLinkHover(item.href)}
                             prefetch={true}
-                            className={`w-full flex items-center gap-3 py-3 px-3 rounded-lg transition-all duration-200 relative group ${
-                              isActive 
-                                ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30' 
+                            className={`w-full flex items-center gap-3 py-3 px-3 rounded-lg transition-all duration-200 relative group ${isActive
+                                ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
                                 : 'text-gray-700 hover:bg-gray-100 hover:translate-x-1'
-                            }`}
+                              }`}
                             title={`${item.label} (Alt+${index + 1})`}
                           >
                             <item.icon className={`w-5 h-5 flex-shrink-0 transition-transform duration-200 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} />
@@ -200,9 +179,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, mobileOpen, setMobileOpe
 
       {/* Desktop persistent side rail */}
       <aside
-        className={`hidden lg:flex lg:flex-col h-screen bg-white border-r border-gray-200 shadow-none z-50 ${
-          isCollapsed ? 'w-20' : 'w-64'
-        }`}
+        className={`hidden lg:flex lg:flex-col h-screen bg-white border-r border-gray-200 shadow-none z-50 ${isCollapsed ? 'w-20' : 'w-64'
+          }`}
         style={{ position: 'relative' }}
       >
         <div className={`p-4 h-[89px] flex items-center flex-shrink-0 border-b border-gray-200 ${isCollapsed ? 'px-3 justify-center' : 'px-6 justify-start'}`}>
@@ -235,11 +213,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, mobileOpen, setMobileOpe
                     href={item.href}
                     onMouseEnter={() => handleLinkHover(item.href)}
                     prefetch={true}
-                    className={`w-full flex items-center ${isCollapsed ? 'justify-center gap-0 px-3' : 'gap-3 px-4'} py-3 rounded-lg transition-all duration-200 relative group ${
-                      isActive 
-                        ? 'bg-blue-700 text-white shadow-lg shadow-blue-500/30' 
+                    className={`w-full flex items-center ${isCollapsed ? 'justify-center gap-0 px-3' : 'gap-3 px-4'} py-3 rounded-lg transition-all duration-200 relative group ${isActive
+                        ? 'bg-blue-700 text-white shadow-lg shadow-blue-500/30'
                         : 'text-gray-700 hover:bg-gray-100 hover:translate-x-1'
-                    }`}
+                      }`}
                     title={isCollapsed ? `${item.label} (Alt+${index + 1})` : `Alt+${index + 1}`}
                   >
                     <item.icon className={`w-5 h-5 flex-shrink-0 transition-transform duration-200 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} />

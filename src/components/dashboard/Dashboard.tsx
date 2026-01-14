@@ -84,44 +84,38 @@ const StatCard: React.FC<StatCardProps> = memo(
     return (
       <div
         ref={cardRef}
-        className={`kbi-card rounded-2xl p-4 sm:p-6 shadow-lg shadow-gray-900/10 ${
-          isColorful
-            ? `${
-                bgClass ??
-                "bg-gradient-to-br from-emerald-500 via-emerald-600 to-green-700"
-              } border border-transparent ring-1 ring-white/20`
+        className={`kbi-card rounded-2xl p-4 sm:p-6 shadow-lg shadow-gray-900/10 ${isColorful
+            ? `${bgClass ??
+            "bg-gradient-to-br from-emerald-500 via-emerald-600 to-green-700"
+            } border border-transparent ring-1 ring-white/20`
             : "bg-white border border-gray-200/80 ring-1 ring-gray-200/80"
-        }`}
+          }`}
       >
         <div className="flex items-center gap-3 sm:gap-5">
           <div
-            className={`flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shadow-inner ${
-              isColorful ? "bg-white/15 text-white" : "bg-blue-50 text-blue-600"
-            }`}
+            className={`flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shadow-inner ${isColorful ? "bg-white/15 text-white" : "bg-blue-50 text-blue-600"
+              }`}
           >
             {icon}
           </div>
           <div className="flex-1 min-w-0">
             <h3
-              className={`text-xs sm:text-sm md:text-base font-semibold truncate ${
-                isColorful ? "text-white/90" : "text-gray-600"
-              }`}
+              className={`text-xs sm:text-sm md:text-base font-semibold truncate ${isColorful ? "text-white/90" : "text-gray-600"
+                }`}
             >
               {title}
             </h3>
             <div className="flex items-baseline gap-1 sm:gap-2 mt-1 sm:mt-2">
               <p
                 ref={mainValueRef}
-                className={`text-2xl sm:text-3xl md:text-4xl xl:text-5xl font-bold leading-tight ${
-                  isColorful ? "text-white" : "text-gray-800"
-                }`}
+                className={`text-2xl sm:text-3xl md:text-4xl xl:text-5xl font-bold leading-tight ${isColorful ? "text-white" : "text-gray-800"
+                  }`}
               >
                 {mainValue}
               </p>
               <p
-                className={`text-xs sm:text-sm font-medium ${
-                  isColorful ? "text-white/80" : "text-gray-600"
-                }`}
+                className={`text-xs sm:text-sm font-medium ${isColorful ? "text-white/80" : "text-gray-600"
+                  }`}
               >
                 {mainLabel}
               </p>
@@ -129,11 +123,10 @@ const StatCard: React.FC<StatCardProps> = memo(
           </div>
         </div>
         <div
-          className={`mt-4 sm:mt-6 pt-3 sm:pt-4 grid grid-cols-2 gap-3 sm:flex sm:flex-row sm:justify-around sm:gap-4 ${
-            isColorful
+          className={`mt-4 sm:mt-6 pt-3 sm:pt-4 grid grid-cols-2 gap-3 sm:flex sm:flex-row sm:justify-around sm:gap-4 ${isColorful
               ? "border-t border-white/20"
               : "border-t border-gray-200/75"
-          }`}
+            }`}
         >
           {secondaryStats.map((stat) => (
             <div
@@ -148,16 +141,14 @@ const StatCard: React.FC<StatCardProps> = memo(
               </div>
               <div className="flex flex-col sm:flex-row sm:items-center sm:gap-1 min-w-0">
                 <span
-                  className={`text-base sm:text-lg font-bold ${
-                    isColorful ? "text-white" : "text-gray-700"
-                  }`}
+                  className={`text-base sm:text-lg font-bold ${isColorful ? "text-white" : "text-gray-700"
+                    }`}
                 >
                   {stat.value}
                 </span>
                 <span
-                  className={`text-xs sm:text-sm truncate ${
-                    isColorful ? "text-white/80" : "text-gray-500"
-                  }`}
+                  className={`text-xs sm:text-sm truncate ${isColorful ? "text-white/80" : "text-gray-500"
+                    }`}
                 >
                   {stat.label}
                 </span>
@@ -187,14 +178,17 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
     isMobileSidebarOpen,
   } = props;
   const mainContentRef = useRef<HTMLDivElement>(null);
-  const animationsRef = useRef<gsap.core.Tween[]>([]);
   const hasAnimatedRef = useRef(false);
 
   useEffect(() => {
-    // Only animate on initial mount, not on subsequent navigations
+    // Skip if already animated this session
     if (hasAnimatedRef.current) return;
-    
-    // Check if we just logged in - if so, skip animations for instant display
+
+    // Check if we've already visited dashboard in this session
+    const sessionKey = 'visited_dashboard_page';
+    const hasVisitedBefore = sessionStorage.getItem(sessionKey);
+
+    // Check if we just logged in - skip animations for instant display
     let skipAnimations = false;
     try {
       const justLoggedIn = sessionStorage.getItem("justLoggedIn");
@@ -202,66 +196,42 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
         sessionStorage.removeItem("justLoggedIn");
         skipAnimations = true;
       }
-    } catch {}
-
-    // Wait for DOM to be ready
-    const timer = setTimeout(() => {
-      // Kill any existing animations
-      animationsRef.current.forEach((tween) => tween.kill());
-      animationsRef.current = [];
-
-      const kbiCards = gsap.utils.toArray<HTMLElement>(".kbi-card");
-      const contentSections = gsap.utils.toArray<HTMLElement>(".content-section");
-
-      // Always ensure elements are visible first
-      kbiCards.forEach((card) => {
-        if (card) gsap.set(card, { opacity: 1, y: 0 });
-      });
-      contentSections.forEach((section) => {
-        if (section) gsap.set(section, { opacity: 1, y: 0 });
-      });
-
-      // If skipping animations or no elements found, we're done
-      if (skipAnimations || (kbiCards.length === 0 && contentSections.length === 0)) {
-        hasAnimatedRef.current = true;
-        return;
+      if (hasVisitedBefore) {
+        skipAnimations = true;
       }
+    } catch { }
 
-      // Set initial state for animation
-      gsap.set([...kbiCards, ...contentSections], { opacity: 0, y: 20 });
+    // Mark as visited for future navigations
+    try {
+      sessionStorage.setItem(sessionKey, 'true');
+    } catch { }
 
-      if (kbiCards.length > 0) {
-        const cardsTween = gsap.to(kbiCards, {
-          opacity: 1,
-          y: 0,
-          duration: 0.5,
-          stagger: 0.08,
-          ease: "power3.out",
-          delay: 0.05,
-        });
-        animationsRef.current.push(cardsTween);
-      }
+    const kbiCards = gsap.utils.toArray<HTMLElement>(".kbi-card");
+    const contentSections = gsap.utils.toArray<HTMLElement>(".content-section");
 
-      if (contentSections.length > 0) {
-        const sectionsTween = gsap.to(contentSections, {
-          opacity: 1,
-          y: 0,
-          duration: 0.3,
-          stagger: 0.08,
-          ease: "power2.out",
-          delay: 0.2,
-        });
-        animationsRef.current.push(sectionsTween);
-      }
+    // Always ensure elements are visible immediately
+    kbiCards.forEach((card) => {
+      if (card) gsap.set(card, { opacity: 1, y: 0 });
+    });
+    contentSections.forEach((section) => {
+      if (section) gsap.set(section, { opacity: 1, y: 0 });
+    });
 
-      hasAnimatedRef.current = true;
-    }, 10); // Small delay to ensure DOM is ready
+    hasAnimatedRef.current = true;
 
-    return () => {
-      clearTimeout(timer);
-      animationsRef.current.forEach((tween) => tween.kill());
-      animationsRef.current = [];
-    };
+    // Skip animations for instant navigation
+    if (skipAnimations || (kbiCards.length === 0 && contentSections.length === 0)) {
+      return;
+    }
+
+    // Only animate on very first visit - quick fade in
+    gsap.set([...kbiCards, ...contentSections], { opacity: 0.8 });
+    gsap.to([...kbiCards, ...contentSections], {
+      opacity: 1,
+      duration: 0.2,
+      stagger: 0.03,
+      ease: "power2.out",
+    });
   }, []); // Only run once on mount
 
   // Memoize static data to prevent recreating on every render
