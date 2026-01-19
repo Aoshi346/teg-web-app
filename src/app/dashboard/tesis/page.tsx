@@ -268,6 +268,7 @@ export default function TesisPage(props: TesisPageProps = {}) {
                       <ProjectCard
                         key={project.id}
                         project={project}
+                        type="tesis"
                         primaryLabel="Ver Detalles"
                         primaryHref={`/dashboard/tesis/${project.id}`}
                       />
@@ -294,6 +295,7 @@ export default function TesisPage(props: TesisPageProps = {}) {
                       <ProjectCard
                         key={project.id}
                         project={project}
+                        type="tesis"
                         primaryHref={`/dashboard/tesis/${project.id}/evaluar`}
                         primaryLabel="Revisar Ahora"
                       />
@@ -320,6 +322,7 @@ export default function TesisPage(props: TesisPageProps = {}) {
                       <ProjectCard
                         key={project.id}
                         project={project}
+                        type="tesis"
                         primaryLabel="Ver Motivo"
                         primaryHref={`/dashboard/tesis/${project.id}`}
                       />

@@ -95,8 +95,8 @@ export default function TesisDetailsPage() {
                         {project.status === "checked"
                           ? "Aprobado"
                           : project.status === "rejected"
-                          ? "Rechazado"
-                          : "Pendiente"}
+                            ? "Rechazado"
+                            : "Pendiente"}
                       </span>
                     </div>
                   </div>

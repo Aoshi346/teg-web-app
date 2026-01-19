@@ -265,6 +265,7 @@ export default function ProyectosPage(props: ProyectosPageProps = {}) {
                       <ProjectCard
                         key={project.id}
                         project={project}
+                        type="proyecto"
                         primaryLabel="Ver Detalles"
                         primaryHref={`/dashboard/proyectos/${project.id}`}
                       />
@@ -290,6 +291,7 @@ export default function ProyectosPage(props: ProyectosPageProps = {}) {
                       <ProjectCard
                         key={project.id}
                         project={project}
+                        type="proyecto"
                         primaryHref={`/dashboard/proyectos/${project.id}/evaluar`}
                         primaryLabel="Revisar Ahora"
                       />
@@ -315,6 +317,7 @@ export default function ProyectosPage(props: ProyectosPageProps = {}) {
                       <ProjectCard
                         key={project.id}
                         project={project}
+                        type="proyecto"
                         primaryLabel="Ver Motivo"
                         primaryHref={`/dashboard/proyectos/${project.id}`}
                       />
