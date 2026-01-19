@@ -15,7 +15,8 @@ import {
     Edit,
     Mail,
     UserCog,
-    Phone
+    Phone,
+    BookOpen
 } from "lucide-react";
 import Image from "next/image";
 import UserModal, { UserData } from "@/components/ui/UserModal";
@@ -48,6 +49,11 @@ export default function SettingsPage({
 
     // Profile State
     const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+    const [profileName, setProfileName] = useState("");
+    const [profileEmail, setProfileEmail] = useState("");
+    const [profilePhone, setProfilePhone] = useState("");
+    const [profileSemester, setProfileSemester] = useState("9no");
+    const [isEditingProfile, setIsEditingProfile] = useState(false);
 
     // Users State (Admin)
     const [users, setUsers] = useState<UserData[]>(MOCK_USERS);
@@ -76,8 +82,15 @@ export default function SettingsPage({
     };
 
     useEffect(() => {
-        setRole(getUserRole());
-        setEmail(getUserEmail());
+        const userRole = getUserRole();
+        const userEmail = getUserEmail();
+        setRole(userRole);
+        setEmail(userEmail);
+        // Initialize profile with user data
+        setProfileEmail(userEmail || "");
+        setProfileName(userEmail?.split("@")[0] || "Usuario");
+        setProfilePhone("0412-1234567"); // Mock data
+        setProfileSemester("9no");
     }, []);
 
     const openDeleteModal = (user: UserData) => {
@@ -211,71 +224,162 @@ export default function SettingsPage({
                                 {/* Profile Section */}
                                 {activeTab === "profile" && (
                                     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                                        <div className="p-6 border-b border-gray-50 bg-gray-50/30">
-                                            <h2 className="text-lg font-bold text-gray-900">Información Personal</h2>
-                                            <p className="text-sm text-gray-500">Actualiza tu foto y detalles personales.</p>
+                                        <div className="p-6 border-b border-gray-50 bg-gray-50/30 flex items-center justify-between">
+                                            <div>
+                                                <h2 className="text-lg font-bold text-gray-900">Información Personal</h2>
+                                                <p className="text-sm text-gray-500">Tu información de perfil.</p>
+                                            </div>
+                                            {!isEditingProfile && (
+                                                <button
+                                                    onClick={() => setIsEditingProfile(true)}
+                                                    className="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors flex items-center gap-2"
+                                                >
+                                                    <Edit className="w-4 h-4" />
+                                                    Editar
+                                                </button>
+                                            )}
                                         </div>
-                                        <div className="p-6 space-y-8">
-                                            {/* Avatar */}
-                                            <div className="flex items-center gap-6">
-                                                <div className="relative group cursor-pointer">
-                                                    <div className={`w-24 h-24 rounded-full flex items-center justify-center text-2xl font-bold text-white overflow-hidden bg-gray-100 border-4 border-white shadow-lg transition-transform group-hover:scale-105`}>
-                                                        {avatarPreview ? (
-                                                            <Image src={avatarPreview} alt="Avatar" width={96} height={96} className="w-full h-full object-cover" />
-                                                        ) : email ? (
-                                                            <div className={`w-full h-full flex items-center justify-center ${getAvatarColor(email)}`}>
-                                                                {email[0].toUpperCase()}
-                                                            </div>
-                                                        ) : (
-                                                            <User className="w-10 h-10 text-gray-400" />
-                                                        )}
+                                        <div className="p-6 space-y-6">
+                                            {/* Avatar & Name with Role Badge */}
+                                            <div className="flex items-center gap-4">
+                                                <div className="relative">
+                                                    <div className={`w-16 h-16 rounded-full flex items-center justify-center text-lg font-bold text-white ${getAvatarColor(email || "")}`}>
+                                                        {profileName ? profileName.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase() : "U"}
                                                     </div>
-                                                    <button className="absolute bottom-0 right-0 p-2 bg-blue-600 text-white rounded-full shadow-md hover:bg-blue-700 transition-colors ring-2 ring-white">
-                                                        <Camera className="w-4 h-4" />
-                                                    </button>
+                                                    {/* Role Badge */}
+                                                    <span className={`absolute -bottom-1 -right-1 px-2 py-0.5 text-[10px] font-bold rounded-full ring-2 ring-white ${role === "Admin" ? "bg-purple-600 text-white" :
+                                                            role === "Profesor" ? "bg-blue-600 text-white" :
+                                                                "bg-green-600 text-white"
+                                                        }`}>
+                                                        {role}
+                                                    </span>
                                                 </div>
                                                 <div>
-                                                    <p className="text-base font-semibold text-gray-900">Tu foto de perfil</p>
-                                                    <p className="text-sm text-gray-500">Haz clic en la cámara para subir una nueva imagen.</p>
+                                                    <p className="text-lg font-semibold text-gray-900">{profileName || "Usuario"}</p>
+                                                    <p className="text-sm text-gray-500">{profileEmail}</p>
                                                 </div>
                                             </div>
 
-                                            <div className="grid gap-6 md:grid-cols-2">
-                                                <div className="space-y-2">
-                                                    <label className="text-sm font-medium text-gray-700">Email</label>
-                                                    <div className="relative group">
-                                                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
-                                                        <input
-                                                            type="email"
-                                                            value={email || ""}
-                                                            disabled
-                                                            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl bg-gray-50 text-gray-500 sm:text-sm transition-all focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                                                        />
+                                            {/* View Mode */}
+                                            {!isEditingProfile ? (
+                                                <div className="grid gap-4 md:grid-cols-2">
+                                                    <div className="p-4 bg-gray-50 rounded-xl">
+                                                        <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Correo Electrónico</p>
+                                                        <p className="text-sm font-medium text-gray-900">{profileEmail || "—"}</p>
+                                                    </div>
+                                                    <div className="p-4 bg-gray-50 rounded-xl">
+                                                        <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Teléfono</p>
+                                                        <p className="text-sm font-medium text-gray-900">{profilePhone || "—"}</p>
+                                                    </div>
+                                                    <div className="p-4 bg-gray-50 rounded-xl">
+                                                        <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Semestre</p>
+                                                        <p className="text-sm font-medium text-gray-900">{profileSemester ? `${profileSemester} Semestre` : "—"}</p>
+                                                    </div>
+                                                    <div className="p-4 bg-gray-50 rounded-xl">
+                                                        <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Rol del Sistema</p>
+                                                        <p className="text-sm font-medium text-gray-900">{role || "—"}</p>
                                                     </div>
                                                 </div>
-                                                <div className="space-y-2">
-                                                    <label className="text-sm font-medium text-gray-700">Rol del Sistema</label>
-                                                    <div className="relative group">
-                                                        <Shield className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
-                                                        <input
-                                                            type="text"
-                                                            value={role || ""}
-                                                            disabled
-                                                            className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl bg-gray-50 text-gray-500 sm:text-sm transition-all focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
-                                                        />
+                                            ) : (
+                                                /* Edit Mode */
+                                                <div className="grid gap-4 md:grid-cols-2">
+                                                    {/* Full Name */}
+                                                    <div className="space-y-1.5">
+                                                        <label className="text-xs font-medium text-gray-600 uppercase tracking-wide">Nombre Completo</label>
+                                                        <div className="relative">
+                                                            <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                                            <input
+                                                                type="text"
+                                                                value={profileName}
+                                                                onChange={(e) => setProfileName(e.target.value)}
+                                                                className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl bg-white text-gray-900 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none"
+                                                            />
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            </div>
 
-                                            <div className="flex justify-end pt-6 border-t border-gray-100">
-                                                <button
-                                                    onClick={handleSaveProfile}
-                                                    className="px-5 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-700 active:transform active:scale-95 transition-all shadow-sm shadow-blue-500/30 flex items-center gap-2"
-                                                >
-                                                    <Save className="w-4 h-4" />
-                                                    Guardar Cambios
-                                                </button>
-                                            </div>
+                                                    {/* Email */}
+                                                    <div className="space-y-1.5">
+                                                        <label className="text-xs font-medium text-gray-600 uppercase tracking-wide">Correo Electrónico</label>
+                                                        <div className="relative">
+                                                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                                            <input
+                                                                type="email"
+                                                                value={profileEmail}
+                                                                onChange={(e) => setProfileEmail(e.target.value)}
+                                                                className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl bg-white text-gray-900 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none"
+                                                            />
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Phone */}
+                                                    <div className="space-y-1.5">
+                                                        <label className="text-xs font-medium text-gray-600 uppercase tracking-wide">Teléfono</label>
+                                                        <div className="relative">
+                                                            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                                            <input
+                                                                type="tel"
+                                                                value={profilePhone}
+                                                                onChange={(e) => setProfilePhone(e.target.value)}
+                                                                className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl bg-white text-gray-900 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none"
+                                                            />
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Semester */}
+                                                    <div className="space-y-1.5">
+                                                        <label className="text-xs font-medium text-gray-600 uppercase tracking-wide">Semestre</label>
+                                                        <div className="relative">
+                                                            <BookOpen className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                                            <select
+                                                                value={profileSemester}
+                                                                onChange={(e) => setProfileSemester(e.target.value)}
+                                                                className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl bg-white text-gray-900 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none appearance-none cursor-pointer"
+                                                            >
+                                                                <option value="9no">9no Semestre</option>
+                                                                <option value="10mo">10mo Semestre</option>
+                                                                <option value="N/A">N/A</option>
+                                                            </select>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Role - Always Read Only */}
+                                                    <div className="space-y-1.5 md:col-span-2">
+                                                        <label className="text-xs font-medium text-gray-600 uppercase tracking-wide">Rol del Sistema</label>
+                                                        <div className="relative">
+                                                            <Shield className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                                            <input
+                                                                type="text"
+                                                                value={role || ""}
+                                                                disabled
+                                                                className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl bg-gray-50 text-gray-500 text-sm cursor-not-allowed"
+                                                            />
+                                                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">Solo lectura</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* Actions */}
+                                            {isEditingProfile && (
+                                                <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
+                                                    <button
+                                                        onClick={() => setIsEditingProfile(false)}
+                                                        className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                                                    >
+                                                        Cancelar
+                                                    </button>
+                                                    <button
+                                                        onClick={() => {
+                                                            handleSaveProfile();
+                                                            setIsEditingProfile(false);
+                                                        }}
+                                                        className="px-5 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 active:scale-95 transition-all flex items-center gap-2"
+                                                    >
+                                                        <Save className="w-4 h-4" />
+                                                        Guardar
+                                                    </button>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 )}
@@ -509,10 +613,10 @@ export default function SettingsPage({
                                 )}
 
                             </div>
-                        </div>
-                    </div>
-                </main>
-            </PageTransition>
+                        </div >
+                    </div >
+                </main >
+            </PageTransition >
         </>
     );
 }

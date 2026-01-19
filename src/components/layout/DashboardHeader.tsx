@@ -132,7 +132,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ pageTitle, isSidebarC
                 <div className="p-1">
                   <button
                     className="w-full text-left flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
-                    onClick={() => { setIsProfileOpen(false); alert("Perfil clicked"); }}
+                    onClick={() => { setIsProfileOpen(false); router.push("/dashboard/settings"); }}
                   >
                     <User className="w-4 h-4 text-gray-400" />
                     Mi Perfil
