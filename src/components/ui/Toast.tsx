@@ -1,111 +1,74 @@
 "use client";
 
-import React, { useEffect, useState, useCallback } from "react";
-import { X, CheckCircle, AlertTriangle, Info } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { X, CheckCircle, AlertCircle, Info } from "lucide-react";
 
-type ToastProps = {
-  visible: boolean;
+export type ToastType = "success" | "error" | "info";
+
+interface ToastProps {
   message: string;
-  type?: "error" | "success" | "info";
-  duration?: number; // ms
-  onClose: () => void; // onClose is required to handle component unmounting after animations.
-};
+  type?: ToastType;
+  isVisible: boolean;
+  onClose: () => void;
+  duration?: number;
+}
 
-const typeStyles = {
-  success: {
-    icon: <CheckCircle className="w-6 h-6 text-green-500" />,
-    barClass: "bg-green-500",
-    name: "Success",
-  },
-  error: {
-    icon: <AlertTriangle className="w-6 h-6 text-red-500" />,
-    barClass: "bg-red-500",
-    name: "Error",
-  },
-  info: {
-    icon: <Info className="w-6 h-6 text-blue-500" />,
-    barClass: "bg-blue-500",
-    name: "Information",
-  },
-};
-
-export default function Toast({ visible, message, type = "info", duration = 4000, onClose }: ToastProps) {
-  const [isExiting, setIsExiting] = useState(false);
-
-  const handleClose = useCallback(() => {
-    setIsExiting(true);
-    setTimeout(() => {
-      onClose();
-      setIsExiting(false);
-    }, 300); // Animation duration
-  }, [onClose]);
+export default function Toast({
+  message,
+  type = "info",
+  isVisible,
+  onClose,
+  duration = 3000
+}: ToastProps) {
+  const [isShowing, setIsShowing] = useState(false);
 
   useEffect(() => {
-    if (visible) {
+    if (isVisible) {
+      setIsShowing(true);
       const timer = setTimeout(() => {
-        handleClose();
+        setIsShowing(false);
+        // Wait for animation to finish before calling onClose
+        setTimeout(onClose, 300);
       }, duration);
       return () => clearTimeout(timer);
+    } else {
+      setIsShowing(false);
     }
-  }, [visible, duration, handleClose]);
+  }, [isVisible, duration, onClose]);
 
-  if (!visible && !isExiting) {
-    return null;
-  }
+  if (!isVisible && !isShowing) return null;
 
-  const { icon, barClass, name } = typeStyles[type];
-  
-  const animationClasses = visible && !isExiting
-    ? "translate-x-0 opacity-100"
-    : "translate-x-full opacity-0";
+  const getIcon = () => {
+    switch (type) {
+      case "success": return <CheckCircle className="w-5 h-5 text-emerald-500" />;
+      case "error": return <AlertCircle className="w-5 h-5 text-red-500" />;
+      default: return <Info className="w-5 h-5 text-blue-500" />;
+    }
+  };
+
+  const getStyles = () => {
+    switch (type) {
+      case "success": return "border-emerald-100 bg-white";
+      case "error": return "border-red-100 bg-white";
+      default: return "border-blue-100 bg-white";
+    }
+  };
 
   return (
     <div
-      className={`fixed top-6 right-6 z-[9999] w-full max-w-sm bg-white rounded-lg shadow-2xl pointer-events-auto ring-1 ring-black ring-opacity-5 overflow-hidden transform transition-all duration-300 ease-in-out ${animationClasses}`}
-      role="alert"
-      aria-live="assertive"
-      aria-atomic="true"
+      className={`fixed bottom-4 right-4 z-[110] flex items-center gap-3 px-4 py-3 rounded-xl border shadow-lg transition-all duration-300 transform ${isShowing ? "translate-y-0 opacity-100 scale-100" : "translate-y-2 opacity-0 scale-95"
+        } ${getStyles()}`}
     >
-      <div className="relative">
-        <div className="p-4">
-          <div className="flex items-start">
-            <div className="flex-shrink-0">{icon}</div>
-            <div className="ml-3 w-0 flex-1 pt-0.5">
-              <p className="text-sm font-semibold text-gray-900">{name}</p>
-              <p className="mt-1 text-sm text-gray-600">
-                {message}
-              </p>
-            </div>
-            <div className="ml-4 flex-shrink-0 flex">
-              <button
-                onClick={handleClose}
-                className="bg-white rounded-md inline-flex text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                <span className="sr-only">Close</span>
-                <X className="h-5 w-5" aria-hidden="true" />
-              </button>
-            </div>
-          </div>
-        </div>
-        {!isExiting && (
-          <div className="absolute bottom-0 left-0 h-1 w-full bg-gray-200">
-            <div
-              className={`h-1 ${barClass}`}
-              style={{ animation: `shrink-width ${duration}ms linear forwards` }}
-            />
-          </div>
-        )}
+      <div className="flex-shrink-0">
+        {getIcon()}
       </div>
-       <style jsx>{`
-        @keyframes shrink-width {
-          from {
-            width: 100%;
-          }
-          to {
-            width: 0%;
-          }
-        }
-      `}</style>
+      <p className="text-sm font-medium text-gray-700">{message}</p>
+      <button
+        onClick={() => setIsShowing(false)}
+        className="p-1 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
+      >
+        <X className="w-4 h-4" />
+      </button>
     </div>
   );
 }
