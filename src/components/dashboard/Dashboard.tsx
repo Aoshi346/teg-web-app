@@ -18,6 +18,7 @@ import PageTransition from "@/components/ui/PageTransition";
 import SemesterSelector from "@/components/ui/SemesterSelector";
 import { mockTesis, mockProyectos, getProyectos, getTesis, Project } from "@/lib/data/mockData";
 import { getAvailableSemesters, getStoredSemester, setStoredSemester, formatSemesterLabel } from "@/lib/semesters";
+import { useRouter } from "next/navigation";
 
 interface StatCardProps {
   title: string;
@@ -183,28 +184,32 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
   } = props;
   const mainContentRef = useRef<HTMLDivElement>(null);
   const hasAnimatedRef = useRef(false);
+  const router = useRouter();
 
   // State for data
   const [semester, setSemester] = useState<string>("");
   const [dashboardData, setDashboardData] = useState<{
     ptegStats: { total: number; checked: number; pending: number; rejected: number };
     tegStats: { total: number; checked: number; pending: number };
-    projectsToReview: { student: string; title: string; date: string; type: string }[];
+    projectsToReview: { id: number; student: string; title: string; date: string; type: string }[];
     progressFeed: { id: number; icon: React.ReactNode; text: string; time: string }[];
   } | null>(null);
 
-  // Load initial data
+  // Load initial semester
   useEffect(() => {
-    // Get stored semester or default
-    const currentSem = getStoredSemester();
-    setSemester(currentSem);
+    setSemester(getStoredSemester());
+  }, []);
+
+  // Load data when semester changes
+  useEffect(() => {
+    if (!semester) return;
 
     const allProyectos = getProyectos();
     const allTesis = getTesis();
 
     // Filter by semester for stats
-    const semProyectos = allProyectos.filter(p => p.semester === currentSem);
-    const semTesis = allTesis.filter(t => t.semester === currentSem);
+    const semProyectos = allProyectos.filter(p => p.semester === semester);
+    const semTesis = allTesis.filter(t => t.semester === semester);
 
     // Calculate Stats
     const ptegStats = {
@@ -220,14 +225,13 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
       pending: semTesis.filter(t => t.status === 'pending').length,
     };
 
-    // Projects to review (All pending, regardless of semester, or maybe just current? 
-    // Usually pending tasks are relevant regardless of semester, but let's stick to current for consistency with the view,
-    // OR show all pending. Let's show all pending sorted by date.)
-    const allPending = [...allProyectos, ...allTesis].filter(p => p.status === 'pending');
-    const projectsToReview = allPending
+    // Projects to review - filter by selected semester
+    const semPending = [...semProyectos, ...semTesis].filter(p => p.status === 'pending');
+    const projectsToReview = semPending
       .sort((a, b) => new Date(b.submittedDate).getTime() - new Date(a.submittedDate).getTime())
-      .slice(0, 3)
+      .slice(0, 5)
       .map(p => ({
+        id: p.id,
         student: p.student,
         title: p.title,
         date: p.submittedDate,
@@ -236,13 +240,13 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
 
     // detailed feed
     const feedEvents: { date: string; type: 'submitted' | 'reviewed'; project: Project }[] = [];
-    [...allProyectos, ...allTesis].forEach(p => {
+    [...semProyectos, ...semTesis].forEach(p => {
       // Add submission event
-      if (p.submittedDate && p.semester === currentSem) { // Filter feed by semester to match context
+      if (p.submittedDate) {
         feedEvents.push({ date: p.submittedDate, type: 'submitted', project: p });
       }
       // Add review event
-      if (p.reviewDate && p.semester === currentSem) {
+      if (p.reviewDate) {
         feedEvents.push({ date: p.reviewDate, type: 'reviewed', project: p });
       }
     });
@@ -290,7 +294,7 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
       progressFeed
     });
 
-  }, []);
+  }, [semester]);
 
   useEffect(() => {
     // Skip if already animated this session
@@ -435,7 +439,7 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
                 availableSemesters={getAvailableSemesters([...mockTesis, ...mockProyectos])}
                 onSemesterChange={(sem) => {
                   setStoredSemester(sem);
-                  window.location.reload(); // Refresh to apply new semester
+                  setSemester(sem);
                 }}
               />
             </div>
@@ -453,13 +457,14 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
                   <h3 className="text-base sm:text-lg md:text-xl font-bold text-gray-900">
                     Revisión de Proyectos
                   </h3>
-                  <button className="text-xs sm:text-sm text-blue-700 border border-blue-700 rounded-md px-2.5 sm:px-3 py-1.5 sm:py-2 font-semibold hover:bg-blue-700 hover:text-white active:bg-blue-800 transition-all duration-200 touch-manipulation whitespace-nowrap">
-                    Ver todos
-                  </button>
                 </div>
                 <div className="space-y-3 sm:space-y-4">
                   {dashboardData?.projectsToReview.length === 0 ? (
-                    <p className="text-gray-500 text-sm text-center py-4">No hay proyectos pendientes de revisión</p>
+                    <div className="flex flex-col items-center justify-center py-8 text-center">
+                      <CheckCircle className="w-12 h-12 text-green-400 mb-3" />
+                      <p className="text-gray-600 font-medium">¡Todo al día!</p>
+                      <p className="text-gray-400 text-sm mt-1">No tienes proyectos pendientes de revisión.</p>
+                    </div>
                   ) : (
                     dashboardData?.projectsToReview.map((project, index) => (
                       <div
@@ -479,7 +484,15 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
                             </span>
                           </p>
                         </div>
-                        <button className="w-full bg-blue-600 text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-semibold hover:bg-blue-700 active:bg-blue-800 transition-all duration-200 shadow-md shadow-blue-600/20 hover:shadow-lg transform hover:scale-[1.02] touch-manipulation">
+                        <button
+                          onClick={() => {
+                            const route = project.type === 'TEG'
+                              ? `/dashboard/tesis/${project.id}`
+                              : `/dashboard/proyectos/${project.id}`;
+                            router.push(route);
+                          }}
+                          className="w-full bg-blue-600 text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-semibold hover:bg-blue-700 active:bg-blue-800 transition-all duration-200 shadow-md shadow-blue-600/20 hover:shadow-lg transform hover:scale-[1.02] touch-manipulation"
+                        >
                           Revisar Ahora
                         </button>
                       </div>
@@ -490,27 +503,40 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
 
               <div className="content-section bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-6 shadow-md shadow-gray-900/5 border border-gray-200/80">
                 <h3 className="text-base sm:text-lg md:text-xl font-bold text-gray-900 mb-3 sm:mb-4">
-                  Seguimiento de Progreso
+                  Seguimiento de Tesis
                 </h3>
-                <div className="space-y-4 sm:space-y-6">
-                  {dashboardData?.progressFeed.length === 0 ? (
-                    <p className="text-gray-500 text-sm text-center py-4">No hay actividad reciente</p>
+                <div className="space-y-3 sm:space-y-4">
+                  {dashboardData?.projectsToReview.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-8 text-center">
+                      <CheckCircle className="w-12 h-12 text-green-400 mb-3" />
+                      <p className="text-gray-600 font-medium">¡Excelente trabajo!</p>
+                      <p className="text-gray-400 text-sm mt-1">Todas las tesis están revisadas.</p>
+                    </div>
                   ) : (
-                    dashboardData?.progressFeed.map((item) => (
+                    dashboardData?.projectsToReview.map((project, index) => (
                       <div
-                        key={item.id}
-                        className="flex items-start gap-2 sm:gap-4"
+                        key={index}
+                        className="flex items-center gap-3 p-3 rounded-lg bg-amber-50 border border-amber-100"
                       >
-                        <div className="flex-shrink-0 mt-0.5 sm:mt-1 bg-gray-100 p-1.5 sm:p-2 rounded-full">
-                          {item.icon}
+                        <div className="flex-shrink-0">
+                          <Clock className="w-5 h-5 text-amber-500" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs sm:text-sm text-gray-800 leading-relaxed">
-                            {item.text}
+                          <p className="text-sm font-medium text-gray-900 truncate">{project.title}</p>
+                          <p className="text-xs text-gray-500">
+                            {project.student} • {project.date}
                           </p>
-                          <p className="text-xs text-gray-500 mt-1">
-                            {item.time}
-                          </p>
+                        </div>
+                        <div className="flex-shrink-0 flex items-center gap-2">
+                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${project.type === 'TEG'
+                            ? 'bg-purple-100 text-purple-700'
+                            : 'bg-blue-100 text-blue-700'
+                            }`}>
+                            {project.type}
+                          </span>
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-700">
+                            Pendiente
+                          </span>
                         </div>
                       </div>
                     ))
