@@ -89,7 +89,7 @@ export default function EvaluarTesisPage({
                     <FileText className="w-6 h-6 text-blue-600 group-hover:text-white transition-colors" />
                   </div>
                   <h3 className="text-xl font-bold text-gray-900 mb-2">
-                    Fase 1: Diagramación
+                    Fase 1: Artículo
                   </h3>
                   <p className="text-gray-600 text-sm mb-4">
                     Evaluación de aspectos formales, estructura, ortografía y
@@ -107,11 +107,10 @@ export default function EvaluarTesisPage({
                     // or the form if passed.
                     router.push(`/dashboard/tesis/${projectId}/evaluar/fase2`);
                   }}
-                  className={`bg-white p-6 rounded-xl shadow-sm border transition-all cursor-pointer group relative overflow-hidden ${
-                    stage1Passed
+                  className={`bg-white p-6 rounded-xl shadow-sm border transition-all cursor-pointer group relative overflow-hidden ${stage1Passed
                       ? "border-gray-200 hover:shadow-md hover:border-green-300"
                       : "border-gray-200 opacity-75 bg-gray-50"
-                  }`}
+                    }`}
                 >
                   {!stage1Passed && (
                     <div className="absolute top-4 right-4">
@@ -119,31 +118,28 @@ export default function EvaluarTesisPage({
                     </div>
                   )}
                   <div
-                    className={`w-12 h-12 rounded-lg flex items-center justify-center mb-4 transition-colors ${
-                      stage1Passed
+                    className={`w-12 h-12 rounded-lg flex items-center justify-center mb-4 transition-colors ${stage1Passed
                         ? "bg-green-100 group-hover:bg-green-600"
                         : "bg-gray-200"
-                    }`}
+                      }`}
                   >
                     <CheckCircle
-                      className={`w-6 h-6 transition-colors ${
-                        stage1Passed
+                      className={`w-6 h-6 transition-colors ${stage1Passed
                           ? "text-green-600 group-hover:text-white"
                           : "text-gray-400"
-                      }`}
+                        }`}
                     />
                   </div>
                   <h3 className="text-xl font-bold text-gray-900 mb-2">
-                    Fase 2: Contenido
+                    Fase 2: Entrega Final
                   </h3>
                   <p className="text-gray-600 text-sm mb-4">
                     Evaluación del planteamiento, objetivos, marco teórico,
                     metodología y resultados.
                   </p>
                   <div
-                    className={`flex items-center text-sm font-medium ${
-                      stage1Passed ? "text-green-600" : "text-gray-400"
-                    }`}
+                    className={`flex items-center text-sm font-medium ${stage1Passed ? "text-green-600" : "text-gray-400"
+                      }`}
                   >
                     {stage1Passed
                       ? "Evaluar ahora →"

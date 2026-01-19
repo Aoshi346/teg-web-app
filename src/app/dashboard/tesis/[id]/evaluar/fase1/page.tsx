@@ -18,7 +18,7 @@ export default function EvaluarTesisFase1Page({
 
   return (
     <>
-      <DashboardHeader pageTitle={`Evaluar Tesis - Fase 1 (Diagramación)`} />
+      <DashboardHeader pageTitle={`Evaluar Tesis - Fase 1 (Artículo)`} />
 
       <PageTransition>
         <main className="flex-1 p-4 sm:p-6 lg:p-8 bg-gray-50">

@@ -55,8 +55,8 @@ export default function EvaluarTesisFase2Page({
                 Acceso Restringido
               </h2>
               <p className="text-gray-600 mb-6">
-                No es posible evaluar la Fase 2 (Contenido) porque el proyecto
-                no ha aprobado la Fase 1 (Diagramación).
+                No es posible evaluar la Fase 2 (Entrega Final) porque el proyecto
+                no ha aprobado la Fase 1 (Artículo).
               </p>
               <div className="flex flex-col gap-3">
                 <button
@@ -83,7 +83,7 @@ export default function EvaluarTesisFase2Page({
 
   return (
     <>
-      <DashboardHeader pageTitle={`Evaluar Tesis - Fase 2 (Contenido)`} />
+      <DashboardHeader pageTitle={`Evaluar Tesis - Fase 2 (Entrega Final)`} />
 
       <PageTransition>
         <main className="flex-1 p-4 sm:p-6 lg:p-8 bg-gray-50">
