@@ -1,6 +1,5 @@
-// Test users for local/demo login with roles
 export const TEST_USERS = [
-  { email: 'admin@example.com', password: '1234', role: 'Admin' },
+  { email: 'admin@tesisfar.com', password: 'admin', role: 'Admin' },
   { email: 'estudiante@example.com', password: 'est123', role: 'Estudiante' },
   { email: 'profesor@example.com', password: 'prof123', role: 'Profesor' },
 ];

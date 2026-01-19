@@ -21,6 +21,7 @@ import {
   TrendingUp,
   X,
 } from "lucide-react";
+import { getUserRole } from "@/features/auth/clientAuth";
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -53,21 +54,32 @@ const Sidebar: React.FC<SidebarProps> = ({
         document.body.style.overflow = "hidden";
         // Focus close button for accessibility
         setTimeout(() => closeBtnRef.current?.focus(), 0);
-      } catch {}
+      } catch { }
     } else {
       try {
         document.body.style.overflow = "";
-      } catch {}
+      } catch { }
     }
     return () => {
       try {
         document.body.style.overflow = "";
-      } catch {}
+      } catch { }
     };
   }, [mobileOpen]);
 
-  const menuItems = useMemo(
-    () => [
+
+
+  // ... (inside component)
+
+  const [userRole, setUserRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Get role on mount (client-side only)
+    setUserRole(getUserRole());
+  }, []);
+
+  const menuItems = useMemo(() => {
+    const baseItems = [
       { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
       {
         icon: FileText,
@@ -79,7 +91,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         label: "Trabajo Especial (TEG)",
         href: "/dashboard/tesis",
       },
-      { icon: ScanLine, label: "Escanear Documento", href: "/dashboard/scan" },
+      { icon: ScanLine, label: "Escanear Documento", href: "/dashboard/scan", requiredRole: ["Estudiante", "Profesor"] },
       { icon: TrendingUp, label: "Seguimiento", href: "/dashboard/tracking" },
       {
         icon: PlusCircle,
@@ -87,9 +99,21 @@ const Sidebar: React.FC<SidebarProps> = ({
         href: "/dashboard/agregar",
       },
       { icon: Settings, label: "Configuración", href: "/dashboard/settings" },
-    ],
-    [],
-  );
+    ];
+
+    // Filter items based on role
+    return baseItems.filter(item => {
+      if (!item.requiredRole) return true;
+      // If no role logic yet, show everything (or default safe). 
+      // But here we want to HIDE Scan for Admin (or only show for Estudiante/Profesor).
+      // If userRole is Admin, and requiredRole doesn't include Admin, hide it.
+      if (!userRole) return true; // Show all if role loading/unknown for now (or hide?)
+
+      // Admin should NOT see Scan. Scan is allowed for: ["Estudiante", "Profesor"]
+      // If user is Admin, they are NOT in that list.
+      return item.requiredRole.includes(userRole);
+    });
+  }, [userRole]);
 
   // Prefetch routes on hover for instant navigation
   const handleLinkHover = useCallback(
@@ -139,9 +163,8 @@ const Sidebar: React.FC<SidebarProps> = ({
           <>
             {/* Mobile drawer (left off-canvas) - rendered in portal to ensure it overlays app content */}
             <div
-              className={`lg:hidden fixed inset-y-0 left-0 z-[100] w-[85vw] max-w-xs sm:max-w-sm bg-white border-r border-gray-200 shadow-2xl transform transition-transform duration-300 ease-out ${
-                mobileOpen ? "translate-x-0" : "-translate-x-full"
-              }`}
+              className={`lg:hidden fixed inset-y-0 left-0 z-[100] w-[85vw] max-w-xs sm:max-w-sm bg-white border-r border-gray-200 shadow-2xl transform transition-transform duration-300 ease-out ${mobileOpen ? "translate-x-0" : "-translate-x-full"
+                }`}
               role="dialog"
               aria-modal="true"
               aria-label="Menú de navegación"
@@ -196,11 +219,10 @@ const Sidebar: React.FC<SidebarProps> = ({
                             onClick={() => setMobileOpen(false)}
                             onMouseEnter={() => handleLinkHover(item.href)}
                             prefetch={true}
-                            className={`w-full flex items-center gap-3 py-3 px-3 rounded-lg transition-all duration-200 relative group ${
-                              isActive
-                                ? "bg-blue-600 text-white shadow-md shadow-blue-600/30"
-                                : "text-gray-700 hover:bg-gray-100 hover:translate-x-1"
-                            }`}
+                            className={`w-full flex items-center gap-3 py-3 px-3 rounded-lg transition-all duration-200 relative group ${isActive
+                              ? "bg-blue-600 text-white shadow-md shadow-blue-600/30"
+                              : "text-gray-700 hover:bg-gray-100 hover:translate-x-1"
+                              }`}
                             title={`${item.label} (Alt+${index + 1})`}
                           >
                             <item.icon
@@ -233,9 +255,8 @@ const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Desktop persistent side rail */}
       <aside
-        className={`hidden lg:flex lg:flex-col h-screen bg-white border-r border-gray-200 shadow-none z-50 ${
-          isCollapsed ? "w-20" : "w-64"
-        }`}
+        className={`hidden lg:flex lg:flex-col h-screen bg-white border-r border-gray-200 shadow-none z-50 ${isCollapsed ? "w-20" : "w-64"
+          }`}
         style={{ position: "relative" }}
       >
         <div
@@ -282,11 +303,10 @@ const Sidebar: React.FC<SidebarProps> = ({
                     href={item.href}
                     onMouseEnter={() => handleLinkHover(item.href)}
                     prefetch={true}
-                    className={`w-full flex items-center ${isCollapsed ? "justify-center gap-0 px-3" : "gap-3 px-4"} py-3 rounded-lg transition-all duration-200 relative group ${
-                      isActive
-                        ? "bg-blue-700 text-white shadow-lg shadow-blue-500/30"
-                        : "text-gray-700 hover:bg-gray-100 hover:translate-x-1"
-                    }`}
+                    className={`w-full flex items-center ${isCollapsed ? "justify-center gap-0 px-3" : "gap-3 px-4"} py-3 rounded-lg transition-all duration-200 relative group ${isActive
+                      ? "bg-blue-700 text-white shadow-lg shadow-blue-500/30"
+                      : "text-gray-700 hover:bg-gray-100 hover:translate-x-1"
+                      }`}
                     title={
                       isCollapsed
                         ? `${item.label} (Alt+${index + 1})`
