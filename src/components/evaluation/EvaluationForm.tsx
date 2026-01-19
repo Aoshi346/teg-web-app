@@ -17,6 +17,13 @@ import Banner from "@/components/ui/Banner";
 import { ImageTooltip } from "@/components/ui/ImageTooltip";
 
 import { useValidation } from "@/hooks/useValidation";
+import {
+  Project,
+  getProyectos,
+  getTesis,
+  updateProyecto,
+  updateTesis,
+} from "@/lib/data/mockData";
 
 interface EvaluationFormProps {
   projectId?: string | null;
@@ -40,6 +47,22 @@ export default function EvaluationForm({
   const router = useRouter();
   const documentType =
     (typeParam || "proyecto").toLowerCase() === "tesis" ? "Tesis" : "Proyecto";
+
+  // Fetch project data
+  const [projectData, setProjectData] = useState<Project | null>(null);
+
+  React.useEffect(() => {
+    if (!projectId) return;
+
+    const id = parseInt(projectId);
+    const list = documentType === "Tesis" ? getTesis() : getProyectos();
+    const found = list.find((p) => p.id === id);
+
+    if (found) {
+      setProjectData(found);
+    }
+  }, [projectId, documentType]);
+
   const sourceQuestions = questions;
   const filteredQuestions = sourceQuestions.filter(
     (q) =>
@@ -408,14 +431,31 @@ export default function EvaluationForm({
       passStatus,
     };
 
-    // Demo: If this is Tesis Stage 1 (inferred by question ID q57), update session storage
-    if (
-      documentType === "Tesis" &&
-      projectId &&
-      filteredQuestions.some((q) => q.id === "q57")
-    ) {
-      if (passStatus === "Pass") {
-        sessionStorage.setItem(`project_${projectId}_stage1_passed`, "true");
+    // Update Project/Tesis with Persistence
+    if (projectData && projectId) {
+      const updatedProject = {
+        ...projectData,
+        status: (passStatus === "Pass" ? "checked" : "rejected") as
+          | "checked"
+          | "rejected"
+          | "pending",
+        score: score,
+        reviewDate: new Date().toISOString().split("T")[0],
+      };
+
+      if (documentType === "Tesis") {
+        // Tesis specific logic
+        // Check if it's stage 1 (based on question q57 passing)
+        const isStage1 = filteredQuestions.some((q) => q.id === "q57");
+        if (isStage1) {
+          // If it's stage 1, preserve Stage 1 passed status if passed
+          if (passStatus === "Pass") {
+            updatedProject.stage1Passed = true;
+          }
+        }
+        updateTesis(updatedProject);
+      } else {
+        updateProyecto(updatedProject);
       }
     }
 
@@ -423,6 +463,14 @@ export default function EvaluationForm({
     setSubmittedData(payload);
     showBanner("Evaluación enviada con éxito.", "success");
     setIsSubmitting(false);
+
+    // Redirect after delay
+    setTimeout(() => {
+      // Find the dashboard URL based on type
+      const returnUrl =
+        documentType === "Tesis" ? "/dashboard/tesis" : "/dashboard/proyectos";
+      router.push(returnUrl);
+    }, 2000);
   };
 
   const allSections = [

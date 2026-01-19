@@ -10,32 +10,76 @@ export function calculateScore(
   ratings: Record<string, number | string>,
   questions: Question[]
 ): number {
-  let score = 0;
-  
-  // Filter questions that are actually in the ratings
-  // We assume questions passed here are the ones being evaluated
+  let totalEarned = 0;
+  let maxPossible = 0;
   
   for (const question of questions) {
+    // Skip text questions for scoring
+    if (question.answerType === 'text') continue;
+
     const ratingRaw = ratings[question.id];
-    const rating = typeof ratingRaw === 'number' ? ratingRaw : Number(ratingRaw) || 0;
+    // Convert to number, default to 0 if missing
+    const val = typeof ratingRaw === 'number' ? ratingRaw : Number(ratingRaw) || 0;
     
-    // Logic: Yes (2) = 5 points, No (1) = 0 points.
-    // If answerType is not yesno, we might need different logic.
-    // For now, user specified 0-20 scale and we have 4 questions.
-    
-    if (question.answerType === 'yesno') {
-      if (rating === 2) { // Yes
-        score += 5;
-      }
-      // No (1) adds 0
-    } else {
-      // Fallback or other logic if we add more question types later
-      // For example, if we had 20 questions, maybe each is 1 point.
-      // But for the current 4 questions, 5 points each makes sense.
+    // If val is 0, it means "unanswered" in our current state logic, 
+    // but usually validation prevents finding score with unanswered questions.
+    // If allowed, 0 counts as 0 points but adds to maxPossible? 
+    // Let's assume validation ensures they are answered. 
+    // If val is 0, treat as "no points" but "max points" exist.
+
+    let earned = 0;
+    let possible = 0;
+
+    switch (question.answerType) {
+      case 'yesno':
+        // 1=No, 2=Yes. Max weight = 1.
+        possible = 1;
+        if (val === 2) earned = 1; // Yes
+        else earned = 0;           // No
+        break;
+
+      case 'frequency':
+        // 1=Nunca (0), 2=A veces (0.5), 3=Siempre (1), 4=No aplica (exclude)
+        if (val === 4) {
+             // No aplica -> Skip this question entirely from scoring
+             possible = 0;
+             earned = 0;
+        } else {
+             possible = 1;
+             if (val === 3) earned = 1;       // Siempre
+             else if (val === 2) earned = 0.5; // A veces
+             else earned = 0;                 // Nunca (val 1)
+        }
+        break;
+
+      case 'stars':
+        // 1-5 stars. Map to 0-1 scale? Or just treat as 5 points max.
+        // Consistency: Let's treat standard weight as 1.
+        // So val 5 = 1, val 1 = 0.2? 
+        // Or linear: val / 5.
+        possible = 1;
+        if (val > 0 && val <= 5) {
+            earned = val / 5;
+        }
+        break;
+        
+      default:
+        possible = 0;
     }
+
+    totalEarned += earned;
+    maxPossible += possible;
   }
+
+  if (maxPossible === 0) return 0;
+
+  // Scale to 20 points
+  const score = (totalEarned / maxPossible) * 20;
   
-  return score;
+  // Return formatted to 2 decimals if needed, but number type usually fine.
+  // We can round it closer to typical grades (e.g. 0.5 precision) or just decimals.
+  // User asked for "decimals included".
+  return Math.round(score * 100) / 100;
 }
 
 export function getPassStatus(score: number): PassStatus {

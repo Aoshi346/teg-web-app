@@ -253,6 +253,8 @@ export const mockTesis: Project[] = [
 // Storage keys for user-added documents
 const ADDED_PROYECTOS_KEY = "tesisfar_added_proyectos";
 const ADDED_TESIS_KEY = "tesisfar_added_tesis";
+const UPDATED_PROYECTOS_KEY = "tesisfar_updated_proyectos";
+const UPDATED_TESIS_KEY = "tesisfar_updated_tesis";
 
 // Helper to get next ID for a collection
 function getNextId(projects: Project[]): number {
@@ -260,8 +262,8 @@ function getNextId(projects: Project[]): number {
   return maxId + 1;
 }
 
-// Helper to load added items from localStorage
-function loadAddedItems(key: string): Project[] {
+// Helper to load items from localStorage
+function loadItems<T>(key: string): T[] {
   if (typeof window === "undefined") return [];
   try {
     const stored = localStorage.getItem(key);
@@ -271,57 +273,108 @@ function loadAddedItems(key: string): Project[] {
   }
 }
 
-// Helper to save added items to localStorage
-function saveAddedItems(key: string, items: Project[]): void {
+// Helper to save items to localStorage
+function saveItems<T>(key: string, items: T[]): void {
   if (typeof window === "undefined") return;
   try {
     localStorage.setItem(key, JSON.stringify(items));
-  } catch { }
+  } catch {}
 }
 
 /**
- * Get all proyectos including user-added ones
+ * Get all proyectos, merging static, added, and updated data
  */
 export function getProyectos(): Project[] {
-  const added = loadAddedItems(ADDED_PROYECTOS_KEY);
-  return [...mockProyectos, ...added];
+  const added = loadItems<Project>(ADDED_PROYECTOS_KEY);
+  const updated = loadItems<Project>(UPDATED_PROYECTOS_KEY);
+  
+  // Create a map of updated projects for O(1) lookup
+  const updatedMap = new Map(updated.map(p => [p.id, p]));
+
+  // Combine static and added
+  const allInitial = [...mockProyectos, ...added];
+  
+  // Apply updates
+  return allInitial.map(p => updatedMap.get(p.id) || p);
 }
 
 /**
- * Get all tesis including user-added ones
+ * Get all tesis, merging static, added, and updated data
  */
 export function getTesis(): Project[] {
-  const added = loadAddedItems(ADDED_TESIS_KEY);
-  return [...mockTesis, ...added];
+  const added = loadItems<Project>(ADDED_TESIS_KEY);
+  const updated = loadItems<Project>(UPDATED_TESIS_KEY);
+  
+  const updatedMap = new Map(updated.map(p => [p.id, p]));
+  const allInitial = [...mockTesis, ...added];
+  
+  return allInitial.map(p => updatedMap.get(p.id) || p);
 }
 
 /**
  * Add a new proyecto
  */
 export function addProyecto(data: Omit<Project, "id">): Project {
-  const added = loadAddedItems(ADDED_PROYECTOS_KEY);
-  const allProyectos = [...mockProyectos, ...added];
+  const added = loadItems<Project>(ADDED_PROYECTOS_KEY);
+  // Calculate next ID based on ALL current projects (mock + added) to avoid collisions
+  // Note: This simple ID generation might still have collision issues if mock IDs overlap with added IDs 
+  // but for this demo with static mocks 1-10, it's fine as long as we check max ID.
+  const currentAll = [...mockProyectos, ...added];
+  
   const newProyecto: Project = {
     ...data,
-    id: getNextId(allProyectos),
+    id: getNextId(currentAll),
   };
   added.push(newProyecto);
-  saveAddedItems(ADDED_PROYECTOS_KEY, added);
+  saveItems(ADDED_PROYECTOS_KEY, added);
   return newProyecto;
+}
+
+/**
+ * Update an existing proyecto
+ */
+export function updateProyecto(project: Project): void {
+  const updated = loadItems<Project>(UPDATED_PROYECTOS_KEY);
+  const index = updated.findIndex(p => p.id === project.id);
+  
+  if (index >= 0) {
+    updated[index] = project;
+  } else {
+    updated.push(project);
+  }
+  
+  saveItems(UPDATED_PROYECTOS_KEY, updated);
 }
 
 /**
  * Add a new tesis
  */
 export function addTesis(data: Omit<Project, "id">): Project {
-  const added = loadAddedItems(ADDED_TESIS_KEY);
-  const allTesis = [...mockTesis, ...added];
+  const added = loadItems<Project>(ADDED_TESIS_KEY);
+  const currentAll = [...mockTesis, ...added];
+  
   const newTesis: Project = {
     ...data,
-    id: getNextId(allTesis),
+    id: getNextId(currentAll),
     stage1Passed: false, // New tesis start with stage1 not passed
   };
   added.push(newTesis);
-  saveAddedItems(ADDED_TESIS_KEY, added);
+  saveItems(ADDED_TESIS_KEY, added);
   return newTesis;
+}
+
+/**
+ * Update an existing tesis
+ */
+export function updateTesis(project: Project): void {
+  const updated = loadItems<Project>(UPDATED_TESIS_KEY);
+  const index = updated.findIndex(p => p.id === project.id);
+  
+  if (index >= 0) {
+    updated[index] = project;
+  } else {
+    updated.push(project);
+  }
+  
+  saveItems(UPDATED_TESIS_KEY, updated);
 }
