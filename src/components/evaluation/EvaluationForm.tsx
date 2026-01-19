@@ -16,6 +16,8 @@ import {
 import Banner from "@/components/ui/Banner";
 import { ImageTooltip } from "@/components/ui/ImageTooltip";
 
+import { useValidation } from "@/hooks/useValidation";
+
 interface EvaluationFormProps {
   projectId?: string | null;
   typeParam?: string; // 'proyecto' | 'tesis'
@@ -67,11 +69,7 @@ export default function EvaluationForm({
   const [submittedData, setSubmittedData] = useState<SubmittedData>(null);
   const [, setActiveSubsection] = useState<string | null>(null);
 
-  const [bannerState, setBannerState] = useState<{
-    visible: boolean;
-    message: string;
-    type: "success" | "error" | "warning" | "info";
-  }>({ visible: false, message: "", type: "info" });
+  const { showBanner, bannerProps } = useValidation();
 
   const setRating = (qid: string, value: number | string) => {
     setRatings((prev) => ({ ...prev, [qid]: value }));
@@ -158,7 +156,7 @@ export default function EvaluationForm({
                   key={option.value}
                   type="button"
                   onClick={() => setRating(question.id, option.value)}
-                  className={`relative flex items-center justify-center py-2.5 px-4 rounded-xl text-sm font-semibold border transition-all duration-200 active:scale-[0.98] ${activeClass}`}
+                  className={`relative flex items-center justify-center py-3 px-6 rounded-xl text-sm font-bold border transition-all duration-300 transform active:scale-[0.98] ${activeClass} ${!isActive && "hover:shadow-md hover:-translate-y-0.5"}`}
                 >
                   {/* Optional: Add icons if desired for friendly UI */}
                   {isActive && (
@@ -209,10 +207,10 @@ export default function EvaluationForm({
                 key={option.value}
                 type="button"
                 onClick={() => setRating(question.id, option.value)}
-                className={`w-full px-4 py-2.5 rounded-lg text-sm font-medium border-2 transition-all text-left ${
+                className={`w-full px-4 py-3 rounded-xl text-sm font-medium border transition-all text-left duration-200 ${
                   currentRating === option.value
-                    ? `${option.color} shadow-md`
-                    : "bg-white text-gray-600 border-gray-200 hover:border-gray-300 hover:shadow-sm"
+                    ? `${option.color} shadow-md ring-2 ring-offset-1 ring-transparent`
+                    : "bg-white text-gray-600 border-gray-200 hover:border-gray-300 hover:bg-gray-50 hover:shadow-sm"
                 }`}
               >
                 {option.label}
@@ -261,8 +259,8 @@ export default function EvaluationForm({
               value={currentText}
               onChange={(e) => setRating(question.id, e.target.value)}
               rows={4}
-              className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none"
-              placeholder="Escriba sus observaciones o recomendaciones"
+              className="w-full bg-white border border-gray-200 rounded-xl p-4 text-sm shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all resize-none placeholder:text-gray-400"
+              placeholder="Escriba sus observaciones o recomendaciones..."
             />
             <p className="text-xs text-gray-500 mt-2">
               Este campo es de texto libre y no afecta el puntaje numérico.
@@ -325,12 +323,10 @@ export default function EvaluationForm({
         );
         const missingQuestion = sectionQuestions[missingIndex];
 
-        setBannerState({
-          visible: true,
-          message:
-            "Por favor complete todas las preguntas de la sección actual antes de avanzar.",
-          type: "error",
-        });
+        showBanner(
+          "Por favor complete todas las preguntas de la sección actual antes de avanzar.",
+          "error",
+        );
 
         if (missingQuestion) {
           scrollToQuestion(missingQuestion.id);
@@ -355,12 +351,10 @@ export default function EvaluationForm({
       );
       const missingQuestion = sectionQuestions[missingIndex];
 
-      setBannerState({
-        visible: true,
-        message:
-          "Por favor califique todas las preguntas de esta sección antes de continuar.",
-        type: "error",
-      });
+      showBanner(
+        "Por favor califique todas las preguntas de esta sección antes de continuar.",
+        "error",
+      );
 
       if (missingQuestion) {
         scrollToQuestion(missingQuestion.id);
@@ -392,12 +386,10 @@ export default function EvaluationForm({
       const targetPage = missingSectionIndex + 1;
       setPage(targetPage);
 
-      setBannerState({
-        visible: true,
-        message:
-          "Por favor califique todas las preguntas obligatorias marcadas.",
-        type: "error",
-      });
+      showBanner(
+        "Por favor califique todas las preguntas obligatorias marcadas.",
+        "error",
+      );
 
       // improved scroll logic
       scrollToQuestion(firstMissingQuestion.id);
@@ -429,11 +421,7 @@ export default function EvaluationForm({
 
     await new Promise((res) => setTimeout(res, 600));
     setSubmittedData(payload);
-    setBannerState({
-      visible: true,
-      message: "Evaluación enviada con éxito.",
-      type: "success",
-    });
+    showBanner("Evaluación enviada con éxito.", "success");
     setIsSubmitting(false);
   };
 
@@ -507,16 +495,10 @@ export default function EvaluationForm({
 
   return (
     <>
-      {bannerState.visible && (
+      {bannerProps.visible && (
         <div className="fixed top-4 inset-x-0 z-[9999] flex justify-center px-4 pointer-events-none">
           <div className="pointer-events-auto w-full max-w-3xl">
-            <Banner
-              visible={bannerState.visible}
-              message={bannerState.message}
-              type={bannerState.type}
-              onClose={() => setBannerState((s) => ({ ...s, visible: false }))}
-              autoHide={6000}
-            />
+            <Banner {...bannerProps} />
           </div>
         </div>
       )}
@@ -567,19 +549,19 @@ export default function EvaluationForm({
                           key={s}
                           type="button"
                           onClick={() => goToPage(pageForSection)}
-                          className={`flex-shrink-0 px-4 py-2.5 rounded-lg font-medium text-sm transition-all ${
+                          className={`flex-shrink-0 px-5 py-2.5 rounded-full font-bold text-sm transition-all duration-300 ${
                             isActive
-                              ? "bg-blue-600 text-white shadow-md"
-                              : "bg-white text-gray-700 hover:bg-blue-50 border border-gray-200"
+                              ? "bg-blue-600 text-white shadow-lg shadow-blue-500/25 scale-105"
+                              : "bg-white text-gray-600 hover:bg-blue-50 hover:text-blue-600 border border-transparent hover:border-blue-100"
                           }`}
                         >
                           <div className="flex items-center gap-2">
                             <span>{s}</span>
                             <span
-                              className={`text-xs px-2 py-0.5 rounded-full ${
+                              className={`text-[10px] px-2 py-0.5 rounded-full font-extrabold ${
                                 isActive
-                                  ? "bg-blue-500 text-white"
-                                  : "bg-gray-100 text-gray-600"
+                                  ? "bg-white/20 text-white"
+                                  : "bg-gray-100 text-gray-500 group-hover:bg-blue-100 group-hover:text-blue-600"
                               }`}
                             >
                               {count}
@@ -798,11 +780,11 @@ export default function EvaluationForm({
                     <button
                       type="button"
                       onClick={handleNextSection}
-                      className="flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-all shadow-sm hover:shadow-md"
+                      className="group flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-bold hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-300 transform hover:-translate-y-0.5"
                     >
                       Siguiente
                       <svg
-                        className="w-4 h-4"
+                        className="w-4 h-4 group-hover:translate-x-1 transition-transform"
                         fill="none"
                         stroke="currentColor"
                         viewBox="0 0 24 24"

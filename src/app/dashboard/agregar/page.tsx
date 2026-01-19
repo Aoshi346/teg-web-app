@@ -2,10 +2,22 @@
 
 import React, { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { FileText, BookOpen, CheckCircle } from "lucide-react";
+import {
+  FileText,
+  BookOpen,
+  CheckCircle,
+  User,
+  GraduationCap,
+  PenTool,
+  ArrowRight,
+  Plus,
+  X,
+  Users,
+} from "lucide-react";
 import DashboardHeader from "@/components/layout/DashboardHeader";
 import PageTransition from "@/components/ui/PageTransition";
 import Banner from "@/components/ui/Banner";
+import SemesterSelector from "@/components/ui/SemesterSelector";
 import { addProyecto, addTesis } from "@/lib/data/mockData";
 import { getAvailableSemesterPeriods } from "@/lib/semesters";
 
@@ -13,8 +25,8 @@ type DocumentType = "proyecto" | "tesis";
 
 interface FormData {
   title: string;
-  student: string;
-  advisor: string;
+  students: string[];
+  advisors: string[];
   semesterPeriod: string;
 }
 
@@ -23,8 +35,8 @@ export default function AgregarDocumentoPage() {
   const [documentType, setDocumentType] = useState<DocumentType>("proyecto");
   const [formData, setFormData] = useState<FormData>({
     title: "",
-    student: "",
-    advisor: "",
+    students: [""],
+    advisors: [""],
     semesterPeriod: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -33,6 +45,15 @@ export default function AgregarDocumentoPage() {
     message: string;
     type: "success" | "error" | "warning" | "info";
   }>({ visible: false, message: "", type: "info" });
+
+  const [errors, setErrors] = useState<{
+    title?: boolean;
+    students: boolean[];
+    advisors: boolean[];
+  }>({
+    students: [],
+    advisors: [],
+  });
 
   const availablePeriods = useMemo(() => getAvailableSemesterPeriods(), []);
 
@@ -48,37 +69,119 @@ export default function AgregarDocumentoPage() {
       ? "9no Semestre (Proyecto TEG)"
       : "10mo Semestre (TEG)";
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData((prev) => ({ ...prev, title: e.target.value }));
+    if (errors.title) setErrors((prev) => ({ ...prev, title: false }));
+  };
+
+  const handleSemesterChange = (semester: string) => {
+    setFormData((prev) => ({ ...prev, semesterPeriod: semester }));
+  };
+
+  // Student Handlers
+  const handleStudentChange = (index: number, value: string) => {
+    const newStudents = [...formData.students];
+    newStudents[index] = value;
+    setFormData((prev) => ({ ...prev, students: newStudents }));
+
+    if (errors.students[index]) {
+      const newStudentErrors = [...errors.students];
+      newStudentErrors[index] = false;
+      setErrors((prev) => ({ ...prev, students: newStudentErrors }));
+    }
+  };
+
+  const addStudent = () => {
+    if (formData.students.length < 3) {
+      setFormData((prev) => ({ ...prev, students: [...prev.students, ""] }));
+      setErrors((prev) => ({ ...prev, students: [...prev.students, false] }));
+    }
+  };
+
+  const removeStudent = (index: number) => {
+    if (formData.students.length > 1) {
+      const newStudents = formData.students.filter((_, i) => i !== index);
+      setFormData((prev) => ({ ...prev, students: newStudents }));
+
+      const newStudentErrors = errors.students.filter((_, i) => i !== index);
+      setErrors((prev) => ({ ...prev, students: newStudentErrors }));
+    }
+  };
+
+  // Advisor Handlers
+  const handleAdvisorChange = (index: number, value: string) => {
+    const newAdvisors = [...formData.advisors];
+    newAdvisors[index] = value;
+    setFormData((prev) => ({ ...prev, advisors: newAdvisors }));
+
+    if (errors.advisors[index]) {
+      const newAdvisorErrors = [...errors.advisors];
+      newAdvisorErrors[index] = false;
+      setErrors((prev) => ({ ...prev, advisors: newAdvisorErrors }));
+    }
+  };
+
+  const addAdvisor = () => {
+    if (formData.advisors.length < 2) {
+      setFormData((prev) => ({ ...prev, advisors: [...prev.advisors, ""] }));
+      setErrors((prev) => ({ ...prev, advisors: [...prev.advisors, false] }));
+    }
+  };
+
+  const removeAdvisor = (index: number) => {
+    if (formData.advisors.length > 1) {
+      const newAdvisors = formData.advisors.filter((_, i) => i !== index);
+      setFormData((prev) => ({ ...prev, advisors: newAdvisors }));
+
+      const newAdvisorErrors = errors.advisors.filter((_, i) => i !== index);
+      setErrors((prev) => ({ ...prev, advisors: newAdvisorErrors }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validation
-    if (
-      !formData.title.trim() ||
-      !formData.student.trim() ||
-      !formData.advisor.trim()
-    ) {
+    // Comprehensive Validation
+    const errorsFound = {
+      title: !formData.title.trim(),
+      students: formData.students.map((s) => !s.trim()),
+      advisors: formData.advisors.map((a) => !a.trim()),
+    };
+
+    const hasStudentErrors = errorsFound.students.some(Boolean);
+    const hasAdvisorErrors = errorsFound.advisors.some(Boolean);
+
+    if (errorsFound.title || hasStudentErrors || hasAdvisorErrors) {
+      setErrors({
+        title: errorsFound.title,
+        students: errorsFound.students,
+        advisors: errorsFound.advisors,
+      });
+
       setBannerState({
         visible: true,
-        message: "Por favor complete todos los campos requeridos.",
+        message: "Por favor complete todos los campos marcados en rojo.",
         type: "error",
       });
       return;
     }
+
+    // Clear errors if any existed
+    setErrors({
+      students: [],
+      advisors: [],
+    });
+
+    const validStudents = formData.students.filter((s) => s.trim() !== "");
+    const validAdvisors = formData.advisors.filter((a) => a.trim() !== "");
 
     setIsSubmitting(true);
 
     try {
       const newDocument = {
         title: formData.title.trim(),
-        student: formData.student.trim(),
-        advisor: formData.advisor.trim(),
+        student: validStudents.join(", "),
+        advisor: validAdvisors.join(", "),
         submittedDate: new Date().toISOString().split("T")[0],
         status: "pending" as const,
         semester: formData.semesterPeriod,
@@ -91,7 +194,7 @@ export default function AgregarDocumentoPage() {
       }
 
       // Simulate network delay
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 800));
 
       setBannerState({
         visible: true,
@@ -102,8 +205,8 @@ export default function AgregarDocumentoPage() {
       // Reset form
       setFormData({
         title: "",
-        student: "",
-        advisor: "",
+        students: [""],
+        advisors: [""],
         semesterPeriod: availablePeriods[0] || "",
       });
 
@@ -145,228 +248,452 @@ export default function AgregarDocumentoPage() {
       )}
 
       <PageTransition>
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto bg-gray-50">
-          <div className="max-w-2xl mx-auto">
-            {/* Document Type Selector */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                Tipo de Documento
-              </h2>
-              <div className="grid grid-cols-2 gap-4">
-                <button
-                  type="button"
-                  onClick={() => setDocumentType("proyecto")}
-                  className={`relative flex flex-col items-center gap-3 p-6 rounded-xl border-2 transition-all duration-200 ${
-                    documentType === "proyecto"
-                      ? "border-blue-500 bg-blue-50 shadow-md"
-                      : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50"
-                  }`}
-                >
-                  <FileText
-                    className={`w-8 h-8 ${documentType === "proyecto" ? "text-blue-600" : "text-gray-500"}`}
-                  />
-                  <div className="text-center">
-                    <p
-                      className={`font-semibold ${documentType === "proyecto" ? "text-blue-900" : "text-gray-700"}`}
-                    >
-                      Proyecto (PTEG)
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">9no Semestre</p>
-                  </div>
-                  {documentType === "proyecto" && (
-                    <div className="absolute top-3 right-3">
-                      <CheckCircle className="w-5 h-5 text-blue-600" />
-                    </div>
-                  )}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setDocumentType("tesis")}
-                  className={`relative flex flex-col items-center gap-3 p-6 rounded-xl border-2 transition-all duration-200 ${
-                    documentType === "tesis"
-                      ? "border-emerald-500 bg-emerald-50 shadow-md"
-                      : "border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50"
-                  }`}
-                >
-                  <BookOpen
-                    className={`w-8 h-8 ${documentType === "tesis" ? "text-emerald-600" : "text-gray-500"}`}
-                  />
-                  <div className="text-center">
-                    <p
-                      className={`font-semibold ${documentType === "tesis" ? "text-emerald-900" : "text-gray-700"}`}
-                    >
-                      Trabajo Especial (TEG)
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1">10mo Semestre</p>
-                  </div>
-                  {documentType === "tesis" && (
-                    <div className="absolute top-3 right-3">
-                      <CheckCircle className="w-5 h-5 text-emerald-600" />
-                    </div>
-                  )}
-                </button>
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto bg-gray-50/50">
+          <div className="max-w-5xl mx-auto space-y-6">
+            {/* Header Section with Semester Selector */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">
+                  Nuevo Registro
+                </h2>
+                <p className="text-gray-500 text-sm mt-1">
+                  Complete la información para añadir un nuevo documento
+                  académico
+                </p>
+              </div>
+              <div className="w-full sm:w-auto">
+                <SemesterSelector
+                  selectedSemester={formData.semesterPeriod}
+                  availableSemesters={availablePeriods}
+                  onSemesterChange={handleSemesterChange}
+                />
               </div>
             </div>
 
-            {/* Form */}
-            <form
-              onSubmit={handleSubmit}
-              className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6"
-            >
-              <h2 className="text-lg font-semibold text-gray-900 mb-6">
-                Información del Documento
-              </h2>
-
-              <div className="space-y-5">
-                {/* Title */}
-                <div>
-                  <label
-                    htmlFor="title"
-                    className="block text-sm font-medium text-gray-700 mb-2"
+            <div className="grid lg:grid-cols-3 gap-6">
+              {/* Left Column: Document Type Selection */}
+              <div className="lg:col-span-1 space-y-4">
+                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+                  Tipo de Documento
+                </h3>
+                <div className="relative group/tooltip">
+                  <button
+                    type="button"
+                    onClick={() => setDocumentType("proyecto")}
+                    className={`relative w-full overflow-hidden flex flex-col items-start gap-3 p-5 rounded-2xl border-2 transition-all duration-300 group ${
+                      documentType === "proyecto"
+                        ? "border-blue-500 bg-white shadow-2xl shadow-blue-500/20 scale-[1.04]"
+                        : "border-transparent bg-white shadow-sm hover:shadow-xl hover:shadow-blue-500/10 hover:bg-gradient-to-br hover:from-blue-50/30 hover:to-white hover:scale-[1.02] hover:border-blue-200"
+                    }`}
                   >
-                    Título <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    id="title"
-                    name="title"
-                    value={formData.title}
-                    onChange={handleInputChange}
-                    placeholder="Ingrese el título del documento"
-                    className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:bg-white focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all text-sm"
-                    required
-                  />
-                </div>
-
-                {/* Student */}
-                <div>
-                  <label
-                    htmlFor="student"
-                    className="block text-sm font-medium text-gray-700 mb-2"
-                  >
-                    Estudiante <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    id="student"
-                    name="student"
-                    value={formData.student}
-                    onChange={handleInputChange}
-                    placeholder="Nombre completo del estudiante"
-                    className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:bg-white focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all text-sm"
-                    required
-                  />
-                </div>
-
-                {/* Advisor */}
-                <div>
-                  <label
-                    htmlFor="advisor"
-                    className="block text-sm font-medium text-gray-700 mb-2"
-                  >
-                    Tutor <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    id="advisor"
-                    name="advisor"
-                    value={formData.advisor}
-                    onChange={handleInputChange}
-                    placeholder="Nombre del tutor o director"
-                    className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:bg-white focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all text-sm"
-                    required
-                  />
-                </div>
-
-                {/* Semester Period */}
-                <div>
-                  <label
-                    htmlFor="semesterPeriod"
-                    className="block text-sm font-medium text-gray-700 mb-2"
-                  >
-                    Período
-                  </label>
-                  <select
-                    id="semesterPeriod"
-                    name="semesterPeriod"
-                    value={formData.semesterPeriod}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:bg-white focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all text-sm"
-                  >
-                    {availablePeriods.map((period) => (
-                      <option key={period} value={period}>
-                        {period}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Semester Type Display */}
-                <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-                  <p className="text-sm text-gray-600">
-                    <span className="font-medium">Semestre:</span>{" "}
-                    <span
-                      className={
-                        documentType === "proyecto"
-                          ? "text-blue-600"
-                          : "text-emerald-600"
-                      }
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 via-blue-500/0 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                    <div
+                      className={`p-3 rounded-xl ${documentType === "proyecto" ? "bg-blue-100 text-blue-600 ring-2 ring-blue-200" : "bg-gray-100 text-gray-500 group-hover:bg-blue-50 group-hover:text-blue-600 group-hover:ring-2 group-hover:ring-blue-100"} transition-all duration-300`}
                     >
-                      {semesterLabel}
-                    </span>
-                  </p>
+                      <FileText className="w-6 h-6 group-hover:scale-110 transition-transform" />
+                    </div>
+                    <div className="text-left relative z-10">
+                      <p
+                        className={`font-bold text-lg ${documentType === "proyecto" ? "text-blue-900" : "text-gray-700 group-hover:text-blue-800"} transition-colors`}
+                      >
+                        Proyecto (PTEG)
+                      </p>
+                      <p className="text-xs font-medium text-gray-500 mt-1">
+                        9no Semestre
+                      </p>
+                    </div>
+                    {documentType === "proyecto" && (
+                      <div className="absolute top-0 right-0 p-4 animate-in fade-in duration-300">
+                        <CheckCircle className="w-5 h-5 text-blue-500" />
+                      </div>
+                    )}
+                    {documentType === "proyecto" && (
+                      <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-blue-400 rounded-full blur-3xl opacity-30 pointer-events-none animate-pulse" />
+                    )}
+                    {documentType === "proyecto" && (
+                      <div
+                        className="absolute inset-0 rounded-2xl bg-blue-500/10 animate-ping pointer-events-none"
+                        style={{
+                          animationDuration: "1s",
+                          animationIterationCount: 1,
+                        }}
+                      />
+                    )}
+                  </button>
+                  <div className="absolute left-full ml-3 top-1/2 -translate-y-1/2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all duration-200 whitespace-nowrap z-50 pointer-events-none">
+                    Propuesta inicial del TEG
+                    <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-gray-900" />
+                  </div>
+                </div>
+
+                <div className="relative group/tooltip">
+                  <button
+                    type="button"
+                    onClick={() => setDocumentType("tesis")}
+                    className={`relative w-full overflow-hidden flex flex-col items-start gap-3 p-5 rounded-2xl border-2 transition-all duration-300 group ${
+                      documentType === "tesis"
+                        ? "border-emerald-500 bg-white shadow-2xl shadow-emerald-500/20 scale-[1.04]"
+                        : "border-transparent bg-white shadow-sm hover:shadow-xl hover:shadow-emerald-500/10 hover:bg-gradient-to-br hover:from-emerald-50/30 hover:to-white hover:scale-[1.02] hover:border-emerald-200"
+                    }`}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/0 via-emerald-500/0 to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                    <div
+                      className={`p-3 rounded-xl ${documentType === "tesis" ? "bg-emerald-100 text-emerald-600 ring-2 ring-emerald-200" : "bg-gray-100 text-gray-500 group-hover:bg-emerald-50 group-hover:text-emerald-600 group-hover:ring-2 group-hover:ring-emerald-100"} transition-all duration-300`}
+                    >
+                      <BookOpen className="w-6 h-6 group-hover:scale-110 transition-transform" />
+                    </div>
+                    <div className="text-left relative z-10">
+                      <p
+                        className={`font-bold text-lg ${documentType === "tesis" ? "text-emerald-900" : "text-gray-700 group-hover:text-emerald-800"} transition-colors`}
+                      >
+                        Trabajo Especial (TEG)
+                      </p>
+                      <p className="text-xs font-medium text-gray-500 mt-1">
+                        10mo Semestre
+                      </p>
+                    </div>
+                    {documentType === "tesis" && (
+                      <div className="absolute top-0 right-0 p-4 animate-in fade-in duration-300">
+                        <CheckCircle className="w-5 h-5 text-emerald-500" />
+                      </div>
+                    )}
+                    {documentType === "tesis" && (
+                      <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-emerald-400 rounded-full blur-3xl opacity-30 pointer-events-none animate-pulse" />
+                    )}
+                    {documentType === "tesis" && (
+                      <div
+                        className="absolute inset-0 rounded-2xl bg-emerald-500/10 animate-ping pointer-events-none"
+                        style={{
+                          animationDuration: "1s",
+                          animationIterationCount: 1,
+                        }}
+                      />
+                    )}
+                  </button>
+                  <div className="absolute left-full ml-3 top-1/2 -translate-y-1/2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all duration-200 whitespace-nowrap z-50 pointer-events-none">
+                    Proyecto final completo
+                    <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-gray-900" />
+                  </div>
                 </div>
               </div>
 
-              {/* Submit Button */}
-              <div className="mt-8 flex flex-col sm:flex-row gap-3">
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className={`flex-1 flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-semibold text-white transition-all shadow-md hover:shadow-lg disabled:opacity-60 disabled:cursor-not-allowed ${
-                    documentType === "proyecto"
-                      ? "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
-                      : "bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"
-                  }`}
+              {/* Right Column: Main Form */}
+              <div className="lg:col-span-2">
+                <form
+                  onSubmit={handleSubmit}
+                  className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"
                 >
-                  {isSubmitting ? (
-                    <>
-                      <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                          fill="none"
+                  <div className="p-6 sm:p-8 space-y-8">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-gray-100">
+                      <div className="flex items-center gap-4">
+                        <div
+                          className={`p-3 rounded-xl ${documentType === "proyecto" ? "bg-blue-50 text-blue-600" : "bg-emerald-50 text-emerald-600"}`}
+                        >
+                          {documentType === "proyecto" ? (
+                            <FileText className="w-6 h-6" />
+                          ) : (
+                            <BookOpen className="w-6 h-6" />
+                          )}
+                        </div>
+                        <div>
+                          <h3 className="text-xl font-bold text-gray-900">
+                            Información del Documento
+                          </h3>
+                          <p className="text-sm text-gray-500 font-medium">
+                            Complete los detalles básicos
+                          </p>
+                        </div>
+                      </div>
+                      <div
+                        className={`self-start sm:self-center px-4 py-2 rounded-full text-xs font-bold border flex items-center gap-2 ${
+                          documentType === "proyecto"
+                            ? "bg-blue-50 text-blue-700 border-blue-100"
+                            : "bg-emerald-50 text-emerald-700 border-emerald-100"
+                        }`}
+                      >
+                        <span
+                          className={`w-2 h-2 rounded-full ${documentType === "proyecto" ? "bg-blue-500" : "bg-emerald-500"}`}
                         />
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        {semesterLabel}
+                      </div>
+                    </div>
+
+                    {/* Title Input */}
+                    <div className="space-y-2 group">
+                      <label
+                        htmlFor="title"
+                        className="text-sm font-semibold text-gray-700 ml-1"
+                      >
+                        Título del{" "}
+                        {documentType === "proyecto" ? "Proyecto" : "Trabajo"}
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                          <PenTool className="w-5 h-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
+                        </div>
+                        <input
+                          type="text"
+                          id="title"
+                          name="title"
+                          value={formData.title}
+                          onChange={handleTitleChange}
+                          placeholder="Ingrese el título completo..."
+                          className={`w-full pl-12 pr-4 py-3.5 bg-white border rounded-xl shadow-sm focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all text-sm font-medium ${
+                            errors.title
+                              ? "border-red-300 ring-4 ring-red-50 focus:border-red-500 focus:ring-red-100"
+                              : "border-gray-200 hover:border-indigo-300"
+                          }`}
                         />
-                      </svg>
-                      Guardando...
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle className="w-5 h-5" />
-                      Agregar{" "}
-                      {documentType === "proyecto" ? "Proyecto" : "Tesis"}
-                    </>
-                  )}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => router.back()}
-                  className="px-6 py-3.5 rounded-xl font-semibold text-gray-700 bg-white border-2 border-gray-300 hover:bg-gray-50 hover:border-gray-400 transition-all"
-                >
-                  Cancelar
-                </button>
+                        {errors.title && (
+                          <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-1 text-red-500 text-xs font-bold animate-in fade-in slide-in-from-left-2">
+                            <X className="w-4 h-4" />
+                            <span>Requerido</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Students Section */}
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Users className="w-5 h-5 text-purple-500" />
+                          <label className="text-sm font-bold text-gray-800">
+                            Estudiantes
+                          </label>
+                          <span className="text-xs font-semibold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
+                            {formData.students.length}/3
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="space-y-3">
+                        {formData.students.map((student, index) => (
+                          <div
+                            key={`student-${index}`}
+                            className={`group relative bg-gradient-to-br ${
+                              errors.students[index]
+                                ? "from-red-50 to-white border-red-200"
+                                : "from-purple-50/50 to-transparent border-purple-100"
+                            } border rounded-xl p-4 hover:shadow-md transition-all duration-300`}
+                          >
+                            <div className="flex items-start gap-3">
+                              <div
+                                className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center mt-0.5 ${
+                                  errors.students[index]
+                                    ? "bg-red-100 text-red-600"
+                                    : "bg-purple-100 text-purple-600"
+                                }`}
+                              >
+                                <User className="w-5 h-5" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <label
+                                  className={`text-xs font-semibold mb-1.5 block ${errors.students[index] ? "text-red-700" : "text-purple-700"}`}
+                                >
+                                  Estudiante {index + 1}
+                                </label>
+                                <div className="relative">
+                                  <input
+                                    type="text"
+                                    value={student}
+                                    onChange={(e) =>
+                                      handleStudentChange(index, e.target.value)
+                                    }
+                                    placeholder="Nombre completo del estudiante"
+                                    className={`w-full px-3 py-2.5 bg-white border rounded-lg shadow-sm focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all text-sm font-medium placeholder:text-gray-400 ${
+                                      errors.students[index]
+                                        ? "border-red-300 focus:border-red-500 focus:ring-red-100"
+                                        : "border-gray-200 hover:border-purple-300"
+                                    }`}
+                                  />
+                                  {errors.students[index] && (
+                                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                      <X className="w-4 h-4 text-red-500" />
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                              {formData.students.length > 1 && (
+                                <button
+                                  type="button"
+                                  onClick={() => removeStudent(index)}
+                                  className="flex-shrink-0 w-8 h-8 rounded-lg bg-white border border-red-100 hover:border-red-200 hover:bg-red-50 flex items-center justify-center text-red-500 hover:text-red-600 transition-all shadow-sm hover:shadow mt-6"
+                                  title="Eliminar estudiante"
+                                >
+                                  <X className="w-4 h-4" />
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+
+                        {formData.students.length < 3 && (
+                          <button
+                            type="button"
+                            onClick={addStudent}
+                            className="w-full p-4 border border-dashed border-purple-300 rounded-xl bg-purple-50/30 hover:bg-purple-50 hover:border-purple-400 transition-all group shadow-sm hover:shadow"
+                          >
+                            <div className="flex items-center justify-center gap-2 text-purple-600 group-hover:text-purple-700">
+                              <div className="w-8 h-8 rounded-lg bg-white border border-purple-100 group-hover:border-purple-200 flex items-center justify-center transition-colors shadow-sm">
+                                <Plus className="w-4 h-4" />
+                              </div>
+                              <span className="text-sm font-semibold">
+                                Agregar Estudiante
+                              </span>
+                            </div>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Advisors Section */}
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <GraduationCap className="w-5 h-5 text-teal-500" />
+                          <label className="text-sm font-bold text-gray-800">
+                            Tutores Académicos
+                          </label>
+                          <span className="text-xs font-semibold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
+                            {formData.advisors.length}/2
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="space-y-3">
+                        {formData.advisors.map((advisor, index) => (
+                          <div
+                            key={`advisor-${index}`}
+                            className={`group relative bg-gradient-to-br ${
+                              errors.advisors[index]
+                                ? "from-red-50 to-white border-red-200"
+                                : "from-teal-50/50 to-transparent border-teal-100"
+                            } border rounded-xl p-4 hover:shadow-md transition-all duration-300`}
+                          >
+                            <div className="flex items-start gap-3">
+                              <div
+                                className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center mt-0.5 ${
+                                  errors.advisors[index]
+                                    ? "bg-red-100 text-red-600"
+                                    : "bg-teal-100 text-teal-600"
+                                }`}
+                              >
+                                <GraduationCap className="w-5 h-5" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <label
+                                  className={`text-xs font-semibold mb-1.5 block ${errors.advisors[index] ? "text-red-700" : "text-teal-700"}`}
+                                >
+                                  Tutor {index + 1}
+                                </label>
+                                <div className="relative">
+                                  <input
+                                    type="text"
+                                    value={advisor}
+                                    onChange={(e) =>
+                                      handleAdvisorChange(index, e.target.value)
+                                    }
+                                    placeholder="Nombre del tutor académico"
+                                    className={`w-full px-3 py-2.5 bg-white border rounded-lg shadow-sm focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all text-sm font-medium placeholder:text-gray-400 ${
+                                      errors.advisors[index]
+                                        ? "border-red-300 focus:border-red-500 focus:ring-red-100"
+                                        : "border-gray-200 hover:border-teal-300"
+                                    }`}
+                                  />
+                                  {errors.advisors[index] && (
+                                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                      <X className="w-4 h-4 text-red-500" />
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                              {formData.advisors.length > 1 && (
+                                <button
+                                  type="button"
+                                  onClick={() => removeAdvisor(index)}
+                                  className="flex-shrink-0 w-8 h-8 rounded-lg bg-white border border-red-100 hover:border-red-200 hover:bg-red-50 flex items-center justify-center text-red-500 hover:text-red-600 transition-all shadow-sm hover:shadow mt-6"
+                                  title="Eliminar tutor"
+                                >
+                                  <X className="w-4 h-4" />
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+
+                        {formData.advisors.length < 2 && (
+                          <button
+                            type="button"
+                            onClick={addAdvisor}
+                            className="w-full p-4 border border-dashed border-teal-300 rounded-xl bg-teal-50/30 hover:bg-teal-50 hover:border-teal-400 transition-all group shadow-sm hover:shadow"
+                          >
+                            <div className="flex items-center justify-center gap-2 text-teal-600 group-hover:text-teal-700">
+                              <div className="w-8 h-8 rounded-lg bg-white border border-teal-100 group-hover:border-teal-200 flex items-center justify-center transition-colors shadow-sm">
+                                <Plus className="w-4 h-4" />
+                              </div>
+                              <span className="text-sm font-semibold">
+                                Agregar Tutor
+                              </span>
+                            </div>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="pt-6 border-t border-gray-100 flex flex-col sm:flex-row items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => router.back()}
+                        className="w-full sm:w-auto px-6 py-3 rounded-xl font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-all order-2 sm:order-1"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className={`w-full sm:flex-1 flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl font-bold text-white shadow-lg transition-all transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none order-1 sm:order-2 ${
+                          documentType === "proyecto"
+                            ? "bg-gradient-to-r from-blue-600 to-indigo-600 hover:shadow-blue-500/30"
+                            : "bg-gradient-to-r from-emerald-600 to-teal-600 hover:shadow-emerald-500/30"
+                        }`}
+                      >
+                        {isSubmitting ? (
+                          <>
+                            <svg
+                              className="animate-spin h-5 w-5"
+                              viewBox="0 0 24 24"
+                            >
+                              <circle
+                                className="opacity-25"
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                stroke="currentColor"
+                                strokeWidth="4"
+                                fill="none"
+                              />
+                              <path
+                                className="opacity-75"
+                                fill="currentColor"
+                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                              />
+                            </svg>
+                            <span>Guardando...</span>
+                          </>
+                        ) : (
+                          <>
+                            <span>Agregar Documento</span>
+                            <ArrowRight className="w-5 h-5" />
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </form>
               </div>
-            </form>
+            </div>
           </div>
         </main>
       </PageTransition>
