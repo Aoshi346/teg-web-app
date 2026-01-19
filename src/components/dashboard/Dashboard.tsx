@@ -16,7 +16,7 @@ import {
 import DashboardHeader from "@/components/layout/DashboardHeader";
 import PageTransition from "@/components/ui/PageTransition";
 import SemesterSelector from "@/components/ui/SemesterSelector";
-import { mockTesis, mockProyectos } from "@/lib/data/mockData";
+import { mockTesis, mockProyectos, getProyectos, getTesis, Project } from "@/lib/data/mockData";
 import { getAvailableSemesters, getStoredSemester, setStoredSemester, formatSemesterLabel } from "@/lib/semesters";
 
 interface StatCardProps {
@@ -184,6 +184,114 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
   const mainContentRef = useRef<HTMLDivElement>(null);
   const hasAnimatedRef = useRef(false);
 
+  // State for data
+  const [semester, setSemester] = useState<string>("");
+  const [dashboardData, setDashboardData] = useState<{
+    ptegStats: { total: number; checked: number; pending: number; rejected: number };
+    tegStats: { total: number; checked: number; pending: number };
+    projectsToReview: { student: string; title: string; date: string; type: string }[];
+    progressFeed: { id: number; icon: React.ReactNode; text: string; time: string }[];
+  } | null>(null);
+
+  // Load initial data
+  useEffect(() => {
+    // Get stored semester or default
+    const currentSem = getStoredSemester();
+    setSemester(currentSem);
+
+    const allProyectos = getProyectos();
+    const allTesis = getTesis();
+
+    // Filter by semester for stats
+    const semProyectos = allProyectos.filter(p => p.semester === currentSem);
+    const semTesis = allTesis.filter(t => t.semester === currentSem);
+
+    // Calculate Stats
+    const ptegStats = {
+      total: semProyectos.length,
+      checked: semProyectos.filter(p => p.status === 'checked').length,
+      pending: semProyectos.filter(p => p.status === 'pending').length,
+      rejected: semProyectos.filter(p => p.status === 'rejected').length
+    };
+
+    const tegStats = {
+      total: semTesis.length,
+      checked: semTesis.filter(t => t.status === 'checked').length,
+      pending: semTesis.filter(t => t.status === 'pending').length,
+    };
+
+    // Projects to review (All pending, regardless of semester, or maybe just current? 
+    // Usually pending tasks are relevant regardless of semester, but let's stick to current for consistency with the view,
+    // OR show all pending. Let's show all pending sorted by date.)
+    const allPending = [...allProyectos, ...allTesis].filter(p => p.status === 'pending');
+    const projectsToReview = allPending
+      .sort((a, b) => new Date(b.submittedDate).getTime() - new Date(a.submittedDate).getTime())
+      .slice(0, 3)
+      .map(p => ({
+        student: p.student,
+        title: p.title,
+        date: p.submittedDate,
+        type: 'stage1Passed' in p ? 'TEG' : 'PTEG'
+      }));
+
+    // detailed feed
+    const feedEvents: { date: string; type: 'submitted' | 'reviewed'; project: Project }[] = [];
+    [...allProyectos, ...allTesis].forEach(p => {
+      // Add submission event
+      if (p.submittedDate && p.semester === currentSem) { // Filter feed by semester to match context
+        feedEvents.push({ date: p.submittedDate, type: 'submitted', project: p });
+      }
+      // Add review event
+      if (p.reviewDate && p.semester === currentSem) {
+        feedEvents.push({ date: p.reviewDate, type: 'reviewed', project: p });
+      }
+    });
+
+    const progressFeed = feedEvents
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      .slice(0, 3)
+      .map((e, index) => {
+        let icon;
+        let text;
+
+        // Calculate relative time (simple approximation)
+        const diffDays = Math.floor((new Date().getTime() - new Date(e.date).getTime()) / (1000 * 3600 * 24));
+        const timeStr = diffDays === 0 ? "Hoy" : diffDays === 1 ? "Ayer" : `${diffDays}d ago`;
+
+        if (e.type === 'submitted') {
+          icon = <FileText className="w-5 h-5 text-blue-600" />;
+          text = `Nueva entrega de '${e.project.student}' (${('stage1Passed' in e.project) ? 'TEG' : 'PTEG'}).`;
+        } else {
+          // Reviewed
+          if (e.project.status === 'checked') {
+            icon = <CheckCircle className="w-5 h-5 text-green-600" />;
+            text = `El proyecto de '${e.project.student}' ha sido Aprobado.`;
+          } else if (e.project.status === 'rejected') {
+            icon = <XCircle className="w-5 h-5 text-red-600" />;
+            text = `El proyecto de '${e.project.student}' requiere correcciones.`;
+          } else {
+            icon = <MessageSquare className="w-5 h-5 text-blue-600" />;
+            text = `Comentarios agregados al proyecto de '${e.project.student}'.`;
+          }
+        }
+
+        return {
+          id: index,
+          icon,
+          text,
+          time: timeStr
+        };
+      });
+
+    setDashboardData({
+      ptegStats,
+      tegStats,
+      projectsToReview,
+      progressFeed
+    });
+
+  }, []);
+
   useEffect(() => {
     // Skip if already animated this session
     if (hasAnimatedRef.current) return;
@@ -238,24 +346,26 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
     });
   }, []); // Only run once on mount
 
-  // Memoize static data to prevent recreating on every render
-  const stats = useMemo(
-    () => [
+  // Build stats cards from data
+  const stats = useMemo(() => {
+    if (!dashboardData) return [];
+
+    return [
       {
         title: "Proyectos de Tesis (PTEG)",
-        mainValue: "12",
+        mainValue: dashboardData.ptegStats.pending.toString(),
         mainLabel: "En Revisión",
         icon: <FileText className="w-8 h-8 sm:w-10 sm:h-10 text-white" />,
         secondaryStats: [
           {
             label: "Aprobados",
-            value: 58,
+            value: dashboardData.ptegStats.checked,
             color: "#10B981",
             icon: <Check size={18} />,
           },
           {
             label: "Rechazados",
-            value: 7,
+            value: dashboardData.ptegStats.rejected,
             color: "#EF4444",
             icon: <XCircle size={18} />,
           },
@@ -265,19 +375,19 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
       },
       {
         title: "Tesis de Grado (TEG)",
-        mainValue: "43",
+        mainValue: dashboardData.tegStats.total.toString(),
         mainLabel: "En Progreso",
         icon: <BookOpen className="w-8 h-8 sm:w-10 sm:h-10 text-white" />,
         secondaryStats: [
           {
             label: "Completadas",
-            value: 21,
+            value: dashboardData.tegStats.checked,
             color: "#10B981",
             icon: <Check size={18} />,
           },
           {
             label: "Pend. Jurado",
-            value: 9,
+            value: dashboardData.tegStats.pending,
             color: "#F59E0B",
             icon: <Clock size={18} />,
           },
@@ -285,54 +395,12 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
         variant: "colorful" as const,
         bgClass: "bg-gradient-to-br from-rose-500 via-red-600 to-orange-500",
       },
-    ],
-    []
-  );
+    ];
+  }, [dashboardData]);
 
-  const projectsToReview = useMemo(
-    () => [
-      {
-        student: "Ana Pérez",
-        title: "Impacto de la IA en la farmacovigilancia",
-        date: "2024-05-10",
-      },
-      {
-        student: "Luis Rodríguez",
-        title: "Desarrollo de un nuevo agente antibacteriano",
-        date: "2024-05-09",
-      },
-      {
-        student: "Carla Gómez",
-        title: "Análisis de la adherencia terapéutica en pacientes crónicos",
-        date: "2024-05-09",
-      },
-    ],
-    []
-  );
-
-  const progressFeed = useMemo(
-    () => [
-      {
-        id: 1,
-        icon: <CheckCircle className="w-5 h-5 text-green-600" />,
-        text: "La tesis de 'Ana Pérez' ha sido Aprobada.",
-        time: "1h ago",
-      },
-      {
-        id: 2,
-        icon: <MessageSquare className="w-5 h-5 text-blue-600" />,
-        text: "Nuevo comentario del jurado en el proyecto de 'Luis Rodríguez'.",
-        time: "3h ago",
-      },
-      {
-        id: 3,
-        icon: <AlertTriangle className="w-5 h-5 text-amber-600" />,
-        text: "Entrega final de 'Carla Gómez' vence en 3 días.",
-        time: "1d ago",
-      },
-    ],
-    []
-  );
+  if (!semester) {
+    return null; // Or skeleton
+  }
 
   return (
     <>
@@ -359,11 +427,11 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Período Actual</p>
-                  <p className="text-lg font-bold text-gray-900">{formatSemesterLabel(getStoredSemester())}</p>
+                  <p className="text-lg font-bold text-gray-900">{formatSemesterLabel(semester)}</p>
                 </div>
               </div>
               <SemesterSelector
-                selectedSemester={getStoredSemester()}
+                selectedSemester={semester}
                 availableSemesters={getAvailableSemesters([...mockTesis, ...mockProyectos])}
                 onSemesterChange={(sem) => {
                   setStoredSemester(sem);
@@ -390,26 +458,33 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
                   </button>
                 </div>
                 <div className="space-y-3 sm:space-y-4">
-                  {projectsToReview.map((project, index) => (
-                    <div
-                      key={index}
-                      className="flex flex-col gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg sm:rounded-xl hover:bg-gray-100 active:bg-gray-200 transition-all duration-200 cursor-pointer group"
-                    >
-                      <div className="flex-1 min-w-0 w-full">
-                        <p className="text-xs sm:text-sm font-semibold text-gray-800 line-clamp-2">
-                          {project.title}
-                        </p>
-                        <p className="text-xs sm:text-sm text-gray-500 mt-1">
-                          {project.student}{" "}
-                          <span className="text-gray-400">•</span>{" "}
-                          <span className="text-xs">{project.date}</span>
-                        </p>
+                  {dashboardData?.projectsToReview.length === 0 ? (
+                    <p className="text-gray-500 text-sm text-center py-4">No hay proyectos pendientes de revisión</p>
+                  ) : (
+                    dashboardData?.projectsToReview.map((project, index) => (
+                      <div
+                        key={index}
+                        className="flex flex-col gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg sm:rounded-xl hover:bg-gray-100 active:bg-gray-200 transition-all duration-200 cursor-pointer group"
+                      >
+                        <div className="flex-1 min-w-0 w-full">
+                          <p className="text-xs sm:text-sm font-semibold text-gray-800 line-clamp-2">
+                            {project.title}
+                          </p>
+                          <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                            {project.student}{" "}
+                            <span className="text-gray-400">•</span>{" "}
+                            <span className="text-xs">{project.date}</span>
+                            <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                              {project.type}
+                            </span>
+                          </p>
+                        </div>
+                        <button className="w-full bg-blue-600 text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-semibold hover:bg-blue-700 active:bg-blue-800 transition-all duration-200 shadow-md shadow-blue-600/20 hover:shadow-lg transform hover:scale-[1.02] touch-manipulation">
+                          Revisar Ahora
+                        </button>
                       </div>
-                      <button className="w-full bg-blue-600 text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-semibold hover:bg-blue-700 active:bg-blue-800 transition-all duration-200 shadow-md shadow-blue-600/20 hover:shadow-lg transform hover:scale-[1.02] touch-manipulation">
-                        Revisar Ahora
-                      </button>
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </div>
               </div>
 
@@ -418,24 +493,28 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
                   Seguimiento de Progreso
                 </h3>
                 <div className="space-y-4 sm:space-y-6">
-                  {progressFeed.map((item) => (
-                    <div
-                      key={item.id}
-                      className="flex items-start gap-2 sm:gap-4"
-                    >
-                      <div className="flex-shrink-0 mt-0.5 sm:mt-1 bg-gray-100 p-1.5 sm:p-2 rounded-full">
-                        {item.icon}
+                  {dashboardData?.progressFeed.length === 0 ? (
+                    <p className="text-gray-500 text-sm text-center py-4">No hay actividad reciente</p>
+                  ) : (
+                    dashboardData?.progressFeed.map((item) => (
+                      <div
+                        key={item.id}
+                        className="flex items-start gap-2 sm:gap-4"
+                      >
+                        <div className="flex-shrink-0 mt-0.5 sm:mt-1 bg-gray-100 p-1.5 sm:p-2 rounded-full">
+                          {item.icon}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs sm:text-sm text-gray-800 leading-relaxed">
+                            {item.text}
+                          </p>
+                          <p className="text-xs text-gray-500 mt-1">
+                            {item.time}
+                          </p>
+                        </div>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs sm:text-sm text-gray-800 leading-relaxed">
-                          {item.text}
-                        </p>
-                        <p className="text-xs text-gray-500 mt-1">
-                          {item.time}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </div>
               </div>
             </div>
