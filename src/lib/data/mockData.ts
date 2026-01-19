@@ -249,3 +249,79 @@ export const mockTesis: Project[] = [
     semester: "2024-01",
   },
 ];
+
+// Storage keys for user-added documents
+const ADDED_PROYECTOS_KEY = "tesisfar_added_proyectos";
+const ADDED_TESIS_KEY = "tesisfar_added_tesis";
+
+// Helper to get next ID for a collection
+function getNextId(projects: Project[]): number {
+  const maxId = projects.reduce((max, p) => Math.max(max, p.id), 0);
+  return maxId + 1;
+}
+
+// Helper to load added items from localStorage
+function loadAddedItems(key: string): Project[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const stored = localStorage.getItem(key);
+    return stored ? JSON.parse(stored) : [];
+  } catch {
+    return [];
+  }
+}
+
+// Helper to save added items to localStorage
+function saveAddedItems(key: string, items: Project[]): void {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(key, JSON.stringify(items));
+  } catch { }
+}
+
+/**
+ * Get all proyectos including user-added ones
+ */
+export function getProyectos(): Project[] {
+  const added = loadAddedItems(ADDED_PROYECTOS_KEY);
+  return [...mockProyectos, ...added];
+}
+
+/**
+ * Get all tesis including user-added ones
+ */
+export function getTesis(): Project[] {
+  const added = loadAddedItems(ADDED_TESIS_KEY);
+  return [...mockTesis, ...added];
+}
+
+/**
+ * Add a new proyecto
+ */
+export function addProyecto(data: Omit<Project, "id">): Project {
+  const added = loadAddedItems(ADDED_PROYECTOS_KEY);
+  const allProyectos = [...mockProyectos, ...added];
+  const newProyecto: Project = {
+    ...data,
+    id: getNextId(allProyectos),
+  };
+  added.push(newProyecto);
+  saveAddedItems(ADDED_PROYECTOS_KEY, added);
+  return newProyecto;
+}
+
+/**
+ * Add a new tesis
+ */
+export function addTesis(data: Omit<Project, "id">): Project {
+  const added = loadAddedItems(ADDED_TESIS_KEY);
+  const allTesis = [...mockTesis, ...added];
+  const newTesis: Project = {
+    ...data,
+    id: getNextId(allTesis),
+    stage1Passed: false, // New tesis start with stage1 not passed
+  };
+  added.push(newTesis);
+  saveAddedItems(ADDED_TESIS_KEY, added);
+  return newTesis;
+}

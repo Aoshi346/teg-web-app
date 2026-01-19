@@ -6,8 +6,12 @@ import { Search, CheckCircle, Clock, XCircle, FileText } from "lucide-react";
 import DashboardHeader from "@/components/layout/DashboardHeader";
 import PageTransition from "@/components/ui/PageTransition";
 import SemesterSelector from "@/components/ui/SemesterSelector";
-import { mockTesis, Project } from "@/lib/data/mockData";
-import { getAvailableSemesters, getStoredSemester, setStoredSemester } from "@/lib/semesters";
+import { getTesis, Project } from "@/lib/data/mockData";
+import {
+  getAvailableSemesters,
+  getStoredSemester,
+  setStoredSemester,
+} from "@/lib/semesters";
 import ProjectCard from "@/components/dashboard/ProjectCard";
 
 interface TesisPageProps {
@@ -29,12 +33,24 @@ export default function TesisPage(props: TesisPageProps = {}) {
     "all" | "checked" | "pending" | "rejected"
   >("all");
 
+  // Load tesis including user-added ones
+  const [allProjects, setAllProjects] = useState<Project[]>([]);
+
+  useEffect(() => {
+    setAllProjects(getTesis());
+  }, []);
+
   // Semester state - persisted in localStorage
-  const availableSemesters = useMemo(() => getAvailableSemesters(mockTesis), []);
+  const availableSemesters = useMemo(
+    () => getAvailableSemesters(allProjects),
+    [allProjects],
+  );
   const [selectedSemester, setSelectedSemester] = useState(() => {
     const stored = getStoredSemester();
     // If stored semester is not available in this data, use first available
-    return availableSemesters.includes(stored) ? stored : availableSemesters[0] || stored;
+    return availableSemesters.includes(stored)
+      ? stored
+      : availableSemesters[0] || stored;
   });
 
   const handleSemesterChange = (semester: string) => {
@@ -44,8 +60,8 @@ export default function TesisPage(props: TesisPageProps = {}) {
 
   // Filter by semester first, then by search/status
   const semesterProjects = useMemo<Project[]>(
-    () => mockTesis.filter((p) => p.semester === selectedSemester),
-    [selectedSemester]
+    () => allProjects.filter((p) => p.semester === selectedSemester),
+    [selectedSemester, allProjects],
   );
 
   const filteredProjects = useMemo(() => {
@@ -63,17 +79,17 @@ export default function TesisPage(props: TesisPageProps = {}) {
 
   const checkedProjects = useMemo(
     () => filteredProjects.filter((p) => p.status === "checked"),
-    [filteredProjects]
+    [filteredProjects],
   );
 
   const pendingProjects = useMemo(
     () => filteredProjects.filter((p) => p.status === "pending"),
-    [filteredProjects]
+    [filteredProjects],
   );
 
   const rejectedProjects = useMemo(
     () => filteredProjects.filter((p) => p.status === "rejected"),
-    [filteredProjects]
+    [filteredProjects],
   );
 
   // Entrance animations - only on first visit per session, not on navigation
@@ -84,7 +100,7 @@ export default function TesisPage(props: TesisPageProps = {}) {
     if (hasAnimatedRef.current) return;
 
     // Check if we've already visited this page in this session
-    const sessionKey = 'visited_tesis_page';
+    const sessionKey = "visited_tesis_page";
     const hasVisitedBefore = sessionStorage.getItem(sessionKey);
 
     // Check if we just logged in or navigating within dashboard
@@ -94,12 +110,12 @@ export default function TesisPage(props: TesisPageProps = {}) {
       if (justLoggedIn || hasVisitedBefore) {
         skipAnimations = true;
       }
-    } catch { }
+    } catch {}
 
     // Mark as visited for future navigations
     try {
-      sessionStorage.setItem(sessionKey, 'true');
-    } catch { }
+      sessionStorage.setItem(sessionKey, "true");
+    } catch {}
 
     const cards = gsap.utils.toArray<HTMLElement>(".project-card");
     const sections = gsap.utils.toArray<HTMLElement>(".section-container");
@@ -183,42 +199,48 @@ export default function TesisPage(props: TesisPageProps = {}) {
 
                   {/* Modern Filter Pills */}
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider mr-1 hidden sm:block">Filtrar:</span>
+                    <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider mr-1 hidden sm:block">
+                      Filtrar:
+                    </span>
                     <button
                       onClick={() => setFilterStatus("all")}
-                      className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${filterStatus === "all"
-                        ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/30 scale-[1.02]"
-                        : "bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-800"
-                        }`}
+                      className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                        filterStatus === "all"
+                          ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg shadow-blue-500/30 scale-[1.02]"
+                          : "bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-800"
+                      }`}
                     >
                       Todos
                     </button>
                     <button
                       onClick={() => setFilterStatus("checked")}
-                      className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 flex items-center gap-1.5 ${filterStatus === "checked"
-                        ? "bg-gradient-to-r from-emerald-500 to-green-600 text-white shadow-lg shadow-emerald-500/30 scale-[1.02]"
-                        : "bg-gray-100 text-gray-600 hover:bg-emerald-50 hover:text-emerald-700"
-                        }`}
+                      className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 flex items-center gap-1.5 ${
+                        filterStatus === "checked"
+                          ? "bg-gradient-to-r from-emerald-500 to-green-600 text-white shadow-lg shadow-emerald-500/30 scale-[1.02]"
+                          : "bg-gray-100 text-gray-600 hover:bg-emerald-50 hover:text-emerald-700"
+                      }`}
                     >
                       <CheckCircle className="w-4 h-4" />
                       Revisados
                     </button>
                     <button
                       onClick={() => setFilterStatus("pending")}
-                      className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 flex items-center gap-1.5 ${filterStatus === "pending"
-                        ? "bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-lg shadow-amber-500/30 scale-[1.02]"
-                        : "bg-gray-100 text-gray-600 hover:bg-amber-50 hover:text-amber-700"
-                        }`}
+                      className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 flex items-center gap-1.5 ${
+                        filterStatus === "pending"
+                          ? "bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-lg shadow-amber-500/30 scale-[1.02]"
+                          : "bg-gray-100 text-gray-600 hover:bg-amber-50 hover:text-amber-700"
+                      }`}
                     >
                       <Clock className="w-4 h-4" />
                       Pendientes
                     </button>
                     <button
                       onClick={() => setFilterStatus("rejected")}
-                      className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 flex items-center gap-1.5 ${filterStatus === "rejected"
-                        ? "bg-gradient-to-r from-red-500 to-rose-600 text-white shadow-lg shadow-red-500/30 scale-[1.02]"
-                        : "bg-gray-100 text-gray-600 hover:bg-red-50 hover:text-red-700"
-                        }`}
+                      className={`px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 flex items-center gap-1.5 ${
+                        filterStatus === "rejected"
+                          ? "bg-gradient-to-r from-red-500 to-rose-600 text-white shadow-lg shadow-red-500/30 scale-[1.02]"
+                          : "bg-gray-100 text-gray-600 hover:bg-red-50 hover:text-red-700"
+                      }`}
                     >
                       <XCircle className="w-4 h-4" />
                       Rechazados

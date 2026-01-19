@@ -86,3 +86,26 @@ export function setStoredSemester(semester: string): void {
         localStorage.setItem("selectedSemester", semester);
     } catch { }
 }
+
+/**
+ * Get available semester periods for document submission
+ * Returns periods from 2024-01 to current semester, sorted newest first
+ */
+export function getAvailableSemesterPeriods(): string[] {
+    const current = getCurrentSemester();
+    const { year: currentYear, period: currentPeriod } = parseSemester(current);
+    
+    const periods: string[] = [];
+    
+    // Generate periods from 2024-01 to current
+    for (let year = 2024; year <= currentYear; year++) {
+        for (let period = 1; period <= 2; period++) {
+            // Don't include future periods
+            if (year === currentYear && period > currentPeriod) break;
+            periods.push(`${year}-${period.toString().padStart(2, "0")}`);
+        }
+    }
+    
+    // Sort newest first
+    return periods.reverse();
+}

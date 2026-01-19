@@ -43,27 +43,29 @@ export default function EvaluationForm({
     (q) =>
       !q.documentType ||
       q.documentType === "Both" ||
-      q.documentType === documentType
+      q.documentType === documentType,
   );
 
-  const [ratings, setRatings] = useState<Record<string, number | string>>(() => {
-    const r: Record<string, number | string> = {};
-    for (const q of filteredQuestions) {
-      r[q.id] = q.answerType === "text" ? "" : 0;
-    }
-    return r;
-  });
+  const [ratings, setRatings] = useState<Record<string, number | string>>(
+    () => {
+      const r: Record<string, number | string> = {};
+      for (const q of filteredQuestions) {
+        r[q.id] = q.answerType === "text" ? "" : 0;
+      }
+      return r;
+    },
+  );
 
   const sections = [
     ...new Set(filteredQuestions.map((q) => q.section || "Sección")),
   ];
   const totalPages = Math.max(1, sections.length);
   const [page, setPage] = useState<number>(1);
-  const [activeQuestion, setActiveQuestion] = useState<Question | null>(null);
+  const [, setActiveQuestion] = useState<Question | null>(null);
   const [comments, setComments] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittedData, setSubmittedData] = useState<SubmittedData>(null);
-  const [activeSubsection, setActiveSubsection] = useState<string | null>(null);
+  const [, setActiveSubsection] = useState<string | null>(null);
 
   const [bannerState, setBannerState] = useState<{
     visible: boolean;
@@ -95,7 +97,7 @@ export default function EvaluationForm({
 
   const getAnswerLabel = (
     question: Question,
-    value: number | string | undefined
+    value: number | string | undefined,
   ): string => {
     if (question.answerType === "text") {
       const textValue = typeof value === "string" ? value.trim() : "";
@@ -107,12 +109,12 @@ export default function EvaluationForm({
     switch (question.answerType) {
       case "yesno":
         const yesNoOption = YESNO_OPTIONS.find(
-          (opt) => opt.value === numericValue
+          (opt) => opt.value === numericValue,
         );
         return yesNoOption?.label || "Sin respuesta";
       case "frequency":
         const freqOption = FREQUENCY_OPTIONS.find(
-          (opt) => opt.value === numericValue
+          (opt) => opt.value === numericValue,
         );
         return freqOption?.label || "Sin respuesta";
       case "stars":
@@ -134,7 +136,9 @@ export default function EvaluationForm({
           <div className="grid grid-cols-2 gap-3 w-full">
             {YESNO_OPTIONS.map((option) => {
               const isActive = currentRating === option.value;
-              const isYes = option.label.toLowerCase() === 'sí' || option.label.toLowerCase() === 'si';
+              const isYes =
+                option.label.toLowerCase() === "sí" ||
+                option.label.toLowerCase() === "si";
 
               let activeClass = "";
               if (isActive) {
@@ -145,7 +149,8 @@ export default function EvaluationForm({
                   ? "bg-emerald-500 text-white border-emerald-500 shadow-md shadow-emerald-500/20"
                   : "bg-rose-500 text-white border-rose-500 shadow-md shadow-rose-500/20";
               } else {
-                activeClass = "bg-white text-gray-600 border-gray-200 hover:bg-gray-50 hover:border-gray-300";
+                activeClass =
+                  "bg-white text-gray-600 border-gray-200 hover:bg-gray-50 hover:border-gray-300";
               }
 
               return (
@@ -159,9 +164,33 @@ export default function EvaluationForm({
                   {isActive && (
                     <span className="absolute left-3 animate-fade-in">
                       {isYes ? (
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
                       ) : (
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M6 18L18 6M6 6l12 12"
+                          />
+                        </svg>
                       )}
                     </span>
                   )}
@@ -180,10 +209,11 @@ export default function EvaluationForm({
                 key={option.value}
                 type="button"
                 onClick={() => setRating(question.id, option.value)}
-                className={`w-full px-4 py-2.5 rounded-lg text-sm font-medium border-2 transition-all text-left ${currentRating === option.value
-                  ? `${option.color} shadow-md`
-                  : "bg-white text-gray-600 border-gray-200 hover:border-gray-300 hover:shadow-sm"
-                  }`}
+                className={`w-full px-4 py-2.5 rounded-lg text-sm font-medium border-2 transition-all text-left ${
+                  currentRating === option.value
+                    ? `${option.color} shadow-md`
+                    : "bg-white text-gray-600 border-gray-200 hover:border-gray-300 hover:shadow-sm"
+                }`}
               >
                 {option.label}
               </button>
@@ -205,10 +235,11 @@ export default function EvaluationForm({
                     type="button"
                     onClick={() => setRating(question.id, val)}
                     aria-label={`Puntuación ${val}`}
-                    className={`w-full px-3 py-2 rounded-lg text-sm font-semibold border-2 transition-all ${isSelected
-                      ? `${palette} shadow-md scale-[1.02]`
-                      : "bg-white text-gray-700 border-gray-200 hover:border-blue-300 hover:bg-blue-50"
-                      }`}
+                    className={`w-full px-3 py-2 rounded-lg text-sm font-semibold border-2 transition-all ${
+                      isSelected
+                        ? `${palette} shadow-md scale-[1.02]`
+                        : "bg-white text-gray-700 border-gray-200 hover:border-blue-300 hover:bg-blue-50"
+                    }`}
                   >
                     {val}
                   </button>
@@ -246,7 +277,11 @@ export default function EvaluationForm({
 
   const isQuestionMissing = (question: Question) => {
     // Optional types or text don't count as missing
-    if (question.answerType === "text" || !["yesno", "frequency", "stars"].includes(question.answerType)) return false;
+    if (
+      question.answerType === "text" ||
+      !["yesno", "frequency", "stars"].includes(question.answerType)
+    )
+      return false;
 
     const value = ratings[question.id];
     // Strict check for 0 or falsy values for required number types
@@ -255,7 +290,9 @@ export default function EvaluationForm({
   };
 
   const findMissingIndexInSection = (section?: string) => {
-    const sectionQuestions = filteredQuestions.filter((q) => q.section === section);
+    const sectionQuestions = filteredQuestions.filter(
+      (q) => q.section === section,
+    );
     return sectionQuestions.findIndex((q) => isQuestionMissing(q));
   };
 
@@ -265,7 +302,10 @@ export default function EvaluationForm({
       if (el) {
         el.scrollIntoView({ behavior: "smooth", block: "center" });
         el.classList.add("ring-2", "ring-red-500", "ring-offset-2");
-        setTimeout(() => el.classList.remove("ring-2", "ring-red-500", "ring-offset-2"), 2000);
+        setTimeout(
+          () => el.classList.remove("ring-2", "ring-red-500", "ring-offset-2"),
+          2000,
+        );
       }
     }, 100); // Small delay to allow page render
   };
@@ -280,12 +320,15 @@ export default function EvaluationForm({
     if (nextPage > page) {
       const missingIndex = findMissingIndexInSection(currentSection);
       if (missingIndex !== -1) {
-        const sectionQuestions = filteredQuestions.filter((q) => q.section === currentSection);
+        const sectionQuestions = filteredQuestions.filter(
+          (q) => q.section === currentSection,
+        );
         const missingQuestion = sectionQuestions[missingIndex];
 
         setBannerState({
           visible: true,
-          message: "Por favor complete todas las preguntas de la sección actual antes de avanzar.",
+          message:
+            "Por favor complete todas las preguntas de la sección actual antes de avanzar.",
           type: "error",
         });
 
@@ -307,12 +350,15 @@ export default function EvaluationForm({
     const missingIndex = findMissingIndexInSection(currentSection);
 
     if (missingIndex !== -1) {
-      const sectionQuestions = filteredQuestions.filter((q) => q.section === currentSection);
+      const sectionQuestions = filteredQuestions.filter(
+        (q) => q.section === currentSection,
+      );
       const missingQuestion = sectionQuestions[missingIndex];
 
       setBannerState({
         visible: true,
-        message: "Por favor califique todas las preguntas de esta sección antes de continuar.",
+        message:
+          "Por favor califique todas las preguntas de esta sección antes de continuar.",
         type: "error",
       });
 
@@ -333,7 +379,9 @@ export default function EvaluationForm({
     const missingSectionIndex = sections.findIndex((section) => {
       const idx = findMissingIndexInSection(section);
       if (idx !== -1) {
-        const sectionQuestions = filteredQuestions.filter((q) => q.section === section);
+        const sectionQuestions = filteredQuestions.filter(
+          (q) => q.section === section,
+        );
         firstMissingQuestion = sectionQuestions[idx];
         return true;
       }
@@ -346,7 +394,8 @@ export default function EvaluationForm({
 
       setBannerState({
         visible: true,
-        message: "Por favor califique todas las preguntas obligatorias marcadas.",
+        message:
+          "Por favor califique todas las preguntas obligatorias marcadas.",
         type: "error",
       });
 
@@ -380,25 +429,30 @@ export default function EvaluationForm({
 
     await new Promise((res) => setTimeout(res, 600));
     setSubmittedData(payload);
-    setBannerState({ visible: true, message: "Evaluación enviada con éxito.", type: "success" });
+    setBannerState({
+      visible: true,
+      message: "Evaluación enviada con éxito.",
+      type: "success",
+    });
     setIsSubmitting(false);
   };
 
   const allSections = [
     ...new Set(filteredQuestions.map((q) => q.section).filter(Boolean)),
   ] as string[];
-  const currentSection = sections[Math.max(0, Math.min(page - 1, sections.length - 1))];
+  const currentSection =
+    sections[Math.max(0, Math.min(page - 1, sections.length - 1))];
   const pageQuestions = filteredQuestions.filter(
-    (q) => q.section === currentSection
+    (q) => q.section === currentSection,
   );
   const subsectionsOfCurrent = currentSection
-    ? [
-      ...new Set(
-        filteredQuestions
-          .filter((q) => q.section === currentSection)
-          .map((q) => q.subsection)
-      ),
-    ].filter(Boolean) as string[]
+    ? ([
+        ...new Set(
+          filteredQuestions
+            .filter((q) => q.section === currentSection)
+            .map((q) => q.subsection),
+        ),
+      ].filter(Boolean) as string[])
     : [];
 
   const getPageForSection = (section?: string) => {
@@ -409,8 +463,9 @@ export default function EvaluationForm({
 
   const getPageForSubsection = (sub?: string) => {
     if (!sub) return 1;
-    const sectionForSub = filteredQuestions.find((q) => q.subsection === sub)
-      ?.section;
+    const sectionForSub = filteredQuestions.find(
+      (q) => q.subsection === sub,
+    )?.section;
     return getPageForSection(sectionForSub);
   };
 
@@ -443,7 +498,9 @@ export default function EvaluationForm({
       threshold: [0.25, 0.5, 0.75],
     });
 
-    const nodes = Array.from(document.querySelectorAll("[id^=subsection-]") as NodeListOf<Element>);
+    const nodes = Array.from(
+      document.querySelectorAll("[id^=subsection-]") as NodeListOf<Element>,
+    );
     nodes.forEach((n) => observer.observe(n));
     return () => observer.disconnect();
   }, [page]);
@@ -502,7 +559,7 @@ export default function EvaluationForm({
                     {allSections.map((s) => {
                       const pageForSection = getPageForSection(s as string);
                       const count = filteredQuestions.filter(
-                        (q) => q.section === s
+                        (q) => q.section === s,
                       ).length;
                       const isActive = currentSection === s;
                       return (
@@ -510,18 +567,20 @@ export default function EvaluationForm({
                           key={s}
                           type="button"
                           onClick={() => goToPage(pageForSection)}
-                          className={`flex-shrink-0 px-4 py-2.5 rounded-lg font-medium text-sm transition-all ${isActive
-                            ? "bg-blue-600 text-white shadow-md"
-                            : "bg-white text-gray-700 hover:bg-blue-50 border border-gray-200"
-                            }`}
+                          className={`flex-shrink-0 px-4 py-2.5 rounded-lg font-medium text-sm transition-all ${
+                            isActive
+                              ? "bg-blue-600 text-white shadow-md"
+                              : "bg-white text-gray-700 hover:bg-blue-50 border border-gray-200"
+                          }`}
                         >
                           <div className="flex items-center gap-2">
                             <span>{s}</span>
                             <span
-                              className={`text-xs px-2 py-0.5 rounded-full ${isActive
-                                ? "bg-blue-500 text-white"
-                                : "bg-gray-100 text-gray-600"
-                                }`}
+                              className={`text-xs px-2 py-0.5 rounded-full ${
+                                isActive
+                                  ? "bg-blue-500 text-white"
+                                  : "bg-gray-100 text-gray-600"
+                              }`}
                             >
                               {count}
                             </span>
@@ -546,16 +605,20 @@ export default function EvaluationForm({
                             key={String(sub)}
                             type="button"
                             onClick={() => {
-                              goToPage(subPage, () => scrollToSubsection(String(sub)));
+                              goToPage(subPage, () =>
+                                scrollToSubsection(String(sub)),
+                              );
                             }}
-                            className={`group flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[11px] font-semibold border transition-all shadow-sm ${isCurrentSubPage
-                              ? "bg-emerald-600 border-emerald-600 text-white shadow-md"
-                              : "bg-white/80 border-gray-200 text-gray-700 hover:bg-emerald-50 hover:border-emerald-200 hover:shadow"
-                              }`}
+                            className={`group flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[11px] font-semibold border transition-all shadow-sm ${
+                              isCurrentSubPage
+                                ? "bg-emerald-600 border-emerald-600 text-white shadow-md"
+                                : "bg-white/80 border-gray-200 text-gray-700 hover:bg-emerald-50 hover:border-emerald-200 hover:shadow"
+                            }`}
                           >
                             <span
-                              className={`w-1.5 h-1.5 rounded-full ${isCurrentSubPage ? "bg-white" : "bg-emerald-500"
-                                }`}
+                              className={`w-1.5 h-1.5 rounded-full ${
+                                isCurrentSubPage ? "bg-white" : "bg-emerald-500"
+                              }`}
                               aria-hidden
                             />
                             <span className="whitespace-nowrap">{sub}</span>
@@ -576,7 +639,8 @@ export default function EvaluationForm({
                     de {totalPages}
                   </div>
                   <div className="text-xs text-gray-500">
-                    {currentSection || "Sección"} · {pageQuestions.length} pregunta
+                    {currentSection || "Sección"} · {pageQuestions.length}{" "}
+                    pregunta
                     {pageQuestions.length !== 1 ? "s" : ""}
                   </div>
                 </div>
@@ -598,10 +662,11 @@ export default function EvaluationForm({
                         key={p}
                         type="button"
                         onClick={() => goToPage(p)}
-                        className={`min-w-[2.5rem] h-10 px-3 rounded-lg font-semibold text-sm transition-all ${p === page
-                          ? "bg-blue-600 text-white shadow-md scale-105"
-                          : "bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200"
-                          }`}
+                        className={`min-w-[2.5rem] h-10 px-3 rounded-lg font-semibold text-sm transition-all ${
+                          p === page
+                            ? "bg-blue-600 text-white shadow-md scale-105"
+                            : "bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200"
+                        }`}
                       >
                         {p}
                       </button>
@@ -619,63 +684,70 @@ export default function EvaluationForm({
                       </h3>
                       <p className="text-sm text-gray-600 mt-1">
                         {pageQuestions.length} pregunta
-                        {pageQuestions.length !== 1 ? "s" : ""} en esta
-                        sección
+                        {pageQuestions.length !== 1 ? "s" : ""} en esta sección
                       </p>
                     </div>
 
-                    {[...new Set(pageQuestions.map((q) => q.subsection || "General"))].map(
-                      (sub) => {
-                        const subId = `subsection-${slugify(sub)}`;
-                        const questionsInSub = pageQuestions.filter(
-                          (q) => (q.subsection || "General") === sub
-                        );
-                        return (
-                          <div key={sub} id={subId} className="space-y-3">
-                            <div className="flex items-center gap-2">
-                              <div className="w-2 h-2 rounded-full bg-blue-500" aria-hidden />
-                              <h4 className="text-sm font-semibold text-gray-800">
-                                {sub}
-                              </h4>
-                            </div>
-                            <div className="grid gap-6 sm:grid-cols-1 lg:grid-cols-2 lg:auto-rows-fr">
-                              {questionsInSub.map((q) => (
-                                <div
-                                  key={q.id}
-                                  id={`qt-${q.id}`}
-                                  onMouseEnter={() => setActiveQuestion(q)}
-                                  // Optional: clear on leave or keep persistent? Keeping persistent usually feels better
-                                  // onMouseLeave={() => setActiveQuestion(null)}
-                                  className="group flex flex-col h-full bg-white rounded-2xl border border-gray-100 p-5 shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-300 scroll-mt-32 focus-within:ring-2 focus-within:ring-blue-100 ring-offset-2"
-                                >
-                                  <div className="mb-4 flex-1">
-                                    <h5 className="font-bold text-gray-900 leading-snug mb-2 flex items-start justify-between gap-2">
-                                      {q.label}
-                                      {q.relatedImage && (
-                                        <ImageTooltip imageUrl={q.relatedImage} title={q.label}>
-                                          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-600 border border-blue-100 hover:bg-blue-100 hover:border-blue-200 transition-colors cursor-help">
-                                            📷 IMG
-                                          </span>
-                                        </ImageTooltip>
-                                      )}
-                                    </h5>
-                                    {q.helper && (
-                                      <p className="text-sm text-gray-500 leading-relaxed">
-                                        {q.helper}
-                                      </p>
-                                    )}
-                                  </div>
-
-                                  <div className="mt-auto pt-4 border-t border-gray-50">
-                                    {renderAnswerInput(q)}
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
+                    {[
+                      ...new Set(
+                        pageQuestions.map((q) => q.subsection || "General"),
+                      ),
+                    ].map((sub) => {
+                      const subId = `subsection-${slugify(sub)}`;
+                      const questionsInSub = pageQuestions.filter(
+                        (q) => (q.subsection || "General") === sub,
+                      );
+                      return (
+                        <div key={sub} id={subId} className="space-y-3">
+                          <div className="flex items-center gap-2">
+                            <div
+                              className="w-2 h-2 rounded-full bg-blue-500"
+                              aria-hidden
+                            />
+                            <h4 className="text-sm font-semibold text-gray-800">
+                              {sub}
+                            </h4>
                           </div>
-                        );
-                      }
-                    )}
+                          <div className="grid gap-6 sm:grid-cols-1 lg:grid-cols-2 lg:auto-rows-fr">
+                            {questionsInSub.map((q) => (
+                              <div
+                                key={q.id}
+                                id={`qt-${q.id}`}
+                                onMouseEnter={() => setActiveQuestion(q)}
+                                // Optional: clear on leave or keep persistent? Keeping persistent usually feels better
+                                // onMouseLeave={() => setActiveQuestion(null)}
+                                className="group flex flex-col h-full bg-white rounded-2xl border border-gray-100 p-5 shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-300 scroll-mt-32 focus-within:ring-2 focus-within:ring-blue-100 ring-offset-2"
+                              >
+                                <div className="mb-4 flex-1">
+                                  <h5 className="font-bold text-gray-900 leading-snug mb-2 flex items-start justify-between gap-2">
+                                    {q.label}
+                                    {q.relatedImage && (
+                                      <ImageTooltip
+                                        imageUrl={q.relatedImage}
+                                        title={q.label}
+                                      >
+                                        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-600 border border-blue-100 hover:bg-blue-100 hover:border-blue-200 transition-colors cursor-help">
+                                          📷 IMG
+                                        </span>
+                                      </ImageTooltip>
+                                    )}
+                                  </h5>
+                                  {q.helper && (
+                                    <p className="text-sm text-gray-500 leading-relaxed">
+                                      {q.helper}
+                                    </p>
+                                  )}
+                                </div>
+
+                                <div className="mt-auto pt-4 border-t border-gray-50">
+                                  {renderAnswerInput(q)}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </div>
@@ -693,7 +765,8 @@ export default function EvaluationForm({
                     placeholder={`Agregue observaciones generales sobre el ${documentType.toLowerCase()}...`}
                   />
                   <p className="text-xs text-gray-500 mt-2">
-                    Este cuadro aparece solo en la última página para que sus observaciones sean lo último que complete.
+                    Este cuadro aparece solo en la última página para que sus
+                    observaciones sean lo último que complete.
                   </p>
                 </div>
               )}
@@ -808,10 +881,11 @@ export default function EvaluationForm({
         <div className="bg-white p-6 sm:p-8 rounded-xl shadow-lg space-y-6">
           <div className="flex items-center gap-3 pb-4 border-b border-gray-200">
             <div
-              className={`w-12 h-12 rounded-full flex items-center justify-center ${submittedData.passStatus === "Pass"
-                ? "bg-green-100"
-                : "bg-red-100"
-                }`}
+              className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                submittedData.passStatus === "Pass"
+                  ? "bg-green-100"
+                  : "bg-red-100"
+              }`}
             >
               {submittedData.passStatus === "Pass" ? (
                 <svg
@@ -921,7 +995,7 @@ export default function EvaluationForm({
                 router.push(
                   typeParam === "tesis"
                     ? "/dashboard/tesis/evaluar"
-                    : "/dashboard/proyectos"
+                    : "/dashboard/proyectos",
                 )
               }
               className="flex-1 sm:flex-initial bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-all shadow-sm hover:shadow-md"
