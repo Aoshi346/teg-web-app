@@ -1,3 +1,10 @@
+export interface AttachedFile {
+  name: string;
+  url: string;
+  type: "pdf" | "word";
+  date: string;
+}
+
 export interface Project {
   id: number;
   title: string;
@@ -10,6 +17,7 @@ export interface Project {
   stage1Passed?: boolean; // For Tesis flow
   semester: string; // Format: "YYYY-SS" (e.g., "2026-01", "2025-02")
   type?: "proyecto" | "tesis";
+  files?: AttachedFile[];
 }
 
 // Test data with semesters from 2024-01 to 2026-02 (6 semesters)
@@ -25,6 +33,20 @@ export const mockProyectos: Project[] = [
     status: "checked",
     score: 19,
     semester: "2026-01",
+    files: [
+      {
+        name: "Propuesta_Proyecto.pdf",
+        url: "#",
+        type: "pdf",
+        date: "2026-01-10",
+      },
+      {
+        name: "Cronograma_Actividades.docx",
+        url: "#",
+        type: "word",
+        date: "2026-01-10",
+      },
+    ],
   },
   {
     id: 2,
@@ -34,6 +56,14 @@ export const mockProyectos: Project[] = [
     submittedDate: "2026-01-09",
     status: "pending",
     semester: "2026-01",
+    files: [
+       {
+        name: "Borrador_Inicial.pdf",
+        url: "#",
+        type: "pdf",
+        date: "2026-01-09",
+      },
+    ]
   },
   // 2025-02
   {
@@ -140,6 +170,14 @@ export const mockTesis: Project[] = [
     score: 19,
     stage1Passed: true,
     semester: "2026-01",
+    files: [
+      {
+        name: "Informe_Final_Tesis.pdf",
+        url: "#",
+        type: "pdf",
+        date: "2026-01-10",
+      }
+    ]
   },
   {
     id: 2,

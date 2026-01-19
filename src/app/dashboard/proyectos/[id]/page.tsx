@@ -185,11 +185,48 @@ export default function ProyectoDetailsPage() {
                     </div>
                   </div>
 
-                  {/* Placeholder for future content like abstract or documents */}
-                  <div className="p-4 border border-dashed border-gray-300 rounded-lg text-center">
-                    <p className="text-sm text-gray-500">
-                      Documentos adjuntos no disponibles en esta vista previa.
-                    </p>
+                  {/* Attached Files & Documents */}
+                  <div>
+                    <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">
+                      Documentos Adicionales
+                    </h3>
+                    {project.files && project.files.length > 0 ? (
+                      <div className="space-y-3">
+                        {project.files.map((file, index) => (
+                          <a
+                            key={index}
+                            href={file.url}
+                            className="flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-xl hover:border-blue-300 hover:shadow-md transition-all group"
+                          >
+                            <div
+                              className={`p-2 rounded-lg ${
+                                file.type === "pdf"
+                                  ? "bg-red-50 text-red-500"
+                                  : "bg-blue-50 text-blue-500"
+                              }`}
+                            >
+                              <FileText className="w-5 h-5" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-gray-900 truncate group-hover:text-blue-600 transition-colors">
+                                {file.name}
+                              </p>
+                              <div className="flex items-center gap-2 text-xs text-gray-500">
+                                <span className="uppercase">{file.type}</span>
+                                <span>•</span>
+                                <span>{file.date}</span>
+                              </div>
+                            </div>
+                          </a>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="p-4 border border-dashed border-gray-300 rounded-lg text-center bg-gray-50/50">
+                        <p className="text-sm text-gray-500">
+                          No hay documentos adjuntos.
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
