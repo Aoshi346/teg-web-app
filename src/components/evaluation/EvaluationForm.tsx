@@ -9,6 +9,7 @@ import {
 } from "@/lib/questions/questions";
 import {
   calculateScore,
+  calculateSectionScores,
   getPassStatus,
   MAX_SCORE,
   PASSING_SCORE,
@@ -433,13 +434,21 @@ export default function EvaluationForm({
 
     // Update Project/Tesis with Persistence
     if (projectData && projectId) {
+      // Calculate section scores for Projects
+      const sectionScores =
+        documentType !== "Tesis"
+          ? calculateSectionScores(ratings, filteredQuestions)
+          : null;
+
       const updatedProject = {
         ...projectData,
         status: (passStatus === "Pass" ? "checked" : "rejected") as
           | "checked"
           | "rejected"
           | "pending",
-        score: score,
+        score: sectionScores ? sectionScores.total : score,
+        diagramacionScore: sectionScores?.diagramacion,
+        contenidoScore: sectionScores?.contenido,
         reviewDate: new Date().toISOString().split("T")[0],
       };
 

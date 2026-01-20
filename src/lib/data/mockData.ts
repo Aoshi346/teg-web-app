@@ -13,7 +13,9 @@ export interface Project {
   submittedDate: string;
   reviewDate?: string;
   status: "checked" | "pending" | "rejected";
-  score?: number; // 0-20 scale
+  score?: number; // 0-20 scale (total score)
+  diagramacionScore?: number; // 0-5 scale (Diagramación section)
+  contenidoScore?: number; // 0-15 scale (Contenido section)
   stage1Passed?: boolean; // For Tesis flow
   semester: string; // Format: "YYYY-SS" (e.g., "2026-01", "2025-02")
   type?: "proyecto" | "tesis";

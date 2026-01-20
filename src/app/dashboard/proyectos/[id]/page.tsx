@@ -195,6 +195,33 @@ export default function ProyectoDetailsPage() {
                             /20
                           </span>
                         </div>
+
+                        {/* Section Scores */}
+                        {(project.diagramacionScore !== undefined ||
+                          project.contenidoScore !== undefined) && (
+                          <div className="mt-4 pt-3 border-t border-gray-200 space-y-2">
+                            {project.diagramacionScore !== undefined && (
+                              <div className="flex items-center justify-between text-xs">
+                                <span className="text-gray-500 font-medium">
+                                  Diagramación
+                                </span>
+                                <span className="font-bold text-blue-600">
+                                  {project.diagramacionScore.toFixed(2)}/5
+                                </span>
+                              </div>
+                            )}
+                            {project.contenidoScore !== undefined && (
+                              <div className="flex items-center justify-between text-xs">
+                                <span className="text-gray-500 font-medium">
+                                  Contenido
+                                </span>
+                                <span className="font-bold text-purple-600">
+                                  {project.contenidoScore.toFixed(2)}/15
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}

@@ -16,7 +16,7 @@ export type Question = {
 
 export const FREQUENCY_OPTIONS = [
   { value: 1, label: 'Muy Poco/Nunca', color: 'bg-red-100 text-red-700 border-red-300' },
-  { value: 2, label: 'A veces', color: 'bg-yellow-100 text-yellow-700 border-yellow-300' },
+  { value: 2, label: 'Medianamente/A veces', color: 'bg-yellow-100 text-yellow-700 border-yellow-300' },
   { value: 3, label: 'Sí/Siempre', color: 'bg-green-100 text-green-700 border-green-300' },
   { value: 4, label: 'No aplica', color: 'bg-gray-100 text-gray-700 border-gray-300' },
 ];
@@ -27,20 +27,38 @@ export const YESNO_OPTIONS = [
 ];
 
 // Scoring weights for Project questions
-// Dimension A (Diagramación): 5 points total, 28 questions = 5/28 ≈ 0.1785 per question
-// Dimension B (Contenido): 15 points total, 28 questions = 15/28 ≈ 0.5357 per question
-export const DIAGRAMACION_WEIGHT = 5 / 28; // ≈ 0.1785 points
-export const CONTENIDO_WEIGHT = 15 / 28;   // ≈ 0.5357 points
+// Dimension A (Diagramación): 5 points total, 28 questions
+// Dimension B (Contenido): 15 points total, 28 questions
+export const DIAGRAMACION_WEIGHT = 0.18; // For backward compatibility
+export const CONTENIDO_WEIGHT = 0.54;    // For backward compatibility
 
-// Scoring multipliers based on answer
-// Yes/Always (value 2 or 3): 100% of weight
-// Sometimes/Average (value 2 for frequency): 50% of weight  
-// No/Never (value 1): 0% of weight
-// N/A (value 4): excluded from calculation
-export const SCORE_MULTIPLIERS = {
-  full: 1.0,      // Yes / Always
-  partial: 0.5,   // Sometimes / Average
-  none: 0.0,      // No / Never
+// Exact point values per answer type and section
+// DIAGRAMACIÓN section scoring (28 questions, 5 points total max)
+export const DIAGRAMACION_SCORES = {
+  yesno: {
+    yes: 0.18,    // Sí
+    no: 0.02,     // No
+  },
+  frequency: {
+    siempre: 0.18,    // Sí/Siempre
+    aveces: 0.09,     // A veces
+    nunca: 0.02,      // Muy Poco/Nunca
+    noaplica: 0.18,   // No aplica (full points)
+  },
+};
+
+// CONTENIDO section scoring
+export const CONTENIDO_SCORES = {
+  yesno: {
+    yes: 0.54,    // Sí
+    no: 0.05,     // No
+  },
+  frequency: {
+    siempre: 0.54,    // Siempre/Always
+    aveces: 0.27,     // A veces
+    nunca: 0.05,      // Nunca
+    noaplica: 0.54,   // No aplica (full points)
+  },
 };
 
 // Derived per-document-type question sets for convenience
@@ -101,7 +119,7 @@ const _PROJECT_QUESTIONS: Question[] = [
   { id: "q23", label: "Sangría en párrafos", helper: "En cada inicio de párrafo del cuerpo del documento hay una sangría de cinco (5) caracteres, lo que equivale a un (1) centímetro", section: "Diagramacion", subsection: "Formato General", documentType: 'Both', answerType: 'yesno', weight: DIAGRAMACION_WEIGHT },
   { id: "q24", label: "Referencias en superíndice", helper: "En todos los párrafos del cuerpo del documento las referencias se indican mediante números arábigos en superíndice al final de cada oración o idea que requiere una cita bibliográfica", section: "Diagramacion", subsection: "Formato General", documentType: 'Both', answerType: 'yesno', weight: DIAGRAMACION_WEIGHT },
   { id: "q25", label: "Reglas ortográficas", helper: "En todos los párrafos del cuerpo del documento se cumple con cada una de las reglas ortográficas", section: "Diagramacion", subsection: "Formato General", documentType: 'Both', answerType: 'yesno', weight: DIAGRAMACION_WEIGHT },
-  { id: "q26", label: "Redacción y coherencia", helper: "En todos los párrafos del cuerpo del documento la redacción presenta un lenguaje coherente, claro, técnicamente adecuado y organizado, y hay transiciones claras entre los párrafos y las secciones del texto", section: "Diagramacion", subsection: "Formato General", documentType: 'Both', answerType: 'yesno', weight: DIAGRAMACION_WEIGHT },
+  { id: "q26", label: "Redacción y coherencia", helper: "En todos los párrafos del cuerpo del documento la redacción presenta un lenguaje coherente, claro, técnicamente adecuado y organizado, y hay transiciones claras entre los párrafos y las secciones del texto", section: "Diagramacion", subsection: "Formato General", documentType: 'Both', answerType: 'frequency', weight: DIAGRAMACION_WEIGHT },
 
   // Diagramacion → Referencias Bibliográficas (Both)
   { id: "q27", label: "Secuencia numérica", helper: "La lista de referencias siempre respeta la secuencia numérica en la que se presentan en el texto", section: "Diagramacion", subsection: "Referencias Bibliográficas", documentType: 'Both', answerType: 'yesno', weight: DIAGRAMACION_WEIGHT },
@@ -112,10 +130,10 @@ const _PROJECT_QUESTIONS: Question[] = [
   { id: "q30", label: "Título - Precisión de variables/categorías", helper: "Contiene los términos precisos de las variables (para estudios cuantitativos) o categorías (para estudios cualitativos) esenciales.", section: "Contenido", subsection: "Título", documentType: 'Proyecto', answerType: 'frequency', weight: CONTENIDO_WEIGHT },
 
   // Contenido → Subtítulo (Project)
-  { id: "q31", label: "Subtítulo - Complemento del título", helper: "Complementa el título proporcionando información adicional para precisar el alcance o enfoque de la investigación.", section: "Contenido", subsection: "Subtítulo", documentType: 'Proyecto', answerType: 'frequency', weight: CONTENIDO_WEIGHT },
+  { id: "q31", label: "Subtítulo - Complemento del título", helper: "Complementa el título proporcionando información adicional para precisar el alcance o enfoque de la investigación.", section: "Contenido", subsection: "Subtítulo", documentType: 'Proyecto', answerType: 'yesno', weight: CONTENIDO_WEIGHT },
 
   // Contenido → Capítulo 1. Introducción → 1.1 Planteamiento del Problema (Project)
-  { id: "q32", label: "Planteamiento - General a particular", helper: "El planteamiento se realiza desde lo general a lo particular, basándose en referentes teóricos y empíricos.", section: "Contenido", subsection: "1.1 Planteamiento del problema", documentType: 'Proyecto', answerType: 'frequency', weight: CONTENIDO_WEIGHT },
+  { id: "q32", label: "Planteamiento - General a particular", helper: "El planteamiento se realiza desde lo general a lo particular, basándose en referentes teóricos y empíricos.", section: "Contenido", subsection: "1.1 Planteamiento del problema", documentType: 'Proyecto', answerType: 'yesno', weight: CONTENIDO_WEIGHT },
   { id: "q33", label: "Planteamiento - Delimitación y precisión", helper: "El planteamiento delimita, define y explica con claridad y precisión el problema.", section: "Contenido", subsection: "1.1 Planteamiento del problema", documentType: 'Proyecto', answerType: 'frequency', weight: CONTENIDO_WEIGHT },
   { id: "q34", label: "Planteamiento - Causas y hechos", helper: "En el planteamiento se identifican y describen las causas y/o hechos que originan el problema.", section: "Contenido", subsection: "1.1 Planteamiento del problema", documentType: 'Proyecto', answerType: 'frequency', weight: CONTENIDO_WEIGHT },
   { id: "q35", label: "Planteamiento - Elementos relacionados", helper: "En el planteamiento se relacionan, describen y explican los elementos que han generado el problema y que están interviniendo en el mismo.", section: "Contenido", subsection: "1.1 Planteamiento del problema", documentType: 'Proyecto', answerType: 'frequency', weight: CONTENIDO_WEIGHT },
@@ -127,7 +145,7 @@ const _PROJECT_QUESTIONS: Question[] = [
   { id: "q39", label: "Justificación - Consecuencias y aportes", helper: "Se analizan las consecuencias y los cambios que podrían derivarse de los resultados de la investigación. Se evalúa el alcance del estudio a nivel científico, social, económico o cultural, considerando los posibles aportes de la investigación en cada una de esas áreas.", section: "Contenido", subsection: "1.2 Justificación e impacto", documentType: 'Proyecto', answerType: 'frequency', weight: CONTENIDO_WEIGHT },
 
   // Contenido → Capítulo 1. Introducción → 1.3 Interrogantes (Project)
-  { id: "q40", label: "Interrogantes - Cinco o más", helper: "Son de tres a cinco.", section: "Contenido", subsection: "1.3 Interrogantes de la investigación", documentType: 'Proyecto', answerType: 'frequency', weight: CONTENIDO_WEIGHT },
+  { id: "q40", label: "Interrogantes - Cinco o más", helper: "Son de tres a cinco.", section: "Contenido", subsection: "1.3 Interrogantes de la investigación", documentType: 'Proyecto', answerType: 'yesno', weight: CONTENIDO_WEIGHT },
   { id: "q41", label: "Interrogantes - Factibles, interesantes, éticas, relevantes", helper: "Son factibles, interesantes, novedosas, éticas y relevantes.", section: "Contenido", subsection: "1.3 Interrogantes de la investigación", documentType: 'Proyecto', answerType: 'frequency', weight: CONTENIDO_WEIGHT },
   { id: "q42", label: "Interrogantes - Lógica del problema", helper: "Son parte de la lógica del problema.", section: "Contenido", subsection: "1.3 Interrogantes de la investigación", documentType: 'Proyecto', answerType: 'frequency', weight: CONTENIDO_WEIGHT },
   { id: "q43", label: "Interrogantes - Claridad y concisión", helper: "Son claras y concisas.", section: "Contenido", subsection: "1.3 Interrogantes de la investigación", documentType: 'Proyecto', answerType: 'frequency', weight: CONTENIDO_WEIGHT },
@@ -135,11 +153,11 @@ const _PROJECT_QUESTIONS: Question[] = [
   { id: "q45", label: "Interrogantes - Respuestas dicotómicas", helper: "Conducen a respuestas dicotómicas (sí/no).", section: "Contenido", subsection: "1.3 Interrogantes de la investigación", documentType: 'Proyecto', answerType: 'frequency', weight: CONTENIDO_WEIGHT },
 
   // Contenido → Objetivos (Project)
-  { id: "q46", label: "Objetivo General - Único", helper: "Es único.", section: "Contenido", subsection: "1.4.1 Objetivo General", documentType: 'Proyecto', answerType: 'frequency', weight: CONTENIDO_WEIGHT },
-  { id: "q47", label: "Objetivo General - Logro general", helper: "Establece a modo general lo que se pretende lograr con la realización de la investigación.", section: "Contenido", subsection: "1.4.1 Objetivo General", documentType: 'Proyecto', answerType: 'frequency', weight: CONTENIDO_WEIGHT },
-  { id: "q48", label: "Objetivo General - Nivel de aplicación", helper: "Pertenece al menos al nivel de aplicación (cuarto nivel) de la taxonomía de Bloom.", section: "Contenido", subsection: "1.4.1 Objetivo General", documentType: 'Proyecto', answerType: 'frequency', weight: CONTENIDO_WEIGHT },
+  { id: "q46", label: "Objetivo General - Único", helper: "Es único.", section: "Contenido", subsection: "1.4.1 Objetivo General", documentType: 'Proyecto', answerType: 'yesno', weight: CONTENIDO_WEIGHT },
+  { id: "q47", label: "Objetivo General - Logro general", helper: "Establece a modo general lo que se pretende lograr con la realización de la investigación.", section: "Contenido", subsection: "1.4.1 Objetivo General", documentType: 'Proyecto', answerType: 'yesno', weight: CONTENIDO_WEIGHT },
+  { id: "q48", label: "Objetivo General - Nivel de aplicación", helper: "Pertenece al menos al nivel de aplicación (cuarto nivel) de la taxonomía de Bloom.", section: "Contenido", subsection: "1.4.1 Objetivo General", documentType: 'Proyecto', answerType: 'yesno', weight: CONTENIDO_WEIGHT },
   { id: "q49", label: "Objetivos Específicos - Consistencia", helper: "Son consistentes con el objetivo general.", section: "Contenido", subsection: "1.4.2 Objetivos Específicos", documentType: 'Proyecto', answerType: 'frequency', weight: CONTENIDO_WEIGHT },
-  { id: "q50", label: "Objetivos Específicos - Correspondencia", helper: "Por cada interrogante de la investigación, existe un objetivo específico.", section: "Contenido", subsection: "1.4.2 Objetivos Específicos", documentType: 'Proyecto', answerType: 'frequency', weight: CONTENIDO_WEIGHT },
+  { id: "q50", label: "Objetivos Específicos - Correspondencia", helper: "Por cada interrogante de la investigación, existe un objetivo específico.", section: "Contenido", subsection: "1.4.2 Objetivos Específicos", documentType: 'Proyecto', answerType: 'yesno', weight: CONTENIDO_WEIGHT },
   { id: "q51", label: "Objetivos Específicos - Logros parciales", helper: "Establecen los logros parciales que facilitan el control sistemático de la investigación.", section: "Contenido", subsection: "1.4.2 Objetivos Específicos", documentType: 'Proyecto', answerType: 'frequency', weight: CONTENIDO_WEIGHT },
   { id: "q52", label: "Objetivos Específicos - Orden", helper: "Están enumerados en orden de importancia, orden lógico y/o orden temporal.", section: "Contenido", subsection: "1.4.2 Objetivos Específicos", documentType: 'Proyecto', answerType: 'frequency', weight: CONTENIDO_WEIGHT },
   { id: "q53", label: "Objetivos Específicos - Medibles y observables", helper: "Son medibles y observables.", section: "Contenido", subsection: "1.4.2 Objetivos Específicos", documentType: 'Proyecto', answerType: 'frequency', weight: CONTENIDO_WEIGHT },
@@ -147,7 +165,7 @@ const _PROJECT_QUESTIONS: Question[] = [
 
   // Contenido → Referencias bibliográficas (Project)
   { id: "q55", label: "Referencias - Suficiencia y actualidad", helper: "La documentación utilizada como apoyo al estudio es suficiente, actualizada y acreditada.", section: "Contenido", subsection: "Referencias bibliográficas", documentType: 'Proyecto', answerType: 'frequency', weight: CONTENIDO_WEIGHT },
-  { id: "q56", label: "Referencias - Pertinencia", helper: "Se citaron las obras más pertinentes al campo de conocimiento.", section: "Contenido", subsection: "Referencias bibliográficas", documentType: 'Proyecto', answerType: 'frequency', weight: CONTENIDO_WEIGHT },
+  { id: "q56", label: "Referencias - Pertinencia", helper: "Se citaron las obras más pertinentes al campo de conocimiento.", section: "Contenido", subsection: "Referencias bibliográficas", documentType: 'Proyecto', answerType: 'yesno', weight: CONTENIDO_WEIGHT },
 ];
 
 const _TESIS_STAGE1_QUESTIONS: Question[] = [
