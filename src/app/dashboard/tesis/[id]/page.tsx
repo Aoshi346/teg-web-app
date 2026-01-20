@@ -13,15 +13,18 @@ import {
   GraduationCap,
   BookOpen,
   Sparkles,
+  Upload,
 } from "lucide-react";
 import DashboardHeader from "@/components/layout/DashboardHeader";
 import PageTransition from "@/components/ui/PageTransition";
 import { getTesis } from "@/lib/data/mockData";
+import { getUserRole } from "@/features/auth/clientAuth";
 
 export default function TesisDetailsPage() {
   const router = useRouter();
   const params = useParams();
   const id = Number(params.id);
+  const userRole = getUserRole();
 
   const theses = getTesis();
   const project = theses.find((p) => p.id === id);
@@ -321,6 +324,34 @@ export default function TesisDetailsPage() {
                           <p className="text-sm text-gray-400 font-medium">
                             No hay documentos adjuntos.
                           </p>
+                        </div>
+                      )}
+
+                      {/* Upload Button for Students */}
+                      {userRole === "Estudiante" && (
+                        <div className="mt-4">
+                          <input
+                            type="file"
+                            id="file-upload"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                // Simulate upload
+                                alert(
+                                  `Archivo ${file.name} subido exitosamente`,
+                                );
+                                // In a real app we'd upload to server and refresh data
+                              }
+                            }}
+                          />
+                          <label
+                            htmlFor="file-upload"
+                            className="flex items-center justify-center gap-2 w-full py-2.5 bg-gray-50 text-gray-700 font-semibold rounded-xl hover:bg-gray-100 border border-gray-200 cursor-pointer transition-colors"
+                          >
+                            <Upload className="w-4 h-4" />
+                            Subir Documento
+                          </label>
                         </div>
                       )}
                     </div>
