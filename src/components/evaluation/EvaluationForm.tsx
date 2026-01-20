@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import {
   FREQUENCY_OPTIONS,
   YESNO_OPTIONS,
+  TERNARY_OPTIONS,
+  TERNARY_NA_OPTIONS,
+  TERNARY_INFO_OPTIONS,
   Question,
 } from "@/lib/questions/questions";
 import {
@@ -139,6 +142,21 @@ export default function EvaluationForm({
           (opt) => opt.value === numericValue,
         );
         return freqOption?.label || "Sin respuesta";
+      case "ternary":
+        const ternaryOption = TERNARY_OPTIONS.find(
+          (opt) => opt.value === numericValue,
+        );
+        return ternaryOption?.label || "Sin respuesta";
+      case "ternary_na":
+        const ternaryNaOption = TERNARY_NA_OPTIONS.find(
+          (opt) => opt.value === numericValue,
+        );
+        return ternaryNaOption?.label || "Sin respuesta";
+      case "ternary_info":
+        const ternaryInfoOption = TERNARY_INFO_OPTIONS.find(
+          (opt) => opt.value === numericValue,
+        );
+        return ternaryInfoOption?.label || "Sin respuesta";
       case "stars":
         return `Puntuación ${numericValue} / 5`;
       default:
@@ -240,6 +258,125 @@ export default function EvaluationForm({
                 {option.label}
               </button>
             ))}
+          </div>
+        );
+
+      case "ternary":
+        return (
+          <div className="grid grid-cols-3 gap-3 w-full pt-2">
+            {TERNARY_OPTIONS.map((option) => {
+              const isActive = currentRating === option.value;
+              let activeClass = "";
+              if (isActive) {
+                if (option.value === 3) {
+                  activeClass =
+                    "bg-emerald-500 text-white border-emerald-500 shadow-md shadow-emerald-500/20";
+                } else if (option.value === 2) {
+                  activeClass =
+                    "bg-amber-500 text-white border-amber-500 shadow-md shadow-amber-500/20";
+                } else {
+                  activeClass =
+                    "bg-rose-500 text-white border-rose-500 shadow-md shadow-rose-500/20";
+                }
+              } else {
+                activeClass =
+                  "bg-white text-gray-600 border-gray-200 hover:bg-gray-50 hover:border-gray-300";
+              }
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => setRating(question.id, option.value)}
+                  className={`flex items-center justify-center py-3 px-4 rounded-xl text-sm font-bold border transition-all duration-300 transform active:scale-[0.98] ${activeClass} ${!isActive && "hover:shadow-md hover:-translate-y-0.5"}`}
+                >
+                  {option.label}
+                </button>
+              );
+            })}
+          </div>
+        );
+
+      case "ternary_na":
+        return (
+          <div className="grid grid-cols-2 gap-3 w-full pt-2">
+            {TERNARY_NA_OPTIONS.map((option, index) => {
+              const isActive = currentRating === option.value;
+              const isLast = index === TERNARY_NA_OPTIONS.length - 1; // Option 5
+
+              let activeClass = "";
+              if (isActive) {
+                if (option.value === 3) {
+                  // Sí
+                  activeClass =
+                    "bg-emerald-500 text-white border-emerald-500 shadow-md shadow-emerald-500/20";
+                } else if (option.value === 2) {
+                  // Medianamente
+                  activeClass =
+                    "bg-amber-500 text-white border-amber-500 shadow-md shadow-amber-500/20";
+                } else if (option.value === 5) {
+                  // No hay subtítulo but OK
+                  activeClass =
+                    "bg-blue-500 text-white border-blue-500 shadow-md shadow-blue-500/20";
+                } else {
+                  // No or No se incluyó
+                  activeClass =
+                    "bg-rose-500 text-white border-rose-500 shadow-md shadow-rose-500/20";
+                }
+              } else {
+                activeClass =
+                  "bg-white text-gray-600 border-gray-200 hover:bg-gray-50 hover:border-gray-300";
+              }
+
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => setRating(question.id, option.value)}
+                  className={`flex items-center justify-center py-3 px-4 rounded-xl text-sm font-bold border transition-all duration-300 transform active:scale-[0.98] ${activeClass} ${!isActive && "hover:shadow-md hover:-translate-y-0.5"} ${isLast ? "col-span-2" : ""}`}
+                >
+                  {option.label}
+                </button>
+              );
+            })}
+          </div>
+        );
+
+      case "ternary_info":
+        return (
+          <div className="grid grid-cols-2 gap-3 w-full pt-2">
+            {TERNARY_INFO_OPTIONS.map((option) => {
+              const isActive = currentRating === option.value;
+              let activeClass = "";
+              if (isActive) {
+                if (option.value === 3) {
+                  // Sí
+                  activeClass =
+                    "bg-emerald-500 text-white border-emerald-500 shadow-md shadow-emerald-500/20";
+                } else if (option.value === 2) {
+                  // Medianamente
+                  activeClass =
+                    "bg-amber-500 text-white border-amber-500 shadow-md shadow-amber-500/20";
+                } else {
+                  // No or No se incluyó
+                  activeClass =
+                    "bg-rose-500 text-white border-rose-500 shadow-md shadow-rose-500/20";
+                }
+              } else {
+                activeClass =
+                  "bg-white text-gray-600 border-gray-200 hover:bg-gray-50 hover:border-gray-300";
+              }
+
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => setRating(question.id, option.value)}
+                  className={`flex items-center justify-center py-3 px-4 rounded-xl text-sm font-bold border transition-all duration-300 transform active:scale-[0.98] ${activeClass} ${!isActive && "hover:shadow-md hover:-translate-y-0.5"}`}
+                >
+                  {option.label}
+                </button>
+              );
+            })}
           </div>
         );
 
