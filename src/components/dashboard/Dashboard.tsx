@@ -243,6 +243,7 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
     const fetchData = async () => {
       try {
         const apiProjects = await getAllProjects();
+        setApiProjects(apiProjects);
 
         // Categorize projects
         const allProyectos = apiProjects.filter((p) => p.type === "proyecto");
@@ -251,26 +252,9 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
         // Student View: Only their own project
         if (isStudent && user) {
           // Backend filters by user, so we just take what we have
-          // Or strictly checking if API returned duplicates or list
-          // For now, assume API returns list of projects for this student.
-          // Fallback logic to match "my project" behavior
-          const myPteg = allProyectos.find(
-            (p) => p.semester === semester || !p.semester,
-          ); // Simple find? actually dashboard usually shows current semester or active one?
-          // Existing logic just searched by name.
-          // API filters by user. So allProyectos are mine.
-          // Let's take the first one that matches semester, or just the most recent?
-          // The semester selector controls global semester state.
           // Filter by selected semester:
-          const myPtegSemester = allProyectos.find(
-            (p) => p.semester === semester,
-          );
-          const myTegSemester = allTesis.find((p) => p.semester === semester);
-
-          // Fallback: If no semester match, maybe show active?
-          // But dashboard has semester selector.
-          const myPteg = myPtegSemester;
-          const myTeg = myTegSemester;
+          const myPteg = allProyectos.find((p) => p.semester === semester);
+          const myTeg = allTesis.find((p) => p.semester === semester);
 
           const myProject = myTeg || myPteg;
 
@@ -464,7 +448,7 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
     };
 
     fetchData();
-  }, [semester, isStudent, user?.email]);
+  }, [semester, isStudent, user, user?.email]);
 
   useEffect(() => {
     // Skip if already animated this session

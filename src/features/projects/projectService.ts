@@ -61,3 +61,13 @@ export async function getAllProjects(): Promise<Project[]> {
   }
 }
 
+// Create a new project (assigned to current user by backend)
+export async function createProject(data: Partial<ApiProject>): Promise<ApiProject> {
+  return api.post<ApiProject>("/projects/", data);
+}
+
+// Update an existing project by ID
+export async function updateProject(id: number, data: Partial<ApiProject>): Promise<ApiProject> {
+  return api.patch<ApiProject>(`/projects/${id}/`, data);
+}
+

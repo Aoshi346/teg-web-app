@@ -21,13 +21,8 @@ import Banner from "@/components/ui/Banner";
 import { ImageTooltip } from "@/components/ui/ImageTooltip";
 
 import { useValidation } from "@/hooks/useValidation";
-import {
-  Project,
-  getProyectos,
-  getTesis,
-  updateProyecto,
-  updateTesis,
-} from "@/lib/data/mockData";
+import { Project, getProyectos, getTesis, updateProyecto, updateTesis } from "@/lib/data/mockData";
+import { updateProject } from "@/features/projects/projectService";
 
 interface EvaluationFormProps {
   projectId?: string | null;
@@ -73,6 +68,12 @@ export default function EvaluationForm({
       !q.documentType ||
       q.documentType === "Both" ||
       q.documentType === documentType,
+  );
+
+  // Local draft persistence
+  const draftStorageKey = React.useMemo(
+    () => `teg_eval_draft:${typeParam}:${projectId ?? "new"}`,
+    [typeParam, projectId],
   );
 
   const [ratings, setRatings] = useState<Record<string, number | string>>(
@@ -438,7 +439,14 @@ export default function EvaluationForm({
     // Optional types or text don't count as missing
     if (
       question.answerType === "text" ||
-      !["yesno", "frequency", "stars"].includes(question.answerType)
+      ![
+        "yesno",
+        "frequency",
+        "stars",
+        "ternary",
+        "ternary_na",
+        "ternary_info",
+      ].includes(question.answerType)
     )
       return false;
 
@@ -447,6 +455,50 @@ export default function EvaluationForm({
     const numericValue = typeof value === "number" ? value : Number(value);
     return !numericValue || numericValue <= 0;
   };
+
+  // Load draft on mount or when questions change
+  React.useEffect(() => {
+    try {
+      const raw = localStorage.getItem(draftStorageKey);
+      if (!raw) return;
+      const draft = JSON.parse(raw) as {
+        ratings?: Record<string, number | string>;
+        comments?: string;
+        page?: number;
+      };
+      // Merge with current questions ensuring keys exist
+      if (draft.ratings) {
+        const draftRatings: Record<string, number | string> = draft.ratings || {};
+        setRatings(() => {
+          const next: Record<string, number | string> = {};
+          for (const q of filteredQuestions) {
+            const existing = draftRatings[q.id];
+            next[q.id] =
+              existing !== undefined
+                ? existing
+                : q.answerType === "text"
+                  ? ""
+                  : 0;
+          }
+          return next;
+        });
+      }
+      if (typeof draft.comments === "string") setComments(draft.comments);
+      if (typeof draft.page === "number") setPage(draft.page);
+    } catch {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draftStorageKey]);
+
+  // Save draft when inputs change (debounced)
+  React.useEffect(() => {
+    const t = setTimeout(() => {
+      try {
+        const payload = JSON.stringify({ ratings, comments, page });
+        localStorage.setItem(draftStorageKey, payload);
+      } catch {}
+    }, 250);
+    return () => clearTimeout(t);
+  }, [ratings, comments, page, draftStorageKey]);
 
   const findMissingIndexInSection = (section?: string) => {
     const sectionQuestions = filteredQuestions.filter(
@@ -599,7 +651,20 @@ export default function EvaluationForm({
             updatedProject.stage1Passed = true;
           }
         }
-        updateTesis(updatedProject);
+        // Try backend first
+        try {
+          await updateProject(updatedProject.id, {
+            status: updatedProject.status,
+            score: updatedProject.score ?? 0,
+            diagramacion_score: updatedProject.diagramacionScore ?? 0,
+            contenido_score: updatedProject.contenidoScore ?? 0,
+            review_date: updatedProject.reviewDate,
+            stage1_passed: updatedProject.stage1Passed ?? false,
+          });
+        } catch (err) {
+          console.warn("Falling back to local updateTesis due to API error:", err);
+          updateTesis(updatedProject);
+        }
       } else {
         // Project specific logic for failure attempts
         if (passStatus === "Fail") {
@@ -615,12 +680,30 @@ export default function EvaluationForm({
         } else {
           updatedProject.status = "checked";
         }
-        updateProyecto(updatedProject);
+        // Try backend first
+        try {
+          await updateProject(updatedProject.id, {
+            status: updatedProject.status,
+            score: updatedProject.score ?? 0,
+            diagramacion_score: updatedProject.diagramacionScore ?? 0,
+            contenido_score: updatedProject.contenidoScore ?? 0,
+            review_date: updatedProject.reviewDate,
+            failed_attempts: updatedProject.failedAttempts ?? 0,
+          });
+        } catch (err) {
+          console.warn("Falling back to local updateProyecto due to API error:", err);
+          updateProyecto(updatedProject);
+        }
       }
     }
 
     await new Promise((res) => setTimeout(res, 600));
     setSubmittedData(payload);
+
+    // Clear saved draft on successful submission
+    try {
+      localStorage.removeItem(draftStorageKey);
+    } catch {}
 
     if (documentType !== "Tesis" && passStatus === "Fail") {
       const attempts = (projectData?.failedAttempts || 0) + 1;
@@ -1078,6 +1161,29 @@ export default function EvaluationForm({
                   className="text-sm text-gray-600 hover:text-gray-900 font-medium transition-colors px-3 py-2"
                 >
                   Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    // Reset local draft
+                    try {
+                      localStorage.removeItem(draftStorageKey);
+                    } catch {}
+                    // Reset form state
+                    setRatings(() => {
+                      const r: Record<string, number | string> = {};
+                      for (const q of filteredQuestions) {
+                        r[q.id] = q.answerType === "text" ? "" : 0;
+                      }
+                      return r;
+                    });
+                    setComments("");
+                    setPage(1);
+                    showBanner("Borrador limpiado.", "success");
+                  }}
+                  className="text-sm text-gray-500 hover:text-gray-800 font-medium transition-colors px-3 py-2"
+                >
+                  Limpiar borrador
                 </button>
               </div>
             </div>
