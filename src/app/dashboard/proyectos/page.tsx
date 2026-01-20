@@ -10,6 +10,7 @@ import { getProyectos, Project } from "@/lib/data/mockData";
 import { getAllProjects } from "@/features/projects/projectService";
 import {
   getAvailableSemesters,
+  getSemesters,
   getStoredSemester,
   setStoredSemester,
 } from "@/lib/semesters";
@@ -36,11 +37,15 @@ export default function ProyectosPage(props: ProyectosPageProps = {}) {
 
   // Load proyectos including user-added ones
   const [allProjects, setAllProjects] = useState<Project[]>([]);
+  const [semesterOptions, setSemesterOptions] = useState<string[]>([]);
 
   useEffect(() => {
     let mounted = true;
     (async () => {
-      const apiProjects = await getAllProjects();
+      const [apiProjects, semestersFromApi] = await Promise.all([
+        getAllProjects(),
+        getSemesters(),
+      ]);
       const onlyProyectos = apiProjects.filter(p => p.type === "proyecto");
       if (mounted && onlyProyectos.length > 0) {
         setAllProjects(onlyProyectos);
@@ -48,14 +53,17 @@ export default function ProyectosPage(props: ProyectosPageProps = {}) {
         // Fallback to local mock data
         setAllProjects(getProyectos());
       }
+      if (mounted) {
+        setSemesterOptions(semestersFromApi.map((s) => s.period));
+      }
     })();
     return () => { mounted = false; };
   }, []);
 
   // Semester state - persisted in localStorage
   const availableSemesters = useMemo(
-    () => getAvailableSemesters(allProjects),
-    [allProjects],
+    () => getAvailableSemesters(allProjects, semesterOptions),
+    [allProjects, semesterOptions],
   );
   const [selectedSemester, setSelectedSemester] = useState(() => {
     const stored = getStoredSemester();
@@ -63,6 +71,15 @@ export default function ProyectosPage(props: ProyectosPageProps = {}) {
       ? stored
       : availableSemesters[0] || stored;
   });
+
+  useEffect(() => {
+    if (availableSemesters.length === 0) return;
+    if (!availableSemesters.includes(selectedSemester)) {
+      const next = availableSemesters[0];
+      setSelectedSemester(next);
+      setStoredSemester(next);
+    }
+  }, [availableSemesters, selectedSemester]);
 
   const handleSemesterChange = (semester: string) => {
     setSelectedSemester(semester);

@@ -10,6 +10,7 @@ import { getTesis, Project } from "@/lib/data/mockData";
 import { getAllProjects } from "@/features/projects/projectService";
 import {
   getAvailableSemesters,
+  getSemesters,
   getStoredSemester,
   setStoredSemester,
 } from "@/lib/semesters";
@@ -36,11 +37,15 @@ export default function TesisPage(props: TesisPageProps = {}) {
 
   // Load tesis including user-added ones
   const [allProjects, setAllProjects] = useState<Project[]>([]);
+  const [semesterOptions, setSemesterOptions] = useState<string[]>([]);
 
   useEffect(() => {
     let mounted = true;
     (async () => {
-      const apiProjects = await getAllProjects();
+      const [apiProjects, semestersFromApi] = await Promise.all([
+        getAllProjects(),
+        getSemesters(),
+      ]);
       const onlyTesis = apiProjects.filter(p => p.type === "tesis");
       if (mounted && onlyTesis.length > 0) {
         setAllProjects(onlyTesis);
@@ -48,14 +53,17 @@ export default function TesisPage(props: TesisPageProps = {}) {
         // Fallback to local mock data
         setAllProjects(getTesis());
       }
+      if (mounted) {
+        setSemesterOptions(semestersFromApi.map((s) => s.period));
+      }
     })();
     return () => { mounted = false; };
   }, []);
 
   // Semester state - persisted in localStorage
   const availableSemesters = useMemo(
-    () => getAvailableSemesters(allProjects),
-    [allProjects],
+    () => getAvailableSemesters(allProjects, semesterOptions),
+    [allProjects, semesterOptions],
   );
   const [selectedSemester, setSelectedSemester] = useState(() => {
     const stored = getStoredSemester();

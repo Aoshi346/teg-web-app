@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   FileText,
@@ -19,14 +19,24 @@ import PageTransition from "@/components/ui/PageTransition";
 import Banner from "@/components/ui/Banner";
 import SemesterSelector from "@/components/ui/SemesterSelector";
 import { createProject, getAllProjects } from "@/features/projects/projectService";
-import { getAvailableSemesters, getCurrentSemester, getStoredSemester, setStoredSemester } from "@/lib/semesters";
+import { getAvailableSemesters, getCurrentSemester, getSemesters, getStoredSemester, setStoredSemester } from "@/lib/semesters";
+import { getAllUsers, getUser, getUserRole } from "@/features/auth/clientAuth";
+import type { User } from "@/features/auth/clientAuth";
 
 type DocumentType = "proyecto" | "tesis";
 
+type UserOption = {
+  id: number;
+  label: string;
+  email: string;
+  role: User["role"];
+  status: User["status"];
+};
+
 interface FormData {
   title: string;
-  students: string[];
-  advisors: string[];
+  studentId: number | "";
+  advisors: (number | "")[];
   semesterPeriod: string;
 }
 
@@ -35,7 +45,7 @@ export default function AgregarDocumentoPage() {
   const [documentType, setDocumentType] = useState<DocumentType>("proyecto");
   const [formData, setFormData] = useState<FormData>({
     title: "",
-    students: [""],
+    studentId: "",
     advisors: [""],
     semesterPeriod: "",
   });
@@ -48,20 +58,29 @@ export default function AgregarDocumentoPage() {
 
   const [errors, setErrors] = useState<{
     title?: boolean;
-    students: boolean[];
+    student?: boolean;
     advisors: boolean[];
   }>({
-    students: [],
     advisors: [],
   });
 
   const [availableSemesters, setAvailableSemesters] = useState<string[]>([]);
+  const [students, setStudents] = useState<UserOption[]>([]);
+  const [professors, setProfessors] = useState<UserOption[]>([]);
+  const userRole = useMemo(() => getUserRole(), []);
+  const currentUser = useMemo(() => getUser(), []);
 
   // Load semesters from backend projects and choose a safe default
-  React.useEffect(() => {
+  useEffect(() => {
     const loadSemesters = async () => {
-      const projects = await getAllProjects();
-      const semesters = getAvailableSemesters(projects);
+      const [projects, semestersFromApi] = await Promise.all([
+        getAllProjects(),
+        getSemesters(),
+      ]);
+      const semesters = getAvailableSemesters(
+        projects,
+        semestersFromApi.map((s) => s.period),
+      );
 
       const stored = getStoredSemester();
       const fallback = getCurrentSemester();
@@ -76,6 +95,44 @@ export default function AgregarDocumentoPage() {
 
     loadSemesters();
   }, []);
+
+  // Fetch selectable users (students & professors)
+  useEffect(() => {
+    const loadUsers = async () => {
+      const users = await getAllUsers();
+      const studentOptions = users
+        .filter((u) => u.role === "Estudiante" && typeof u.id === "number")
+        .map((u) => ({
+          id: u.id!,
+          label: u.fullName?.trim() ? u.fullName : u.email,
+          email: u.email,
+          role: u.role,
+          status: u.status,
+        }));
+
+      const professorOptions = users
+        .filter((u) => u.role === "Profesor" && typeof u.id === "number")
+        .map((u) => ({
+          id: u.id!,
+          label: u.fullName?.trim() ? u.fullName : u.email,
+          email: u.email,
+          role: u.role,
+          status: u.status,
+        }));
+
+      setStudents(studentOptions);
+      setProfessors(professorOptions);
+
+      // Auto-select current student for non-admins
+      if (userRole !== "Admin" && currentUser?.id) {
+        setFormData((prev) => ({ ...prev, studentId: currentUser.id! }));
+      } else if (studentOptions.length === 1) {
+        setFormData((prev) => ({ ...prev, studentId: studentOptions[0].id }));
+      }
+    };
+
+    loadUsers();
+  }, [userRole, currentUser?.id]);
 
   const semesterLabel =
     documentType === "proyecto"
@@ -92,40 +149,32 @@ export default function AgregarDocumentoPage() {
     setFormData((prev) => ({ ...prev, semesterPeriod: semester }));
   };
 
-  // Student Handlers
-  const handleStudentChange = (index: number, value: string) => {
-    const newStudents = [...formData.students];
-    newStudents[index] = value;
-    setFormData((prev) => ({ ...prev, students: newStudents }));
-
-    if (errors.students[index]) {
-      const newStudentErrors = [...errors.students];
-      newStudentErrors[index] = false;
-      setErrors((prev) => ({ ...prev, students: newStudentErrors }));
-    }
-  };
-
-  const addStudent = () => {
-    if (formData.students.length < 3) {
-      setFormData((prev) => ({ ...prev, students: [...prev.students, ""] }));
-      setErrors((prev) => ({ ...prev, students: [...prev.students, false] }));
-    }
-  };
-
-  const removeStudent = (index: number) => {
-    if (formData.students.length > 1) {
-      const newStudents = formData.students.filter((_, i) => i !== index);
-      setFormData((prev) => ({ ...prev, students: newStudents }));
-
-      const newStudentErrors = errors.students.filter((_, i) => i !== index);
-      setErrors((prev) => ({ ...prev, students: newStudentErrors }));
-    }
+  // Student Handler
+  const handleStudentSelect = (value: string) => {
+    const numericValue = value ? Number(value) : "";
+    setFormData((prev) => ({ ...prev, studentId: numericValue }));
+    if (errors.student) setErrors((prev) => ({ ...prev, student: false }));
   };
 
   // Advisor Handlers
   const handleAdvisorChange = (index: number, value: string) => {
+    const numericValue = value ? Number(value) : "";
+
+    // Avoid duplicate selection
+    if (
+      numericValue !== "" &&
+      formData.advisors.some((id, i) => i !== index && id === numericValue)
+    ) {
+      setBannerState({
+        visible: true,
+        message: "Este tutor ya está seleccionado.",
+        type: "warning",
+      });
+      return;
+    }
+
     const newAdvisors = [...formData.advisors];
-    newAdvisors[index] = value;
+    newAdvisors[index] = numericValue;
     setFormData((prev) => ({ ...prev, advisors: newAdvisors }));
 
     if (errors.advisors[index]) {
@@ -158,17 +207,16 @@ export default function AgregarDocumentoPage() {
     // Comprehensive Validation
     const errorsFound = {
       title: !formData.title.trim(),
-      students: formData.students.map((s) => !s.trim()),
-      advisors: formData.advisors.map((a) => !a.trim()),
+      student: !formData.studentId,
+      advisors: formData.advisors.map((a) => !a),
     };
 
-    const hasStudentErrors = errorsFound.students.some(Boolean);
     const hasAdvisorErrors = errorsFound.advisors.some(Boolean);
 
-    if (errorsFound.title || hasStudentErrors || hasAdvisorErrors) {
+    if (errorsFound.title || errorsFound.student || hasAdvisorErrors) {
       setErrors({
         title: errorsFound.title,
-        students: errorsFound.students,
+        student: errorsFound.student,
         advisors: errorsFound.advisors,
       });
 
@@ -182,21 +230,26 @@ export default function AgregarDocumentoPage() {
 
     // Clear errors if any existed
     setErrors({
-      students: [],
+      student: false,
       advisors: [],
     });
 
-    const validAdvisors = formData.advisors.filter((a) => a.trim() !== "");
+    const validAdvisors = formData.advisors.filter((a) => a !== "");
+    const advisorNames = validAdvisors
+      .map((id) => professors.find((p) => p.id === id)?.label)
+      .filter(Boolean)
+      .join(", ");
 
     setIsSubmitting(true);
 
     try {
       await createProject({
         title: formData.title.trim(),
-        advisor: validAdvisors.join(", "),
+        advisor: advisorNames,
         semester: formData.semesterPeriod,
         project_type: documentType,
         status: "pending",
+        student: formData.studentId as number,
       });
       setBannerState({
         visible: true,
@@ -208,7 +261,7 @@ export default function AgregarDocumentoPage() {
       const resetSemester = availableSemesters[0] || formData.semesterPeriod || getCurrentSemester();
       setFormData({
         title: "",
-        students: [""],
+        studentId: userRole === "Admin" ? "" : currentUser?.id || "",
         advisors: [""],
         semesterPeriod: resetSemester,
       });
@@ -462,91 +515,59 @@ export default function AgregarDocumentoPage() {
                         <div className="flex items-center gap-2">
                           <Users className="w-5 h-5 text-purple-500" />
                           <label className="text-sm font-bold text-gray-800">
-                            Estudiantes
+                            Estudiante responsable
                           </label>
-                          <span className="text-xs font-semibold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
-                            {formData.students.length}/3
-                          </span>
                         </div>
                       </div>
 
-                      <div className="space-y-3">
-                        {formData.students.map((student, index) => (
+                      <div
+                        className={`group relative bg-gradient-to-br ${
+                          errors.student
+                            ? "from-red-50 to-white border-red-200"
+                            : "from-purple-50/50 to-transparent border-purple-100"
+                        } border rounded-xl p-4 hover:shadow-md transition-all duration-300`}
+                      >
+                        <div className="flex items-start gap-3">
                           <div
-                            key={`student-${index}`}
-                            className={`group relative bg-gradient-to-br ${
-                              errors.students[index]
-                                ? "from-red-50 to-white border-red-200"
-                                : "from-purple-50/50 to-transparent border-purple-100"
-                            } border rounded-xl p-4 hover:shadow-md transition-all duration-300`}
+                            className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center mt-0.5 ${
+                              errors.student
+                                ? "bg-red-100 text-red-600"
+                                : "bg-purple-100 text-purple-600"
+                            }`}
                           >
-                            <div className="flex items-start gap-3">
-                              <div
-                                className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center mt-0.5 ${
-                                  errors.students[index]
-                                    ? "bg-red-100 text-red-600"
-                                    : "bg-purple-100 text-purple-600"
+                            <User className="w-5 h-5" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <label
+                              className={`text-xs font-semibold mb-1.5 block ${errors.student ? "text-red-700" : "text-purple-700"}`}
+                            >
+                              Seleccione al estudiante
+                            </label>
+                            <div className="relative">
+                              <select
+                                value={formData.studentId}
+                                onChange={(e) => handleStudentSelect(e.target.value)}
+                                className={`w-full px-3 py-2.5 bg-white border rounded-lg shadow-sm focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all text-sm font-medium ${
+                                  errors.student
+                                    ? "border-red-300 focus:border-red-500 focus:ring-red-100"
+                                    : "border-gray-200 hover:border-purple-300"
                                 }`}
                               >
-                                <User className="w-5 h-5" />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <label
-                                  className={`text-xs font-semibold mb-1.5 block ${errors.students[index] ? "text-red-700" : "text-purple-700"}`}
-                                >
-                                  Estudiante {index + 1}
-                                </label>
-                                <div className="relative">
-                                  <input
-                                    type="text"
-                                    value={student}
-                                    onChange={(e) =>
-                                      handleStudentChange(index, e.target.value)
-                                    }
-                                    placeholder="Nombre completo del estudiante"
-                                    className={`w-full px-3 py-2.5 bg-white border rounded-lg shadow-sm focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all text-sm font-medium placeholder:text-gray-400 ${
-                                      errors.students[index]
-                                        ? "border-red-300 focus:border-red-500 focus:ring-red-100"
-                                        : "border-gray-200 hover:border-purple-300"
-                                    }`}
-                                  />
-                                  {errors.students[index] && (
-                                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                                      <X className="w-4 h-4 text-red-500" />
-                                    </div>
-                                  )}
+                                <option value="">Seleccione un estudiante</option>
+                                {students.map((stu) => (
+                                  <option key={stu.id} value={stu.id}>
+                                    {stu.label} {stu.status === "pending" ? "(Pendiente)" : ""}
+                                  </option>
+                                ))}
+                              </select>
+                              {errors.student && (
+                                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                  <X className="w-4 h-4 text-red-500" />
                                 </div>
-                              </div>
-                              {formData.students.length > 1 && (
-                                <button
-                                  type="button"
-                                  onClick={() => removeStudent(index)}
-                                  className="flex-shrink-0 w-8 h-8 rounded-lg bg-white border border-red-100 hover:border-red-200 hover:bg-red-50 flex items-center justify-center text-red-500 hover:text-red-600 transition-all shadow-sm hover:shadow mt-6"
-                                  title="Eliminar estudiante"
-                                >
-                                  <X className="w-4 h-4" />
-                                </button>
                               )}
                             </div>
                           </div>
-                        ))}
-
-                        {formData.students.length < 3 && (
-                          <button
-                            type="button"
-                            onClick={addStudent}
-                            className="w-full p-4 border border-dashed border-purple-300 rounded-xl bg-purple-50/30 hover:bg-purple-50 hover:border-purple-400 transition-all group shadow-sm hover:shadow"
-                          >
-                            <div className="flex items-center justify-center gap-2 text-purple-600 group-hover:text-purple-700">
-                              <div className="w-8 h-8 rounded-lg bg-white border border-purple-100 group-hover:border-purple-200 flex items-center justify-center transition-colors shadow-sm">
-                                <Plus className="w-4 h-4" />
-                              </div>
-                              <span className="text-sm font-semibold">
-                                Agregar Estudiante
-                              </span>
-                            </div>
-                          </button>
-                        )}
+                        </div>
                       </div>
                     </div>
 
@@ -591,19 +612,24 @@ export default function AgregarDocumentoPage() {
                                   Tutor {index + 1}
                                 </label>
                                 <div className="relative">
-                                  <input
-                                    type="text"
+                                  <select
                                     value={advisor}
                                     onChange={(e) =>
                                       handleAdvisorChange(index, e.target.value)
                                     }
-                                    placeholder="Nombre del tutor académico"
-                                    className={`w-full px-3 py-2.5 bg-white border rounded-lg shadow-sm focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all text-sm font-medium placeholder:text-gray-400 ${
+                                    className={`w-full px-3 py-2.5 bg-white border rounded-lg shadow-sm focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all text-sm font-medium ${
                                       errors.advisors[index]
                                         ? "border-red-300 focus:border-red-500 focus:ring-red-100"
                                         : "border-gray-200 hover:border-teal-300"
                                     }`}
-                                  />
+                                  >
+                                    <option value="">Seleccione un tutor</option>
+                                    {professors.map((prof) => (
+                                      <option key={prof.id} value={prof.id}>
+                                        {prof.label} {prof.status === "pending" ? "(Pendiente)" : ""}
+                                      </option>
+                                    ))}
+                                  </select>
                                   {errors.advisors[index] && (
                                     <div className="absolute right-3 top-1/2 -translate-y-1/2">
                                       <X className="w-4 h-4 text-red-500" />

@@ -33,9 +33,12 @@ import Toast, { ToastType } from "@/components/ui/Toast";
 import DeleteModal from "@/components/ui/DeleteModal";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import {
-  addCustomSemester,
-  getCustomSemesters,
+  createSemester,
+  deleteSemester,
+  formatSemesterLabel,
   getAvailableSemesterPeriods,
+  getSemesters,
+  Semester as SemesterApi,
 } from "@/lib/semesters";
 
 export default function SettingsPage({
@@ -68,6 +71,14 @@ export default function SettingsPage({
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<UserData | null>(null);
 
+  // Semester Management (Admin)
+  const [semesters, setSemesters] = useState<SemesterApi[]>([]);
+  const [newSemesterYear, setNewSemesterYear] = useState<number>(
+    new Date().getFullYear(),
+  );
+  const [newSemesterPeriod, setNewSemesterPeriod] = useState<string>("01");
+  const [isSavingSemester, setIsSavingSemester] = useState(false);
+
   // Delete Modal State
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<UserData | null>(null);
@@ -95,6 +106,16 @@ export default function SettingsPage({
   const showToast = (message: string, type: ToastType = "info") => {
     setToast({ message, type, isVisible: true });
   };
+
+  const loadSemesters = React.useCallback(async () => {
+    try {
+      const data = await getSemesters();
+      setSemesters(data);
+    } catch (e) {
+      console.error(e);
+      showToast("Error al cargar semestres", "error");
+    }
+  }, [showToast]);
 
   // Load users helper
   const loadUsers = React.useCallback(async () => {
@@ -142,11 +163,12 @@ export default function SettingsPage({
       setProfileName(userEmail?.split("@")[0] || "Usuario");
     }
 
-    // Load users if admin
+    // Load users and semesters if admin
     if (userRole === "Admin") {
       loadUsers();
+      loadSemesters();
     }
-  }, [activeTab, loadUsers]); // Reload when tab changes too
+  }, [activeTab, loadUsers, loadSemesters]); // Reload when tab changes too
 
   const openDeleteModal = (user: UserData) => {
     setUserToDelete(user);
@@ -240,6 +262,47 @@ export default function SettingsPage({
     } catch (err) {
       console.error(err);
       showToast("No se pudo actualizar el perfil.", "error");
+    }
+  };
+
+  const handleAddSemester = async () => {
+    const period = `${newSemesterYear}-${newSemesterPeriod.padStart(2, "0")}`;
+    const valid = /^\d{4}-(01|02)$/.test(period);
+
+    if (!valid) {
+      showToast("Formato inválido. Use YYYY-01 o YYYY-02.", "error");
+      return;
+    }
+
+    if (semesters.some((s) => s.period === period)) {
+      showToast("Este semestre ya existe.", "warning");
+      return;
+    }
+
+    try {
+      setIsSavingSemester(true);
+      await createSemester(period);
+      showToast("Semestre agregado.", "success");
+      await loadSemesters();
+    } catch (error) {
+      console.error(error);
+      showToast("No se pudo agregar el semestre.", "error");
+    } finally {
+      setIsSavingSemester(false);
+    }
+  };
+
+  const handleDeleteSemester = async (id: number) => {
+    try {
+      setIsSavingSemester(true);
+      await deleteSemester(id);
+      showToast("Semestre eliminado.", "success");
+      await loadSemesters();
+    } catch (error) {
+      console.error(error);
+      showToast("No se pudo eliminar el semestre.", "error");
+    } finally {
+      setIsSavingSemester(false);
     }
   };
 
@@ -670,59 +733,79 @@ export default function SettingsPage({
                         <div>
                           <h2 className="text-lg font-bold text-gray-900">Gestión de Semestres</h2>
                           <p className="text-sm text-gray-500">
-                            Agrega semestres adicionales para los selectores.
+                            Registra los períodos académicos para vincularlos a los trabajos.
                           </p>
                         </div>
                       </div>
-                      <div className="p-4 sm:p-6 space-y-4">
-                        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-                          <input
-                            id="new-semester-input"
-                            type="text"
-                            placeholder="Ej: 2026-02"
-                            className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none"
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter") {
-                                const value = (e.target as HTMLInputElement).value.trim();
-                                if (value) {
-                                  addCustomSemester(value);
-                                  showToast("Semestre agregado.", "success");
-                                  (e.target as HTMLInputElement).value = "";
-                                }
-                              }
-                            }}
-                          />
-                          <button
-                            onClick={() => {
-                              const input = document.getElementById("new-semester-input") as HTMLInputElement | null;
-                              const value = input?.value.trim();
-                              if (value) {
-                                addCustomSemester(value);
-                                showToast("Semestre agregado.", "success");
-                                if (input) input.value = "";
-                              }
-                            }}
-                            className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-700 transition-all shadow-md shadow-blue-500/20"
-                          >
-                            Agregar Semestre
-                          </button>
-                        </div>
-                        <div className="space-y-2">
-                          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Semestres disponibles</p>
-                          <div className="flex flex-wrap gap-2">
-                            {getCustomSemesters().length === 0 && (
-                              <span className="text-sm text-gray-500">No hay semestres adicionales.</span>
-                            )}
-                            {getCustomSemesters().map((sem) => (
-                              <span
-                                key={sem}
-                                className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-100"
-                              >
-                                {sem}
-                              </span>
-                            ))}
+                      <div className="p-4 sm:p-6 grid gap-6 lg:grid-cols-2">
+                        <div className="space-y-4">
+                          <div className="space-y-1">
+                            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Nuevo semestre</p>
+                            <p className="text-sm text-gray-600">
+                              Selecciona el año y el período, luego agrega.
+                            </p>
                           </div>
-                          <p className="text-xs text-gray-400">Sugerencias: {getAvailableSemesterPeriods().slice(0,4).join(", ")}</p>
+                          <div className="grid gap-3 sm:grid-cols-[1fr_1fr_auto]">
+                            <input
+                              type="number"
+                              min={2020}
+                              value={newSemesterYear}
+                              onChange={(e) => setNewSemesterYear(Number(e.target.value))}
+                              className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none"
+                              placeholder="Año"
+                            />
+                            <select
+                              value={newSemesterPeriod}
+                              onChange={(e) => setNewSemesterPeriod(e.target.value)}
+                              className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none"
+                            >
+                              <option value="01">01 (Ene-Jun)</option>
+                              <option value="02">02 (Jul-Dic)</option>
+                            </select>
+                            <button
+                              onClick={handleAddSemester}
+                              disabled={isSavingSemester}
+                              className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-700 transition-all shadow-md shadow-blue-500/20 disabled:opacity-60"
+                            >
+                              Agregar
+                            </button>
+                          </div>
+                          <p className="text-xs text-gray-400">
+                            Sugerencias: {getAvailableSemesterPeriods().slice(0, 4).join(", ")}
+                          </p>
+                        </div>
+
+                        <div className="space-y-3">
+                          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Semestres disponibles</p>
+                          {semesters.length === 0 ? (
+                            <div className="text-sm text-gray-500 bg-gray-50 border border-gray-200 rounded-xl p-4">
+                              Aún no hay semestres registrados.
+                            </div>
+                          ) : (
+                            <div className="divide-y divide-gray-100 border border-gray-200 rounded-xl overflow-hidden">
+                              {semesters.map((semester) => (
+                                <div
+                                  key={semester.id}
+                                  className="flex items-center justify-between px-4 py-3 bg-white"
+                                >
+                                  <div>
+                                    <p className="text-sm font-semibold text-gray-900">
+                                      {formatSemesterLabel(semester.period)}
+                                    </p>
+                                    <p className="text-xs text-gray-500">{semester.period}</p>
+                                  </div>
+                                  <button
+                                    onClick={() => handleDeleteSemester(semester.id)}
+                                    disabled={isSavingSemester}
+                                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-60"
+                                    title="Eliminar semestre"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>

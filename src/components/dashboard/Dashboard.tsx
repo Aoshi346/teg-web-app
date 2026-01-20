@@ -19,6 +19,7 @@ import { Project } from "@/types/project";
 import { getAllProjects } from "@/features/projects/projectService";
 import {
   getAvailableSemesters,
+  getSemesters,
   getStoredSemester,
   setStoredSemester,
   formatSemesterLabel,
@@ -208,6 +209,7 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
   // State for data
   const [semester, setSemester] = useState<string>("");
   const [apiProjects, setApiProjects] = useState<Project[]>([]);
+  const [semesterOptions, setSemesterOptions] = useState<string[]>([]);
   const [dashboardData, setDashboardData] = useState<{
     ptegStats: {
       total: number;
@@ -243,8 +245,12 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
 
     const fetchData = async () => {
       try {
-        const apiProjects = await getAllProjects();
+        const [apiProjects, semestersFromApi] = await Promise.all([
+          getAllProjects(),
+          getSemesters(),
+        ]);
         setApiProjects(apiProjects);
+        setSemesterOptions(semestersFromApi.map((s) => s.period));
 
         // Categorize projects
         const allProyectos = apiProjects.filter((p) => p.type === "proyecto");
@@ -618,7 +624,7 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
               </div>
               <SemesterSelector
                 selectedSemester={semester}
-                availableSemesters={getAvailableSemesters(apiProjects)}
+                availableSemesters={getAvailableSemesters(apiProjects, semesterOptions)}
                 onSemesterChange={(sem) => {
                   setStoredSemester(sem);
                   setSemester(sem);

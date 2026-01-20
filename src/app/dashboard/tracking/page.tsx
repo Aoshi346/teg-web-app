@@ -6,7 +6,7 @@ import DashboardHeader from "@/components/layout/DashboardHeader";
 import PageTransition from "@/components/ui/PageTransition";
 import TrackingTable from "@/components/ui/TrackingTable";
 import SemesterSelector from "@/components/ui/SemesterSelector";
-import { getAvailableSemesters, getStoredSemester, setStoredSemester, getCurrentSemester } from "@/lib/semesters";
+import { getAvailableSemesters, getStoredSemester, setStoredSemester, getCurrentSemester, getSemesters } from "@/lib/semesters";
 import { getAllProjects } from "@/features/projects/projectService";
 import { Project } from "@/types/project";
 
@@ -32,10 +32,16 @@ export default function TrackingPage({
 
     useEffect(() => {
         const fetchData = async () => {
-            const apiProjects = await getAllProjects();
+            const [apiProjects, semestersFromApi] = await Promise.all([
+                getAllProjects(),
+                getSemesters(),
+            ]);
             setProjects(apiProjects);
 
-            const semesters = getAvailableSemesters(apiProjects);
+            const semesters = getAvailableSemesters(
+                apiProjects,
+                semestersFromApi.map((s) => s.period),
+            );
             const stored = getStoredSemester();
             const fallback = getCurrentSemester();
             const chosen = semesters.length

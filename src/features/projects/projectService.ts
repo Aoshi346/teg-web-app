@@ -54,6 +54,10 @@ export async function getAllProjects(): Promise<Project[]> {
 }
 
 function mapApiProject(p: ApiProject): Project {
+  const normalizedType = (p.project_type || "proyecto").toLowerCase() === "tesis"
+    ? "tesis"
+    : "proyecto";
+
   return {
     id: p.id,
     title: p.title,
@@ -67,7 +71,7 @@ function mapApiProject(p: ApiProject): Project {
     contenidoScore: p.contenido_score,
     stage1Passed: p.stage1_passed,
     semester: p.semester,
-    type: p.project_type,
+    type: normalizedType,
     files: p.files?.map(f => ({
       name: f.name,
       url: f.url,

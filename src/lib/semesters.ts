@@ -4,8 +4,13 @@
  */
 
 import { Project } from "@/types/project";
+import { api } from "@/lib/api";
 
-const CUSTOM_SEMESTERS_KEY = "customSemesters";
+export interface Semester {
+    id: number;
+    period: string;
+    created_at: string;
+}
 
 /**
  * Get the current semester based on the current date
@@ -41,9 +46,8 @@ export function formatSemesterLabel(semester: string): string {
 /**
  * Get all unique semesters from a list of projects, sorted newest first
  */
-export function getAvailableSemesters(projects: Project[]): string[] {
-    const custom = getCustomSemesters();
-    const semesters = [...new Set([...projects.map((p) => p.semester), ...custom])];
+export function getAvailableSemesters(projects: Project[], extraSemesters: string[] = []): string[] {
+    const semesters = [...new Set([...projects.map((p) => p.semester), ...extraSemesters])];
     return semesters.sort((a, b) => {
         const aParsed = parseSemester(a);
         const bParsed = parseSemester(b);
@@ -90,29 +94,21 @@ export function setStoredSemester(semester: string): void {
     } catch { }
 }
 
-export function getCustomSemesters(): string[] {
-    if (typeof window === "undefined") return [];
+export async function getSemesters(): Promise<Semester[]> {
     try {
-        const raw = localStorage.getItem(CUSTOM_SEMESTERS_KEY);
-        if (!raw) return [];
-        const parsed = JSON.parse(raw);
-        return Array.isArray(parsed) ? parsed : [];
-    } catch {
+        return await api.get<Semester[]>("/semesters/");
+    } catch (error) {
+        console.error("Failed to fetch semesters", error);
         return [];
     }
 }
 
-export function addCustomSemester(semester: string): string[] {
-    if (typeof window === "undefined") return [];
-    const cleaned = semester.trim();
-    if (!cleaned) return getCustomSemesters();
-    const existing = getCustomSemesters();
-    if (existing.includes(cleaned)) return existing;
-    const updated = [...existing, cleaned];
-    try {
-        localStorage.setItem(CUSTOM_SEMESTERS_KEY, JSON.stringify(updated));
-    } catch { }
-    return updated;
+export async function createSemester(period: string): Promise<Semester> {
+    return api.post<Semester>("/semesters/", { period });
+}
+
+export async function deleteSemester(id: number): Promise<void> {
+    await api.delete<void>(`/semesters/${id}/`);
 }
 
 /**
