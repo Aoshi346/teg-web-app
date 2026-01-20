@@ -167,10 +167,10 @@ export default function ProjectCard({
                 />
               </svg>
               <div className="flex flex-col items-center justify-center leading-none">
-                <span className={`text-lg font-bold ${config.scoreText}`}>
-                  {project.score}
+                <span className={`text-sm font-bold ${config.scoreText}`}>
+                  {project.score.toFixed(2)}
                 </span>
-                <span className="text-[9px] uppercase font-bold text-gray-400 mt-0.5">
+                <span className="text-[8px] uppercase font-bold text-gray-400 mt-0.5">
                   /20
                 </span>
               </div>

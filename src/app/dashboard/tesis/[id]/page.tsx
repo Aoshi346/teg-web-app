@@ -181,7 +181,7 @@ export default function TesisDetailsPage() {
                                 : "text-rose-600"
                             }`}
                           >
-                            {project.score}
+                            {project.score.toFixed(2)}
                           </span>
                           <span className="text-xl font-bold text-gray-400 ml-1">
                             /20
