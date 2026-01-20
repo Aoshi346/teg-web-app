@@ -7,7 +7,7 @@ import {
   getUserRole,
   getUserEmail,
   getAllUsers,
-  updateUserStatus,
+  updateStatusById,
   register as registerUser,
   User as AuthUser,
 } from "@/features/auth/clientAuth";
@@ -88,20 +88,25 @@ export default function SettingsPage({
   };
 
   // Load users helper
-  const loadUsers = () => {
-    const storedUsers = getAllUsers();
-    // Map to UserData format expected by the table (adding id if missing, though typically we use email as key)
-    const mappedUsers: UserData[] = storedUsers.map((u, index) => ({
-      id: index + 1, // Artificial ID for display/key
-      fullName: u.fullName || u.email.split("@")[0],
-      email: u.email,
-      role: u.role,
-      semester: u.semester || "N/A",
-      phone: u.phone || "",
-      status: u.status,
-    }));
-    setUsers(mappedUsers);
-  };
+  const loadUsers = React.useCallback(async () => {
+    try {
+      const storedUsers = await getAllUsers();
+      // Map to UserData format expected by the table (adding id if missing, though typically we use email as key)
+      const mappedUsers: UserData[] = storedUsers.map((u, index) => ({
+        id: u.id || index + 1, // Artificial ID for display/key if undefined
+        fullName: u.fullName || u.email.split("@")[0],
+        email: u.email,
+        role: u.role,
+        semester: u.semester || "N/A",
+        phone: u.phone || "",
+        status: u.status,
+      }));
+      setUsers(mappedUsers);
+    } catch (e) {
+      console.error(e);
+      showToast("Error al cargar usuarios", "error");
+    }
+  }, []);
 
   useEffect(() => {
     const userRole = getUserRole();
@@ -120,7 +125,7 @@ export default function SettingsPage({
     if (userRole === "Admin") {
       loadUsers();
     }
-  }, [activeTab]); // Reload when tab changes too
+  }, [activeTab, loadUsers]); // Reload when tab changes too
 
   const openDeleteModal = (user: UserData) => {
     setUserToDelete(user);
@@ -138,16 +143,21 @@ export default function SettingsPage({
     }
   };
 
-  const handleStatusUpdate = (
-    email: string,
+  const handleStatusUpdate = async (
+    id: number | undefined,
     newStatus: "active" | "pending",
   ) => {
-    updateUserStatus(email, newStatus);
-    loadUsers(); // Refresh list
-    showToast(
-      `Usuario ${newStatus === "active" ? "activado" : "desactivado"} correctamente.`,
-      "success",
-    );
+    if (!id) return;
+    try {
+      await updateStatusById(id, newStatus);
+      await loadUsers(); // Refresh list
+      showToast(
+        `Usuario ${newStatus === "active" ? "activado" : "desactivado"} correctamente.`,
+        "success",
+      );
+    } catch {
+      showToast("Error al actualizar estado", "error");
+    }
   };
 
   const handleAddUser = () => {
@@ -160,7 +170,9 @@ export default function SettingsPage({
     setIsUserModalOpen(true);
   };
 
-  const handleSaveUser = (userData: Omit<UserData, "id"> & { id?: number }) => {
+  const handleSaveUser = async (
+    userData: Omit<UserData, "id"> & { id?: number },
+  ) => {
     // Prepare user object for clientAuth
     const newUser: AuthUser = {
       email: userData.email,
@@ -174,15 +186,22 @@ export default function SettingsPage({
 
     if (userData.id) {
       // Edit mode - tricky without update function in clientAuth, assuming add for now or skip
-      showToast("Edición simulada (necesita backend).", "info");
+      showToast(
+        "Edición simulada (necesita backend endpoint de edición).",
+        "info",
+      );
     } else {
       // Add new
-      const res = registerUser(newUser);
-      if (res.success) {
-        showToast("Usuario creado correctamente.", "success");
-        loadUsers();
-      } else {
-        showToast(res.message || "Error al crear usuario.", "error");
+      try {
+        const res = await registerUser(newUser);
+        if (res.success) {
+          showToast("Usuario creado correctamente.", "success");
+          await loadUsers();
+        } else {
+          showToast(res.message || "Error al crear usuario.", "error");
+        }
+      } catch {
+        showToast("Error de red", "error");
       }
     }
     setIsUserModalOpen(false);
@@ -695,7 +714,7 @@ export default function SettingsPage({
                                         <button
                                           onClick={() =>
                                             handleStatusUpdate(
-                                              user.email,
+                                              user.id,
                                               "active",
                                             )
                                           }
@@ -756,7 +775,7 @@ export default function SettingsPage({
                                   </span>
                                   <button
                                     onClick={() =>
-                                      handleStatusUpdate(user.email, "active")
+                                      handleStatusUpdate(user.id, "active")
                                     }
                                     className="px-3 py-1.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-sm transition-all active:scale-95"
                                   >
@@ -865,10 +884,7 @@ export default function SettingsPage({
                                     {user.status === "pending" && (
                                       <button
                                         onClick={() =>
-                                          handleStatusUpdate(
-                                            user.email,
-                                            "active",
-                                          )
+                                          handleStatusUpdate(user.id, "active")
                                         }
                                         className="px-3 py-1.5 text-xs font-medium text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-lg transition-colors"
                                       >
@@ -880,7 +896,7 @@ export default function SettingsPage({
                                         <button
                                           onClick={() =>
                                             handleStatusUpdate(
-                                              user.email,
+                                              user.id,
                                               "pending",
                                             )
                                           }

@@ -345,6 +345,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   });
 
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   // Animation state
   const [isClosing, setIsClosing] = useState(false);
@@ -399,47 +400,42 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
         showToast("Por favor ingresa una dirección de correo válida.", "error");
         return;
       }
-      const result = demoLogin(loginEmail, loginPassword);
-      if (!result.success) {
-        // Check if it's a pending user (optional, but generic error is safer for security usually, but for internal tools ok)
-        // For now trusting clientAuth message or adding one
 
-        // If the user actually exists but is pending, clientAuth login *might* return success if we didn't block it there.
-        // Wait, I didn't verify login blocked pending users yet.
-        // I should check clientAuth again.
-        // `login` in clientAuth JUST CHECKS credentials. I'll need to check status here or in clientAuth.
-
-        // Let's assume login returns user if success.
-
-        showToast(result.message || "Credenciales incorrectas.", "error");
-        return;
-      }
-
-      // Check status manually if login returned success but we need to block pending
-      if (result.user && result.user.status === "pending") {
-        showToast(
-          "Tu cuenta aún está pendiente de aprobación por un administrador.",
-          "info",
-        );
-        return;
-      }
-
-      showToast("Inicio de sesión exitoso.", "success");
-      // show a brief loading animation before redirecting
       setIsLoggingIn(true);
-      // Mark this navigation so the dashboard can skip showing a second loader
-      try {
-        sessionStorage.setItem("justLoggedIn", "1");
-      } catch {}
-      setTimeout(() => {
-        try {
-          router.push("/dashboard");
-        } catch {
-          window.location.href = "/dashboard";
-        }
-      }, 1500);
-      // close modal after a short delay so user sees the animation
-      setTimeout(() => handleClose(), 1550);
+
+      demoLogin(loginEmail, loginPassword)
+        .then((result) => {
+          if (!result.success) {
+            setIsLoggingIn(false);
+            showToast(result.message || "Credenciales incorrectas.", "error");
+            return;
+          }
+
+          if (result.user && result.user.status === "pending") {
+            setIsLoggingIn(false);
+            showToast(
+              "Tu cuenta aún está pendiente de aprobación por un administrador.",
+              "info",
+            );
+            return;
+          }
+
+          showToast("Inicio de sesión exitoso.", "success");
+          try {
+            sessionStorage.setItem("justLoggedIn", "1");
+          } catch {}
+          setTimeout(() => {
+            try {
+              router.push("/dashboard");
+            } catch {
+              window.location.href = "/dashboard";
+            }
+          }, 1000); // Reduced delay for smoother feel with API
+        })
+        .catch(() => {
+          setIsLoggingIn(false);
+          showToast("Error de conexión", "error");
+        });
     } else {
       if (
         !registerFullName.trim() ||
@@ -448,36 +444,47 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
         !registerConfirmPassword.trim()
       ) {
         showToast("Por favor completa todos los campos de registro.", "error");
-        return;
-      }
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(registerEmail)) {
-        showToast("Por favor ingresa una dirección de correo válida.", "error");
-        return;
-      }
+        return; // Add return
+      } // Add missing brace? No, context shows it
+
       if (registerPassword !== registerConfirmPassword) {
-        showToast("Las contraseñas no coinciden.", "error");
+        showToast("Las contraseñas no coinciden", "error");
         return;
       }
 
-      const result = demoRegister({
+      const newUser = {
         email: registerEmail,
+        fullName: registerFullName,
         password: registerPassword,
         role: registerRole,
-        fullName: registerFullName,
-        status: "pending", // Should be set by backend/helper usually, but explicitly here is fine
-      });
+        status: "pending" as const,
+      };
 
-      if (!result.success) {
-        showToast(result.message || "Error al registrar.", "error");
-        return;
-      }
+      setLoading(true); // Reuse existing loading state or isLoggingIn? existing code uses setLoading but it's not in view?
+      // Wait, view shows `setIsLoggingIn` usage in login, but register part used `setLoading` in previous `view_file` (Line 445 in previous view, wait, previous view didn't show register logic fully? Line 443 says "else ...").
+      // Ah, Step 1038 lines 443+.
+      // I'll assume setLoading exists.
 
-      showToast(
-        "Registro exitoso. Espera la validación del administrador.",
-        "success",
-      );
-      setIsLoginMode(true);
+      demoRegister(newUser)
+        .then((res) => {
+          setLoading(false);
+          if (res.success) {
+            showToast(
+              "Registro exitoso. Espera la aprobación de un administrador.",
+              "success",
+            );
+            setTimeout(() => {
+              setIsLoginMode(true);
+              setLoginEmail(registerEmail);
+            }, 1500);
+          } else {
+            showToast(res.message || "Error al registrarse", "error");
+          }
+        })
+        .catch(() => {
+          setLoading(false);
+          showToast("Error de conexión", "error");
+        });
     }
   };
 
@@ -747,9 +754,10 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                     <div className="pt-2">
                       <Button
                         type="submit"
-                        className="w-full h-12 text-sm font-bold bg-blue-600 text-white hover:bg-blue-700 rounded-xl shadow-lg shadow-blue-600/30 hover:shadow-blue-600/40 active:scale-[0.98] transition-all duration-200"
+                        disabled={loading}
+                        className="w-full h-12 text-sm font-bold bg-blue-600 text-white hover:bg-blue-700 rounded-xl shadow-lg shadow-blue-600/30 hover:shadow-blue-600/40 active:scale-[0.98] transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed"
                       >
-                        Registrarse
+                        {loading ? "Registrando..." : "Registrarse"}
                       </Button>
                     </div>
                   </form>

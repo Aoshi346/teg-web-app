@@ -1,12 +1,10 @@
- // Simple client-side auth helper for demo/test credentials only.
-// WARNING: This is for local/demo purposes and not secure for production.
+// Client-side auth helper interacting with Django API
+import { api } from "@/lib/api";
 
-import { TEST_USERS } from './credentials';
-
-const SESSION_KEY = 'tf_demo_session';
-const USERS_KEY = 'tf_demo_users';
+const SESSION_KEY = 'tf_session_user';
 
 export interface User {
+  id?: number;
   email: string;
   password?: string;
   role: 'Admin' | 'Estudiante' | 'Profesor';
@@ -16,58 +14,46 @@ export interface User {
   phone?: string;
 }
 
-// Initialize users in localStorage if empty
-function getStoredUsers(): User[] {
-  if (typeof window === 'undefined') return [];
-  const stored = localStorage.getItem(USERS_KEY);
-  if (stored) return JSON.parse(stored);
-  
-  // Initialize with test users
-  const initialUsers: User[] = TEST_USERS.map(u => ({
-    ...u,
-    fullName: u.role === 'Admin' ? 'Administrador' : u.role === 'Estudiante' ? 'Estudiante Demo' : 'Profesor Demo',
-    status: 'active', // Default test users are active
-    role: u.role as User['role']
-  }));
-  localStorage.setItem(USERS_KEY, JSON.stringify(initialUsers));
-  return initialUsers;
+// Persist user to sessionStorage for sync access in UI components
+function saveUserSession(user: User) {
+  if (typeof window === 'undefined') return;
+  sessionStorage.setItem(SESSION_KEY, JSON.stringify(user));
 }
 
-export function register(user: User): { success: boolean; message?: string } {
-  const users = getStoredUsers();
-  if (users.find(u => u.email === user.email)) {
-    return { success: false, message: 'El correo ya está registrado' };
-  }
-  
-  // New users are pending by default
-  const newUser: User = { ...user, status: 'pending' };
-  users.push(newUser);
-  localStorage.setItem(USERS_KEY, JSON.stringify(users));
-  return { success: true };
-}
-
-export function login(email: string, password: string): { success: boolean; message?: string; user?: User } {
-  const users = getStoredUsers();
-  const user = users.find((u) => u.email === email && u.password === password);
-  
-  if (user) {
-    sessionStorage.setItem(SESSION_KEY, JSON.stringify({ 
-      email: user.email, 
-      role: user.role, 
-      status: user.status,
-      fullName: user.fullName 
-    }));
-    return { success: true, user };
-  }
-  return { success: false, message: 'Credenciales incorrectas' };
-}
-
-export function logout() {
+// Clear session
+function clearUserSession() {
+  if (typeof window === 'undefined') return;
   sessionStorage.removeItem(SESSION_KEY);
 }
 
+export async function register(user: User): Promise<{ success: boolean; message?: string }> {
+  try {
+    await api.post('/auth/register/', user);
+    return { success: true };
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : "Error en el registro";
+    return { success: false, message: msg };
+  }
+}
+
+export async function login(email: string, password: string): Promise<{ success: boolean; message?: string; user?: User }> {
+  try {
+    const user = await api.post<User>('/auth/login/', { email, password });
+    saveUserSession(user);
+    return { success: true, user };
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : "Credenciales incorrectas";
+    return { success: false, message: msg };
+  }
+}
+
+export function logout() {
+  api.post('/auth/logout/', {}).catch(console.error); // Best effort logout
+  clearUserSession();
+}
+
 export function isAuthenticated(): boolean {
-  return !!sessionStorage.getItem(SESSION_KEY);
+  return !!getUser();
 }
 
 export function getUser(): User | null {
@@ -88,17 +74,41 @@ export function getUserRole(): string | null {
 }
 
 // Admin Helper: Get all users
-export function getAllUsers(): User[] {
-  return getStoredUsers();
+export async function getAllUsers(): Promise<User[]> {
+  try {
+    return await api.get<User[]>('/users/');
+  } catch (error) {
+    console.error("Failed to fetch users", error);
+    return [];
+  }
 }
 
 // Admin Helper: Update user status
-export function updateUserStatus(email: string, status: 'active' | 'pending'): void {
-  const users = getStoredUsers();
-  const index = users.findIndex(u => u.email === email);
-  if (index >= 0) {
-    users[index].status = status;
-    localStorage.setItem(USERS_KEY, JSON.stringify(users));
+export async function updateUserStatus(email: string, status: 'active' | 'pending'): Promise<void> {
+  // Since we need ID for update, we assume we have user objects with IDs in the list
+  // If not, we'd need to fetch by email or pass the full user object.
+  // For now, this signature is tricky if we don't have ID.
+  // Let's assume the callers (SettingsPage) have access to the ID.
+  // Refactoring usage in SettingsPage will be needed anyway.
+  
+  // NOTE: This function signature matches previous one, but implementation is broken without ID.
+  // We will overload or change signature in next step refactor of SettingsPage.
+  // For now, let's look up the user first (inefficient but compatible) or just expose a new method.
+  
+  // New method preferred: updateStatusById(id, status)
+  // But to keep TypeScript happy temporarily:
+  // We'll throw error or try to find user.
+  console.warn("updateUserStatus(email) is deprecated. Use updateStatusById(id) instead.");
+  
+  // Try to find user by email to get ID - inefficient but implementation compliant
+  const users = await getAllUsers();
+  const user = users.find(u => u.email === email);
+  if (user && user.id) {
+    await updateStatusById(user.id, status);
   }
+}
+
+export async function updateStatusById(id: number, status: 'active' | 'pending'): Promise<void> {
+   await api.patch(`/users/${id}/`, { status });
 }
 

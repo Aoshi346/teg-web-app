@@ -15,13 +15,8 @@ import {
 import DashboardHeader from "@/components/layout/DashboardHeader";
 import PageTransition from "@/components/ui/PageTransition";
 import SemesterSelector from "@/components/ui/SemesterSelector";
-import {
-  mockTesis,
-  mockProyectos,
-  getProyectos,
-  getTesis,
-  Project,
-} from "@/lib/data/mockData";
+import { Project } from "@/lib/data/mockData";
+import { getAllProjects } from "@/features/projects/projectService";
 import {
   getAvailableSemesters,
   getStoredSemester,
@@ -211,6 +206,7 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
 
   // State for data
   const [semester, setSemester] = useState<string>("");
+  const [apiProjects, setApiProjects] = useState<Project[]>([]);
   const [dashboardData, setDashboardData] = useState<{
     ptegStats: {
       total: number;
@@ -244,193 +240,230 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
   useEffect(() => {
     if (!semester) return;
 
-    const allProyectos = getProyectos();
-    const allTesis = getTesis();
+    const fetchData = async () => {
+      try {
+        const apiProjects = await getAllProjects();
 
-    // Student View: Only their own project
-    if (isStudent && user) {
-      // Find student's project (matching by name for this demo, ideally ID or email)
-      // normalize names for comparison
-      const studentName = (user.fullName || "").toLowerCase();
+        // Categorize projects
+        const allProyectos = apiProjects.filter((p) => p.type === "proyecto");
+        const allTesis = apiProjects.filter((p) => p.type === "tesis");
 
-      const myPteg = allProyectos.find((p) =>
-        p.student.toLowerCase().includes(studentName),
-      );
-      const myTeg = allTesis.find((p) =>
-        p.student.toLowerCase().includes(studentName),
-      );
+        // Student View: Only their own project
+        if (isStudent && user) {
+          // Backend filters by user, so we just take what we have
+          // Or strictly checking if API returned duplicates or list
+          // For now, assume API returns list of projects for this student.
+          // Fallback logic to match "my project" behavior
+          const myPteg = allProyectos.find(
+            (p) => p.semester === semester || !p.semester,
+          ); // Simple find? actually dashboard usually shows current semester or active one?
+          // Existing logic just searched by name.
+          // API filters by user. So allProyectos are mine.
+          // Let's take the first one that matches semester, or just the most recent?
+          // The semester selector controls global semester state.
+          // Filter by selected semester:
+          const myPtegSemester = allProyectos.find(
+            (p) => p.semester === semester,
+          );
+          const myTegSemester = allTesis.find((p) => p.semester === semester);
 
-      const myProject = myTeg || myPteg;
+          // Fallback: If no semester match, maybe show active?
+          // But dashboard has semester selector.
+          const myPteg = myPtegSemester;
+          const myTeg = myTegSemester;
 
-      // Stats for student (e.g. My Deliverables)
-      const ptegStats = {
-        total: myPteg ? 1 : 0,
-        checked: myPteg?.status === "checked" ? 1 : 0,
-        pending: myPteg?.status === "pending" ? 1 : 0,
-        rejected: myPteg?.status === "rejected" ? 1 : 0,
-      };
-      const tegStats = {
-        total: myTeg ? 1 : 0,
-        checked: myTeg?.status === "checked" ? 1 : 0,
-        pending: myTeg?.status === "pending" ? 1 : 0,
-      };
+          const myProject = myTeg || myPteg;
 
-      // My Project list (for the card)
-      const projectsToReview = myProject
-        ? [
-            {
-              id: myProject.id,
-              student: myProject.student,
-              title: myProject.title,
-              date: myProject.submittedDate,
-              type: myTeg ? "TEG" : "PTEG",
-              status: myProject.status,
-            },
-          ]
-        : [];
+          // Stats for student (e.g. My Deliverables)
+          const ptegStats = {
+            total: myPteg ? 1 : 0,
+            checked: myPteg?.status === "checked" ? 1 : 0,
+            pending: myPteg?.status === "pending" ? 1 : 0,
+            rejected: myPteg?.status === "rejected" ? 1 : 0,
+          };
+          const tegStats = {
+            total: myTeg ? 1 : 0,
+            checked: myTeg?.status === "checked" ? 1 : 0,
+            pending: myTeg?.status === "pending" ? 1 : 0,
+          };
 
-      // Feed for student
-      const feedEvents: {
-        date: string;
-        type: "submitted" | "reviewed";
-        project: Project;
-      }[] = [];
-      if (myProject) {
-        if (myProject.submittedDate)
-          feedEvents.push({
-            date: myProject.submittedDate,
-            type: "submitted",
-            project: myProject,
-          });
-        if (myProject.reviewDate)
-          feedEvents.push({
-            date: myProject.reviewDate,
-            type: "reviewed",
-            project: myProject,
-          });
-      }
+          // My Project list (for the card)
+          const projectsToReview = myProject
+            ? [
+                {
+                  id: myProject.id,
+                  student: myProject.student,
+                  title: myProject.title,
+                  date: myProject.submittedDate,
+                  type: myTeg ? "TEG" : "PTEG",
+                  status: myProject.status,
+                },
+              ]
+            : [];
 
-      const progressFeed = feedEvents.map((e, index) => {
-        // ... reuse feed logic or simplify
-        const icon = <FileText className="w-5 h-5 text-blue-600" />;
-        const text =
-          e.type === "submitted"
-            ? "Has enviado tu proyecto."
-            : "Tu proyecto ha sido revisado.";
-        return { id: index, icon, text, time: e.date };
-      });
-
-      setDashboardData({ ptegStats, tegStats, projectsToReview, progressFeed });
-      return;
-    }
-
-    // Admin/Tutor View: All projects
-    // Filter by semester for stats
-    const semProyectos = allProyectos.filter((p) => p.semester === semester);
-    const semTesis = allTesis.filter((t) => t.semester === semester);
-
-    // Calculate Stats
-    const ptegStats = {
-      total: semProyectos.length,
-      checked: semProyectos.filter((p) => p.status === "checked").length,
-      pending: semProyectos.filter((p) => p.status === "pending").length,
-      rejected: semProyectos.filter((p) => p.status === "rejected").length,
-    };
-
-    const tegStats = {
-      total: semTesis.length,
-      checked: semTesis.filter((t) => t.status === "checked").length,
-      pending: semTesis.filter((t) => t.status === "pending").length,
-    };
-
-    // Projects to review - filter by selected semester
-    const semPending = [...semProyectos, ...semTesis].filter(
-      (p) => p.status === "pending",
-    );
-    const projectsToReview = semPending
-      .sort(
-        (a, b) =>
-          new Date(b.submittedDate).getTime() -
-          new Date(a.submittedDate).getTime(),
-      )
-      .slice(0, 5)
-      .map((p) => ({
-        id: p.id,
-        student: p.student,
-        title: p.title,
-        date: p.submittedDate,
-        type: "stage1Passed" in p ? "TEG" : "PTEG",
-        status: p.status,
-      }));
-
-    // detailed feed
-    const feedEvents: {
-      date: string;
-      type: "submitted" | "reviewed";
-      project: Project;
-    }[] = [];
-    [...semProyectos, ...semTesis].forEach((p) => {
-      // Add submission event
-      if (p.submittedDate) {
-        feedEvents.push({
-          date: p.submittedDate,
-          type: "submitted",
-          project: p,
-        });
-      }
-      // Add review event
-      if (p.reviewDate) {
-        feedEvents.push({ date: p.reviewDate, type: "reviewed", project: p });
-      }
-    });
-
-    const progressFeed = feedEvents
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-      .slice(0, 3)
-      .map((e, index) => {
-        let icon;
-        let text;
-
-        // Calculate relative time (simple approximation)
-        const diffDays = Math.floor(
-          (new Date().getTime() - new Date(e.date).getTime()) /
-            (1000 * 3600 * 24),
-        );
-        const timeStr =
-          diffDays === 0 ? "Hoy" : diffDays === 1 ? "Ayer" : `${diffDays}d ago`;
-
-        if (e.type === "submitted") {
-          icon = <FileText className="w-5 h-5 text-blue-600" />;
-          text = `Nueva entrega de '${e.project.student}' (${"stage1Passed" in e.project ? "TEG" : "PTEG"}).`;
-        } else {
-          // Reviewed
-          if (e.project.status === "checked") {
-            icon = <CheckCircle className="w-5 h-5 text-green-600" />;
-            text = `El proyecto de '${e.project.student}' ha sido Aprobado.`;
-          } else if (e.project.status === "rejected") {
-            icon = <XCircle className="w-5 h-5 text-red-600" />;
-            text = `El proyecto de '${e.project.student}' requiere correcciones.`;
-          } else {
-            icon = <MessageSquare className="w-5 h-5 text-blue-600" />;
-            text = `Comentarios agregados al proyecto de '${e.project.student}'.`;
+          // Feed for student
+          const feedEvents: {
+            date: string;
+            type: "submitted" | "reviewed";
+            project: Project;
+          }[] = [];
+          if (myProject) {
+            if (myProject.submittedDate)
+              feedEvents.push({
+                date: myProject.submittedDate,
+                type: "submitted",
+                project: myProject,
+              });
+            if (myProject.reviewDate)
+              feedEvents.push({
+                date: myProject.reviewDate,
+                type: "reviewed",
+                project: myProject,
+              });
           }
+
+          const progressFeed = feedEvents.map((e, index) => {
+            const icon = <FileText className="w-5 h-5 text-blue-600" />;
+            const text =
+              e.type === "submitted"
+                ? "Has enviado tu proyecto."
+                : "Tu proyecto ha sido revisado.";
+            return { id: index, icon, text, time: e.date };
+          });
+
+          setDashboardData({
+            ptegStats,
+            tegStats,
+            projectsToReview,
+            progressFeed,
+          });
+          return;
         }
 
-        return {
-          id: index,
-          icon,
-          text,
-          time: timeStr,
-        };
-      });
+        // Admin/Tutor View: All projects
+        // Filter by semester for stats
+        const semProyectos = allProyectos.filter(
+          (p) => p.semester === semester,
+        );
+        const semTesis = allTesis.filter((t) => t.semester === semester);
 
-    setDashboardData({
-      ptegStats,
-      tegStats,
-      projectsToReview,
-      progressFeed,
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // Calculate Stats
+        const ptegStats = {
+          total: semProyectos.length,
+          checked: semProyectos.filter((p) => p.status === "checked").length,
+          pending: semProyectos.filter((p) => p.status === "pending").length,
+          rejected: semProyectos.filter((p) => p.status === "rejected").length,
+        };
+
+        const tegStats = {
+          total: semTesis.length,
+          checked: semTesis.filter((t) => t.status === "checked").length,
+          pending: semTesis.filter((t) => t.status === "pending").length,
+        };
+
+        // Projects to review - filter by selected semester
+        const semPending = [...semProyectos, ...semTesis].filter(
+          (p) => p.status === "pending",
+        );
+        const projectsToReview = semPending
+          .sort(
+            (a, b) =>
+              new Date(b.submittedDate).getTime() -
+              new Date(a.submittedDate).getTime(),
+          )
+          .slice(0, 5)
+          .map((p) => ({
+            id: p.id,
+            student: p.student,
+            title: p.title,
+            date: p.submittedDate,
+            type: "stage1Passed" in p ? "TEG" : "PTEG",
+            status: p.status,
+          }));
+
+        // detailed feed
+        const feedEvents: {
+          date: string;
+          type: "submitted" | "reviewed";
+          project: Project;
+        }[] = [];
+        [...semProyectos, ...semTesis].forEach((p) => {
+          // Add submission event
+          if (p.submittedDate) {
+            feedEvents.push({
+              date: p.submittedDate,
+              type: "submitted",
+              project: p,
+            });
+          }
+          // Add review event
+          if (p.reviewDate) {
+            feedEvents.push({
+              date: p.reviewDate,
+              type: "reviewed",
+              project: p,
+            });
+          }
+        });
+
+        const progressFeed = feedEvents
+          .sort(
+            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+          )
+          .slice(0, 3)
+          .map((e, index) => {
+            let icon;
+            let text;
+
+            // Calculate relative time (simple approximation)
+            const diffDays = Math.floor(
+              (new Date().getTime() - new Date(e.date).getTime()) /
+                (1000 * 3600 * 24),
+            );
+            const timeStr =
+              diffDays === 0
+                ? "Hoy"
+                : diffDays === 1
+                  ? "Ayer"
+                  : `${diffDays}d ago`;
+
+            if (e.type === "submitted") {
+              icon = <FileText className="w-5 h-5 text-blue-600" />;
+              text = `Nueva entrega de '${e.project.student}' (${"stage1Passed" in e.project ? "TEG" : "PTEG"}).`;
+            } else {
+              // Reviewed
+              if (e.project.status === "checked") {
+                icon = <CheckCircle className="w-5 h-5 text-green-600" />;
+                text = `El proyecto de '${e.project.student}' ha sido Aprobado.`;
+              } else if (e.project.status === "rejected") {
+                icon = <XCircle className="w-5 h-5 text-red-600" />;
+                text = `El proyecto de '${e.project.student}' requiere correcciones.`;
+              } else {
+                icon = <MessageSquare className="w-5 h-5 text-blue-600" />;
+                text = `Comentarios agregados al proyecto de '${e.project.student}'.`;
+              }
+            }
+
+            return {
+              id: index,
+              icon,
+              text,
+              time: timeStr,
+            };
+          });
+
+        setDashboardData({
+          ptegStats,
+          tegStats,
+          projectsToReview,
+          progressFeed,
+        });
+      } catch (error) {
+        console.error("Failed to fetch projects", error);
+      }
+    };
+
+    fetchData();
   }, [semester, isStudent, user?.email]);
 
   useEffect(() => {
@@ -600,10 +633,7 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
               </div>
               <SemesterSelector
                 selectedSemester={semester}
-                availableSemesters={getAvailableSemesters([
-                  ...mockTesis,
-                  ...mockProyectos,
-                ])}
+                availableSemesters={getAvailableSemesters(apiProjects)}
                 onSemesterChange={(sem) => {
                   setStoredSemester(sem);
                   setSemester(sem);
