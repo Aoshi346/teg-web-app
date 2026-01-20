@@ -18,6 +18,7 @@ export interface Project {
   semester: string; // Format: "YYYY-SS" (e.g., "2026-01", "2025-02")
   type?: "proyecto" | "tesis";
   files?: AttachedFile[];
+  failedAttempts?: number;
 }
 
 // Test data with semesters from 2024-01 to 2026-02 (6 semesters)

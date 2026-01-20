@@ -10,28 +10,36 @@ import {
   CheckCircle,
   XCircle,
   Clock,
+  GraduationCap,
+  BookOpen,
+  Sparkles,
 } from "lucide-react";
 import DashboardHeader from "@/components/layout/DashboardHeader";
 import PageTransition from "@/components/ui/PageTransition";
-import { mockTesis } from "@/lib/data/mockData";
+import { getTesis } from "@/lib/data/mockData";
 
 export default function TesisDetailsPage() {
   const router = useRouter();
   const params = useParams();
   const id = Number(params.id);
 
-  const project = mockTesis.find((p) => p.id === id);
+  const theses = getTesis();
+  const project = theses.find((p) => p.id === id);
 
   if (!project) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900">
+      <div className="flex items-center justify-center h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+        <div className="text-center bg-white p-8 rounded-2xl shadow-lg">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <XCircle className="w-8 h-8 text-red-500" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
             Tesis no encontrada
           </h2>
+          <p className="text-gray-500 mb-4">La tesis solicitada no existe.</p>
           <button
             onClick={() => router.back()}
-            className="mt-4 text-blue-600 hover:underline"
+            className="px-6 py-2 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 transition-colors"
           >
             Volver
           </button>
@@ -40,209 +48,300 @@ export default function TesisDetailsPage() {
     );
   }
 
-  const getStatusColor = () => {
+  const getStatusConfig = () => {
     switch (project.status) {
       case "checked":
-        return "text-green-600 bg-green-50 border-green-200";
+        return {
+          bg: "bg-gradient-to-r from-emerald-500 to-teal-500",
+          text: "text-white",
+          icon: <CheckCircle className="w-4 h-4" />,
+          label: "Aprobado",
+        };
       case "pending":
-        return "text-amber-600 bg-amber-50 border-amber-200";
+        return {
+          bg: "bg-gradient-to-r from-amber-400 to-orange-400",
+          text: "text-white",
+          icon: <Clock className="w-4 h-4" />,
+          label: "Pendiente",
+        };
       case "rejected":
-        return "text-red-600 bg-red-50 border-red-200";
+        return {
+          bg: "bg-gradient-to-r from-rose-500 to-red-500",
+          text: "text-white",
+          icon: <XCircle className="w-4 h-4" />,
+          label: "Rechazado",
+        };
       default:
-        return "text-gray-600 bg-gray-50 border-gray-200";
+        return {
+          bg: "bg-gray-500",
+          text: "text-white",
+          icon: null,
+          label: "Desconocido",
+        };
     }
   };
 
-  const getStatusIcon = () => {
-    switch (project.status) {
-      case "checked":
-        return <CheckCircle className="w-6 h-6" />;
-      case "pending":
-        return <Clock className="w-6 h-6" />;
-      case "rejected":
-        return <XCircle className="w-6 h-6" />;
-      default:
-        return null;
-    }
-  };
+  const statusConfig = getStatusConfig();
 
   return (
     <>
       <DashboardHeader pageTitle="Detalles de Tesis" />
       <PageTransition>
-        <main className="flex-1 p-4 md:p-8 overflow-y-auto bg-gray-50">
-          <div className="max-w-7xl mx-auto">
+        <main className="flex-1 p-4 md:p-8 overflow-y-auto bg-gradient-to-br from-slate-50 via-white to-emerald-50/30">
+          <div className="max-w-5xl mx-auto">
+            {/* Back Button */}
             <button
               onClick={() => router.back()}
-              className="flex items-center text-gray-600 hover:text-gray-900 mb-6 transition-colors"
+              className="flex items-center gap-2 text-gray-500 hover:text-gray-900 mb-6 transition-colors group"
             >
-              <ArrowLeft className="w-5 h-5 mr-2" />
-              Volver
+              <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+              <span className="font-medium">Volver</span>
             </button>
 
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-              <div className="p-6 md:p-8 border-b border-gray-100">
-                <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-                  <div className="flex-1">
-                    <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+            {/* Main Card */}
+            <div className="bg-white rounded-3xl shadow-2xl shadow-gray-200/50 border border-gray-100 overflow-hidden">
+              {/* Header Section - Clean White with Colorful Accents */}
+              <div className="relative p-6 md:p-8 border-b border-gray-100">
+                {/* Decorative gradient accent */}
+                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500" />
+
+                <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
+                  {/* Title and Status */}
+                  <div className="flex-1 min-w-0">
+                    {/* Thesis Label */}
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="p-2.5 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl text-white shadow-lg shadow-emerald-500/25">
+                        <BookOpen className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <span className="text-xs font-bold text-emerald-600 uppercase tracking-wider">
+                          Tesis #{project.id}
+                        </span>
+                        <div className="flex items-center gap-2 text-gray-400 text-xs mt-0.5">
+                          <Sparkles className="w-3 h-3" />
+                          <span>Semestre {project.semester}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Title */}
+                    <h1 className="text-2xl md:text-3xl font-black text-gray-900 mb-5 leading-tight">
                       {project.title}
                     </h1>
-                    <div
-                      className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border ${getStatusColor()}`}
-                    >
-                      {getStatusIcon()}
-                      <span className="font-semibold capitalize">
-                        {project.status === "checked"
-                          ? "Aprobado"
-                          : project.status === "rejected"
-                            ? "Rechazado"
-                            : "Pendiente"}
-                      </span>
-                    </div>
-                  </div>
-                  {project.score !== undefined && (
-                    <div className="flex flex-col items-center justify-center bg-gray-50 rounded-xl p-4 border border-gray-100 min-w-[120px]">
-                      <span className="text-sm text-gray-500 font-medium uppercase tracking-wider">
-                        Calificación
-                      </span>
-                      <span
-                        className={`text-4xl font-bold ${
-                          project.score >= 10
-                            ? "text-green-600"
-                            : "text-red-600"
-                        }`}
+
+                    {/* Status Badges Row */}
+                    <div className="flex flex-wrap items-center gap-3">
+                      <div
+                        className={`inline-flex items-center gap-2 px-4 py-2 rounded-full ${statusConfig.bg} ${statusConfig.text} font-semibold text-sm shadow-lg`}
                       >
-                        {project.score}/20
-                      </span>
-                    </div>
-                  )}
-                </div>
-              </div>
+                        {statusConfig.icon}
+                        <span>{statusConfig.label}</span>
+                      </div>
 
-              <div className="p-6 md:p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">
-                      Información del Estudiante
-                    </h3>
-                    <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
-                      <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
-                        <User className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-900">
-                          {project.student}
-                        </p>
-                        <p className="text-sm text-gray-500">Estudiante</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">
-                      Tutor Académico
-                    </h3>
-                    <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
-                      <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">
-                        <FileText className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-900">
-                          {project.advisor}
-                        </p>
-                        <p className="text-sm text-gray-500">Tutor</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">
-                      Fechas Importantes
-                    </h3>
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between p-3 border-b border-gray-100">
-                        <span className="text-gray-600 flex items-center gap-2">
-                          <Calendar className="w-4 h-4" />
-                          Fecha de Entrega
-                        </span>
-                        <span className="font-medium text-gray-900">
-                          {project.submittedDate}
-                        </span>
-                      </div>
-                      {project.reviewDate && (
-                        <div className="flex items-center justify-between p-3 border-b border-gray-100">
-                          <span className="text-gray-600 flex items-center gap-2">
+                      {project.stage1Passed !== undefined && (
+                        <div
+                          className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold ${
+                            project.stage1Passed
+                              ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                              : "bg-amber-50 text-amber-700 border border-amber-200"
+                          }`}
+                        >
+                          {project.stage1Passed ? (
                             <CheckCircle className="w-4 h-4" />
-                            Fecha de Revisión
-                          </span>
-                          <span className="font-medium text-gray-900">
-                            {project.reviewDate}
+                          ) : (
+                            <Clock className="w-4 h-4" />
+                          )}
+                          <span>
+                            Fase 1:{" "}
+                            {project.stage1Passed ? "Aprobada" : "Pendiente"}
                           </span>
                         </div>
                       )}
                     </div>
                   </div>
 
-                  {/* Attached Files & Documents */}
-                  <div>
-                    <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">
-                      Documentos Adicionales
-                    </h3>
-                    {project.files && project.files.length > 0 ? (
-                      <div className="space-y-3">
-                        {project.files.map((file, index) => (
-                          <a
-                            key={index}
-                            href={file.url}
-                            className="flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-xl hover:border-emerald-300 hover:shadow-md transition-all group"
+                  {/* Score Card */}
+                  {project.score !== undefined && (
+                    <div className="flex-shrink-0">
+                      <div
+                        className={`rounded-2xl p-6 text-center min-w-[140px] border-2 ${
+                          project.score >= 10
+                            ? "bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200"
+                            : "bg-gradient-to-br from-rose-50 to-red-50 border-rose-200"
+                        }`}
+                      >
+                        <span className="text-xs text-gray-500 font-bold uppercase tracking-wider block mb-1">
+                          Calificación
+                        </span>
+                        <div className="flex items-baseline justify-center">
+                          <span
+                            className={`text-5xl font-black ${
+                              project.score >= 10
+                                ? "text-emerald-600"
+                                : "text-rose-600"
+                            }`}
                           >
-                            <div
-                              className={`p-2 rounded-lg ${
-                                file.type === "pdf"
-                                  ? "bg-red-50 text-red-500"
-                                  : "bg-blue-50 text-blue-500"
-                              }`}
-                            >
-                              <FileText className="w-5 h-5" />
+                            {project.score}
+                          </span>
+                          <span className="text-xl font-bold text-gray-400 ml-1">
+                            /20
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Content Grid */}
+              <div className="p-6 md:p-8 bg-gradient-to-b from-gray-50/50 to-white">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Left Column */}
+                  <div className="space-y-5">
+                    {/* Student Info */}
+                    <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                      <h3 className="text-xs font-bold text-emerald-600 uppercase tracking-wider mb-4 flex items-center gap-2">
+                        <User className="w-4 h-4" />
+                        Información del Estudiante
+                      </h3>
+                      <div className="flex items-center gap-4">
+                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center text-white text-xl font-bold shadow-lg shadow-emerald-500/25">
+                          {project.student.charAt(0)}
+                        </div>
+                        <div>
+                          <p className="font-bold text-gray-900 text-lg">
+                            {project.student}
+                          </p>
+                          <p className="text-sm text-gray-500">Estudiante</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Advisor Info */}
+                    <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                      <h3 className="text-xs font-bold text-teal-600 uppercase tracking-wider mb-4 flex items-center gap-2">
+                        <GraduationCap className="w-4 h-4" />
+                        Tutor Académico
+                      </h3>
+                      <div className="flex items-center gap-4">
+                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center text-white text-xl font-bold shadow-lg shadow-teal-500/25">
+                          {project.advisor.charAt(0)}
+                        </div>
+                        <div>
+                          <p className="font-bold text-gray-900 text-lg">
+                            {project.advisor}
+                          </p>
+                          <p className="text-sm text-gray-500">Tutor</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Column */}
+                  <div className="space-y-5">
+                    {/* Important Dates */}
+                    <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                      <h3 className="text-xs font-bold text-cyan-600 uppercase tracking-wider mb-4 flex items-center gap-2">
+                        <Calendar className="w-4 h-4" />
+                        Fechas Importantes
+                      </h3>
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-cyan-100 flex items-center justify-center">
+                              <Calendar className="w-5 h-5 text-cyan-600" />
                             </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="font-medium text-gray-900 truncate group-hover:text-emerald-600 transition-colors">
-                                {file.name}
-                              </p>
-                              <div className="flex items-center gap-2 text-xs text-gray-500">
-                                <span className="uppercase">{file.type}</span>
-                                <span>•</span>
-                                <span>{file.date}</span>
+                            <span className="text-gray-700 font-medium">
+                              Fecha de Entrega
+                            </span>
+                          </div>
+                          <span className="font-bold text-gray-900 bg-white px-3 py-1.5 rounded-lg text-sm border border-gray-200">
+                            {project.submittedDate}
+                          </span>
+                        </div>
+                        {project.reviewDate && (
+                          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-xl bg-cyan-100 flex items-center justify-center">
+                                <CheckCircle className="w-5 h-5 text-cyan-600" />
                               </div>
+                              <span className="text-gray-700 font-medium">
+                                Fecha de Revisión
+                              </span>
                             </div>
-                          </a>
-                        ))}
+                            <span className="font-bold text-gray-900 bg-white px-3 py-1.5 rounded-lg text-sm border border-gray-200">
+                              {project.reviewDate}
+                            </span>
+                          </div>
+                        )}
                       </div>
-                    ) : (
-                      <div className="p-4 border border-dashed border-gray-300 rounded-lg text-center bg-gray-50/50">
-                        <p className="text-sm text-gray-500">
-                          No hay documentos adjuntos.
-                        </p>
-                      </div>
-                    )}
+                    </div>
+
+                    {/* Attached Files */}
+                    <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                      <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+                        <FileText className="w-4 h-4" />
+                        Documentos Adicionales
+                      </h3>
+                      {project.files && project.files.length > 0 ? (
+                        <div className="space-y-3">
+                          {project.files.map((file, index) => (
+                            <a
+                              key={index}
+                              href={file.url}
+                              className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl hover:bg-emerald-50 border border-transparent hover:border-emerald-200 transition-all group"
+                            >
+                              <div
+                                className={`p-2.5 rounded-xl ${
+                                  file.type === "pdf"
+                                    ? "bg-rose-100 text-rose-600"
+                                    : "bg-blue-100 text-blue-600"
+                                }`}
+                              >
+                                <FileText className="w-5 h-5" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="font-semibold text-gray-900 truncate group-hover:text-emerald-600 transition-colors">
+                                  {file.name}
+                                </p>
+                                <div className="flex items-center gap-2 text-xs text-gray-500">
+                                  <span className="uppercase font-medium">
+                                    {file.type}
+                                  </span>
+                                  <span>•</span>
+                                  <span>{file.date}</span>
+                                </div>
+                              </div>
+                            </a>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="p-6 border-2 border-dashed border-gray-200 rounded-xl text-center">
+                          <FileText className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                          <p className="text-sm text-gray-400 font-medium">
+                            No hay documentos adjuntos.
+                          </p>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
 
               {/* Action Footer */}
-              <div className="p-6 bg-gray-50 border-t border-gray-200 flex justify-end gap-3">
-                {project.status === "pending" && (
-                  <button
-                    onClick={() =>
-                      router.push(`/dashboard/tesis/${project.id}/evaluar`)
-                    }
-                    className="px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
-                  >
-                    Evaluar Tesis
-                  </button>
-                )}
+              <div className="p-6 bg-gray-50 border-t border-gray-100">
+                <div className="flex flex-col sm:flex-row items-center justify-end gap-4">
+                  {project.status === "pending" && (
+                    <button
+                      onClick={() =>
+                        router.push(`/dashboard/tesis/${project.id}/evaluar`)
+                      }
+                      className="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl font-semibold hover:from-emerald-700 hover:to-teal-700 transition-all shadow-lg shadow-emerald-500/25 hover:shadow-xl hover:shadow-emerald-500/30 transform hover:-translate-y-0.5"
+                    >
+                      Evaluar Tesis
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           </div>

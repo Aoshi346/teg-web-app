@@ -455,13 +455,43 @@ export default function EvaluationForm({
         }
         updateTesis(updatedProject);
       } else {
+        // Project specific logic for failure attempts
+        if (passStatus === "Fail") {
+          const currentAttempts = (projectData.failedAttempts || 0) + 1;
+          updatedProject.failedAttempts = currentAttempts;
+          updatedProject.status = "rejected";
+
+          // Alert logic handled below via banner, but here we set final status
+          if (currentAttempts >= 2) {
+            // Final failure
+            updatedProject.status = "rejected";
+          }
+        } else {
+          updatedProject.status = "checked";
+        }
         updateProyecto(updatedProject);
       }
     }
 
     await new Promise((res) => setTimeout(res, 600));
     setSubmittedData(payload);
-    showBanner("Evaluación enviada con éxito.", "success");
+
+    if (documentType !== "Tesis" && passStatus === "Fail") {
+      const attempts = (projectData?.failedAttempts || 0) + 1;
+      if (attempts >= 2) {
+        showBanner(
+          "Proyecto rechazado definitivamente (2/2 intentos fallidos). Por favor contacte a su tutor.",
+          "error",
+        );
+      } else {
+        showBanner(
+          `Proyecto rechazado. Intento ${attempts}/2 utilizado. Puede corregir y re-enviar.`,
+          "warning",
+        );
+      }
+    } else {
+      showBanner("Evaluación enviada con éxito.", "success");
+    }
     setIsSubmitting(false);
 
     // Redirect after delay
