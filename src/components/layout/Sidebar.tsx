@@ -87,6 +87,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         isTesis
           ? { icon: BookOpen, label: "Trabajo Especial (TEG)", href: "/dashboard/tesis" }
           : { icon: FileText, label: "Proyecto (PTEG)", href: "/dashboard/proyectos" },
+        { icon: TrendingUp, label: "Seguimiento", href: "/dashboard/tracking" },
       ];
     }
 

@@ -94,9 +94,14 @@ export function setStoredSemester(semester: string): void {
     } catch { }
 }
 
+let semestersCache: Semester[] | null = null;
+
 export async function getSemesters(): Promise<Semester[]> {
+    if (semestersCache) return semestersCache;
     try {
-        return await api.get<Semester[]>("/semesters/");
+        const data = await api.get<Semester[]>("/semesters/");
+        semestersCache = data;
+        return data;
     } catch (error) {
         console.error("Failed to fetch semesters", error);
         return [];
@@ -104,11 +109,14 @@ export async function getSemesters(): Promise<Semester[]> {
 }
 
 export async function createSemester(period: string): Promise<Semester> {
-    return api.post<Semester>("/semesters/", { period });
+    const s = await api.post<Semester>("/semesters/", { period });
+    semestersCache = null;
+    return s;
 }
 
 export async function deleteSemester(id: number): Promise<void> {
     await api.delete<void>(`/semesters/${id}/`);
+    semestersCache = null;
 }
 
 /**

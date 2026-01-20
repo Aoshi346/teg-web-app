@@ -9,6 +9,7 @@ import SemesterSelector from "@/components/ui/SemesterSelector";
 import { getAvailableSemesters, getStoredSemester, setStoredSemester, getCurrentSemester, getSemesters } from "@/lib/semesters";
 import { getAllProjects } from "@/features/projects/projectService";
 import { Project } from "@/types/project";
+import { getUserRole } from "@/features/auth/clientAuth";
 
 const ITEMS_PER_PAGE = 5;
 
@@ -29,6 +30,8 @@ export default function TrackingPage({
     const [semester, setSemester] = useState<string>("");
     const [availableSemesters, setAvailableSemesters] = useState<string[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
+    const userRole = useMemo(() => getUserRole(), []);
+    const isStudent = userRole === "Estudiante";
 
     useEffect(() => {
         const fetchData = async () => {
@@ -66,22 +69,22 @@ export default function TrackingPage({
         }
     }, [semester]);
 
-    const pendingForSemester = useMemo(() => {
+    const semesterProjects = useMemo(() => {
         return projects
-            .filter((p) => p.status === "pending" && (!semester || p.semester === semester))
-            .sort(
-                (a, b) =>
-                    new Date(b.submittedDate).getTime() -
-                    new Date(a.submittedDate).getTime()
-            );
+            .filter((p) => !semester || p.semester === semester)
+            .sort((a, b) => new Date(b.submittedDate).getTime() - new Date(a.submittedDate).getTime());
     }, [projects, semester]);
 
     const filteredItems = useMemo(() => {
-        if (filter === "all") return pendingForSemester;
-        return pendingForSemester.filter((item) =>
+        const base = isStudent
+            ? semesterProjects
+            : semesterProjects.filter((p) => p.status === "pending");
+
+        if (filter === "all") return base;
+        return base.filter((item) =>
             filter === "teg" ? item.type === "tesis" : item.type === "proyecto"
         );
-    }, [pendingForSemester, filter]);
+    }, [semesterProjects, filter, isStudent]);
 
     // Pagination Logic
     const totalPages = Math.max(1, Math.ceil(filteredItems.length / ITEMS_PER_PAGE));
@@ -112,10 +115,12 @@ export default function TrackingPage({
                         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
                             <div>
                                 <h2 className="text-2xl font-bold text-gray-900 tracking-tight">
-                                    Evaluaciones Pendientes
+                                    {isStudent ? "Estado de mi trabajo" : "Evaluaciones Pendientes"}
                                 </h2>
                                 <p className="text-gray-500 mt-1">
-                                    Gestiona y revisa las entregas que requieren tu atención inmediata.
+                                    {isStudent
+                                        ? "Consulta el estado y los detalles de tu proyecto o tesis."
+                                        : "Gestiona y revisa las entregas que requieren tu atención inmediata."}
                                 </p>
                             </div>
 
@@ -170,20 +175,21 @@ export default function TrackingPage({
                         ) : (
                             <TrackingTable
                                 items={paginatedItems}
+                                userRole={userRole}
                                 pagination={{
                                     currentPage,
                                     totalPages,
                                     onPageChange: setCurrentPage
                                 }}
-                                onReview={(item) => {
-                                    // Determine if it's TEG or PTEG based on stage1Passed property or _type if available
-                                    const isTesis = "stage1Passed" in item || (item as any)._type === "teg";
-
-                                    if (isTesis) {
-                                        router.push(`/dashboard/tesis/${item.id}`);
-                                    } else {
-                                        router.push(`/dashboard/proyectos/${item.id}`);
-                                    }
+                                onView={(item) => {
+                                    const isTesis = item.type === "tesis";
+                                    const basePath = isTesis ? "/dashboard/tesis" : "/dashboard/proyectos";
+                                    router.push(`${basePath}/${item.id}`);
+                                }}
+                                onReview={isStudent ? undefined : (item) => {
+                                    const isTesis = item.type === "tesis";
+                                    const basePath = isTesis ? "/dashboard/tesis" : "/dashboard/proyectos";
+                                    router.push(`${basePath}/${item.id}`);
                                 }}
                             />
                         )}

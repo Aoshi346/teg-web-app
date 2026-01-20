@@ -71,6 +71,15 @@ export default function AgregarDocumentoPage() {
   const userRole = useMemo(() => getUserRole(), []);
   const currentUser = useMemo(() => getUser(), []);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const isStudent = userRole === "Estudiante";
+  const studentSemester = (currentUser?.semester || "").toLowerCase();
+
+  const allowedDocumentTypes = useMemo(() => {
+    if (!isStudent) return ["proyecto", "tesis"] as DocumentType[];
+    if (studentSemester.includes("9")) return ["proyecto"];
+    if (studentSemester.includes("10")) return ["tesis"];
+    return [documentType];
+  }, [isStudent, studentSemester, documentType]);
 
   // Load semesters from backend projects and choose a safe default
   useEffect(() => {
@@ -354,109 +363,110 @@ export default function AgregarDocumentoPage() {
               {/* Left Column: Document Type Selection */}
               <div className="lg:col-span-1 space-y-4">
                 <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
-                  Tipo de Documento
+                  {isStudent ? "Documento asignado" : "Tipo de Documento"}
                 </h3>
-                <div className="relative group/tooltip">
-                  <button
-                    type="button"
-                    onClick={() => setDocumentType("proyecto")}
-                    disabled={userRole === "Estudiante"}
-                    className={`relative w-full overflow-hidden flex flex-col items-start gap-3 p-5 rounded-2xl border-2 transition-all duration-300 group ${
-                      documentType === "proyecto"
-                        ? "border-blue-500 bg-white shadow-2xl shadow-blue-500/20 scale-[1.04]"
-                        : "border-transparent bg-white shadow-sm hover:shadow-xl hover:shadow-blue-500/10 hover:bg-gradient-to-br hover:from-blue-50/30 hover:to-white hover:scale-[1.02] hover:border-blue-200"
-                    }`}
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 via-blue-500/0 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-                    <div
-                      className={`p-3 rounded-xl ${documentType === "proyecto" ? "bg-blue-100 text-blue-600 ring-2 ring-blue-200" : "bg-gray-100 text-gray-500 group-hover:bg-blue-50 group-hover:text-blue-600 group-hover:ring-2 group-hover:ring-blue-100"} transition-all duration-300`}
-                    >
-                      <FileText className="w-6 h-6 group-hover:scale-110 transition-transform" />
-                    </div>
-                    <div className="text-left relative z-10">
-                      <p
-                        className={`font-bold text-lg ${documentType === "proyecto" ? "text-blue-900" : "text-gray-700 group-hover:text-blue-800"} transition-colors`}
-                      >
-                        Proyecto (PTEG)
-                      </p>
-                      <p className="text-xs font-medium text-gray-500 mt-1">
-                        9no Semestre
-                      </p>
-                    </div>
-                    {documentType === "proyecto" && (
-                      <div className="absolute top-0 right-0 p-4 animate-in fade-in duration-300">
-                        <CheckCircle className="w-5 h-5 text-blue-500" />
-                      </div>
-                    )}
-                    {documentType === "proyecto" && (
-                      <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-blue-400 rounded-full blur-3xl opacity-30 pointer-events-none animate-pulse" />
-                    )}
-                    {documentType === "proyecto" && (
-                      <div
-                        className="absolute inset-0 rounded-2xl bg-blue-500/10 animate-ping pointer-events-none"
-                        style={{
-                          animationDuration: "1s",
-                          animationIterationCount: 1,
-                        }}
-                      />
-                    )}
-                  </button>
-                  <div className="absolute left-full ml-3 top-1/2 -translate-y-1/2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all duration-200 whitespace-nowrap z-50 pointer-events-none">
-                    Propuesta inicial del TEG
-                    <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-gray-900" />
-                  </div>
-                </div>
 
-                <div className="relative group/tooltip">
-                  <button
-                    type="button"
-                    onClick={() => setDocumentType("tesis")}
-                    disabled={userRole === "Estudiante"}
-                    className={`relative w-full overflow-hidden flex flex-col items-start gap-3 p-5 rounded-2xl border-2 transition-all duration-300 group ${
-                      documentType === "tesis"
-                        ? "border-emerald-500 bg-white shadow-2xl shadow-emerald-500/20 scale-[1.04]"
-                        : "border-transparent bg-white shadow-sm hover:shadow-xl hover:shadow-emerald-500/10 hover:bg-gradient-to-br hover:from-emerald-50/30 hover:to-white hover:scale-[1.02] hover:border-emerald-200"
-                    }`}
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/0 via-emerald-500/0 to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-                    <div
-                      className={`p-3 rounded-xl ${documentType === "tesis" ? "bg-emerald-100 text-emerald-600 ring-2 ring-emerald-200" : "bg-gray-100 text-gray-500 group-hover:bg-emerald-50 group-hover:text-emerald-600 group-hover:ring-2 group-hover:ring-emerald-100"} transition-all duration-300`}
+                {allowedDocumentTypes.includes("proyecto") && (
+                  <div className="relative group/tooltip">
+                    <button
+                      type="button"
+                      onClick={() => setDocumentType("proyecto")}
+                      disabled={isStudent}
+                      className={`relative w-full overflow-hidden flex flex-col items-start gap-3 p-5 rounded-2xl border-2 transition-all duration-300 group ${
+                        documentType === "proyecto"
+                          ? "border-blue-500 bg-white shadow-2xl shadow-blue-500/20 scale-[1.04]"
+                          : "border-transparent bg-white shadow-sm hover:shadow-xl hover:shadow-blue-500/10 hover:bg-gradient-to-br hover:from-blue-50/30 hover:to-white hover:scale-[1.02] hover:border-blue-200"
+                      }`}
                     >
-                      <BookOpen className="w-6 h-6 group-hover:scale-110 transition-transform" />
-                    </div>
-                    <div className="text-left relative z-10">
-                      <p
-                        className={`font-bold text-lg ${documentType === "tesis" ? "text-emerald-900" : "text-gray-700 group-hover:text-emerald-800"} transition-colors`}
-                      >
-                        Trabajo Especial (TEG)
-                      </p>
-                      <p className="text-xs font-medium text-gray-500 mt-1">
-                        10mo Semestre
-                      </p>
-                    </div>
-                    {documentType === "tesis" && (
-                      <div className="absolute top-0 right-0 p-4 animate-in fade-in duration-300">
-                        <CheckCircle className="w-5 h-5 text-emerald-500" />
-                      </div>
-                    )}
-                    {documentType === "tesis" && (
-                      <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-emerald-400 rounded-full blur-3xl opacity-30 pointer-events-none animate-pulse" />
-                    )}
-                    {documentType === "tesis" && (
+                      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 via-blue-500/0 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
                       <div
-                        className="absolute inset-0 rounded-2xl bg-emerald-500/10 animate-ping pointer-events-none"
-                        style={{
-                          animationDuration: "1s",
-                          animationIterationCount: 1,
-                        }}
-                      />
-                    )}
-                  </button>
-                  <div className="absolute left-full ml-3 top-1/2 -translate-y-1/2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all duration-200 whitespace-nowrap z-50 pointer-events-none">
-                    Proyecto final completo
-                    <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-gray-900" />
+                        className={`p-3 rounded-xl ${documentType === "proyecto" ? "bg-blue-100 text-blue-600 ring-2 ring-blue-200" : "bg-gray-100 text-gray-500 group-hover:bg-blue-50 group-hover:text-blue-600 group-hover:ring-2 group-hover:ring-blue-100"} transition-all duration-300`}
+                      >
+                        <FileText className="w-6 h-6 group-hover:scale-110 transition-transform" />
+                      </div>
+                      <div className="text-left relative z-10">
+                        <p
+                          className={`font-bold text-lg ${documentType === "proyecto" ? "text-blue-900" : "text-gray-700 group-hover:text-blue-800"} transition-colors`}
+                        >
+                          Proyecto (PTEG)
+                        </p>
+                        <p className="text-xs font-medium text-gray-500 mt-1">
+                          9no Semestre
+                        </p>
+                      </div>
+                      {documentType === "proyecto" && (
+                        <>
+                          <div className="absolute top-0 right-0 p-4 animate-in fade-in duration-300">
+                            <CheckCircle className="w-5 h-5 text-blue-500" />
+                          </div>
+                          <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-blue-400 rounded-full blur-3xl opacity-30 pointer-events-none animate-pulse" />
+                          <div
+                            className="absolute inset-0 rounded-2xl bg-blue-500/10 animate-ping pointer-events-none"
+                            style={{
+                              animationDuration: "1s",
+                              animationIterationCount: 1,
+                            }}
+                          />
+                        </>
+                      )}
+                    </button>
+                    <div className="absolute left-full ml-3 top-1/2 -translate-y-1/2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all duration-200 whitespace-nowrap z-50 pointer-events-none">
+                      Propuesta inicial del TEG
+                      <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-gray-900" />
+                    </div>
                   </div>
-                </div>
+                )}
+
+                {allowedDocumentTypes.includes("tesis") && (
+                  <div className="relative group/tooltip">
+                    <button
+                      type="button"
+                      onClick={() => setDocumentType("tesis")}
+                      disabled={isStudent}
+                      className={`relative w-full overflow-hidden flex flex-col items-start gap-3 p-5 rounded-2xl border-2 transition-all duration-300 group ${
+                        documentType === "tesis"
+                          ? "border-emerald-500 bg-white shadow-2xl shadow-emerald-500/20 scale-[1.04]"
+                          : "border-transparent bg-white shadow-sm hover:shadow-xl hover:shadow-emerald-500/10 hover:bg-gradient-to-br hover:from-emerald-50/30 hover:to-white hover:scale-[1.02] hover:border-emerald-200"
+                      }`}
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/0 via-emerald-500/0 to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                      <div
+                        className={`p-3 rounded-xl ${documentType === "tesis" ? "bg-emerald-100 text-emerald-600 ring-2 ring-emerald-200" : "bg-gray-100 text-gray-500 group-hover:bg-emerald-50 group-hover:text-emerald-600 group-hover:ring-2 group-hover:ring-emerald-100"} transition-all duration-300`}
+                      >
+                        <BookOpen className="w-6 h-6 group-hover:scale-110 transition-transform" />
+                      </div>
+                      <div className="text-left relative z-10">
+                        <p
+                          className={`font-bold text-lg ${documentType === "tesis" ? "text-emerald-900" : "text-gray-700 group-hover:text-emerald-800"} transition-colors`}
+                        >
+                          Trabajo Especial (TEG)
+                        </p>
+                        <p className="text-xs font-medium text-gray-500 mt-1">
+                          10mo Semestre
+                        </p>
+                      </div>
+                      {documentType === "tesis" && (
+                        <>
+                          <div className="absolute top-0 right-0 p-4 animate-in fade-in duration-300">
+                            <CheckCircle className="w-5 h-5 text-emerald-500" />
+                          </div>
+                          <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-emerald-400 rounded-full blur-3xl opacity-30 pointer-events-none animate-pulse" />
+                          <div
+                            className="absolute inset-0 rounded-2xl bg-emerald-500/10 animate-ping pointer-events-none"
+                            style={{
+                              animationDuration: "1s",
+                              animationIterationCount: 1,
+                            }}
+                          />
+                        </>
+                      )}
+                    </button>
+                    <div className="absolute left-full ml-3 top-1/2 -translate-y-1/2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all duration-200 whitespace-nowrap z-50 pointer-events-none">
+                      Proyecto final completo
+                      <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-gray-900" />
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Right Column: Main Form */}

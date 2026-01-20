@@ -1,10 +1,12 @@
 import React from "react";
 import { Project } from "@/types/project";
-import { FileText, BookOpen, Clock, Calendar, CheckCircle, XCircle, ChevronLeft, ChevronRight, User } from "lucide-react";
+import { FileText, BookOpen, Calendar, CheckCircle, ChevronLeft, ChevronRight, User, Eye, PencilLine } from "lucide-react";
 
 interface TrackingTableProps {
     items: Project[];
+    userRole?: string | null;
     onReview?: (project: Project) => void;
+    onView?: (project: Project) => void;
     pagination?: {
         currentPage: number;
         totalPages: number;
@@ -48,7 +50,22 @@ const Avatar: React.FC<{ name: string }> = ({ name }) => {
     );
 };
 
-const TrackingTable: React.FC<TrackingTableProps> = ({ items, onReview, pagination }) => {
+const statusStyles: Record<Project["status"], { label: string; classes: string }> = {
+    pending: {
+        label: "Pendiente",
+        classes: "bg-amber-50 text-amber-700 ring-1 ring-amber-600/20",
+    },
+    checked: {
+        label: "Revisado",
+        classes: "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/20",
+    },
+    rejected: {
+        label: "Rechazado",
+        classes: "bg-red-50 text-red-700 ring-1 ring-red-600/20",
+    },
+};
+
+const TrackingTable: React.FC<TrackingTableProps> = ({ items, onReview, onView, pagination, userRole }) => {
     if (items.length === 0) {
         return (
             <div className="text-center py-16 bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col items-center">
@@ -133,21 +150,44 @@ const TrackingTable: React.FC<TrackingTableProps> = ({ items, onReview, paginati
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 ring-1 ring-amber-600/20">
-                                            <span className="relative flex h-2 w-2">
-                                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                                                <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                                        {item.status === "pending" ? (
+                                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${statusStyles.pending.classes}`}>
+                                                <span className="relative flex h-2 w-2">
+                                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                                                </span>
+                                                {statusStyles.pending.label}
                                             </span>
-                                            Pendiente
-                                        </span>
+                                        ) : (
+                                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${statusStyles[item.status].classes}`}>
+                                                {statusStyles[item.status].label}
+                                            </span>
+                                        )}
                                     </td>
                                     <td className="px-6 py-4 text-right pr-8">
-                                        <button
-                                            onClick={() => onReview?.(item)}
-                                            className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg text-blue-700 bg-blue-50 hover:bg-blue-100 active:bg-blue-200 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                                        >
-                                            Revisar
-                                        </button>
+                                        <div className="flex items-center justify-end gap-2">
+                                            {onView && (
+                                                <button
+                                                    onClick={() => onView(item)}
+                                                    className="inline-flex items-center justify-center px-3 py-2 text-sm font-medium rounded-lg text-slate-700 bg-slate-50 hover:bg-slate-100 active:bg-slate-200 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-slate-500/20"
+                                                    title="Ver detalles"
+                                                >
+                                                    <Eye className="w-4 h-4 mr-2" />
+                                                    Ver
+                                                </button>
+                                            )}
+
+                                            {onReview && (userRole === "Admin" || userRole === "Profesor") ? (
+                                                <button
+                                                    onClick={() => onReview(item)}
+                                                    className="inline-flex items-center justify-center px-3 py-2 text-sm font-medium rounded-lg text-blue-700 bg-blue-50 hover:bg-blue-100 active:bg-blue-200 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                                                    title="Revisar"
+                                                >
+                                                    <PencilLine className="w-4 h-4 mr-2" />
+                                                    Revisar
+                                                </button>
+                                            ) : null}
+                                        </div>
                                     </td>
                                 </tr>
                             );

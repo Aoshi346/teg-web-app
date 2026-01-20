@@ -199,10 +199,12 @@ export async function updateUser(id: number, user: Partial<User>): Promise<User>
   if (user.phone !== undefined) payload.phone = user.phone;
 
   const apiUser = await api.patch<ApiUser>(`/users/${id}/`, payload);
+  invalidateUsersCache();
   return mapApiUser(apiUser);
 }
 
 export async function deleteUser(id: number): Promise<void> {
   await api.delete<void>(`/users/${id}/`);
+  invalidateUsersCache();
 }
 
