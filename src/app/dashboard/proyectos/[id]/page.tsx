@@ -22,7 +22,9 @@ import {
   getProject,
   getEvaluationsByProject,
   ApiEvaluation,
+  uploadProjectFile,
 } from "@/features/projects/projectService";
+import { getUserRole } from "@/features/auth/clientAuth";
 
 export default function ProyectoDetailsPage() {
   const router = useRouter();
@@ -31,6 +33,9 @@ export default function ProyectoDetailsPage() {
 
   const [project, setProject] = React.useState<ReturnType<typeof getProyectos>[number] | null>(null);
   const [evaluations, setEvaluations] = React.useState<ApiEvaluation[]>([]);
+  const [isUploading, setIsUploading] = React.useState(false);
+  const [uploadError, setUploadError] = React.useState<string | null>(null);
+  const userRole = React.useMemo(() => getUserRole(), []);
 
   React.useEffect(() => {
     let mounted = true;
@@ -47,6 +52,29 @@ export default function ProyectoDetailsPage() {
     })();
     return () => { mounted = false; };
   }, [id]);
+
+  const handleFileUpload = async (file: File) => {
+    setUploadError(null);
+    setIsUploading(true);
+    try {
+      const uploaded = await uploadProjectFile(id, file);
+      setProject((prev) => {
+        if (!prev) return prev;
+        const updatedFiles = [...(prev.files || []), {
+          name: uploaded.name,
+          url: uploaded.url,
+          type: uploaded.file_type,
+          date: uploaded.date,
+        }];
+        return { ...prev, files: updatedFiles };
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Error al subir el archivo.";
+      setUploadError(message);
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   if (!project) {
     return (
@@ -386,6 +414,32 @@ export default function ProyectoDetailsPage() {
                           <p className="text-sm text-gray-400 font-medium">
                             No hay documentos adjuntos.
                           </p>
+                        </div>
+                      )}
+
+                      {userRole === "Estudiante" && (
+                        <div className="mt-4 space-y-2">
+                          <input
+                            type="file"
+                            accept="application/pdf"
+                            id="project-file-upload"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                handleFileUpload(file);
+                              }
+                            }}
+                          />
+                          <label
+                            htmlFor="project-file-upload"
+                            className="flex items-center justify-center gap-2 w-full py-2.5 bg-gray-50 text-gray-700 font-semibold rounded-xl hover:bg-gray-100 border border-gray-200 cursor-pointer transition-colors"
+                          >
+                            {isUploading ? "Subiendo..." : "Subir Documento"}
+                          </label>
+                          {uploadError && (
+                            <p className="text-xs text-red-600 font-semibold">{uploadError}</p>
+                          )}
                         </div>
                       )}
                     </div>

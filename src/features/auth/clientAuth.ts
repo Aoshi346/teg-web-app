@@ -109,14 +109,23 @@ export function getUserRole(): string | null {
 }
 
 // Admin Helper: Get all users
+let usersCache: User[] | null = null;
+
 export async function getAllUsers(): Promise<User[]> {
+  if (usersCache) return usersCache;
   try {
     const apiUsers = await api.get<ApiUser[]>('/users/');
-    return apiUsers.map(mapApiUser);
+    const mapped = apiUsers.map(mapApiUser);
+    usersCache = mapped;
+    return mapped;
   } catch (error) {
     console.error("Failed to fetch users", error);
     return [];
   }
+}
+
+function invalidateUsersCache() {
+  usersCache = null;
 }
 
 // Update current user's profile
@@ -163,6 +172,7 @@ export async function updateUserStatus(email: string, status: 'active' | 'pendin
 
 export async function updateStatusById(id: number, status: 'active' | 'pending'): Promise<void> {
    await api.patch(`/users/${id}/`, { status });
+   invalidateUsersCache();
 }
 
 // Admin helpers
@@ -175,6 +185,7 @@ export async function createUser(user: User): Promise<User> {
     semester: user.semester,
     phone: user.phone,
   });
+  invalidateUsersCache();
   return mapApiUser(apiUser);
 }
 

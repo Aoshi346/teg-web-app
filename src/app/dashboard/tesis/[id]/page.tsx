@@ -22,6 +22,7 @@ import {
   getProject,
   getEvaluationsByProject,
   ApiEvaluation,
+  uploadProjectFile,
 } from "@/features/projects/projectService";
 import { getUserRole } from "@/features/auth/clientAuth";
 
@@ -29,10 +30,12 @@ export default function TesisDetailsPage() {
   const router = useRouter();
   const params = useParams();
   const id = Number(params.id);
-  const userRole = getUserRole();
+  const userRole = React.useMemo(() => getUserRole(), []);
 
   const [project, setProject] = React.useState<ReturnType<typeof getTesis>[number] | null>(null);
   const [evaluations, setEvaluations] = React.useState<ApiEvaluation[]>([]);
+  const [isUploading, setIsUploading] = React.useState(false);
+  const [uploadError, setUploadError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     let mounted = true;
@@ -55,6 +58,29 @@ export default function TesisDetailsPage() {
     })();
     return () => { mounted = false; };
   }, [id]);
+
+  const handleFileUpload = async (file: File) => {
+    setUploadError(null);
+    setIsUploading(true);
+    try {
+      const uploaded = await uploadProjectFile(id, file);
+      setProject((prev) => {
+        if (!prev) return prev;
+        const updatedFiles = [...(prev.files || []), {
+          name: uploaded.name,
+          url: uploaded.url,
+          type: uploaded.file_type,
+          date: uploaded.date,
+        }];
+        return { ...prev, files: updatedFiles };
+      });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Error al subir el archivo.";
+      setUploadError(message);
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   if (!project) {
     return (
@@ -356,19 +382,16 @@ export default function TesisDetailsPage() {
 
                       {/* Upload Button for Students */}
                       {userRole === "Estudiante" && (
-                        <div className="mt-4">
+                        <div className="mt-4 space-y-2">
                           <input
                             type="file"
                             id="file-upload"
+                            accept="application/pdf"
                             className="hidden"
                             onChange={(e) => {
                               const file = e.target.files?.[0];
                               if (file) {
-                                // Simulate upload
-                                alert(
-                                  `Archivo ${file.name} subido exitosamente`,
-                                );
-                                // In a real app we'd upload to server and refresh data
+                                handleFileUpload(file);
                               }
                             }}
                           />
@@ -377,8 +400,11 @@ export default function TesisDetailsPage() {
                             className="flex items-center justify-center gap-2 w-full py-2.5 bg-gray-50 text-gray-700 font-semibold rounded-xl hover:bg-gray-100 border border-gray-200 cursor-pointer transition-colors"
                           >
                             <Upload className="w-4 h-4" />
-                            Subir Documento
+                            {isUploading ? "Subiendo..." : "Subir Documento"}
                           </label>
+                          {uploadError && (
+                            <p className="text-xs text-red-600 font-semibold">{uploadError}</p>
+                          )}
                         </div>
                       )}
                     </div>

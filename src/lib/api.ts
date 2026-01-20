@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:8000/api";
+export const API_URL = "http://localhost:8000/api";
 
 // Helper: read csrftoken from cookie
 function getCookie(name: string): string | null {
@@ -101,4 +101,47 @@ export const api = {
     
   delete: <T>(endpoint: string, options?: RequestOptions) => 
     request<T>(endpoint, { ...options, method: "DELETE" }),
+};
+
+export async function postForm<T>(endpoint: string, formData: FormData): Promise<T> {
+  const headers: Record<string, string> = {};
+  let csrfToken = getCookie("csrftoken");
+  if (!csrfToken) {
+    try {
+      await fetch(`${API_URL}/csrf/`, { credentials: "include" });
+      csrfToken = getCookie("csrftoken");
+    } catch {
+      // best effort
+    }
+  }
+  if (csrfToken) {
+    headers["X-CSRFToken"] = csrfToken;
+  }
+
+  const response = await fetch(`${API_URL}${endpoint}`, {
+    method: "POST",
+    body: formData,
+    credentials: "include",
+    headers,
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    let message = errorData.detail || errorData.message;
+    if (!message && errorData && typeof errorData === "object") {
+      const firstKey = Object.keys(errorData)[0];
+      const value = (errorData as Record<string, unknown>)[firstKey];
+      if (Array.isArray(value) && value.length > 0 && typeof value[0] === "string") {
+        message = value[0];
+      }
+    }
+    if (!message) message = "Something went wrong";
+    throw new Error(message);
+  }
+
+  if (response.status === 204) {
+    return {} as T;
+  }
+
+  return response.json();
 };

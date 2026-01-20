@@ -1,4 +1,4 @@
-import { api } from "@/lib/api";
+import { api, postForm } from "@/lib/api";
 import { Project } from "@/types/project";
 
 export interface ApiFile {
@@ -119,6 +119,13 @@ export async function getProject(id: number): Promise<Project | null> {
 // Delete a project by ID
 export async function deleteProject(id: number): Promise<void> {
   await api.delete<void>(`/projects/${id}/`);
+}
+
+// Upload a file to a project
+export async function uploadProjectFile(projectId: number, file: File): Promise<ApiFile> {
+  const formData = new FormData();
+  formData.append("file", file);
+  return postForm<ApiFile>(`/projects/${projectId}/files/`, formData);
 }
 
 // Admin-only: Reassign student for a project

@@ -18,7 +18,7 @@ import DashboardHeader from "@/components/layout/DashboardHeader";
 import PageTransition from "@/components/ui/PageTransition";
 import Banner from "@/components/ui/Banner";
 import SemesterSelector from "@/components/ui/SemesterSelector";
-import { createProject, getAllProjects } from "@/features/projects/projectService";
+import { createProject, getAllProjects, uploadProjectFile } from "@/features/projects/projectService";
 import { getAvailableSemesters, getCurrentSemester, getSemesters, getStoredSemester, setStoredSemester } from "@/lib/semesters";
 import { getAllUsers, getUser, getUserRole } from "@/features/auth/clientAuth";
 import type { User } from "@/features/auth/clientAuth";
@@ -60,6 +60,7 @@ export default function AgregarDocumentoPage() {
     title?: boolean;
     student?: boolean;
     advisors: boolean[];
+    files?: boolean;
   }>({
     advisors: [],
   });
@@ -69,6 +70,7 @@ export default function AgregarDocumentoPage() {
   const [professors, setProfessors] = useState<UserOption[]>([]);
   const userRole = useMemo(() => getUserRole(), []);
   const currentUser = useMemo(() => getUser(), []);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
   // Load semesters from backend projects and choose a safe default
   useEffect(() => {
@@ -133,6 +135,18 @@ export default function AgregarDocumentoPage() {
 
     loadUsers();
   }, [userRole, currentUser?.id]);
+
+  // Force document type for students based on their semester
+  useEffect(() => {
+    if (userRole !== "Estudiante") return;
+    if (!currentUser?.semester) return;
+    const semesterValue = currentUser.semester.toLowerCase();
+    if (semesterValue.includes("9")) {
+      setDocumentType("proyecto");
+    } else if (semesterValue.includes("10")) {
+      setDocumentType("tesis");
+    }
+  }, [userRole, currentUser?.semester]);
 
   const semesterLabel =
     documentType === "proyecto"
@@ -209,15 +223,17 @@ export default function AgregarDocumentoPage() {
       title: !formData.title.trim(),
       student: !formData.studentId,
       advisors: formData.advisors.map((a) => !a),
+      files: userRole === "Estudiante" && selectedFiles.length === 0,
     };
 
     const hasAdvisorErrors = errorsFound.advisors.some(Boolean);
 
-    if (errorsFound.title || errorsFound.student || hasAdvisorErrors) {
+    if (errorsFound.title || errorsFound.student || hasAdvisorErrors || errorsFound.files) {
       setErrors({
         title: errorsFound.title,
         student: errorsFound.student,
         advisors: errorsFound.advisors,
+        files: errorsFound.files,
       });
 
       setBannerState({
@@ -232,6 +248,7 @@ export default function AgregarDocumentoPage() {
     setErrors({
       student: false,
       advisors: [],
+      files: false,
     });
 
     const validAdvisors = formData.advisors.filter((a) => a !== "");
@@ -243,7 +260,7 @@ export default function AgregarDocumentoPage() {
     setIsSubmitting(true);
 
     try {
-      await createProject({
+      const created = await createProject({
         title: formData.title.trim(),
         advisor: advisorNames,
         semester: formData.semesterPeriod,
@@ -251,6 +268,12 @@ export default function AgregarDocumentoPage() {
         status: "pending",
         student: formData.studentId as number,
       });
+
+      if (selectedFiles.length > 0) {
+        await Promise.all(
+          selectedFiles.map((file) => uploadProjectFile(created.id, file)),
+        );
+      }
       setBannerState({
         visible: true,
         message: `${documentType === "proyecto" ? "Proyecto" : "Tesis"} agregado exitosamente.`,
@@ -265,6 +288,7 @@ export default function AgregarDocumentoPage() {
         advisors: [""],
         semesterPeriod: resetSemester,
       });
+      setSelectedFiles([]);
 
       // Redirect after short delay
       setTimeout(() => {
@@ -336,6 +360,7 @@ export default function AgregarDocumentoPage() {
                   <button
                     type="button"
                     onClick={() => setDocumentType("proyecto")}
+                    disabled={userRole === "Estudiante"}
                     className={`relative w-full overflow-hidden flex flex-col items-start gap-3 p-5 rounded-2xl border-2 transition-all duration-300 group ${
                       documentType === "proyecto"
                         ? "border-blue-500 bg-white shadow-2xl shadow-blue-500/20 scale-[1.04]"
@@ -386,6 +411,7 @@ export default function AgregarDocumentoPage() {
                   <button
                     type="button"
                     onClick={() => setDocumentType("tesis")}
+                    disabled={userRole === "Estudiante"}
                     className={`relative w-full overflow-hidden flex flex-col items-start gap-3 p-5 rounded-2xl border-2 transition-all duration-300 group ${
                       documentType === "tesis"
                         ? "border-emerald-500 bg-white shadow-2xl shadow-emerald-500/20 scale-[1.04]"
@@ -544,22 +570,31 @@ export default function AgregarDocumentoPage() {
                               Seleccione al estudiante
                             </label>
                             <div className="relative">
-                              <select
-                                value={formData.studentId}
-                                onChange={(e) => handleStudentSelect(e.target.value)}
-                                className={`w-full px-3 py-2.5 bg-white border rounded-lg shadow-sm focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all text-sm font-medium ${
-                                  errors.student
-                                    ? "border-red-300 focus:border-red-500 focus:ring-red-100"
-                                    : "border-gray-200 hover:border-purple-300"
-                                }`}
-                              >
-                                <option value="">Seleccione un estudiante</option>
-                                {students.map((stu) => (
-                                  <option key={stu.id} value={stu.id}>
-                                    {stu.label} {stu.status === "pending" ? "(Pendiente)" : ""}
-                                  </option>
-                                ))}
-                              </select>
+                              {userRole === "Estudiante" ? (
+                                <input
+                                  type="text"
+                                  disabled
+                                  value={currentUser?.fullName || currentUser?.email || "Estudiante"}
+                                  className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg shadow-sm text-sm font-medium text-gray-600 cursor-not-allowed"
+                                />
+                              ) : (
+                                <select
+                                  value={formData.studentId}
+                                  onChange={(e) => handleStudentSelect(e.target.value)}
+                                  className={`w-full px-3 py-2.5 bg-white border rounded-lg shadow-sm focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all text-sm font-medium ${
+                                    errors.student
+                                      ? "border-red-300 focus:border-red-500 focus:ring-red-100"
+                                      : "border-gray-200 hover:border-purple-300"
+                                  }`}
+                                >
+                                  <option value="">Seleccione un estudiante</option>
+                                  {students.map((stu) => (
+                                    <option key={stu.id} value={stu.id}>
+                                      {stu.label} {stu.status === "pending" ? "(Pendiente)" : ""}
+                                    </option>
+                                  ))}
+                                </select>
+                              )}
                               {errors.student && (
                                 <div className="absolute right-3 top-1/2 -translate-y-1/2">
                                   <X className="w-4 h-4 text-red-500" />
@@ -567,6 +602,48 @@ export default function AgregarDocumentoPage() {
                               )}
                             </div>
                           </div>
+                                            {/* File Upload Section (Students) */}
+                                            {userRole === "Estudiante" && (
+                                              <div className="space-y-4">
+                                                <div className="flex items-center gap-2">
+                                                  <FileText className="w-5 h-5 text-indigo-500" />
+                                                  <label className="text-sm font-bold text-gray-800">
+                                                    Subir documento en PDF
+                                                  </label>
+                                                </div>
+                                                <div
+                                                  className={`border-2 border-dashed rounded-xl p-4 bg-white ${
+                                                    errors.files
+                                                      ? "border-red-300 bg-red-50/40"
+                                                      : "border-indigo-200 hover:border-indigo-300"
+                                                  }`}
+                                                >
+                                                  <input
+                                                    type="file"
+                                                    accept="application/pdf"
+                                                    multiple
+                                                    onChange={(e) => {
+                                                      const files = Array.from(e.target.files || []);
+                                                      setSelectedFiles(files);
+                                                      if (errors.files) {
+                                                        setErrors((prev) => ({ ...prev, files: false }));
+                                                      }
+                                                    }}
+                                                    className="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                                                  />
+                                                  {selectedFiles.length > 0 && (
+                                                    <div className="mt-3 text-xs text-gray-500">
+                                                      {selectedFiles.length} archivo(s) seleccionado(s)
+                                                    </div>
+                                                  )}
+                                                  {errors.files && (
+                                                    <p className="mt-2 text-xs text-red-600 font-semibold">
+                                                      Debe adjuntar al menos un PDF.
+                                                    </p>
+                                                  )}
+                                                </div>
+                                              </div>
+                                            )}
                         </div>
                       </div>
                     </div>

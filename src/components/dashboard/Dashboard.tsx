@@ -514,6 +514,15 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
     });
   }, []); // Only run once on mount
 
+  useEffect(() => {
+    const available = getAvailableSemesters(apiProjects, semesterOptions);
+    if (available.length === 0) return;
+    if (!available.includes(semester)) {
+      setSemester(available[0]);
+      setStoredSemester(available[0]);
+    }
+  }, [apiProjects, semesterOptions, semester]);
+
   // Build stats cards from data
   const stats = useMemo(() => {
     if (!dashboardData) return [];

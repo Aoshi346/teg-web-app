@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import DashboardHeader from "@/components/layout/DashboardHeader";
 import PageTransition from "@/components/ui/PageTransition";
 import {
@@ -103,9 +103,9 @@ export default function SettingsPage({
     isVisible: false,
   });
 
-  const showToast = (message: string, type: ToastType = "info") => {
+  const showToast = useCallback((message: string, type: ToastType = "info") => {
     setToast({ message, type, isVisible: true });
-  };
+  }, []);
 
   const loadSemesters = React.useCallback(async () => {
     try {
@@ -143,7 +143,7 @@ export default function SettingsPage({
       console.error(e);
       showToast("Error al cargar usuarios", "error");
     }
-  }, []);
+  }, [showToast]);
 
   useEffect(() => {
     const userRole = getUserRole();
@@ -162,13 +162,15 @@ export default function SettingsPage({
       setProfileEmail(userEmail || "");
       setProfileName(userEmail?.split("@")[0] || "Usuario");
     }
+  }, []);
 
-    // Load users and semesters if admin
-    if (userRole === "Admin") {
+  useEffect(() => {
+    if (role !== "Admin") return;
+    if (activeTab === "users") {
       loadUsers();
       loadSemesters();
     }
-  }, [activeTab, loadUsers, loadSemesters]); // Reload when tab changes too
+  }, [activeTab, role, loadUsers, loadSemesters]);
 
   const openDeleteModal = (user: UserData) => {
     setUserToDelete(user);

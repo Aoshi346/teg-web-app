@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { gsap } from "gsap";
 import { Search, CheckCircle, Clock, XCircle, FileText } from "lucide-react";
+import { useRouter } from "next/navigation";
 import DashboardHeader from "@/components/layout/DashboardHeader";
 import PageTransition from "@/components/ui/PageTransition";
 import SemesterSelector from "@/components/ui/SemesterSelector";
@@ -15,6 +16,7 @@ import {
   setStoredSemester,
 } from "@/lib/semesters";
 import ProjectCard from "@/components/dashboard/ProjectCard";
+import { getUserRole } from "@/features/auth/clientAuth";
 
 interface TesisPageProps {
   handleSidebarCollapse?: () => void;
@@ -30,6 +32,8 @@ export default function TesisPage(props: TesisPageProps = {}) {
     isSidebarCollapsed,
     isMobileSidebarOpen,
   } = props;
+  const router = useRouter();
+  const userRole = useMemo(() => getUserRole(), []);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState<
     "all" | "checked" | "pending" | "rejected"
@@ -201,6 +205,14 @@ export default function TesisPage(props: TesisPageProps = {}) {
                     onSemesterChange={handleSemesterChange}
                   />
                   <div className="flex items-center gap-3">
+                    {userRole === "Estudiante" && (
+                      <button
+                        onClick={() => router.push("/dashboard/agregar")}
+                        className="px-4 py-2.5 rounded-xl text-sm font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition-all shadow-md shadow-emerald-500/20"
+                      >
+                        Subir Tesis
+                      </button>
+                    )}
                     <div className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl border border-emerald-200/60">
                       <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shadow-sm shadow-emerald-500/50" />
                       <span className="text-sm font-semibold text-emerald-700">

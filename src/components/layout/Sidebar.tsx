@@ -21,7 +21,7 @@ import {
   TrendingUp,
   X,
 } from "lucide-react";
-import { getUserRole } from "@/features/auth/clientAuth";
+import { getUser, getUserRole } from "@/features/auth/clientAuth";
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -72,6 +72,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   // ... (inside component)
 
   const [userRole, setUserRole] = useState<string | null>(null);
+  const user = useMemo(() => getUser(), []);
 
   useEffect(() => {
     // Get role on mount (client-side only)
@@ -79,6 +80,16 @@ const Sidebar: React.FC<SidebarProps> = ({
   }, []);
 
   const menuItems = useMemo(() => {
+    if (userRole === "Estudiante") {
+      const semester = user?.semester?.toLowerCase() || "";
+      const isTesis = semester.includes("10");
+      return [
+        isTesis
+          ? { icon: BookOpen, label: "Trabajo Especial (TEG)", href: "/dashboard/tesis" }
+          : { icon: FileText, label: "Proyecto (PTEG)", href: "/dashboard/proyectos" },
+      ];
+    }
+
     const baseItems = [
       { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
       {
@@ -104,16 +115,10 @@ const Sidebar: React.FC<SidebarProps> = ({
     // Filter items based on role
     return baseItems.filter(item => {
       if (!item.requiredRole) return true;
-      // If no role logic yet, show everything (or default safe). 
-      // But here we want to HIDE Scan for Admin (or only show for Estudiante/Profesor).
-      // If userRole is Admin, and requiredRole doesn't include Admin, hide it.
-      if (!userRole) return true; // Show all if role loading/unknown for now (or hide?)
-
-      // Admin should NOT see Scan. Scan is allowed for: ["Estudiante", "Profesor"]
-      // If user is Admin, they are NOT in that list.
+      if (!userRole) return true;
       return item.requiredRole.includes(userRole);
     });
-  }, [userRole]);
+  }, [userRole, user]);
 
   // Prefetch routes on hover for instant navigation
   const handleLinkHover = useCallback(
