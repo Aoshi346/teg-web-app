@@ -34,6 +34,7 @@ export default function ProyectosPage(props: ProyectosPageProps = {}) {
   } = props;
   const router = useRouter();
   const userRole = useMemo(() => getUserRole(), []);
+  const isStudent = userRole === "Estudiante";
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState<
     "all" | "checked" | "pending" | "rejected"
@@ -309,6 +310,7 @@ export default function ProyectosPage(props: ProyectosPageProps = {}) {
                         type="proyecto"
                         primaryLabel="Ver Detalles"
                         primaryHref={`/dashboard/proyectos/${project.id}`}
+                        canEdit={!isStudent}
                       />
                     ))}
                   </div>
@@ -333,8 +335,9 @@ export default function ProyectosPage(props: ProyectosPageProps = {}) {
                         key={project.id}
                         project={project}
                         type="proyecto"
-                        primaryHref={`/dashboard/proyectos/${project.id}/evaluar`}
-                        primaryLabel="Revisar Ahora"
+                        primaryHref={isStudent ? `/dashboard/proyectos/${project.id}` : `/dashboard/proyectos/${project.id}/evaluar`}
+                        primaryLabel={isStudent ? "Ver Detalles" : "Revisar Ahora"}
+                        canEdit={!isStudent}
                       />
                     ))}
                   </div>
@@ -361,6 +364,7 @@ export default function ProyectosPage(props: ProyectosPageProps = {}) {
                         type="proyecto"
                         primaryLabel="Ver Motivo"
                         primaryHref={`/dashboard/proyectos/${project.id}`}
+                        canEdit={!isStudent}
                       />
                     ))}
                   </div>

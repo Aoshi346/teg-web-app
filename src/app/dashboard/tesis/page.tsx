@@ -34,6 +34,7 @@ export default function TesisPage(props: TesisPageProps = {}) {
   } = props;
   const router = useRouter();
   const userRole = useMemo(() => getUserRole(), []);
+  const isStudent = userRole === "Estudiante";
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState<
     "all" | "checked" | "pending" | "rejected"
@@ -314,6 +315,7 @@ export default function TesisPage(props: TesisPageProps = {}) {
                         type="tesis"
                         primaryLabel="Ver Detalles"
                         primaryHref={`/dashboard/tesis/${project.id}`}
+                        canEdit={!isStudent}
                       />
                     ))}
                   </div>
@@ -339,8 +341,9 @@ export default function TesisPage(props: TesisPageProps = {}) {
                         key={project.id}
                         project={project}
                         type="tesis"
-                        primaryHref={`/dashboard/tesis/${project.id}/evaluar`}
-                        primaryLabel="Revisar Ahora"
+                        primaryHref={isStudent ? `/dashboard/tesis/${project.id}` : `/dashboard/tesis/${project.id}/evaluar`}
+                        primaryLabel={isStudent ? "Ver Detalles" : "Revisar Ahora"}
+                        canEdit={!isStudent}
                       />
                     ))}
                   </div>
@@ -368,6 +371,7 @@ export default function TesisPage(props: TesisPageProps = {}) {
                         type="tesis"
                         primaryLabel="Ver Motivo"
                         primaryHref={`/dashboard/tesis/${project.id}`}
+                        canEdit={!isStudent}
                       />
                     ))}
                   </div>

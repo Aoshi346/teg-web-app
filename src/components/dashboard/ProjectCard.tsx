@@ -11,6 +11,7 @@ interface ProjectCardProps {
   primaryLabel?: string;
   className?: string;
   type?: "proyecto" | "tesis";
+  canEdit?: boolean;
 }
 
 export default function ProjectCard({
@@ -19,6 +20,7 @@ export default function ProjectCard({
   primaryLabel,
   className,
   type = "proyecto",
+  canEdit = true,
 }: ProjectCardProps) {
   const router = useRouter();
 
@@ -108,13 +110,15 @@ export default function ProjectCard({
       className={`project-card relative h-full flex flex-col bg-white rounded-3xl p-5 border border-gray-100 transition-all duration-300 shadow-sm hover:shadow-xl cursor-pointer group ${config.wrapper} ${className ?? ""}`}
     >
       {/* Edit Button (Absolute Top Right) */}
-      <button
-        onClick={handleEdit}
-        className="absolute top-4 right-4 p-2 rounded-full bg-gray-50 text-gray-400 hover:bg-blue-50 hover:text-blue-600 transition-all duration-200 z-10 opacity-0 group-hover:opacity-100 transform translate-x-2 group-hover:translate-x-0"
-        title="Editar Proyecto"
-      >
-        <Pencil className="w-4 h-4" />
-      </button>
+      {canEdit && (
+        <button
+          onClick={handleEdit}
+          className="absolute top-4 right-4 p-2 rounded-full bg-gray-50 text-gray-400 hover:bg-blue-50 hover:text-blue-600 transition-all duration-200 z-10 opacity-0 group-hover:opacity-100 transform translate-x-2 group-hover:translate-x-0"
+          title="Editar Proyecto"
+        >
+          <Pencil className="w-4 h-4" />
+        </button>
+      )}
 
       {/* Header with Title and Score/Status */}
       <div className="flex items-start justify-between gap-3 mb-5 pr-8">
