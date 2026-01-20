@@ -341,6 +341,20 @@ export default function TesisDetailsPage() {
                       Evaluar Tesis
                     </button>
                   )}
+
+                  {project.stage1Passed && (
+                    <button
+                      onClick={() =>
+                        router.push(
+                          `/dashboard/tesis/${project.id}/evaluar/fase2`,
+                        )
+                      }
+                      className="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-xl font-semibold hover:from-violet-700 hover:to-indigo-700 transition-all shadow-lg shadow-violet-500/25 hover:shadow-xl hover:shadow-violet-500/30 transform hover:-translate-y-0.5 flex items-center justify-center gap-2"
+                    >
+                      <Sparkles className="w-5 h-5" />
+                      Evaluación Fase 2
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

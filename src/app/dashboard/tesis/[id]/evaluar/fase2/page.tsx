@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import PageTransition from "@/components/ui/PageTransition";
 import DashboardHeader from "@/components/layout/DashboardHeader";
 import EvaluationForm from "@/components/evaluation/EvaluationForm";
+import { getTesis } from "@/lib/data/mockData";
 import { TESIS_STAGE2_QUESTIONS } from "@/lib/questions/questions";
 import { AlertCircle, ArrowLeft } from "lucide-react";
 
@@ -18,12 +19,18 @@ export default function EvaluarTesisFase2Page({
   const [isAllowed, setIsAllowed] = useState<boolean | null>(null);
 
   useEffect(() => {
-    // Check stage 1 pass status - no delay for instant navigation
+    // Check stage 1 pass status using mock data
     const checkStatus = () => {
-      // For demonstration, we'll check a sessionStorage flag or default to false
-      const passed =
-        sessionStorage.getItem(`project_${projectId}_stage1_passed`) === "true";
-      setIsAllowed(passed);
+      const id = Number(projectId);
+      const theses = getTesis();
+      const project = theses.find((p) => p.id === id);
+
+      // Allow if project exists and stage1Passed is true
+      if (project && project.stage1Passed) {
+        setIsAllowed(true);
+      } else {
+        setIsAllowed(false);
+      }
     };
 
     if (projectId) {
@@ -55,8 +62,8 @@ export default function EvaluarTesisFase2Page({
                 Acceso Restringido
               </h2>
               <p className="text-gray-600 mb-6">
-                No es posible evaluar la Fase 2 (Entrega Final) porque el proyecto
-                no ha aprobado la Fase 1 (Artículo).
+                No es posible evaluar la Fase 2 (Entrega Final) porque el
+                proyecto no ha aprobado la Fase 1 (Artículo).
               </p>
               <div className="flex flex-col gap-3">
                 <button
