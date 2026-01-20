@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   FileText,
@@ -18,9 +18,8 @@ import DashboardHeader from "@/components/layout/DashboardHeader";
 import PageTransition from "@/components/ui/PageTransition";
 import Banner from "@/components/ui/Banner";
 import SemesterSelector from "@/components/ui/SemesterSelector";
-import { addProyecto, addTesis } from "@/lib/data/mockData";
-import { createProject } from "@/features/projects/projectService";
-import { getAvailableSemesterPeriods } from "@/lib/semesters";
+import { createProject, getAllProjects } from "@/features/projects/projectService";
+import { getAvailableSemesters, getCurrentSemester, getStoredSemester, setStoredSemester } from "@/lib/semesters";
 
 type DocumentType = "proyecto" | "tesis";
 
@@ -56,14 +55,27 @@ export default function AgregarDocumentoPage() {
     advisors: [],
   });
 
-  const availablePeriods = useMemo(() => getAvailableSemesterPeriods(), []);
+  const [availableSemesters, setAvailableSemesters] = useState<string[]>([]);
 
-  // Set default period on first render
+  // Load semesters from backend projects and choose a safe default
   React.useEffect(() => {
-    if (availablePeriods.length > 0 && !formData.semesterPeriod) {
-      setFormData((prev) => ({ ...prev, semesterPeriod: availablePeriods[0] }));
-    }
-  }, [availablePeriods, formData.semesterPeriod]);
+    const loadSemesters = async () => {
+      const projects = await getAllProjects();
+      const semesters = getAvailableSemesters(projects);
+
+      const stored = getStoredSemester();
+      const fallback = getCurrentSemester();
+      const chosen = semesters.length
+        ? (semesters.includes(stored) ? stored : semesters[0])
+        : (stored || fallback);
+
+      setAvailableSemesters(semesters.length ? semesters : [chosen]);
+      setFormData((prev) => ({ ...prev, semesterPeriod: chosen }));
+      setStoredSemester(chosen);
+    };
+
+    loadSemesters();
+  }, []);
 
   const semesterLabel =
     documentType === "proyecto"
@@ -76,6 +88,7 @@ export default function AgregarDocumentoPage() {
   };
 
   const handleSemesterChange = (semester: string) => {
+    setStoredSemester(semester);
     setFormData((prev) => ({ ...prev, semesterPeriod: semester }));
   };
 
@@ -173,54 +186,31 @@ export default function AgregarDocumentoPage() {
       advisors: [],
     });
 
-    const validStudents = formData.students.filter((s) => s.trim() !== "");
     const validAdvisors = formData.advisors.filter((a) => a.trim() !== "");
 
     setIsSubmitting(true);
 
     try {
-      // Try backend first
-      try {
-        await createProject({
-          title: formData.title.trim(),
-          advisor: validAdvisors.join(", "),
-          semester: formData.semesterPeriod,
-          project_type: documentType,
-          status: "pending",
-        });
-        setBannerState({
-          visible: true,
-          message: `${documentType === "proyecto" ? "Proyecto" : "Tesis"} agregado exitosamente.`,
-          type: "success",
-        });
-      } catch (err) {
-        console.warn("Falling back to local add due to API error:", err);
-        const newDocument = {
-          title: formData.title.trim(),
-          student: validStudents.join(", "),
-          advisor: validAdvisors.join(", "),
-          submittedDate: new Date().toISOString().split("T")[0],
-          status: "pending" as const,
-          semester: formData.semesterPeriod,
-        };
-        if (documentType === "proyecto") {
-          addProyecto(newDocument);
-        } else {
-          addTesis(newDocument);
-        }
-        setBannerState({
-          visible: true,
-          message: `${documentType === "proyecto" ? "Proyecto" : "Tesis"} agregado localmente (sin backend).`,
-          type: "warning",
-        });
-      }
+      await createProject({
+        title: formData.title.trim(),
+        advisor: validAdvisors.join(", "),
+        semester: formData.semesterPeriod,
+        project_type: documentType,
+        status: "pending",
+      });
+      setBannerState({
+        visible: true,
+        message: `${documentType === "proyecto" ? "Proyecto" : "Tesis"} agregado exitosamente.`,
+        type: "success",
+      });
 
       // Reset form
+      const resetSemester = availableSemesters[0] || formData.semesterPeriod || getCurrentSemester();
       setFormData({
         title: "",
         students: [""],
         advisors: [""],
-        semesterPeriod: availablePeriods[0] || "",
+        semesterPeriod: resetSemester,
       });
 
       // Redirect after short delay
@@ -277,7 +267,7 @@ export default function AgregarDocumentoPage() {
               <div className="w-full sm:w-auto">
                 <SemesterSelector
                   selectedSemester={formData.semesterPeriod}
-                  availableSemesters={availablePeriods}
+                  availableSemesters={availableSemesters}
                   onSemesterChange={handleSemesterChange}
                 />
               </div>

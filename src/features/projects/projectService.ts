@@ -28,6 +28,19 @@ export interface ApiProject {
   files?: ApiFile[];
 }
 
+export interface ApiEvaluation {
+  id: number;
+  project: number;
+  reviewer?: number | null;
+  reviewer_name?: string;
+  ratings: Record<string, number | string>;
+  comments: Record<string, unknown> | string;
+  score: number;
+  pass_status: "Pass" | "Fail";
+  section_scores?: Record<string, number>;
+  graded_at: string;
+}
+
 export async function getAllProjects(): Promise<Project[]> {
   try {
     const response = await api.get<ApiProject[]>("/projects/");
@@ -73,6 +86,19 @@ export async function createProject(data: Partial<ApiProject>): Promise<ApiProje
 // Update an existing project by ID
 export async function updateProject(id: number, data: Partial<ApiProject>): Promise<ApiProject> {
   return api.patch<ApiProject>(`/projects/${id}/`, data);
+}
+
+export async function createEvaluation(data: Omit<ApiEvaluation, "id" | "graded_at">): Promise<ApiEvaluation> {
+  return api.post<ApiEvaluation>(`/evaluations/`, data);
+}
+
+export async function getEvaluationsByProject(projectId: number): Promise<ApiEvaluation[]> {
+  try {
+    return await api.get<ApiEvaluation[]>(`/evaluations/?project=${projectId}`);
+  } catch (error) {
+    console.error(`Failed to fetch evaluations for project ${projectId}`, error);
+    return [];
+  }
 }
 
 // Retrieve a single project by ID

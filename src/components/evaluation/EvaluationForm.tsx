@@ -22,7 +22,11 @@ import { ImageTooltip } from "@/components/ui/ImageTooltip";
 
 import { useValidation } from "@/hooks/useValidation";
 import { Project } from "@/types/project";
-import { updateProject, getProject } from "@/features/projects/projectService";
+import {
+  updateProject,
+  getProject,
+  createEvaluation,
+} from "@/features/projects/projectService";
 
 interface EvaluationFormProps {
   projectId?: string | null;
@@ -585,143 +589,180 @@ export default function EvaluationForm({
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Global validation across sections
-    let firstMissingQuestion: Question | undefined;
-    const missingSectionIndex = sections.findIndex((section) => {
-      const idx = findMissingIndexInSection(section);
-      if (idx !== -1) {
-        const sectionQuestions = filteredQuestions.filter(
-          (q) => q.section === section,
+    try {
+      // Global validation across sections
+      let firstMissingQuestion: Question | undefined;
+      const missingSectionIndex = sections.findIndex((section) => {
+        const idx = findMissingIndexInSection(section);
+        if (idx !== -1) {
+          const sectionQuestions = filteredQuestions.filter(
+            (q) => q.section === section,
+          );
+          firstMissingQuestion = sectionQuestions[idx];
+          return true;
+        }
+        return false;
+      });
+
+      if (missingSectionIndex !== -1 && firstMissingQuestion) {
+        const targetPage = missingSectionIndex + 1;
+        setPage(targetPage);
+
+        showBanner(
+          "Por favor califique todas las preguntas obligatorias marcadas.",
+          "error",
         );
-        firstMissingQuestion = sectionQuestions[idx];
-        return true;
+
+        // improved scroll logic
+        scrollToQuestion(firstMissingQuestion.id);
+        setIsSubmitting(false);
+        return;
       }
-      return false;
-    });
 
-    if (missingSectionIndex !== -1 && firstMissingQuestion) {
-      const targetPage = missingSectionIndex + 1;
-      setPage(targetPage);
+      // Enforce max attempts for proyectos (non-Tesis)
+      if (
+        documentType !== "Tesis" &&
+        projectData &&
+        (projectData.failedAttempts || 0) >= 2
+      ) {
+        showBanner(
+          "Este proyecto ya agotó los 2 intentos permitidos.",
+          "error",
+        );
+        setIsSubmitting(false);
+        return;
+      }
 
-      showBanner(
-        "Por favor califique todas las preguntas obligatorias marcadas.",
-        "error",
-      );
+      const score = calculateScore(ratings, filteredQuestions);
+      const passStatus = getPassStatus(score);
 
-      // improved scroll logic
-      scrollToQuestion(firstMissingQuestion.id);
-      setIsSubmitting(false);
-      return;
-    }
+      const payload: SubmittedData = {
+        ratings,
+        comments,
+        gradedAt: new Date().toISOString(),
+        score,
+        passStatus,
+      };
 
-    const score = calculateScore(ratings, filteredQuestions);
-    const passStatus = getPassStatus(score);
-
-    const payload: SubmittedData = {
-      ratings,
-      comments,
-      gradedAt: new Date().toISOString(),
-      score,
-      passStatus,
-    };
-
-    // Update Project/Tesis with Persistence
-    if (projectData && projectId) {
       // Calculate section scores for Projects
       const sectionScores =
         documentType !== "Tesis"
           ? calculateSectionScores(ratings, filteredQuestions)
           : null;
 
-      const updatedProject = {
-        ...projectData,
-        status: (passStatus === "Pass" ? "checked" : "rejected") as
-          | "checked"
-          | "rejected"
-          | "pending",
-        score: sectionScores ? sectionScores.total : score,
-        diagramacionScore: sectionScores?.diagramacion,
-        contenidoScore: sectionScores?.contenido,
-        reviewDate: new Date().toISOString().split("T")[0],
-      };
+      const sectionScoresRecord = sectionScores
+        ? {
+            total: sectionScores.total,
+            diagramacion: sectionScores.diagramacion,
+            contenido: sectionScores.contenido,
+          }
+        : undefined;
 
-      if (documentType === "Tesis") {
-        // Tesis specific logic
-        // Check if it's stage 1 (based on question q57 passing)
-        const isStage1 = filteredQuestions.some((q) => q.id === "q57");
-        if (isStage1) {
-          // If it's stage 1, preserve Stage 1 passed status if passed
-          if (passStatus === "Pass") {
+      // Persist evaluation record
+      if (projectId) {
+        await createEvaluation({
+          project: parseInt(projectId),
+          ratings: ratings || {},
+          comments: { general: comments || "" },
+          score,
+          pass_status: passStatus,
+          section_scores: sectionScoresRecord,
+        });
+      }
+
+      // Update Project/Tesis with Persistence
+      if (projectData && projectId) {
+        const updatedProject = {
+          ...projectData,
+          status: (passStatus === "Pass" ? "checked" : "rejected") as
+            | "checked"
+            | "rejected"
+            | "pending",
+          score: sectionScores ? sectionScores.total : score,
+          diagramacionScore: sectionScores?.diagramacion,
+          contenidoScore: sectionScores?.contenido,
+          reviewDate: new Date().toISOString().split("T")[0],
+        };
+
+        if (documentType === "Tesis") {
+          // Tesis specific logic
+          const isStage1 = filteredQuestions.some((q) => q.id === "q57");
+          if (isStage1 && passStatus === "Pass") {
             updatedProject.stage1Passed = true;
           }
-        }
-        await updateProject(updatedProject.id, {
-          status: updatedProject.status,
-          score: updatedProject.score ?? 0,
-          diagramacion_score: updatedProject.diagramacionScore ?? 0,
-          contenido_score: updatedProject.contenidoScore ?? 0,
-          review_date: updatedProject.reviewDate,
-          stage1_passed: updatedProject.stage1Passed ?? false,
-        });
-      } else {
-        // Project specific logic for failure attempts
-        if (passStatus === "Fail") {
-          const currentAttempts = (projectData.failedAttempts || 0) + 1;
-          updatedProject.failedAttempts = currentAttempts;
-          updatedProject.status = "rejected";
-
-          // Alert logic handled below via banner, but here we set final status
-          if (currentAttempts >= 2) {
-            // Final failure
-            updatedProject.status = "rejected";
-          }
+          await updateProject(updatedProject.id, {
+            status: updatedProject.status,
+            score: updatedProject.score ?? 0,
+            diagramacion_score: updatedProject.diagramacionScore ?? 0,
+            contenido_score: updatedProject.contenidoScore ?? 0,
+            review_date: updatedProject.reviewDate,
+            stage1_passed: updatedProject.stage1Passed ?? false,
+          });
         } else {
-          updatedProject.status = "checked";
+          // Project specific logic for failure attempts
+          if (passStatus === "Fail") {
+            const currentAttempts = (projectData.failedAttempts || 0) + 1;
+            // cap attempts at 2
+            updatedProject.failedAttempts = Math.min(currentAttempts, 2);
+            updatedProject.status = "rejected";
+
+            if (currentAttempts >= 2) {
+              updatedProject.status = "rejected";
+            }
+          } else {
+            updatedProject.status = "checked";
+            // Reset attempts on successful approval
+            updatedProject.failedAttempts = 0;
+          }
+          await updateProject(updatedProject.id, {
+            status: updatedProject.status,
+            score: updatedProject.score ?? 0,
+            diagramacion_score: updatedProject.diagramacionScore ?? 0,
+            contenido_score: updatedProject.contenidoScore ?? 0,
+            review_date: updatedProject.reviewDate,
+            failed_attempts: updatedProject.failedAttempts ?? 0,
+          });
         }
-        await updateProject(updatedProject.id, {
-          status: updatedProject.status,
-          score: updatedProject.score ?? 0,
-          diagramacion_score: updatedProject.diagramacionScore ?? 0,
-          contenido_score: updatedProject.contenidoScore ?? 0,
-          review_date: updatedProject.reviewDate,
-          failed_attempts: updatedProject.failedAttempts ?? 0,
-        });
       }
-    }
 
-    await new Promise((res) => setTimeout(res, 600));
-    setSubmittedData(payload);
+      await new Promise((res) => setTimeout(res, 600));
+      setSubmittedData(payload);
 
-    // Clear saved draft on successful submission
-    try {
-      localStorage.removeItem(draftStorageKey);
-    } catch {}
+      // Clear saved draft on successful submission
+      try {
+        localStorage.removeItem(draftStorageKey);
+      } catch {}
 
-    if (documentType !== "Tesis" && passStatus === "Fail") {
-      const attempts = (projectData?.failedAttempts || 0) + 1;
-      if (attempts >= 2) {
-        showBanner(
-          "Proyecto rechazado definitivamente (2/2 intentos fallidos). Por favor contacte a su tutor.",
-          "error",
-        );
+      if (documentType !== "Tesis" && passStatus === "Fail") {
+        const attempts = (projectData?.failedAttempts || 0) + 1;
+        if (attempts >= 2) {
+          showBanner(
+            "Proyecto rechazado definitivamente (2/2 intentos fallidos). Por favor contacte a su tutor.",
+            "error",
+          );
+        } else {
+          showBanner(
+            `Proyecto rechazado. Intento ${attempts}/2 utilizado. Puede corregir y re-enviar.`,
+            "warning",
+          );
+        }
       } else {
-        showBanner(
-          `Proyecto rechazado. Intento ${attempts}/2 utilizado. Puede corregir y re-enviar.`,
-          "warning",
-        );
+        showBanner("Evaluación enviada con éxito.", "success");
       }
-    } else {
-      showBanner("Evaluación enviada con éxito.", "success");
-    }
-    setIsSubmitting(false);
 
-    // Redirect after delay
-    setTimeout(() => {
-      // Find the dashboard URL based on type
-      const returnUrl =
-        documentType === "Tesis" ? "/dashboard/tesis" : "/dashboard/proyectos";
-      router.push(returnUrl);
-    }, 2000);
+      // Redirect after delay
+      setTimeout(() => {
+        const returnUrl =
+          documentType === "Tesis" ? "/dashboard/tesis" : "/dashboard/proyectos";
+        router.push(returnUrl);
+      }, 2000);
+    } catch (err: unknown) {
+      console.error(err);
+      const msg = err instanceof Error ? err.message : "No se pudo enviar la evaluación.";
+      showBanner(msg, "error");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const allSections = [

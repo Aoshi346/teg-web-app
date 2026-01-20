@@ -8,8 +8,12 @@ import {
   getUserEmail,
   getAllUsers,
   updateStatusById,
-  register as registerUser,
+  createUser,
+  updateUser as updateUserApi,
+  deleteUser as deleteUserApi,
   User as AuthUser,
+  updateProfile,
+  getUser,
 } from "@/features/auth/clientAuth";
 import {
   User,
@@ -66,7 +70,7 @@ export default function SettingsPage({
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
   const usersPerPage = 5;
-  const totalPages = Math.ceil(users.length / usersPerPage);
+  const totalPages = Math.max(1, Math.ceil(users.length / usersPerPage));
   const paginatedUsers = users.slice(
     (currentPage - 1) * usersPerPage,
     currentPage * usersPerPage,
@@ -91,9 +95,8 @@ export default function SettingsPage({
   const loadUsers = React.useCallback(async () => {
     try {
       const storedUsers = await getAllUsers();
-      // Map to UserData format expected by the table (adding id if missing, though typically we use email as key)
       const mappedUsers: UserData[] = storedUsers.map((u, index) => ({
-        id: u.id || index + 1, // Artificial ID for display/key if undefined
+        id: u.id || index + 1,
         fullName: u.fullName || u.email.split("@")[0],
         email: u.email,
         role: u.role,
@@ -101,7 +104,15 @@ export default function SettingsPage({
         phone: u.phone || "",
         status: u.status,
       }));
+
+      // Always show pending first
+      mappedUsers.sort((a, b) => {
+        if (a.status === b.status) return 0;
+        return a.status === "pending" ? -1 : 1;
+      });
+
       setUsers(mappedUsers);
+      setCurrentPage(1); // reset pagination after reload
     } catch (e) {
       console.error(e);
       showToast("Error al cargar usuarios", "error");
@@ -115,8 +126,13 @@ export default function SettingsPage({
     setEmail(userEmail);
 
     // Initialize profile
-    if (typeof window !== "undefined") {
-      // Just use basic data for now
+    const sessionUser = getUser();
+    if (sessionUser) {
+      setProfileEmail(sessionUser.email || "");
+      setProfileName(sessionUser.fullName || sessionUser.email.split("@")[0] || "Usuario");
+      setProfilePhone(sessionUser.phone || "");
+      setProfileSemester(sessionUser.semester || "");
+    } else if (typeof window !== "undefined") {
       setProfileEmail(userEmail || "");
       setProfileName(userEmail?.split("@")[0] || "Usuario");
     }
@@ -132,14 +148,18 @@ export default function SettingsPage({
     setIsDeleteModalOpen(true);
   };
 
-  const confirmDeleteUser = () => {
-    // Not implemented in clientAuth yet, assuming just UI removal for now or we add deleteUser to clientAuth
-    // For now, just remove from UI to simulate
-    if (userToDelete) {
-      // In a real app we would call deleteUser(userToDelete.email)
-      // setUsers(users.filter(u => u.email !== userToDelete.email));
-      showToast("Usuario eliminado correctamente (Simulado).", "success");
+  const confirmDeleteUser = async () => {
+    if (!userToDelete?.id) return;
+    try {
+      await deleteUserApi(userToDelete.id);
+      showToast("Usuario eliminado correctamente.", "success");
+      await loadUsers();
+    } catch (error) {
+      console.error(error);
+      showToast("Error al eliminar usuario", "error");
+    } finally {
       setUserToDelete(null);
+      setIsDeleteModalOpen(false);
     }
   };
 
@@ -173,43 +193,49 @@ export default function SettingsPage({
   const handleSaveUser = async (
     userData: Omit<UserData, "id"> & { id?: number },
   ) => {
-    // Prepare user object for clientAuth
-    const newUser: AuthUser = {
+    const payload: AuthUser = {
       email: userData.email,
-      role: userData.role as AuthUser["role"], // specific cast
+      role: userData.role as AuthUser["role"],
       fullName: userData.fullName,
       semester: userData.semester,
       phone: userData.phone,
-      password: "password123", // Default pw for manually added users
-      status: "active",
+      password: "password123", // default password for manual creation
+      status: "pending",
     };
 
-    if (userData.id) {
-      // Edit mode - tricky without update function in clientAuth, assuming add for now or skip
-      showToast(
-        "Edición simulada (necesita backend endpoint de edición).",
-        "info",
-      );
-    } else {
-      // Add new
-      try {
-        const res = await registerUser(newUser);
-        if (res.success) {
-          showToast("Usuario creado correctamente.", "success");
-          await loadUsers();
-        } else {
-          showToast(res.message || "Error al crear usuario.", "error");
-        }
-      } catch {
-        showToast("Error de red", "error");
+    try {
+      if (userData.id) {
+        await updateUserApi(userData.id, payload);
+        showToast("Usuario actualizado correctamente.", "success");
+      } else {
+        await createUser(payload);
+        showToast(
+          "Usuario creado correctamente. Estado inicial: pendiente.",
+          "success",
+        );
       }
+      await loadUsers();
+    } catch (error) {
+      console.error(error);
+      showToast("Error al guardar usuario", "error");
+    } finally {
+      setIsUserModalOpen(false);
     }
-    setIsUserModalOpen(false);
   };
 
-  const handleSaveProfile = () => {
-    // Mock save
-    showToast("Perfil actualizado correctamente.", "success");
+  const handleSaveProfile = async () => {
+    try {
+      await updateProfile({
+        fullName: profileName,
+        phone: profilePhone,
+        semester: profileSemester,
+      });
+      setIsEditingProfile(false);
+      showToast("Perfil actualizado correctamente.", "success");
+    } catch (err) {
+      console.error(err);
+      showToast("No se pudo actualizar el perfil.", "error");
+    }
   };
 
   // Deterministic avatar color helper
@@ -891,21 +917,15 @@ export default function SettingsPage({
                                         Aprobar
                                       </button>
                                     )}
-                                    {user.status === "active" &&
-                                      user.role !== "Admin" && (
-                                        <button
-                                          onClick={() =>
-                                            handleStatusUpdate(
-                                              user.id,
-                                              "pending",
-                                            )
-                                          }
-                                          className="p-2 text-amber-600 hover:bg-amber-50 rounded-lg transition-colors"
-                                          title="Desactivar"
-                                        >
-                                          <Lock className="w-4 h-4" />
-                                        </button>
-                                      )}
+                                    {user.role !== "Admin" && user.email !== email && (
+                                      <button
+                                        onClick={() => openDeleteModal(user)}
+                                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                        title="Eliminar"
+                                      >
+                                        <Trash2 className="w-4 h-4" />
+                                      </button>
+                                    )}
                                     <button
                                       onClick={() => handleEditUser(user)}
                                       className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
@@ -990,10 +1010,15 @@ export default function SettingsPage({
                       </div>
 
                       {/* Pagination */}
-                      {totalPages > 1 && (
+                      {users.length > 0 && (
                         <div className="p-4 border-t border-gray-100 flex items-center justify-between bg-gray-50/30">
                           <p className="text-sm text-gray-500">
-                            Mostrando {(currentPage - 1) * usersPerPage + 1}-
+                            Mostrando {
+                              users.length === 0
+                                ? 0
+                                : (currentPage - 1) * usersPerPage + 1
+                            }
+                            -
                             {Math.min(currentPage * usersPerPage, users.length)}{" "}
                             de {users.length}
                           </p>

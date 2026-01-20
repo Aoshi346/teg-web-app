@@ -6,9 +6,9 @@ import DashboardHeader from "@/components/layout/DashboardHeader";
 import PageTransition from "@/components/ui/PageTransition";
 import TrackingTable from "@/components/ui/TrackingTable";
 import SemesterSelector from "@/components/ui/SemesterSelector";
-import { getProyectos, getTesis, Project, mockProyectos, mockTesis } from "@/lib/data/mockData";
-import { getAvailableSemesters, getStoredSemester, setStoredSemester } from "@/lib/semesters";
-import { LayoutDashboard, Filter } from "lucide-react";
+import { getAvailableSemesters, getStoredSemester, setStoredSemester, getCurrentSemester } from "@/lib/semesters";
+import { getAllProjects } from "@/features/projects/projectService";
+import { Project } from "@/types/project";
 
 const ITEMS_PER_PAGE = 5;
 
@@ -24,46 +24,58 @@ export default function TrackingPage({
     isMobileSidebarOpen?: boolean;
 }) {
     const router = useRouter();
-    const [items, setItems] = useState<Project[]>([]);
+    const [projects, setProjects] = useState<Project[]>([]);
     const [filter, setFilter] = useState<"all" | "pteg" | "teg">("all");
     const [semester, setSemester] = useState<string>("");
+    const [availableSemesters, setAvailableSemesters] = useState<string[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
 
     useEffect(() => {
-        // Initialize semester
-        setSemester(getStoredSemester());
+        const fetchData = async () => {
+            const apiProjects = await getAllProjects();
+            setProjects(apiProjects);
+
+            const semesters = getAvailableSemesters(apiProjects);
+            const stored = getStoredSemester();
+            const fallback = getCurrentSemester();
+            const chosen = semesters.length
+                ? (semesters.includes(stored) ? stored : semesters[0])
+                : (stored || fallback);
+
+            setAvailableSemesters(semesters.length ? semesters : [chosen]);
+            if (semesters.length > 0) {
+                setSemester(semesters.includes(stored) ? stored : semesters[0]);
+            } else {
+                setSemester(chosen);
+            }
+        };
+
+        fetchData();
     }, []);
 
+    // Re-run pagination reset when semester changes
     useEffect(() => {
-        if (!semester) return;
-
-        // Load data from mock sources (which read from localStorage)
-        const proyectos = getProyectos();
-        const tesis = getTesis();
-
-        // Mark types for filtering
-        const pWithMeta = proyectos.map((p) => ({ ...p, _type: "pteg" }));
-        const tWithMeta = tesis.map((t) => ({ ...t, _type: "teg" }));
-
-        // Merge and filter for Pending AND Semester
-        const allPending = [...pWithMeta, ...tWithMeta].filter(
-            (item) => item.status === "pending" && item.semester === semester
-        );
-
-        // Sort by Date (Suspense: newest first)
-        allPending.sort(
-            (a, b) =>
-                new Date(b.submittedDate).getTime() - new Date(a.submittedDate).getTime()
-        );
-
-        setItems(allPending);
-        setCurrentPage(1); // Reset page on semester change
+        if (semester) {
+            setCurrentPage(1);
+        }
     }, [semester]);
 
+    const pendingForSemester = useMemo(() => {
+        return projects
+            .filter((p) => p.status === "pending" && (!semester || p.semester === semester))
+            .sort(
+                (a, b) =>
+                    new Date(b.submittedDate).getTime() -
+                    new Date(a.submittedDate).getTime()
+            );
+    }, [projects, semester]);
+
     const filteredItems = useMemo(() => {
-        if (filter === "all") return items;
-        return items.filter((item: any) => item._type === filter);
-    }, [items, filter]);
+        if (filter === "all") return pendingForSemester;
+        return pendingForSemester.filter((item) =>
+            filter === "teg" ? item.type === "tesis" : item.type === "proyecto"
+        );
+    }, [pendingForSemester, filter]);
 
     // Pagination Logic
     const totalPages = Math.ceil(filteredItems.length / ITEMS_PER_PAGE);
@@ -104,7 +116,7 @@ export default function TrackingPage({
                             <div className="flex flex-col sm:flex-row gap-3">
                                 <SemesterSelector
                                     selectedSemester={semester}
-                                    availableSemesters={getAvailableSemesters([...mockTesis, ...mockProyectos])}
+                                    availableSemesters={availableSemesters}
                                     onSemesterChange={(sem) => {
                                         setStoredSemester(sem);
                                         setSemester(sem);

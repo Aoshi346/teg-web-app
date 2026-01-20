@@ -1,5 +1,5 @@
 import React from "react";
-import { Project } from "@/lib/data/mockData";
+import { Project } from "@/types/project";
 import { FileText, BookOpen, Clock, Calendar, CheckCircle, XCircle, ChevronLeft, ChevronRight, User } from "lucide-react";
 
 interface TrackingTableProps {

@@ -14,6 +14,28 @@ export interface User {
   phone?: string;
 }
 
+type ApiUser = {
+  id?: number;
+  email: string;
+  role: 'Admin' | 'Estudiante' | 'Profesor';
+  status: 'active' | 'pending';
+  full_name?: string;
+  semester?: string | null;
+  phone?: string | null;
+};
+
+function mapApiUser(u: ApiUser | User): User {
+  return {
+    id: (u as ApiUser).id,
+    email: u.email,
+    role: u.role,
+    status: (u as ApiUser).status ?? (u as User).status ?? 'pending',
+    fullName: (u as ApiUser).full_name ?? (u as User).fullName ?? "",
+    semester: u.semester ?? "",
+    phone: u.phone ?? "",
+  };
+}
+
 // Persist user to sessionStorage for sync access in UI components
 function saveUserSession(user: User) {
   if (typeof window === 'undefined') return;
@@ -28,7 +50,14 @@ function clearUserSession() {
 
 export async function register(user: User): Promise<{ success: boolean; message?: string }> {
   try {
-    await api.post('/auth/register/', user);
+    await api.post('/auth/register/', {
+      email: user.email,
+      password: user.password,
+      full_name: user.fullName,
+      role: user.role,
+      semester: user.semester,
+      phone: user.phone,
+    });
     return { success: true };
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : "Error en el registro";
@@ -38,7 +67,8 @@ export async function register(user: User): Promise<{ success: boolean; message?
 
 export async function login(email: string, password: string): Promise<{ success: boolean; message?: string; user?: User }> {
   try {
-    const user = await api.post<User>('/auth/login/', { email, password });
+    const apiUser = await api.post<ApiUser>('/auth/login/', { email, password });
+    const user = mapApiUser(apiUser);
     saveUserSession(user);
     return { success: true, user };
   } catch (error: unknown) {
@@ -60,7 +90,12 @@ export function getUser(): User | null {
   if (typeof window === 'undefined') return null;
   const raw = sessionStorage.getItem(SESSION_KEY);
   if (!raw) return null;
-  try { return JSON.parse(raw); } catch { return null; }
+  try {
+    const parsed = JSON.parse(raw);
+    return mapApiUser(parsed);
+  } catch {
+    return null;
+  }
 }
 
 export function getUserEmail(): string | null {
@@ -76,11 +111,29 @@ export function getUserRole(): string | null {
 // Admin Helper: Get all users
 export async function getAllUsers(): Promise<User[]> {
   try {
-    return await api.get<User[]>('/users/');
+    const apiUsers = await api.get<ApiUser[]>('/users/');
+    return apiUsers.map(mapApiUser);
   } catch (error) {
     console.error("Failed to fetch users", error);
     return [];
   }
+}
+
+// Update current user's profile
+export async function updateProfile(payload: Pick<User, "fullName" | "phone" | "semester">): Promise<User> {
+  const apiUser = await api.patch<ApiUser>("/auth/me/", {
+    full_name: payload.fullName,
+    phone: payload.phone,
+    semester: payload.semester,
+  });
+  const updated = mapApiUser(apiUser);
+  // Refresh session cache
+  const current = getUser();
+  saveUserSession({
+    ...(current || {} as User),
+    ...updated,
+  });
+  return updated;
 }
 
 // Admin Helper: Update user status
@@ -110,5 +163,35 @@ export async function updateUserStatus(email: string, status: 'active' | 'pendin
 
 export async function updateStatusById(id: number, status: 'active' | 'pending'): Promise<void> {
    await api.patch(`/users/${id}/`, { status });
+}
+
+// Admin helpers
+export async function createUser(user: User): Promise<User> {
+  const apiUser = await api.post<ApiUser>('/auth/register/', {
+    email: user.email,
+    password: user.password,
+    full_name: user.fullName,
+    role: user.role,
+    semester: user.semester,
+    phone: user.phone,
+  });
+  return mapApiUser(apiUser);
+}
+
+export async function updateUser(id: number, user: Partial<User>): Promise<User> {
+  const payload: Record<string, unknown> = {};
+  if (user.email !== undefined) payload.email = user.email;
+  if (user.fullName !== undefined) payload.full_name = user.fullName;
+  if (user.role !== undefined) payload.role = user.role;
+  if (user.status !== undefined) payload.status = user.status;
+  if (user.semester !== undefined) payload.semester = user.semester;
+  if (user.phone !== undefined) payload.phone = user.phone;
+
+  const apiUser = await api.patch<ApiUser>(`/users/${id}/`, payload);
+  return mapApiUser(apiUser);
+}
+
+export async function deleteUser(id: number): Promise<void> {
+  await api.delete<void>(`/users/${id}/`);
 }
 
