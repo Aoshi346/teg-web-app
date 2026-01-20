@@ -78,7 +78,7 @@ export default function TrackingPage({
     }, [pendingForSemester, filter]);
 
     // Pagination Logic
-    const totalPages = Math.ceil(filteredItems.length / ITEMS_PER_PAGE);
+    const totalPages = Math.max(1, Math.ceil(filteredItems.length / ITEMS_PER_PAGE));
     const paginatedItems = useMemo(() => {
         const start = (currentPage - 1) * ITEMS_PER_PAGE;
         return filteredItems.slice(start, start + ITEMS_PER_PAGE);
@@ -156,24 +156,31 @@ export default function TrackingPage({
                             </div>
                         </div>
 
-                        <TrackingTable
-                            items={paginatedItems}
-                            pagination={{
-                                currentPage,
-                                totalPages,
-                                onPageChange: setCurrentPage
-                            }}
-                            onReview={(item) => {
-                                // Determine if it's TEG or PTEG based on stage1Passed property or _type if available
-                                const isTesis = "stage1Passed" in item || (item as any)._type === "teg";
+                        {filteredItems.length === 0 ? (
+                            <div className="p-6 bg-white border border-gray-200 rounded-2xl text-center shadow-sm">
+                                <p className="text-base font-semibold text-gray-800">No hay entregas que coincidan.</p>
+                                <p className="text-sm text-gray-500 mt-1">Ajusta el semestre o los filtros para ver más resultados.</p>
+                            </div>
+                        ) : (
+                            <TrackingTable
+                                items={paginatedItems}
+                                pagination={{
+                                    currentPage,
+                                    totalPages,
+                                    onPageChange: setCurrentPage
+                                }}
+                                onReview={(item) => {
+                                    // Determine if it's TEG or PTEG based on stage1Passed property or _type if available
+                                    const isTesis = "stage1Passed" in item || (item as any)._type === "teg";
 
-                                if (isTesis) {
-                                    router.push(`/dashboard/tesis/${item.id}`);
-                                } else {
-                                    router.push(`/dashboard/proyectos/${item.id}`);
-                                }
-                            }}
-                        />
+                                    if (isTesis) {
+                                        router.push(`/dashboard/tesis/${item.id}`);
+                                    } else {
+                                        router.push(`/dashboard/proyectos/${item.id}`);
+                                    }
+                                }}
+                            />
+                        )}
                     </div>
                 </main>
             </PageTransition>

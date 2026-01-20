@@ -58,13 +58,7 @@ export default function EvaluationForm({
   React.useEffect(() => {
     if (!projectId) return;
     const id = parseInt(projectId);
-    getProject(id).then((p) => {
-      if (p) setProjectData(p);
-    });
-  }, [projectId]);
-  React.useEffect(() => {
-    if (!projectId) return;
-    const id = parseInt(projectId);
+    if (Number.isNaN(id)) return;
     getProject(id).then((p) => {
       if (p) setProjectData(p);
     });
@@ -660,8 +654,14 @@ export default function EvaluationForm({
 
       // Persist evaluation record
       if (projectId) {
+        const parsedProjectId = parseInt(projectId);
+        if (Number.isNaN(parsedProjectId)) {
+          showBanner("Proyecto inválido para evaluación.", "error");
+          setIsSubmitting(false);
+          return;
+        }
         await createEvaluation({
-          project: parseInt(projectId),
+          project: parsedProjectId,
           ratings: ratings || {},
           comments: { general: comments || "" },
           score,

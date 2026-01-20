@@ -5,6 +5,8 @@
 
 import { Project } from "@/types/project";
 
+const CUSTOM_SEMESTERS_KEY = "customSemesters";
+
 /**
  * Get the current semester based on the current date
  */
@@ -40,7 +42,8 @@ export function formatSemesterLabel(semester: string): string {
  * Get all unique semesters from a list of projects, sorted newest first
  */
 export function getAvailableSemesters(projects: Project[]): string[] {
-    const semesters = [...new Set(projects.map((p) => p.semester))];
+    const custom = getCustomSemesters();
+    const semesters = [...new Set([...projects.map((p) => p.semester), ...custom])];
     return semesters.sort((a, b) => {
         const aParsed = parseSemester(a);
         const bParsed = parseSemester(b);
@@ -85,6 +88,31 @@ export function setStoredSemester(semester: string): void {
     try {
         localStorage.setItem("selectedSemester", semester);
     } catch { }
+}
+
+export function getCustomSemesters(): string[] {
+    if (typeof window === "undefined") return [];
+    try {
+        const raw = localStorage.getItem(CUSTOM_SEMESTERS_KEY);
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+    } catch {
+        return [];
+    }
+}
+
+export function addCustomSemester(semester: string): string[] {
+    if (typeof window === "undefined") return [];
+    const cleaned = semester.trim();
+    if (!cleaned) return getCustomSemesters();
+    const existing = getCustomSemesters();
+    if (existing.includes(cleaned)) return existing;
+    const updated = [...existing, cleaned];
+    try {
+        localStorage.setItem(CUSTOM_SEMESTERS_KEY, JSON.stringify(updated));
+    } catch { }
+    return updated;
 }
 
 /**

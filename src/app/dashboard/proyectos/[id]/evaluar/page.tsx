@@ -1,20 +1,17 @@
 "use client";
 
 import React from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import PageTransition from "@/components/ui/PageTransition";
 import DashboardHeader from "@/components/layout/DashboardHeader";
 import EvaluationForm from "@/components/evaluation/EvaluationForm";
 import { PROJECT_QUESTIONS } from "@/lib/questions/questions";
 import { ArrowLeft } from "lucide-react";
 
-export default function EvaluarProyectoPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default function EvaluarProyectoPage() {
   const router = useRouter();
-  const { id: projectId } = React.use(params);
+  const params = useParams();
+  const projectId = Array.isArray(params.id) ? params.id[0] : params.id;
   const typeParam = "proyecto";
 
   return (

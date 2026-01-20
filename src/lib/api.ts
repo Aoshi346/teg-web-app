@@ -64,7 +64,17 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    const message = errorData.detail || errorData.message || "Something went wrong";
+    let message = errorData.detail || errorData.message;
+
+    if (!message && errorData && typeof errorData === "object") {
+      const firstKey = Object.keys(errorData)[0];
+      const value = (errorData as Record<string, unknown>)[firstKey];
+      if (Array.isArray(value) && value.length > 0 && typeof value[0] === "string") {
+        message = value[0];
+      }
+    }
+
+    if (!message) message = "Something went wrong";
     throw new Error(message);
   }
 

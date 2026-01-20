@@ -65,6 +65,14 @@ export default function TesisPage(props: TesisPageProps = {}) {
       : availableSemesters[0] || stored;
   });
 
+  useEffect(() => {
+    if (availableSemesters.length === 0) return;
+    if (!availableSemesters.includes(selectedSemester)) {
+      setSelectedSemester(availableSemesters[0]);
+      setStoredSemester(availableSemesters[0]);
+    }
+  }, [availableSemesters, selectedSemester]);
+
   const handleSemesterChange = (semester: string) => {
     setSelectedSemester(semester);
     setStoredSemester(semester);
@@ -72,7 +80,10 @@ export default function TesisPage(props: TesisPageProps = {}) {
 
   // Filter by semester first, then by search/status
   const semesterProjects = useMemo<Project[]>(
-    () => allProjects.filter((p) => p.semester === selectedSemester),
+    () =>
+      selectedSemester
+        ? allProjects.filter((p) => p.semester === selectedSemester)
+        : allProjects,
     [selectedSemester, allProjects],
   );
 

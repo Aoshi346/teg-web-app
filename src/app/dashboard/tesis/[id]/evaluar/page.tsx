@@ -1,19 +1,16 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import PageTransition from "@/components/ui/PageTransition";
 import DashboardHeader from "@/components/layout/DashboardHeader";
 import { FileText, CheckCircle, Lock, ArrowLeft } from "lucide-react";
 import { getProject } from "@/features/projects/projectService";
 
-export default function EvaluarTesisPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default function EvaluarTesisPage() {
   const router = useRouter();
-  const { id: projectId } = React.use(params);
+  const params = useParams();
+  const projectId = Array.isArray(params.id) ? params.id[0] : params.id;
   const [stage1Passed, setStage1Passed] = useState(false);
 
   useEffect(() => {

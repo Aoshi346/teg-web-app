@@ -18,7 +18,11 @@ import {
 import DashboardHeader from "@/components/layout/DashboardHeader";
 import PageTransition from "@/components/ui/PageTransition";
 import { getProyectos } from "@/lib/data/mockData";
-import { getProject } from "@/features/projects/projectService";
+import {
+  getProject,
+  getEvaluationsByProject,
+  ApiEvaluation,
+} from "@/features/projects/projectService";
 
 export default function ProyectoDetailsPage() {
   const router = useRouter();
@@ -26,6 +30,7 @@ export default function ProyectoDetailsPage() {
   const id = Number(params.id);
 
   const [project, setProject] = React.useState<ReturnType<typeof getProyectos>[number] | null>(null);
+  const [evaluations, setEvaluations] = React.useState<ApiEvaluation[]>([]);
 
   React.useEffect(() => {
     let mounted = true;
@@ -33,6 +38,8 @@ export default function ProyectoDetailsPage() {
       const apiProject = await getProject(id);
       if (mounted && apiProject && apiProject.type === "proyecto") {
         setProject(apiProject);
+        const evals = await getEvaluationsByProject(id);
+        setEvaluations(evals.sort((a, b) => new Date(b.graded_at).getTime() - new Date(a.graded_at).getTime()));
       } else if (mounted) {
         const local = getProyectos().find(p => p.id === id);
         setProject(local || null);
@@ -103,6 +110,10 @@ export default function ProyectoDetailsPage() {
     project.failedAttempts || (project.status === "rejected" ? 1 : 0);
   const canRetry = project.status === "rejected" && failedAttempts < 2;
   const isFinalRejection = project.status === "rejected" && failedAttempts >= 2;
+  const attemptsUsed = Math.min(
+    project.failedAttempts || evaluations.length || 0,
+    2,
+  );
 
   return (
     <>
@@ -177,6 +188,11 @@ export default function ProyectoDetailsPage() {
                               ? "Sin intentos (2/2)"
                               : `Intento ${failedAttempts}/2 - Puede reintentar`}
                           </span>
+                        </div>
+                      )}
+                      {project.type === "proyecto" && (
+                        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-100">
+                          Intentos usados: {attemptsUsed}/2
                         </div>
                       )}
                     </div>
@@ -373,6 +389,81 @@ export default function ProyectoDetailsPage() {
                         </div>
                       )}
                     </div>
+
+                    {/* Evaluations History */}
+                    {project.type === "proyecto" && (
+                      <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                        <h3 className="text-xs font-bold text-purple-600 uppercase tracking-wider mb-4 flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4" />
+                          Historial de Evaluaciones
+                        </h3>
+                        {evaluations.length === 0 ? (
+                          <p className="text-sm text-gray-500">
+                            Aún no hay evaluaciones registradas.
+                          </p>
+                        ) : (
+                          <div className="space-y-4">
+                            {evaluations.map((ev, idx) => (
+                              <div
+                                key={ev.id}
+                                className="border border-gray-100 rounded-xl p-4 bg-gray-50/70"
+                              >
+                                <div className="flex items-center justify-between gap-3">
+                                  <div className="flex items-center gap-2">
+                                    <div
+                                      className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                                        ev.pass_status === "Pass"
+                                          ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                                          : "bg-rose-50 text-rose-700 border border-rose-200"
+                                      }`}
+                                    >
+                                      {ev.pass_status === "Pass" ? "Aprobado" : "Rechazado"}
+                                    </div>
+                                    <span className="text-xs text-gray-500">
+                                      {new Date(ev.graded_at).toLocaleDateString()}
+                                    </span>
+                                  </div>
+                                  <span className="text-sm font-bold text-gray-900">
+                                    Puntaje: {ev.score}/20
+                                  </span>
+                                </div>
+                                {ev.section_scores && (
+                                  <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-gray-600">
+                                    {"diagramacion" in ev.section_scores && (
+                                      <div className="flex items-center justify-between bg-white px-3 py-2 rounded-lg border border-gray-100">
+                                        <span>Diagramación</span>
+                                        <span className="font-semibold text-blue-600">
+                                          {ev.section_scores.diagramacion}/5
+                                        </span>
+                                      </div>
+                                    )}
+                                    {"contenido" in ev.section_scores && (
+                                      <div className="flex items-center justify-between bg-white px-3 py-2 rounded-lg border border-gray-100">
+                                        <span>Contenido</span>
+                                        <span className="font-semibold text-purple-600">
+                                          {ev.section_scores.contenido}/15
+                                        </span>
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                                {ev.comments && (
+                                  <div className="mt-3 p-3 bg-white rounded-lg border border-gray-100 text-sm text-gray-700">
+                                    <span className="font-semibold text-gray-900">Comentario:</span>
+                                    <p className="mt-1 whitespace-pre-wrap">
+                                      {typeof ev.comments === "string"
+                                        ? ev.comments
+                                        : (ev.comments as any).general || "Sin comentarios"}
+                                    </p>
+                                  </div>
+                                )}
+                                <div className="mt-2 text-xs text-gray-500">Intento {idx + 1}/2</div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

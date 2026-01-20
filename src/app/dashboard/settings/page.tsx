@@ -32,6 +32,11 @@ import UserModal, { UserData } from "@/components/ui/UserModal";
 import Toast, { ToastType } from "@/components/ui/Toast";
 import DeleteModal from "@/components/ui/DeleteModal";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  addCustomSemester,
+  getCustomSemesters,
+  getAvailableSemesterPeriods,
+} from "@/lib/semesters";
 
 export default function SettingsPage({
   handleSidebarCollapse,
@@ -659,6 +664,69 @@ export default function SettingsPage({
                 {/* Admin Users Section */}
                 {activeTab === "users" && role === "Admin" && (
                   <div className="space-y-8">
+                    {/* Semester Management */}
+                    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                      <div className="p-4 sm:p-6 border-b border-gray-50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-gray-50/30">
+                        <div>
+                          <h2 className="text-lg font-bold text-gray-900">Gestión de Semestres</h2>
+                          <p className="text-sm text-gray-500">
+                            Agrega semestres adicionales para los selectores.
+                          </p>
+                        </div>
+                      </div>
+                      <div className="p-4 sm:p-6 space-y-4">
+                        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+                          <input
+                            id="new-semester-input"
+                            type="text"
+                            placeholder="Ej: 2026-02"
+                            className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none"
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                const value = (e.target as HTMLInputElement).value.trim();
+                                if (value) {
+                                  addCustomSemester(value);
+                                  showToast("Semestre agregado.", "success");
+                                  (e.target as HTMLInputElement).value = "";
+                                }
+                              }
+                            }}
+                          />
+                          <button
+                            onClick={() => {
+                              const input = document.getElementById("new-semester-input") as HTMLInputElement | null;
+                              const value = input?.value.trim();
+                              if (value) {
+                                addCustomSemester(value);
+                                showToast("Semestre agregado.", "success");
+                                if (input) input.value = "";
+                              }
+                            }}
+                            className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-700 transition-all shadow-md shadow-blue-500/20"
+                          >
+                            Agregar Semestre
+                          </button>
+                        </div>
+                        <div className="space-y-2">
+                          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Semestres disponibles</p>
+                          <div className="flex flex-wrap gap-2">
+                            {getCustomSemesters().length === 0 && (
+                              <span className="text-sm text-gray-500">No hay semestres adicionales.</span>
+                            )}
+                            {getCustomSemesters().map((sem) => (
+                              <span
+                                key={sem}
+                                className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-100"
+                              >
+                                {sem}
+                              </span>
+                            ))}
+                          </div>
+                          <p className="text-xs text-gray-400">Sugerencias: {getAvailableSemesterPeriods().slice(0,4).join(", ")}</p>
+                        </div>
+                      </div>
+                    </div>
+
                     {/* Pending Approvals Section */}
                     {paginatedUsers.some((u) => u.status === "pending") && (
                       <div className="bg-amber-50 rounded-2xl shadow-sm border border-amber-100 overflow-hidden">
