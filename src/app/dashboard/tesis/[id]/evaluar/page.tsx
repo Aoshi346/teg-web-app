@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import PageTransition from "@/components/ui/PageTransition";
 import DashboardHeader from "@/components/layout/DashboardHeader";
 import { FileText, CheckCircle, Lock, ArrowLeft } from "lucide-react";
+import { getProject } from "@/features/projects/projectService";
 
 export default function EvaluarTesisPage({
   params,
@@ -16,10 +17,17 @@ export default function EvaluarTesisPage({
   const [stage1Passed, setStage1Passed] = useState(false);
 
   useEffect(() => {
-    // Mock check
-    const passed =
-      sessionStorage.getItem(`project_${projectId}_stage1_passed`) === "true";
-    setStage1Passed(passed);
+    let mounted = true;
+    (async () => {
+      const apiProject = await getProject(Number(projectId));
+      if (mounted && apiProject && apiProject.type === "tesis") {
+        setStage1Passed(Boolean(apiProject.stage1Passed));
+      } else if (mounted) {
+        const passed = sessionStorage.getItem(`project_${projectId}_stage1_passed`) === "true";
+        setStage1Passed(passed);
+      }
+    })();
+    return () => { mounted = false; };
   }, [projectId]);
 
   // Helper to toggle pass status for demo purposes
@@ -27,6 +35,7 @@ export default function EvaluarTesisPage({
     const newState = !stage1Passed;
     setStage1Passed(newState);
     if (projectId) {
+      // Demo-only: local toggle. In a real flow, this should PATCH the backend to update stage1_passed.
       sessionStorage.setItem(
         `project_${projectId}_stage1_passed`,
         String(newState)

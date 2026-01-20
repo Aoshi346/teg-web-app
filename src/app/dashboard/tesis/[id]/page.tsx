@@ -18,6 +18,7 @@ import {
 import DashboardHeader from "@/components/layout/DashboardHeader";
 import PageTransition from "@/components/ui/PageTransition";
 import { getTesis } from "@/lib/data/mockData";
+import { getProject } from "@/features/projects/projectService";
 import { getUserRole } from "@/features/auth/clientAuth";
 
 export default function TesisDetailsPage() {
@@ -26,8 +27,21 @@ export default function TesisDetailsPage() {
   const id = Number(params.id);
   const userRole = getUserRole();
 
-  const theses = getTesis();
-  const project = theses.find((p) => p.id === id);
+  const [project, setProject] = React.useState<ReturnType<typeof getTesis>[number] | null>(null);
+
+  React.useEffect(() => {
+    let mounted = true;
+    (async () => {
+      const apiProject = await getProject(id);
+      if (mounted && apiProject && apiProject.type === "tesis") {
+        setProject(apiProject);
+      } else if (mounted) {
+        const local = getTesis().find(p => p.id === id);
+        setProject(local || null);
+      }
+    })();
+    return () => { mounted = false; };
+  }, [id]);
 
   if (!project) {
     return (

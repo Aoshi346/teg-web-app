@@ -15,7 +15,7 @@ import {
 import DashboardHeader from "@/components/layout/DashboardHeader";
 import PageTransition from "@/components/ui/PageTransition";
 import SemesterSelector from "@/components/ui/SemesterSelector";
-import { Project } from "@/lib/data/mockData";
+import { Project } from "@/types/project";
 import { getAllProjects } from "@/features/projects/projectService";
 import {
   getAvailableSemesters,
@@ -201,7 +201,8 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
   const hasAnimatedRef = useRef(false);
   const router = useRouter();
 
-  const user = getUser();
+  // Read user once to avoid effect loops caused by changing object references
+  const user = useMemo(() => getUser(), []);
   const isStudent = user?.role === "Estudiante";
 
   // State for data
@@ -250,7 +251,7 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
         const allTesis = apiProjects.filter((p) => p.type === "tesis");
 
         // Student View: Only their own project
-        if (isStudent && user) {
+        if (isStudent) {
           // Backend filters by user, so we just take what we have
           // Filter by selected semester:
           const myPteg = allProyectos.find((p) => p.semester === semester);
@@ -448,7 +449,7 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
     };
 
     fetchData();
-  }, [semester, isStudent, user, user?.email]);
+  }, [semester, isStudent]);
 
   useEffect(() => {
     // Skip if already animated this session

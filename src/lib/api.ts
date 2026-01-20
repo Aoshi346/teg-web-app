@@ -1,5 +1,16 @@
 const API_URL = "http://localhost:8000/api";
 
+// Helper: read csrftoken from cookie
+function getCookie(name: string): string | null {
+  if (typeof document === "undefined") return null;
+  const cookies = document.cookie ? document.cookie.split(";") : [];
+  for (const cookie of cookies) {
+    const [key, ...rest] = cookie.trim().split("=");
+    if (key === name) return decodeURIComponent(rest.join("="));
+  }
+  return null;
+}
+
 interface RequestOptions extends RequestInit {
   data?: unknown;
 }
@@ -7,9 +18,9 @@ interface RequestOptions extends RequestInit {
 async function request<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
   const { data, ...customConfig } = options;
   
-  const headers = {
+  const headers: Record<string, string> = {
     "Content-Type": "application/json",
-    ...customConfig.headers,
+    ...((customConfig.headers as Record<string, string>) || {}),
   };
 
   const config: RequestInit = {
@@ -21,6 +32,26 @@ async function request<T>(endpoint: string, options: RequestOptions = {}): Promi
 
   if (data) {
     config.body = JSON.stringify(data);
+  }
+
+  // Attach CSRF for unsafe methods
+  const unsafeMethods = ["POST", "PUT", "PATCH", "DELETE"];
+  const method = (config.method || "GET").toUpperCase();
+  if (unsafeMethods.includes(method)) {
+    // Ensure we have a CSRF token cookie; if not, fetch it
+    let csrfToken = getCookie("csrftoken");
+    if (!csrfToken) {
+      try {
+        // Fetch CSRF token to set cookie
+        await fetch(`${API_URL}/csrf/`, { credentials: "include" });
+        csrfToken = getCookie("csrftoken");
+      } catch (e) {
+        // proceed; server may still accept if CSRF is exempt in dev
+      }
+    }
+    if (csrfToken) {
+      headers["X-CSRFToken"] = csrfToken;
+    }
   }
 
   const response = await fetch(`${API_URL}${endpoint}`, config);

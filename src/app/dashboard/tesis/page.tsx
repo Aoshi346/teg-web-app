@@ -7,6 +7,7 @@ import DashboardHeader from "@/components/layout/DashboardHeader";
 import PageTransition from "@/components/ui/PageTransition";
 import SemesterSelector from "@/components/ui/SemesterSelector";
 import { getTesis, Project } from "@/lib/data/mockData";
+import { getAllProjects } from "@/features/projects/projectService";
 import {
   getAvailableSemesters,
   getStoredSemester,
@@ -37,7 +38,18 @@ export default function TesisPage(props: TesisPageProps = {}) {
   const [allProjects, setAllProjects] = useState<Project[]>([]);
 
   useEffect(() => {
-    setAllProjects(getTesis());
+    let mounted = true;
+    (async () => {
+      const apiProjects = await getAllProjects();
+      const onlyTesis = apiProjects.filter(p => p.type === "tesis");
+      if (mounted && onlyTesis.length > 0) {
+        setAllProjects(onlyTesis);
+      } else if (mounted) {
+        // Fallback to local mock data
+        setAllProjects(getTesis());
+      }
+    })();
+    return () => { mounted = false; };
   }, []);
 
   // Semester state - persisted in localStorage

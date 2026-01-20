@@ -18,14 +18,28 @@ import {
 import DashboardHeader from "@/components/layout/DashboardHeader";
 import PageTransition from "@/components/ui/PageTransition";
 import { getProyectos } from "@/lib/data/mockData";
+import { getProject } from "@/features/projects/projectService";
 
 export default function ProyectoDetailsPage() {
   const router = useRouter();
   const params = useParams();
   const id = Number(params.id);
 
-  const projects = getProyectos();
-  const project = projects.find((p) => p.id === id);
+  const [project, setProject] = React.useState<ReturnType<typeof getProyectos>[number] | null>(null);
+
+  React.useEffect(() => {
+    let mounted = true;
+    (async () => {
+      const apiProject = await getProject(id);
+      if (mounted && apiProject && apiProject.type === "proyecto") {
+        setProject(apiProject);
+      } else if (mounted) {
+        const local = getProyectos().find(p => p.id === id);
+        setProject(local || null);
+      }
+    })();
+    return () => { mounted = false; };
+  }, [id]);
 
   if (!project) {
     return (

@@ -21,8 +21,8 @@ import Banner from "@/components/ui/Banner";
 import { ImageTooltip } from "@/components/ui/ImageTooltip";
 
 import { useValidation } from "@/hooks/useValidation";
-import { Project, getProyectos, getTesis, updateProyecto, updateTesis } from "@/lib/data/mockData";
-import { updateProject } from "@/features/projects/projectService";
+import { Project } from "@/types/project";
+import { updateProject, getProject } from "@/features/projects/projectService";
 
 interface EvaluationFormProps {
   projectId?: string | null;
@@ -50,17 +50,21 @@ export default function EvaluationForm({
   // Fetch project data
   const [projectData, setProjectData] = useState<Project | null>(null);
 
+  // Load project from backend
   React.useEffect(() => {
     if (!projectId) return;
-
     const id = parseInt(projectId);
-    const list = documentType === "Tesis" ? getTesis() : getProyectos();
-    const found = list.find((p) => p.id === id);
-
-    if (found) {
-      setProjectData(found);
-    }
-  }, [projectId, documentType]);
+    getProject(id).then((p) => {
+      if (p) setProjectData(p);
+    });
+  }, [projectId]);
+  React.useEffect(() => {
+    if (!projectId) return;
+    const id = parseInt(projectId);
+    getProject(id).then((p) => {
+      if (p) setProjectData(p);
+    });
+  }, [projectId]);
 
   const sourceQuestions = questions;
   const filteredQuestions = sourceQuestions.filter(
@@ -651,20 +655,14 @@ export default function EvaluationForm({
             updatedProject.stage1Passed = true;
           }
         }
-        // Try backend first
-        try {
-          await updateProject(updatedProject.id, {
-            status: updatedProject.status,
-            score: updatedProject.score ?? 0,
-            diagramacion_score: updatedProject.diagramacionScore ?? 0,
-            contenido_score: updatedProject.contenidoScore ?? 0,
-            review_date: updatedProject.reviewDate,
-            stage1_passed: updatedProject.stage1Passed ?? false,
-          });
-        } catch (err) {
-          console.warn("Falling back to local updateTesis due to API error:", err);
-          updateTesis(updatedProject);
-        }
+        await updateProject(updatedProject.id, {
+          status: updatedProject.status,
+          score: updatedProject.score ?? 0,
+          diagramacion_score: updatedProject.diagramacionScore ?? 0,
+          contenido_score: updatedProject.contenidoScore ?? 0,
+          review_date: updatedProject.reviewDate,
+          stage1_passed: updatedProject.stage1Passed ?? false,
+        });
       } else {
         // Project specific logic for failure attempts
         if (passStatus === "Fail") {
@@ -680,20 +678,14 @@ export default function EvaluationForm({
         } else {
           updatedProject.status = "checked";
         }
-        // Try backend first
-        try {
-          await updateProject(updatedProject.id, {
-            status: updatedProject.status,
-            score: updatedProject.score ?? 0,
-            diagramacion_score: updatedProject.diagramacionScore ?? 0,
-            contenido_score: updatedProject.contenidoScore ?? 0,
-            review_date: updatedProject.reviewDate,
-            failed_attempts: updatedProject.failedAttempts ?? 0,
-          });
-        } catch (err) {
-          console.warn("Falling back to local updateProyecto due to API error:", err);
-          updateProyecto(updatedProject);
-        }
+        await updateProject(updatedProject.id, {
+          status: updatedProject.status,
+          score: updatedProject.score ?? 0,
+          diagramacion_score: updatedProject.diagramacionScore ?? 0,
+          contenido_score: updatedProject.contenidoScore ?? 0,
+          review_date: updatedProject.reviewDate,
+          failed_attempts: updatedProject.failedAttempts ?? 0,
+        });
       }
     }
 

@@ -19,6 +19,7 @@ import PageTransition from "@/components/ui/PageTransition";
 import Banner from "@/components/ui/Banner";
 import SemesterSelector from "@/components/ui/SemesterSelector";
 import { addProyecto, addTesis } from "@/lib/data/mockData";
+import { createProject } from "@/features/projects/projectService";
 import { getAvailableSemesterPeriods } from "@/lib/semesters";
 
 type DocumentType = "proyecto" | "tesis";
@@ -178,29 +179,41 @@ export default function AgregarDocumentoPage() {
     setIsSubmitting(true);
 
     try {
-      const newDocument = {
-        title: formData.title.trim(),
-        student: validStudents.join(", "),
-        advisor: validAdvisors.join(", "),
-        submittedDate: new Date().toISOString().split("T")[0],
-        status: "pending" as const,
-        semester: formData.semesterPeriod,
-      };
-
-      if (documentType === "proyecto") {
-        addProyecto(newDocument);
-      } else {
-        addTesis(newDocument);
+      // Try backend first
+      try {
+        await createProject({
+          title: formData.title.trim(),
+          advisor: validAdvisors.join(", "),
+          semester: formData.semesterPeriod,
+          project_type: documentType,
+          status: "pending",
+        });
+        setBannerState({
+          visible: true,
+          message: `${documentType === "proyecto" ? "Proyecto" : "Tesis"} agregado exitosamente.`,
+          type: "success",
+        });
+      } catch (err) {
+        console.warn("Falling back to local add due to API error:", err);
+        const newDocument = {
+          title: formData.title.trim(),
+          student: validStudents.join(", "),
+          advisor: validAdvisors.join(", "),
+          submittedDate: new Date().toISOString().split("T")[0],
+          status: "pending" as const,
+          semester: formData.semesterPeriod,
+        };
+        if (documentType === "proyecto") {
+          addProyecto(newDocument);
+        } else {
+          addTesis(newDocument);
+        }
+        setBannerState({
+          visible: true,
+          message: `${documentType === "proyecto" ? "Proyecto" : "Tesis"} agregado localmente (sin backend).`,
+          type: "warning",
+        });
       }
-
-      // Simulate network delay
-      await new Promise((resolve) => setTimeout(resolve, 800));
-
-      setBannerState({
-        visible: true,
-        message: `${documentType === "proyecto" ? "Proyecto" : "Tesis"} agregado exitosamente.`,
-        type: "success",
-      });
 
       // Reset form
       setFormData({

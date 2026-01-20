@@ -3,7 +3,7 @@
  * Semester format: "YYYY-SS" where SS is 01 (Jan-Jun) or 02 (Jul-Dec)
  */
 
-import { Project } from "@/lib/data/mockData";
+import { Project } from "@/types/project";
 
 /**
  * Get the current semester based on the current date

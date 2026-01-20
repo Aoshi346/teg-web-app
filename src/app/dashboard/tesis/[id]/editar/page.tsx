@@ -6,6 +6,7 @@ import DashboardHeader from "@/components/layout/DashboardHeader";
 import PageTransition from "@/components/ui/PageTransition";
 import DocumentForm from "@/components/dashboard/DocumentForm";
 import { getTesis, Project } from "@/lib/data/mockData";
+import { getProject } from "@/features/projects/projectService";
 import { ArrowLeft } from "lucide-react";
 
 export default function EditarTesisPage({
@@ -20,11 +21,16 @@ export default function EditarTesisPage({
 
   useEffect(() => {
     if (id) {
-      const allTesis = getTesis();
-      const found = allTesis.find((t) => t.id === parseInt(id));
-      if (found) {
-        setProject(found);
-      }
+      (async () => {
+        const apiProject = await getProject(parseInt(id));
+        if (apiProject && apiProject.type === "tesis") {
+          setProject(apiProject as Project);
+        } else {
+          const allTesis = getTesis();
+          const found = allTesis.find((t) => t.id === parseInt(id));
+          if (found) setProject(found);
+        }
+      })();
     }
     setIsLoading(false);
   }, [id]);

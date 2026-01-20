@@ -23,6 +23,8 @@ import {
   updateTesis,
   Project,
 } from "@/lib/data/mockData";
+import { createProject, updateProject as apiUpdateProject, reassignStudent } from "@/features/projects/projectService";
+import { getAllUsers, getUserRole } from "@/features/auth/clientAuth";
 import { getAvailableSemesterPeriods } from "@/lib/semesters";
 
 interface DocumentFormProps {
@@ -95,6 +97,26 @@ export default function DocumentForm({
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { showBanner, bannerProps } = useValidation();
+  const [studentsList, setStudentsList] = useState<Array<{ id: number; label: string }>>([]);
+  const [selectedStudentId, setSelectedStudentId] = useState<number | null>(null);
+  const userRole = getUserRole();
+
+  // Admins: fetch students for reassignment in edit mode
+  useEffect(() => {
+    const fetchUsers = async () => {
+      if (mode === "edit" && userRole === "Admin") {
+        const users = await getAllUsers();
+        const students = users.filter(u => u.role === "Estudiante" && typeof u.id === "number");
+        setStudentsList(students.map(u => ({ id: u.id!, label: (u.fullName || u.email) as string })));
+        if (initialData) {
+          const match = students.find(u => (u.fullName || u.email) === initialData.student);
+          if (match && match.id) setSelectedStudentId(match.id);
+        }
+      }
+    };
+    fetchUsers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode, userRole]);
 
   // Handlers
   const handleStudentChange = (index: number, value: string) => {
@@ -195,15 +217,27 @@ export default function DocumentForm({
       };
 
       if (mode === "create") {
-        payload.status = "pending";
-        payload.submittedDate = new Date().toISOString().split("T")[0];
-
-        if (documentType === "proyecto") {
-          addProyecto(payload as Omit<Project, "id">);
-        } else {
-          addTesis(payload as Omit<Project, "id">);
+        // Backend create (student assigned server-side)
+        try {
+          await createProject({
+            title: payload.title || "",
+            advisor: payload.advisor || "",
+            semester: payload.semester || "",
+            project_type: documentType,
+            status: "pending",
+          });
+          showBanner("Documento agregado exitosamente.", "success");
+        } catch (err) {
+          console.warn("Falling back to local add due to API error:", err);
+          payload.status = "pending";
+          payload.submittedDate = new Date().toISOString().split("T")[0];
+          if (documentType === "proyecto") {
+            addProyecto(payload as Omit<Project, "id">);
+          } else {
+            addTesis(payload as Omit<Project, "id">);
+          }
+          showBanner("Documento agregado localmente (sin backend).", "warning");
         }
-        showBanner("Documento agregado exitosamente.", "success");
       } else {
         // Edit Mode
         if (!initialData) throw new Error("No initial data for edit");
@@ -212,13 +246,29 @@ export default function DocumentForm({
           ...initialData,
           ...payload,
         };
-
-        if (documentType === "proyecto") {
-          updateProyecto(updatedDoc);
-        } else {
-          updateTesis(updatedDoc);
+        // Backend update first
+        try {
+          await apiUpdateProject(updatedDoc.id, {
+            title: updatedDoc.title,
+            advisor: updatedDoc.advisor,
+            semester: updatedDoc.semester,
+            project_type: documentType,
+            status: updatedDoc.status,
+          });
+          // If Admin selected a different student, reassign
+          if (userRole === "Admin" && selectedStudentId) {
+            await reassignStudent(updatedDoc.id, { student: selectedStudentId });
+          }
+          showBanner("Cambios guardados exitosamente.", "success");
+        } catch (err) {
+          console.warn("Falling back to local update due to API error:", err);
+          if (documentType === "proyecto") {
+            updateProyecto(updatedDoc);
+          } else {
+            updateTesis(updatedDoc);
+          }
+          showBanner("Cambios guardados localmente (sin backend).", "warning");
         }
-        showBanner("Cambios guardados exitosamente.", "success");
       }
 
       await new Promise((resolve) => setTimeout(resolve, 800));
@@ -445,6 +495,24 @@ export default function DocumentForm({
               )}
             </div>
           </div>
+
+          {/* Admin-only: Student reassignment */}
+          {mode === "edit" && userRole === "Admin" && (
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-gray-700 ml-1">Reasignar Estudiante</label>
+              <select
+                value={selectedStudentId ?? ""}
+                onChange={(e) => setSelectedStudentId(Number(e.target.value) || null)}
+                className="w-full px-3 py-2.5 bg-white border rounded-lg shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all text-sm"
+              >
+                <option value="">Seleccione un estudiante</option>
+                {studentsList.map(s => (
+                  <option key={s.id} value={s.id}>{s.label}</option>
+                ))}
+              </select>
+              <p className="text-xs text-gray-500">Solo administradores pueden reasignar el dueño del documento.</p>
+            </div>
+          )}
 
           {/* Actions */}
           <div className="pt-6 border-t border-gray-100 flex flex-col sm:flex-row items-center gap-3">
