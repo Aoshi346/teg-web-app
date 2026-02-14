@@ -17,13 +17,13 @@ export default function ScanLayout({
         const currentRole = getUserRole();
         setRole(currentRole);
 
-        if (currentRole === "Admin") {
+        if (currentRole === "Administrador") {
             // Admin not allowed in Scan module
             router.push("/dashboard");
         }
     }, [router]);
 
-    if (role === "Admin") {
+    if (role === "Administrador") {
         return null; // Or a loading spinner/access denied message while redirecting
     }
 

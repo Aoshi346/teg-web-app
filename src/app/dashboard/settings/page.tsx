@@ -165,7 +165,7 @@ export default function SettingsPage({
   }, []);
 
   useEffect(() => {
-    if (role !== "Admin") return;
+    if (role !== "Administrador") return;
     if (activeTab === "users") {
       loadUsers();
       loadSemesters();
@@ -377,7 +377,7 @@ export default function SettingsPage({
                         label: "Notificaciones",
                         icon: Bell,
                       },
-                      ...(role === "Admin"
+                      ...(role === "Administrador"
                         ? [{ id: "users", label: "Usuarios", icon: UserCog }]
                         : []),
                     ].map((item) => (
@@ -445,11 +445,13 @@ export default function SettingsPage({
                           {/* Role Badge */}
                           <span
                             className={`absolute -bottom-1 -right-1 px-2 py-0.5 text-[10px] font-bold rounded-full ring-2 ring-white ${
-                              role === "Admin"
+                              role === "Administrador"
                                 ? "bg-purple-600 text-white"
-                                : role === "Profesor"
+                                : role === "Tutor"
                                   ? "bg-blue-600 text-white"
-                                  : "bg-green-600 text-white"
+                                  : role === "Jurado"
+                                    ? "bg-amber-600 text-white"
+                                    : "bg-green-600 text-white"
                             }`}
                           >
                             {role}
@@ -727,7 +729,7 @@ export default function SettingsPage({
                 )}
 
                 {/* Admin Users Section */}
-                {activeTab === "users" && role === "Admin" && (
+                {activeTab === "users" && role === "Administrador" && (
                   <div className="space-y-8">
                     {/* Semester Management */}
                     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
@@ -878,11 +880,13 @@ export default function SettingsPage({
                                     <td className="px-6 py-4">
                                       <span
                                         className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${
-                                          user.role === "Admin"
+                                          user.role === "Administrador"
                                             ? "bg-purple-50 text-purple-700 border-purple-200"
-                                            : user.role === "Profesor"
+                                            : user.role === "Tutor"
                                               ? "bg-blue-50 text-blue-700 border-blue-200"
-                                              : "bg-green-50 text-green-700 border-green-200"
+                                              : user.role === "Jurado"
+                                                ? "bg-amber-50 text-amber-700 border-amber-200"
+                                                : "bg-green-50 text-green-700 border-green-200"
                                         }`}
                                       >
                                         {user.role}
@@ -943,11 +947,13 @@ export default function SettingsPage({
                                 <div className="mt-3 flex items-center justify-between gap-2">
                                   <span
                                     className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${
-                                      user.role === "Admin"
+                                      user.role === "Administrador"
                                         ? "bg-purple-50 text-purple-700 border-purple-200"
-                                        : user.role === "Profesor"
+                                        : user.role === "Tutor"
                                           ? "bg-blue-50 text-blue-700 border-blue-200"
-                                          : "bg-green-50 text-green-700 border-green-200"
+                                          : user.role === "Jurado"
+                                            ? "bg-amber-50 text-amber-700 border-amber-200"
+                                            : "bg-green-50 text-green-700 border-green-200"
                                     }`}
                                   >
                                     {user.role}
@@ -1035,11 +1041,13 @@ export default function SettingsPage({
                                 <td className="px-6 py-4">
                                   <span
                                     className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${
-                                      user.role === "Admin"
+                                      user.role === "Administrador"
                                         ? "bg-purple-50 text-purple-700 border-purple-200"
-                                        : user.role === "Profesor"
+                                        : user.role === "Tutor"
                                           ? "bg-blue-50 text-blue-700 border-blue-200"
-                                          : "bg-green-50 text-green-700 border-green-200"
+                                          : user.role === "Jurado"
+                                            ? "bg-amber-50 text-amber-700 border-amber-200"
+                                            : "bg-green-50 text-green-700 border-green-200"
                                     }`}
                                   >
                                     {user.role}
@@ -1070,7 +1078,7 @@ export default function SettingsPage({
                                         Aprobar
                                       </button>
                                     )}
-                                    {user.role !== "Admin" && user.email !== email && (
+                                    {user.role !== "Administrador" && user.email !== email && (
                                       <button
                                         onClick={() => openDeleteModal(user)}
                                         className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
@@ -1140,11 +1148,13 @@ export default function SettingsPage({
                             <div className="mt-3 flex flex-wrap gap-2">
                               <span
                                 className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${
-                                  user.role === "Admin"
+                                  user.role === "Administrador"
                                     ? "bg-purple-50 text-purple-700 border-purple-200"
-                                    : user.role === "Profesor"
+                                    : user.role === "Tutor"
                                       ? "bg-blue-50 text-blue-700 border-blue-200"
-                                      : "bg-green-50 text-green-700 border-green-200"
+                                      : user.role === "Jurado"
+                                        ? "bg-amber-50 text-amber-700 border-amber-200"
+                                        : "bg-green-50 text-green-700 border-green-200"
                                 }`}
                               >
                                 {user.role}

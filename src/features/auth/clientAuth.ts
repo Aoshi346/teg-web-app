@@ -7,7 +7,7 @@ export interface User {
   id?: number;
   email: string;
   password?: string;
-  role: 'Admin' | 'Estudiante' | 'Profesor';
+  role: 'Administrador' | 'Estudiante' | 'Jurado' | 'Tutor';
   fullName?: string;
   status: 'active' | 'pending';
   semester?: string;
@@ -17,7 +17,7 @@ export interface User {
 type ApiUser = {
   id?: number;
   email: string;
-  role: 'Admin' | 'Estudiante' | 'Profesor';
+  role: 'Administrador' | 'Estudiante' | 'Jurado' | 'Tutor';
   status: 'active' | 'pending';
   full_name?: string;
   semester?: string | null;

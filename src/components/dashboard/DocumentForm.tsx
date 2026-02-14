@@ -17,15 +17,11 @@ import { useValidation } from "@/hooks/useValidation";
 import Banner from "@/components/ui/Banner";
 import SemesterSelector from "@/components/ui/SemesterSelector";
 import {
-  addProyecto,
-  addTesis,
-  updateProyecto,
-  updateTesis,
   Project,
-} from "@/lib/data/mockData";
+} from "@/types/project";
 import { createProject, updateProject as apiUpdateProject, reassignStudent } from "@/features/projects/projectService";
-import { getAllUsers, getUserRole } from "@/features/auth/clientAuth";
-import { getAvailableSemesterPeriods } from "@/lib/semesters";
+import { getAllUsers, getUser, getUserRole } from "@/features/auth/clientAuth";
+import { compareSemesters, getAvailableSemesterPeriods, getSemesters } from "@/lib/semesters";
 
 interface DocumentFormProps {
   initialData?: Project;
@@ -61,22 +57,16 @@ export default function DocumentForm({
 
   // Form State
   const [title, setTitle] = useState(initialData?.title || "");
-  // Parse students/advisors from string (Data is "Name1, Name2") to array
-  const [students, setStudents] = useState<string[]>(
-    initialData?.student
-      ? initialData.student.split(",").map((s) => s.trim())
-      : [""],
-  );
   const [advisors, setAdvisors] = useState<string[]>(
     initialData?.advisor
       ? initialData.advisor.split(",").map((s) => s.trim())
       : [""],
   );
 
-  const availablePeriods = useMemo(() => getAvailableSemesterPeriods(), []);
-  const [semesterPeriod, setSemesterPeriod] = useState(
-    initialData?.semester || availablePeriods[0] || "",
+  const [availablePeriods, setAvailablePeriods] = useState<string[]>(() =>
+    getAvailableSemesterPeriods(),
   );
+  const [semesterPeriod, setSemesterPeriod] = useState(initialData?.semester || "");
 
   // Ensure semester is set on load
   useEffect(() => {
@@ -85,13 +75,30 @@ export default function DocumentForm({
     }
   }, [availablePeriods, semesterPeriod]);
 
+  // Load semesters from backend, fallback to local list
+  useEffect(() => {
+    const loadSemesters = async () => {
+      const semesters = await getSemesters();
+      const periods = semesters.map((s) => s.period);
+      const sorted = periods.sort((a, b) => compareSemesters(b, a));
+      const fallback = sorted.length ? sorted : getAvailableSemesterPeriods();
+      const merged = initialData?.semester && !fallback.includes(initialData.semester)
+        ? [initialData.semester, ...fallback]
+        : fallback;
+      setAvailablePeriods(merged);
+      if (!semesterPeriod && merged.length > 0) {
+        setSemesterPeriod(merged[0]);
+      }
+    };
+    loadSemesters();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialData?.semester]);
+
   // Validation State
   const [errors, setErrors] = useState<{
     title?: boolean;
-    students: boolean[];
     advisors: boolean[];
   }>({
-    students: [],
     advisors: [],
   });
 
@@ -100,51 +107,26 @@ export default function DocumentForm({
   const [studentsList, setStudentsList] = useState<Array<{ id: number; label: string }>>([]);
   const [selectedStudentId, setSelectedStudentId] = useState<number | null>(null);
   const userRole = getUserRole();
+  const currentUser = useMemo(() => getUser(), []);
 
   // Admins: fetch students for reassignment in edit mode
   useEffect(() => {
     const fetchUsers = async () => {
-      if (mode === "edit" && userRole === "Admin") {
+      if (userRole === "Administrador") {
         const users = await getAllUsers();
         const students = users.filter(u => u.role === "Estudiante" && typeof u.id === "number");
         setStudentsList(students.map(u => ({ id: u.id!, label: (u.fullName || u.email) as string })));
         if (initialData) {
           const match = students.find(u => (u.fullName || u.email) === initialData.student);
           if (match && match.id) setSelectedStudentId(match.id);
+        } else if (students.length === 1) {
+          setSelectedStudentId(students[0].id);
         }
       }
     };
     fetchUsers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode, userRole]);
-
-  // Handlers
-  const handleStudentChange = (index: number, value: string) => {
-    const newStudents = [...students];
-    newStudents[index] = value;
-    setStudents(newStudents);
-    if (errors.students[index]) {
-      const newErrs = [...errors.students];
-      newErrs[index] = false;
-      setErrors((prev) => ({ ...prev, students: newErrs }));
-    }
-  };
-
-  const addStudent = () => {
-    if (students.length < 3) {
-      setStudents([...students, ""]);
-    }
-  };
-
-  const removeStudent = (index: number) => {
-    if (students.length > 1) {
-      setStudents(students.filter((_, i) => i !== index));
-      setErrors((prev) => ({
-        ...prev,
-        students: prev.students.filter((_, i) => i !== index),
-      }));
-    }
-  };
 
   const handleAdvisorChange = (index: number, value: string) => {
     const newAdvisors = [...advisors];
@@ -178,18 +160,13 @@ export default function DocumentForm({
 
     // Validation Logic
     const titleError = !title.trim();
-    const studentsErrors = students.map((s) => !s.trim());
     const advisorsErrors = advisors.map((a) => !a.trim());
 
-    const hasErrors =
-      titleError ||
-      studentsErrors.some(Boolean) ||
-      advisorsErrors.some(Boolean);
+    const hasErrors = titleError || advisorsErrors.some(Boolean);
 
     if (hasErrors) {
       setErrors({
         title: titleError,
-        students: studentsErrors,
         advisors: advisorsErrors,
       });
       showBanner(
@@ -202,12 +179,10 @@ export default function DocumentForm({
     setIsSubmitting(true);
 
     try {
-      const validStudents = students.filter((s) => s.trim());
       const validAdvisors = advisors.filter((a) => a.trim());
 
       const payload: Partial<Project> = {
         title: title.trim(),
-        student: validStudents.join(", "),
         advisor: validAdvisors.join(", "),
         semester: semesterPeriod,
         type: documentType,
@@ -218,26 +193,17 @@ export default function DocumentForm({
 
       if (mode === "create") {
         // Backend create (student assigned server-side)
-        try {
-          await createProject({
-            title: payload.title || "",
-            advisor: payload.advisor || "",
-            semester: payload.semester || "",
-            project_type: documentType,
-            status: "pending",
-          });
-          showBanner("Documento agregado exitosamente.", "success");
-        } catch (err) {
-          console.warn("Falling back to local add due to API error:", err);
-          payload.status = "pending";
-          payload.submittedDate = new Date().toISOString().split("T")[0];
-          if (documentType === "proyecto") {
-            addProyecto(payload as Omit<Project, "id">);
-          } else {
-            addTesis(payload as Omit<Project, "id">);
-          }
-          showBanner("Documento agregado localmente (sin backend).", "warning");
-        }
+        await createProject({
+          title: payload.title || "",
+          advisor: payload.advisor || "",
+          semester: payload.semester || "",
+          project_type: documentType,
+          status: "pending",
+          ...(userRole === "Administrador" && selectedStudentId
+            ? { student: selectedStudentId }
+            : {}),
+        });
+        showBanner("Documento agregado exitosamente.", "success");
       } else {
         // Edit Mode
         if (!initialData) throw new Error("No initial data for edit");
@@ -247,28 +213,18 @@ export default function DocumentForm({
           ...payload,
         };
         // Backend update first
-        try {
-          await apiUpdateProject(updatedDoc.id, {
-            title: updatedDoc.title,
-            advisor: updatedDoc.advisor,
-            semester: updatedDoc.semester,
-            project_type: documentType,
-            status: updatedDoc.status,
-          });
-          // If Admin selected a different student, reassign
-          if (userRole === "Admin" && selectedStudentId) {
-            await reassignStudent(updatedDoc.id, { student: selectedStudentId });
-          }
-          showBanner("Cambios guardados exitosamente.", "success");
-        } catch (err) {
-          console.warn("Falling back to local update due to API error:", err);
-          if (documentType === "proyecto") {
-            updateProyecto(updatedDoc);
-          } else {
-            updateTesis(updatedDoc);
-          }
-          showBanner("Cambios guardados localmente (sin backend).", "warning");
+        await apiUpdateProject(updatedDoc.id, {
+          title: updatedDoc.title,
+          advisor: updatedDoc.advisor,
+          semester: updatedDoc.semester,
+          project_type: documentType,
+          status: updatedDoc.status,
+        });
+        // If Admin selected a different student, reassign
+        if (userRole === "Administrador" && selectedStudentId) {
+          await reassignStudent(updatedDoc.id, { student: selectedStudentId });
         }
+        showBanner("Cambios guardados exitosamente.", "success");
       }
 
       await new Promise((resolve) => setTimeout(resolve, 800));
@@ -362,71 +318,53 @@ export default function DocumentForm({
             </div>
           </div>
 
-          {/* Students Section */}
+          {/* Student Section */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Users className="w-5 h-5 text-purple-500" />
                 <label className="text-sm font-bold text-gray-800">
-                  Estudiantes
+                  Estudiante responsable
                 </label>
-                <span className="text-xs font-semibold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
-                  {students.length}/3
-                </span>
               </div>
             </div>
 
-            <div className="space-y-3">
-              {students.map((student, index) => (
+            <div
+              className="group relative bg-gradient-to-br from-purple-50/50 to-transparent border-purple-100 border rounded-xl p-4 hover:shadow-md transition-all duration-300"
+            >
+              <div className="flex items-start gap-3">
                 <div
-                  key={`st-${index}`}
-                  className={`group relative bg-gradient-to-br ${errors.students[index] ? "from-red-50 to-white border-red-200" : "from-purple-50/50 to-transparent border-purple-100"} border rounded-xl p-4 hover:shadow-md transition-all duration-300`}
+                  className="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center mt-0.5 bg-purple-100 text-purple-600"
                 >
-                  <div className="flex items-start gap-3">
-                    <div
-                      className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center mt-0.5 ${errors.students[index] ? "bg-red-100 text-red-600" : "bg-purple-100 text-purple-600"}`}
-                    >
-                      <User className="w-5 h-5" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <label
-                        className={`text-xs font-semibold mb-1.5 block ${errors.students[index] ? "text-red-700" : "text-purple-700"}`}
-                      >
-                        Estudiante {index + 1}
-                      </label>
-                      <div className="relative">
-                        <input
-                          type="text"
-                          value={student}
-                          onChange={(e) =>
-                            handleStudentChange(index, e.target.value)
-                          }
-                          className={`w-full px-3 py-2.5 bg-white border rounded-lg shadow-sm focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all text-sm font-medium ${errors.students[index] ? "border-red-300" : "border-gray-200"}`}
-                          placeholder="Nombre completo"
-                        />
-                      </div>
-                    </div>
-                    {students.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => removeStudent(index)}
-                        className="mt-6 p-2 rounded-lg hover:bg-red-50 text-red-400 hover:text-red-600 transition-colors"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    )}
-                  </div>
+                  <User className="w-5 h-5" />
                 </div>
-              ))}
-              {students.length < 3 && (
-                <button
-                  type="button"
-                  onClick={addStudent}
-                  className="w-full p-3 border border-dashed border-purple-300 rounded-xl bg-purple-50/30 text-purple-600 hover:bg-purple-50 font-semibold text-sm flex items-center justify-center gap-2 transition-all"
-                >
-                  <Plus className="w-4 h-4" /> Agregar Estudiante
-                </button>
-              )}
+                <div className="flex-1 min-w-0">
+                  <label className="text-xs font-semibold mb-1.5 block text-purple-700">
+                    Estudiante asignado
+                  </label>
+                  {userRole === "Administrador" ? (
+                    <select
+                      value={selectedStudentId ?? ""}
+                      onChange={(e) => setSelectedStudentId(Number(e.target.value) || null)}
+                      className="w-full px-3 py-2.5 bg-white border rounded-lg shadow-sm focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all text-sm font-medium border-gray-200"
+                    >
+                      <option value="">Seleccione un estudiante</option>
+                      {studentsList.map((s) => (
+                        <option key={s.id} value={s.id}>
+                          {s.label}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      type="text"
+                      disabled
+                      value={initialData?.student || currentUser?.fullName || currentUser?.email || "Asignado automáticamente"}
+                      className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg shadow-sm text-sm font-medium text-gray-600 cursor-not-allowed"
+                    />
+                  )}
+                </div>
+              </div>
             </div>
           </div>
 
@@ -495,24 +433,6 @@ export default function DocumentForm({
               )}
             </div>
           </div>
-
-          {/* Admin-only: Student reassignment */}
-          {mode === "edit" && userRole === "Admin" && (
-            <div className="space-y-2">
-              <label className="text-sm font-semibold text-gray-700 ml-1">Reasignar Estudiante</label>
-              <select
-                value={selectedStudentId ?? ""}
-                onChange={(e) => setSelectedStudentId(Number(e.target.value) || null)}
-                className="w-full px-3 py-2.5 bg-white border rounded-lg shadow-sm focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all text-sm"
-              >
-                <option value="">Seleccione un estudiante</option>
-                {studentsList.map(s => (
-                  <option key={s.id} value={s.id}>{s.label}</option>
-                ))}
-              </select>
-              <p className="text-xs text-gray-500">Solo administradores pueden reasignar el dueño del documento.</p>
-            </div>
-          )}
 
           {/* Actions */}
           <div className="pt-6 border-t border-gray-100 flex flex-col sm:flex-row items-center gap-3">

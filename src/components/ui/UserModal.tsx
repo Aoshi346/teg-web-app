@@ -18,7 +18,7 @@ export interface UserData {
   email: string;
   semester?: string;
   phone?: string;
-  role: "Estudiante" | "Profesor" | "Admin";
+  role: "Estudiante" | "Tutor" | "Jurado" | "Administrador";
   status?: "active" | "pending";
 }
 
@@ -185,8 +185,9 @@ export default function UserModal({
                   className="w-full pl-10 pr-8 py-2.5 bg-white ring-1 ring-gray-200 rounded-xl text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 outline-none transition-all appearance-none cursor-pointer"
                 >
                   <option value="Estudiante">Estudiante</option>
-                  <option value="Profesor">Profesor</option>
-                  <option value="Admin">Administrador</option>
+                  <option value="Tutor">Tutor</option>
+                  <option value="Jurado">Jurado</option>
+                  <option value="Administrador">Administrador</option>
                 </select>
                 <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
               </div>

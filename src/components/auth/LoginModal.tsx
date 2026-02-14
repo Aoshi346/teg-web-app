@@ -323,7 +323,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const [loginPassword, setLoginPassword] = useState("");
   const [registerFullName, setRegisterFullName] = useState("");
   const [registerEmail, setRegisterEmail] = useState("");
-  const [registerRole, setRegisterRole] = useState<"Estudiante" | "Profesor">(
+  const [registerRole, setRegisterRole] = useState<"Estudiante" | "Tutor" | "Jurado">(
     "Estudiante",
   );
   const [registerPassword, setRegisterPassword] = useState("");
@@ -677,13 +677,14 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                           value={registerRole}
                           onChange={(e) =>
                             setRegisterRole(
-                              e.target.value as "Estudiante" | "Profesor",
+                              e.target.value as "Estudiante" | "Tutor" | "Jurado",
                             )
                           }
                           className="w-full pl-12 pr-4 h-11 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none appearance-none cursor-pointer transition-all duration-200"
                         >
                           <option value="Estudiante">Estudiante</option>
-                          <option value="Profesor">Profesor</option>
+                          <option value="Tutor">Tutor</option>
+                          <option value="Jurado">Jurado</option>
                         </select>
                       </div>
                     </div>

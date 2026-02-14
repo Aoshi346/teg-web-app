@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { X, CheckCircle, AlertCircle, Info } from "lucide-react";
+import { X, CheckCircle, AlertCircle, Info, AlertTriangle } from "lucide-react";
 
-export type ToastType = "success" | "error" | "info";
+export type ToastType = "success" | "error" | "info" | "warning";
 
 interface ToastProps {
   message: string;
@@ -18,7 +18,7 @@ export default function Toast({
   type = "info",
   isVisible,
   onClose,
-  duration = 3000
+  duration = 3000,
 }: ToastProps) {
   const [isShowing, setIsShowing] = useState(false);
 
@@ -40,28 +40,39 @@ export default function Toast({
 
   const getIcon = () => {
     switch (type) {
-      case "success": return <CheckCircle className="w-5 h-5 text-emerald-500" />;
-      case "error": return <AlertCircle className="w-5 h-5 text-red-500" />;
-      default: return <Info className="w-5 h-5 text-blue-500" />;
+      case "success":
+        return <CheckCircle className="w-5 h-5 text-emerald-500" />;
+      case "error":
+        return <AlertCircle className="w-5 h-5 text-red-500" />;
+      case "warning":
+        return <AlertTriangle className="w-5 h-5 text-amber-500" />;
+      default:
+        return <Info className="w-5 h-5 text-blue-500" />;
     }
   };
 
   const getStyles = () => {
     switch (type) {
-      case "success": return "border-emerald-100 bg-white";
-      case "error": return "border-red-100 bg-white";
-      default: return "border-blue-100 bg-white";
+      case "success":
+        return "border-emerald-100 bg-white";
+      case "error":
+        return "border-red-100 bg-white";
+      case "warning":
+        return "border-amber-100 bg-white";
+      default:
+        return "border-blue-100 bg-white";
     }
   };
 
   return (
     <div
-      className={`fixed bottom-4 right-4 z-[110] flex items-center gap-3 px-4 py-3 rounded-xl border shadow-lg transition-all duration-300 transform ${isShowing ? "translate-y-0 opacity-100 scale-100" : "translate-y-2 opacity-0 scale-95"
-        } ${getStyles()}`}
+      className={`fixed bottom-4 right-4 z-[110] flex items-center gap-3 px-4 py-3 rounded-xl border shadow-lg transition-all duration-300 transform ${
+        isShowing
+          ? "translate-y-0 opacity-100 scale-100"
+          : "translate-y-2 opacity-0 scale-95"
+      } ${getStyles()}`}
     >
-      <div className="flex-shrink-0">
-        {getIcon()}
-      </div>
+      <div className="flex-shrink-0">{getIcon()}</div>
       <p className="text-sm font-medium text-gray-700">{message}</p>
       <button
         onClick={() => setIsShowing(false)}

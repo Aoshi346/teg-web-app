@@ -103,7 +103,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         label: "Trabajo Especial (TEG)",
         href: "/dashboard/tesis",
       },
-      { icon: ScanLine, label: "Escanear Documento", href: "/dashboard/scan", requiredRole: ["Estudiante", "Profesor"] },
+      { icon: ScanLine, label: "Escanear Documento", href: "/dashboard/scan", requiredRole: ["Estudiante", "Tutor", "Jurado"] },
       { icon: TrendingUp, label: "Seguimiento", href: "/dashboard/tracking" },
       {
         icon: PlusCircle,

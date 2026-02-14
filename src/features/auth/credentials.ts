@@ -1,7 +1,8 @@
 export const TEST_USERS = [
-  { email: 'admin@tesisfar.com', password: 'admin', role: 'Admin' },
+  { email: 'admin@tesisfar.com', password: 'admin', role: 'Administrador' },
   { email: 'estudiante@example.com', password: 'est123', role: 'Estudiante' },
-  { email: 'profesor@example.com', password: 'prof123', role: 'Profesor' },
+  { email: 'tutor@example.com', password: 'prof123', role: 'Tutor' },
+  { email: 'jurado@example.com', password: 'jur123', role: 'Jurado' },
 ];
 
 // Backwards-compatible single exported constants (deprecated but kept for convenience)

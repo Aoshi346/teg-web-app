@@ -72,6 +72,7 @@ export default function AgregarDocumentoPage() {
   const currentUser = useMemo(() => getUser(), []);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const isStudent = userRole === "Estudiante";
+  const isStaffReviewer = userRole === "Tutor" || userRole === "Jurado";
   const studentSemester = (currentUser?.semester || "").toLowerCase();
 
   const allowedDocumentTypes = useMemo(() => {
@@ -107,7 +108,7 @@ export default function AgregarDocumentoPage() {
     loadSemesters();
   }, []);
 
-  // Fetch selectable users (students & professors)
+  // Fetch selectable users (students & tutors)
   useEffect(() => {
     const loadUsers = async () => {
       const users = await getAllUsers();
@@ -122,7 +123,7 @@ export default function AgregarDocumentoPage() {
         }));
 
       const professorOptions = users
-        .filter((u) => u.role === "Profesor" && typeof u.id === "number")
+        .filter((u) => u.role === "Tutor" && typeof u.id === "number")
         .map((u) => ({
           id: u.id!,
           label: u.fullName?.trim() ? u.fullName : u.email,
@@ -135,7 +136,7 @@ export default function AgregarDocumentoPage() {
       setProfessors(professorOptions);
 
       // Auto-select current student for non-admins
-      if (userRole !== "Admin" && currentUser?.id) {
+      if (userRole !== "Administrador" && currentUser?.id) {
         setFormData((prev) => ({ ...prev, studentId: currentUser.id! }));
       } else if (studentOptions.length === 1) {
         setFormData((prev) => ({ ...prev, studentId: studentOptions[0].id }));
@@ -227,10 +228,19 @@ export default function AgregarDocumentoPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (isStaffReviewer) {
+      setBannerState({
+        visible: true,
+        message: "Los tutores y jurados no pueden registrar documentos directamente.",
+        type: "warning",
+      });
+      return;
+    }
+
     // Comprehensive Validation
     const errorsFound = {
       title: !formData.title.trim(),
-      student: !formData.studentId,
+      student: userRole === "Administrador" ? !formData.studentId : false,
       advisors: formData.advisors.map((a) => !a),
       files: userRole === "Estudiante" && selectedFiles.length === 0,
     };
@@ -275,7 +285,9 @@ export default function AgregarDocumentoPage() {
         semester: formData.semesterPeriod,
         project_type: documentType,
         status: "pending",
-        student: formData.studentId as number,
+        ...(userRole === "Administrador" && formData.studentId
+          ? { student: formData.studentId as number }
+          : {}),
       });
 
       if (selectedFiles.length > 0) {
@@ -293,7 +305,7 @@ export default function AgregarDocumentoPage() {
       const resetSemester = availableSemesters[0] || formData.semesterPeriod || getCurrentSemester();
       setFormData({
         title: "",
-        studentId: userRole === "Admin" ? "" : currentUser?.id || "",
+        studentId: userRole === "Administrador" ? "" : currentUser?.id || "",
         advisors: [""],
         semesterPeriod: resetSemester,
       });
@@ -358,6 +370,12 @@ export default function AgregarDocumentoPage() {
                 />
               </div>
             </div>
+
+            {isStaffReviewer && (
+              <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                Los tutores y jurados no pueden registrar documentos. Si necesitas crear uno, solicita acceso de administrador.
+              </div>
+            )}
 
             <div className="grid lg:grid-cols-3 gap-6">
               {/* Left Column: Document Type Selection */}
@@ -612,51 +630,52 @@ export default function AgregarDocumentoPage() {
                               )}
                             </div>
                           </div>
-                                            {/* File Upload Section (Students) */}
-                                            {userRole === "Estudiante" && (
-                                              <div className="space-y-4">
-                                                <div className="flex items-center gap-2">
-                                                  <FileText className="w-5 h-5 text-indigo-500" />
-                                                  <label className="text-sm font-bold text-gray-800">
-                                                    Subir documento en PDF
-                                                  </label>
-                                                </div>
-                                                <div
-                                                  className={`border-2 border-dashed rounded-xl p-4 bg-white ${
-                                                    errors.files
-                                                      ? "border-red-300 bg-red-50/40"
-                                                      : "border-indigo-200 hover:border-indigo-300"
-                                                  }`}
-                                                >
-                                                  <input
-                                                    type="file"
-                                                    accept="application/pdf"
-                                                    multiple
-                                                    onChange={(e) => {
-                                                      const files = Array.from(e.target.files || []);
-                                                      setSelectedFiles(files);
-                                                      if (errors.files) {
-                                                        setErrors((prev) => ({ ...prev, files: false }));
-                                                      }
-                                                    }}
-                                                    className="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
-                                                  />
-                                                  {selectedFiles.length > 0 && (
-                                                    <div className="mt-3 text-xs text-gray-500">
-                                                      {selectedFiles.length} archivo(s) seleccionado(s)
-                                                    </div>
-                                                  )}
-                                                  {errors.files && (
-                                                    <p className="mt-2 text-xs text-red-600 font-semibold">
-                                                      Debe adjuntar al menos un PDF.
-                                                    </p>
-                                                  )}
-                                                </div>
-                                              </div>
-                                            )}
                         </div>
                       </div>
                     </div>
+
+                    {/* File Upload Section (Students) */}
+                    {userRole === "Estudiante" && (
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-2">
+                          <FileText className="w-5 h-5 text-indigo-500" />
+                          <label className="text-sm font-bold text-gray-800">
+                            Subir documento (PDF o Word)
+                          </label>
+                        </div>
+                        <div
+                          className={`border-2 border-dashed rounded-xl p-4 bg-white ${
+                            errors.files
+                              ? "border-red-300 bg-red-50/40"
+                              : "border-indigo-200 hover:border-indigo-300"
+                          }`}
+                        >
+                          <input
+                            type="file"
+                            accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                            multiple
+                            onChange={(e) => {
+                              const files = Array.from(e.target.files || []);
+                              setSelectedFiles(files);
+                              if (errors.files) {
+                                setErrors((prev) => ({ ...prev, files: false }));
+                              }
+                            }}
+                            className="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                          />
+                          {selectedFiles.length > 0 && (
+                            <div className="mt-3 text-xs text-gray-500">
+                              {selectedFiles.length} archivo(s) seleccionado(s)
+                            </div>
+                          )}
+                          {errors.files && (
+                            <p className="mt-2 text-xs text-red-600 font-semibold">
+                              Debe adjuntar al menos un archivo.
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    )}
 
                     {/* Advisors Section */}
                     <div className="space-y-4">
@@ -768,7 +787,7 @@ export default function AgregarDocumentoPage() {
                       </button>
                       <button
                         type="submit"
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || isStaffReviewer}
                         className={`w-full sm:flex-1 flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl font-bold text-white shadow-lg transition-all transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none order-1 sm:order-2 ${
                           documentType === "proyecto"
                             ? "bg-gradient-to-r from-blue-600 to-indigo-600 hover:shadow-blue-500/30"
