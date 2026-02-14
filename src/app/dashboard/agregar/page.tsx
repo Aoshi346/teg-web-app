@@ -30,7 +30,13 @@ import {
   getStoredSemester,
   setStoredSemester,
 } from "@/lib/semesters";
-import { getAllUsers, getUser, getUserRole } from "@/features/auth/clientAuth";
+import {
+  getAllUsers,
+  getUser,
+  getUserRole,
+  ApiUser,
+} from "@/features/auth/clientAuth";
+import { api } from "@/lib/api";
 import type { User } from "@/features/auth/clientAuth";
 
 type DocumentType = "proyecto" | "tesis";
@@ -46,6 +52,7 @@ type UserOption = {
 interface FormData {
   title: string;
   studentId: number | "";
+  partnerId: number | "";
   advisors: (number | "")[];
   semesterPeriod: string;
 }
@@ -56,6 +63,7 @@ export default function AgregarDocumentoPage() {
   const [formData, setFormData] = useState<FormData>({
     title: "",
     studentId: "",
+    partnerId: "",
     advisors: [""],
     semesterPeriod: "",
   });
@@ -77,6 +85,7 @@ export default function AgregarDocumentoPage() {
 
   const [availableSemesters, setAvailableSemesters] = useState<string[]>([]);
   const [students, setStudents] = useState<UserOption[]>([]);
+  const [potentialPartners, setPotentialPartners] = useState<UserOption[]>([]);
   const [professors, setProfessors] = useState<UserOption[]>([]);
   const userRole = useMemo(() => getUserRole(), []);
   const currentUser = useMemo(() => getUser(), []);
@@ -146,6 +155,26 @@ export default function AgregarDocumentoPage() {
 
       setStudents(studentOptions);
       setProfessors(professorOptions);
+      setPotentialPartners(studentOptions); // Default for Admin
+
+      if (userRole === "Estudiante") {
+        try {
+          const response = await api.get<ApiUser[]>("/users/?role=Estudiante");
+          setPotentialPartners(
+            response
+              .filter((u) => u.id !== currentUser?.id)
+              .map((u) => ({
+                id: u.id!,
+                label: u.full_name || u.email,
+                email: u.email,
+                role: "Estudiante",
+                status: u.status || "active",
+              })),
+          );
+        } catch (err) {
+          console.error("Failed to fetch partners", err);
+        }
+      }
 
       // Auto-select current student for non-admins
       if (userRole !== "Administrador" && currentUser?.id) {
@@ -190,6 +219,11 @@ export default function AgregarDocumentoPage() {
     const numericValue = value ? Number(value) : "";
     setFormData((prev) => ({ ...prev, studentId: numericValue }));
     if (errors.student) setErrors((prev) => ({ ...prev, student: false }));
+  };
+
+  const handlePartnerSelect = (value: string) => {
+    const numericValue = value ? Number(value) : "";
+    setFormData((prev) => ({ ...prev, partnerId: numericValue }));
   };
 
   // Advisor Handlers
@@ -306,6 +340,9 @@ export default function AgregarDocumentoPage() {
         ...(userRole === "Administrador" && formData.studentId
           ? { student: formData.studentId as number }
           : {}),
+        ...(formData.partnerId
+          ? { partner: formData.partnerId as number }
+          : {}),
       });
 
       if (selectedFiles.length > 0) {
@@ -327,6 +364,7 @@ export default function AgregarDocumentoPage() {
       setFormData({
         title: "",
         studentId: userRole === "Administrador" ? "" : currentUser?.id || "",
+        partnerId: "",
         advisors: [""],
         semesterPeriod: resetSemester,
       });
@@ -667,6 +705,51 @@ export default function AgregarDocumentoPage() {
                                 </div>
                               )}
                             </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Partner Selection */}
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Users className="w-5 h-5 text-indigo-500" />
+                          <label className="text-sm font-bold text-gray-800">
+                            Compañero (Opcional)
+                          </label>
+                        </div>
+                      </div>
+                      <div className="group relative bg-gradient-to-br from-indigo-50/50 to-transparent border-indigo-100 border rounded-xl p-4 hover:shadow-md transition-all duration-300">
+                        <div className="flex items-start gap-3">
+                          <div className="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center mt-0.5 bg-indigo-100 text-indigo-600">
+                            <UserIcon className="w-5 h-5" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <label className="text-xs font-semibold mb-1.5 block text-indigo-700">
+                              Seleccionar Compañero
+                            </label>
+                            <select
+                              value={formData.partnerId}
+                              onChange={(e) =>
+                                handlePartnerSelect(e.target.value)
+                              }
+                              className="w-full px-3 py-2.5 bg-white border rounded-lg shadow-sm focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all text-sm font-medium border-gray-200"
+                            >
+                              <option value="">Sin compañero</option>
+                              {potentialPartners
+                                .filter(
+                                  (s) =>
+                                    s.id !==
+                                    (Number(formData.studentId) ||
+                                      currentUser?.id),
+                                )
+                                .map((s) => (
+                                  <option key={s.id} value={s.id}>
+                                    {s.label}
+                                  </option>
+                                ))}
+                            </select>
                           </div>
                         </div>
                       </div>
