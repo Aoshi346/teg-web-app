@@ -95,6 +95,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               href: "/dashboard/proyectos",
             },
         { icon: TrendingUp, label: "Seguimiento", href: "/dashboard/tracking" },
+        { icon: Settings, label: "Configuración", href: "/dashboard/settings" },
       ];
     }
 

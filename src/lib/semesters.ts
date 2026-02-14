@@ -47,7 +47,7 @@ export function formatSemesterLabel(semester: string): string {
  * Get all unique semesters from a list of projects, sorted newest first
  */
 export function getAvailableSemesters(projects: Project[], extraSemesters: string[] = []): string[] {
-    const semesters = [...new Set([...projects.map((p) => p.semester), ...extraSemesters])];
+    const semesters = [...new Set([...projects.map((p) => p.period), ...extraSemesters])];
     return semesters.sort((a, b) => {
         const aParsed = parseSemester(a);
         const bParsed = parseSemester(b);

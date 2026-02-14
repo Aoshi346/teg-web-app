@@ -13,6 +13,8 @@ export interface Project {
   title: string;
   student: string; // display name
   advisor: string;
+  partner?: number;
+  partnerName?: string;
   submittedDate: string;
   reviewDate?: string;
   status: ProjectStatus;
@@ -20,7 +22,7 @@ export interface Project {
   diagramacionScore?: number;
   contenidoScore?: number;
   stage1Passed?: boolean;
-  semester: string; // e.g., "2026-02"
+  period: string; // Academic period e.g., "2026-02"
   type?: ProjectType;
   files?: ProjectFile[];
   failedAttempts?: number;

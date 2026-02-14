@@ -90,7 +90,7 @@ export default function ProyectosPage(props: ProyectosPageProps = {}) {
 
   // Filter by semester first, then by search/status
   const semesterProjects = useMemo<Project[]>(
-    () => allProjects.filter((p) => p.semester === selectedSemester),
+    () => allProjects.filter((p) => p.period === selectedSemester),
     [selectedSemester, allProjects],
   );
 

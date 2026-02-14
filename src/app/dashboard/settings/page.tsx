@@ -261,7 +261,8 @@ export default function SettingsPage({
       await updateProfile({
         fullName: profileName,
         phone: profilePhone,
-        semester: profileSemester,
+        // Students cannot change their semester
+        ...(role !== "Estudiante" ? { semester: profileSemester } : {}),
       });
       setIsEditingProfile(false);
       showToast("Perfil actualizado correctamente.", "success");
@@ -576,13 +577,23 @@ export default function SettingsPage({
                                 onChange={(e) =>
                                   setProfileSemester(e.target.value)
                                 }
-                                className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl bg-white text-gray-900 text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none appearance-none cursor-pointer"
+                                disabled={role === "Estudiante"}
+                                className={`w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none appearance-none ${
+                                  role === "Estudiante"
+                                    ? "bg-gray-50 text-gray-500 cursor-not-allowed"
+                                    : "bg-white text-gray-900 cursor-pointer"
+                                }`}
                               >
                                 <option value="9no">9no Semestre</option>
                                 <option value="10mo">10mo Semestre</option>
                                 <option value="N/A">N/A</option>
                               </select>
                             </div>
+                            {role === "Estudiante" && (
+                              <p className="text-xs text-gray-400 mt-1">
+                                Solo un administrador puede cambiar tu semestre.
+                              </p>
+                            )}
                           </div>
 
                           {/* Role - Always Read Only */}

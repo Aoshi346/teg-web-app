@@ -267,8 +267,8 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
         if (isStudent) {
           // Backend filters by user, so we just take what we have
           // Filter by selected semester:
-          const myPteg = allProyectos.find((p) => p.semester === semester);
-          const myTeg = allTesis.find((p) => p.semester === semester);
+          const myPteg = allProyectos.find((p) => p.period === semester);
+          const myTeg = allTesis.find((p) => p.period === semester);
 
           const myProject = myTeg || myPteg;
 
@@ -340,10 +340,8 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
 
         // Admin/Tutor View: All projects
         // Filter by semester for stats
-        const semProyectos = allProyectos.filter(
-          (p) => p.semester === semester,
-        );
-        const semTesis = allTesis.filter((t) => t.semester === semester);
+        const semProyectos = allProyectos.filter((p) => p.period === semester);
+        const semTesis = allTesis.filter((t) => t.period === semester);
 
         // Calculate Stats
         const ptegStats = {

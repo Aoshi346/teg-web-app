@@ -18,8 +18,18 @@ import DashboardHeader from "@/components/layout/DashboardHeader";
 import PageTransition from "@/components/ui/PageTransition";
 import Banner from "@/components/ui/Banner";
 import SemesterSelector from "@/components/ui/SemesterSelector";
-import { createProject, getAllProjects, uploadProjectFile } from "@/features/projects/projectService";
-import { getAvailableSemesters, getCurrentSemester, getSemesters, getStoredSemester, setStoredSemester } from "@/lib/semesters";
+import {
+  createProject,
+  getAllProjects,
+  uploadProjectFile,
+} from "@/features/projects/projectService";
+import {
+  getAvailableSemesters,
+  getCurrentSemester,
+  getSemesters,
+  getStoredSemester,
+  setStoredSemester,
+} from "@/lib/semesters";
 import { getAllUsers, getUser, getUserRole } from "@/features/auth/clientAuth";
 import type { User } from "@/features/auth/clientAuth";
 
@@ -97,8 +107,10 @@ export default function AgregarDocumentoPage() {
       const stored = getStoredSemester();
       const fallback = getCurrentSemester();
       const chosen = semesters.length
-        ? (semesters.includes(stored) ? stored : semesters[0])
-        : (stored || fallback);
+        ? semesters.includes(stored)
+          ? stored
+          : semesters[0]
+        : stored || fallback;
 
       setAvailableSemesters(semesters.length ? semesters : [chosen]);
       setFormData((prev) => ({ ...prev, semesterPeriod: chosen }));
@@ -231,7 +243,8 @@ export default function AgregarDocumentoPage() {
     if (isStaffReviewer) {
       setBannerState({
         visible: true,
-        message: "Los tutores y jurados no pueden registrar documentos directamente.",
+        message:
+          "Los tutores y jurados no pueden registrar documentos directamente.",
         type: "warning",
       });
       return;
@@ -247,7 +260,12 @@ export default function AgregarDocumentoPage() {
 
     const hasAdvisorErrors = errorsFound.advisors.some(Boolean);
 
-    if (errorsFound.title || errorsFound.student || hasAdvisorErrors || errorsFound.files) {
+    if (
+      errorsFound.title ||
+      errorsFound.student ||
+      hasAdvisorErrors ||
+      errorsFound.files
+    ) {
       setErrors({
         title: errorsFound.title,
         student: errorsFound.student,
@@ -282,7 +300,7 @@ export default function AgregarDocumentoPage() {
       const created = await createProject({
         title: formData.title.trim(),
         advisor: advisorNames,
-        semester: formData.semesterPeriod,
+        period: formData.semesterPeriod,
         project_type: documentType,
         status: "pending",
         ...(userRole === "Administrador" && formData.studentId
@@ -302,7 +320,10 @@ export default function AgregarDocumentoPage() {
       });
 
       // Reset form
-      const resetSemester = availableSemesters[0] || formData.semesterPeriod || getCurrentSemester();
+      const resetSemester =
+        availableSemesters[0] ||
+        formData.semesterPeriod ||
+        getCurrentSemester();
       setFormData({
         title: "",
         studentId: userRole === "Administrador" ? "" : currentUser?.id || "",
@@ -373,7 +394,8 @@ export default function AgregarDocumentoPage() {
 
             {isStaffReviewer && (
               <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-                Los tutores y jurados no pueden registrar documentos. Si necesitas crear uno, solicita acceso de administrador.
+                Los tutores y jurados no pueden registrar documentos. Si
+                necesitas crear uno, solicita acceso de administrador.
               </div>
             )}
 
@@ -602,23 +624,34 @@ export default function AgregarDocumentoPage() {
                                 <input
                                   type="text"
                                   disabled
-                                  value={currentUser?.fullName || currentUser?.email || "Estudiante"}
+                                  value={
+                                    currentUser?.fullName ||
+                                    currentUser?.email ||
+                                    "Estudiante"
+                                  }
                                   className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg shadow-sm text-sm font-medium text-gray-600 cursor-not-allowed"
                                 />
                               ) : (
                                 <select
                                   value={formData.studentId}
-                                  onChange={(e) => handleStudentSelect(e.target.value)}
+                                  onChange={(e) =>
+                                    handleStudentSelect(e.target.value)
+                                  }
                                   className={`w-full px-3 py-2.5 bg-white border rounded-lg shadow-sm focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all text-sm font-medium ${
                                     errors.student
                                       ? "border-red-300 focus:border-red-500 focus:ring-red-100"
                                       : "border-gray-200 hover:border-purple-300"
                                   }`}
                                 >
-                                  <option value="">Seleccione un estudiante</option>
+                                  <option value="">
+                                    Seleccione un estudiante
+                                  </option>
                                   {students.map((stu) => (
                                     <option key={stu.id} value={stu.id}>
-                                      {stu.label} {stu.status === "pending" ? "(Pendiente)" : ""}
+                                      {stu.label}{" "}
+                                      {stu.status === "pending"
+                                        ? "(Pendiente)"
+                                        : ""}
                                     </option>
                                   ))}
                                 </select>
@@ -658,7 +691,10 @@ export default function AgregarDocumentoPage() {
                               const files = Array.from(e.target.files || []);
                               setSelectedFiles(files);
                               if (errors.files) {
-                                setErrors((prev) => ({ ...prev, files: false }));
+                                setErrors((prev) => ({
+                                  ...prev,
+                                  files: false,
+                                }));
                               }
                             }}
                             className="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
@@ -729,10 +765,15 @@ export default function AgregarDocumentoPage() {
                                         : "border-gray-200 hover:border-teal-300"
                                     }`}
                                   >
-                                    <option value="">Seleccione un tutor</option>
+                                    <option value="">
+                                      Seleccione un tutor
+                                    </option>
                                     {professors.map((prof) => (
                                       <option key={prof.id} value={prof.id}>
-                                        {prof.label} {prof.status === "pending" ? "(Pendiente)" : ""}
+                                        {prof.label}{" "}
+                                        {prof.status === "pending"
+                                          ? "(Pendiente)"
+                                          : ""}
                                       </option>
                                     ))}
                                   </select>

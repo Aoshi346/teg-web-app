@@ -14,7 +14,7 @@ export interface User {
   phone?: string;
 }
 
-type ApiUser = {
+export type ApiUser = {
   id?: number;
   email: string;
   role: 'Administrador' | 'Estudiante' | 'Jurado' | 'Tutor';
@@ -129,12 +129,15 @@ function invalidateUsersCache() {
 }
 
 // Update current user's profile
-export async function updateProfile(payload: Pick<User, "fullName" | "phone" | "semester">): Promise<User> {
-  const apiUser = await api.patch<ApiUser>("/auth/me/", {
-    full_name: payload.fullName,
-    phone: payload.phone,
-    semester: payload.semester,
-  });
+export async function updateProfile(payload: Pick<User, "fullName" | "phone"> & { semester?: string }): Promise<User> {
+  const body: Record<string, string> = {
+    full_name: payload.fullName || "",
+    phone: payload.phone || "",
+  };
+  if (payload.semester !== undefined) {
+    body.semester = payload.semester;
+  }
+  const apiUser = await api.patch<ApiUser>("/auth/me/", body);
   const updated = mapApiUser(apiUser);
   // Refresh session cache
   const current = getUser();

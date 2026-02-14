@@ -92,7 +92,7 @@ export default function TesisPage(props: TesisPageProps = {}) {
   const semesterProjects = useMemo<Project[]>(
     () =>
       selectedSemester
-        ? allProjects.filter((p) => p.semester === selectedSemester)
+        ? allProjects.filter((p) => p.period === selectedSemester)
         : allProjects,
     [selectedSemester, allProjects],
   );

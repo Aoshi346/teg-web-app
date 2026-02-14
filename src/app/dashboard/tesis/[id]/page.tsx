@@ -177,7 +177,7 @@ export default function TesisDetailsPage() {
                         </span>
                         <div className="flex items-center gap-2 text-gray-400 text-xs mt-0.5">
                           <Sparkles className="w-3 h-3" />
-                          <span>Semestre {project.semester}</span>
+                          <span>Semestre {project.period}</span>
                         </div>
                       </div>
                     </div>

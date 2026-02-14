@@ -14,6 +14,8 @@ export interface ApiProject {
   title: string;
   student: number; // ID
   student_name?: string; // From serializer
+  partner?: number;
+  partner_name?: string;
   advisor: string;
   submitted_date: string;
   review_date?: string;
@@ -22,7 +24,7 @@ export interface ApiProject {
   diagramacion_score: number;
   contenido_score: number;
   stage1_passed: boolean;
-  semester: string;
+  period: string;
   project_type: "proyecto" | "tesis";
   failed_attempts: number;
   files?: ApiFile[];
@@ -62,6 +64,8 @@ function mapApiProject(p: ApiProject): Project {
     id: p.id,
     title: p.title,
     student: p.student_name || `Estudiante ${p.student}`,
+    partner: p.partner,
+    partnerName: p.partner_name,
     advisor: p.advisor,
     submittedDate: p.submitted_date,
     reviewDate: p.review_date,
@@ -70,7 +74,7 @@ function mapApiProject(p: ApiProject): Project {
     diagramacionScore: p.diagramacion_score,
     contenidoScore: p.contenido_score,
     stage1Passed: p.stage1_passed,
-    semester: p.semester,
+    period: p.period,
     type: normalizedType,
     files: p.files?.map(f => ({
       name: f.name,

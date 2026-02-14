@@ -16,12 +16,24 @@ import {
 import { useValidation } from "@/hooks/useValidation";
 import Banner from "@/components/ui/Banner";
 import SemesterSelector from "@/components/ui/SemesterSelector";
+import { Project } from "@/types/project";
 import {
-  Project,
-} from "@/types/project";
-import { createProject, updateProject as apiUpdateProject, reassignStudent } from "@/features/projects/projectService";
-import { getAllUsers, getUser, getUserRole } from "@/features/auth/clientAuth";
-import { compareSemesters, getAvailableSemesterPeriods, getSemesters } from "@/lib/semesters";
+  createProject,
+  updateProject as apiUpdateProject,
+  reassignStudent,
+} from "@/features/projects/projectService";
+import {
+  getAllUsers,
+  getUser,
+  getUserRole,
+  ApiUser,
+} from "@/features/auth/clientAuth";
+import { api } from "@/lib/api";
+import {
+  compareSemesters,
+  getAvailableSemesterPeriods,
+  getSemesters,
+} from "@/lib/semesters";
 
 interface DocumentFormProps {
   initialData?: Project;
@@ -66,7 +78,9 @@ export default function DocumentForm({
   const [availablePeriods, setAvailablePeriods] = useState<string[]>(() =>
     getAvailableSemesterPeriods(),
   );
-  const [semesterPeriod, setSemesterPeriod] = useState(initialData?.semester || "");
+  const [semesterPeriod, setSemesterPeriod] = useState(
+    initialData?.period || "",
+  );
 
   // Ensure semester is set on load
   useEffect(() => {
@@ -82,9 +96,10 @@ export default function DocumentForm({
       const periods = semesters.map((s) => s.period);
       const sorted = periods.sort((a, b) => compareSemesters(b, a));
       const fallback = sorted.length ? sorted : getAvailableSemesterPeriods();
-      const merged = initialData?.semester && !fallback.includes(initialData.semester)
-        ? [initialData.semester, ...fallback]
-        : fallback;
+      const merged =
+        initialData?.period && !fallback.includes(initialData.period)
+          ? [initialData.period, ...fallback]
+          : fallback;
       setAvailablePeriods(merged);
       if (!semesterPeriod && merged.length > 0) {
         setSemesterPeriod(merged[0]);
@@ -92,7 +107,7 @@ export default function DocumentForm({
     };
     loadSemesters();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialData?.semester]);
+  }, [initialData?.period]);
 
   // Validation State
   const [errors, setErrors] = useState<{
@@ -104,29 +119,64 @@ export default function DocumentForm({
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { showBanner, bannerProps } = useValidation();
-  const [studentsList, setStudentsList] = useState<Array<{ id: number; label: string }>>([]);
-  const [selectedStudentId, setSelectedStudentId] = useState<number | null>(null);
+  const [studentsList, setStudentsList] = useState<
+    Array<{ id: number; label: string }>
+  >([]);
+  const [selectedStudentId, setSelectedStudentId] = useState<number | null>(
+    null,
+  );
+  const [partnerId, setPartnerId] = useState<number | null>(
+    initialData?.partner || null,
+  );
+  const [potentialPartners, setPotentialPartners] = useState<
+    Array<{ id: number; label: string }>
+  >([]);
   const userRole = getUserRole();
   const currentUser = useMemo(() => getUser(), []);
 
-  // Admins: fetch students for reassignment in edit mode
+  // Fetch users (Students for assignment or partners)
   useEffect(() => {
     const fetchUsers = async () => {
       if (userRole === "Administrador") {
         const users = await getAllUsers();
-        const students = users.filter(u => u.role === "Estudiante" && typeof u.id === "number");
-        setStudentsList(students.map(u => ({ id: u.id!, label: (u.fullName || u.email) as string })));
+        const students = users.filter(
+          (u) => u.role === "Estudiante" && typeof u.id === "number",
+        );
+        const formatted = students.map((u) => ({
+          id: u.id!,
+          label: (u.fullName || u.email) as string,
+        }));
+        setStudentsList(formatted);
+        setPotentialPartners(formatted);
+
         if (initialData) {
-          const match = students.find(u => (u.fullName || u.email) === initialData.student);
+          const match = students.find(
+            (u) => (u.fullName || u.email) === initialData.student,
+          );
           if (match && match.id) setSelectedStudentId(match.id);
         } else if (students.length === 1) {
-          setSelectedStudentId(students[0].id);
+          setSelectedStudentId(students[0].id || null);
+        }
+      } else if (userRole === "Estudiante") {
+        // Students fetch other students for partner selection
+        // We use direct API call to use the query param
+        try {
+          const response = await api.get<ApiUser[]>("/users/?role=Estudiante");
+          const students = response.filter((u) => u.id !== currentUser?.id);
+          setPotentialPartners(
+            students.map((u) => ({
+              id: u.id!,
+              label: u.full_name || u.email,
+            })),
+          );
+        } catch (err) {
+          console.error("Failed to fetch potential partners", err);
         }
       }
     };
     fetchUsers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode, userRole]);
+  }, [mode, userRole, currentUser?.id]);
 
   const handleAdvisorChange = (index: number, value: string) => {
     const newAdvisors = [...advisors];
@@ -184,8 +234,9 @@ export default function DocumentForm({
       const payload: Partial<Project> = {
         title: title.trim(),
         advisor: validAdvisors.join(", "),
-        semester: semesterPeriod,
+        period: semesterPeriod,
         type: documentType,
+        partner: partnerId || undefined, // Use undefined if null to skip or handle properly
         // Status and dates might be preserved or reset?
         // For Edit: preserve existing properties not in form
         // For Create: defaults handled by add functions
@@ -196,7 +247,8 @@ export default function DocumentForm({
         await createProject({
           title: payload.title || "",
           advisor: payload.advisor || "",
-          semester: payload.semester || "",
+          period: payload.period || "",
+          partner: payload.partner,
           project_type: documentType,
           status: "pending",
           ...(userRole === "Administrador" && selectedStudentId
@@ -216,7 +268,8 @@ export default function DocumentForm({
         await apiUpdateProject(updatedDoc.id, {
           title: updatedDoc.title,
           advisor: updatedDoc.advisor,
-          semester: updatedDoc.semester,
+          period: updatedDoc.period,
+          partner: payload.partner,
           project_type: documentType,
           status: updatedDoc.status,
         });
@@ -329,13 +382,9 @@ export default function DocumentForm({
               </div>
             </div>
 
-            <div
-              className="group relative bg-gradient-to-br from-purple-50/50 to-transparent border-purple-100 border rounded-xl p-4 hover:shadow-md transition-all duration-300"
-            >
+            <div className="group relative bg-gradient-to-br from-purple-50/50 to-transparent border-purple-100 border rounded-xl p-4 hover:shadow-md transition-all duration-300">
               <div className="flex items-start gap-3">
-                <div
-                  className="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center mt-0.5 bg-purple-100 text-purple-600"
-                >
+                <div className="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center mt-0.5 bg-purple-100 text-purple-600">
                   <User className="w-5 h-5" />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -345,7 +394,9 @@ export default function DocumentForm({
                   {userRole === "Administrador" ? (
                     <select
                       value={selectedStudentId ?? ""}
-                      onChange={(e) => setSelectedStudentId(Number(e.target.value) || null)}
+                      onChange={(e) =>
+                        setSelectedStudentId(Number(e.target.value) || null)
+                      }
                       className="w-full px-3 py-2.5 bg-white border rounded-lg shadow-sm focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all text-sm font-medium border-gray-200"
                     >
                       <option value="">Seleccione un estudiante</option>
@@ -359,10 +410,61 @@ export default function DocumentForm({
                     <input
                       type="text"
                       disabled
-                      value={initialData?.student || currentUser?.fullName || currentUser?.email || "Asignado automáticamente"}
+                      value={
+                        initialData?.student ||
+                        currentUser?.fullName ||
+                        currentUser?.email ||
+                        "Asignado automáticamente"
+                      }
                       className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg shadow-sm text-sm font-medium text-gray-600 cursor-not-allowed"
                     />
                   )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Partner Section */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Users className="w-5 h-5 text-indigo-500" />
+                <label className="text-sm font-bold text-gray-800">
+                  Compañero (Opcional)
+                </label>
+              </div>
+            </div>
+            <div className="group relative bg-gradient-to-br from-indigo-50/50 to-transparent border-indigo-100 border rounded-xl p-4 hover:shadow-md transition-all duration-300">
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center mt-0.5 bg-indigo-100 text-indigo-600">
+                  <User className="w-5 h-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <label className="text-xs font-semibold mb-1.5 block text-indigo-700">
+                    Seleccionar Compañero
+                  </label>
+                  <select
+                    value={partnerId ?? ""}
+                    onChange={(e) =>
+                      setPartnerId(Number(e.target.value) || null)
+                    }
+                    className="w-full px-3 py-2.5 bg-white border rounded-lg shadow-sm focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 transition-all text-sm font-medium border-gray-200"
+                  >
+                    <option value="">Sin compañero</option>
+                    {potentialPartners
+                      .filter(
+                        (p) =>
+                          p.id !==
+                          (userRole === "Administrador"
+                            ? selectedStudentId
+                            : currentUser?.id),
+                      )
+                      .map((s) => (
+                        <option key={s.id} value={s.id}>
+                          {s.label}
+                        </option>
+                      ))}
+                  </select>
                 </div>
               </div>
             </div>
