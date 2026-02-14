@@ -6,7 +6,7 @@ import {
   FileText,
   BookOpen,
   CheckCircle,
-  User,
+  User as UserIcon,
   GraduationCap,
   PenTool,
   ArrowRight,
@@ -374,14 +374,19 @@ export default function AgregarDocumentoPage() {
           <div className="max-w-5xl mx-auto space-y-6">
             {/* Header Section with Semester Selector */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900">
-                  Nuevo Registro
-                </h2>
-                <p className="text-gray-500 text-sm mt-1">
-                  Complete la información para añadir un nuevo documento
-                  académico
-                </p>
+              <div className="flex items-start gap-4">
+                <div className="mt-1 p-2 bg-purple-100 rounded-lg text-purple-600">
+                  <UserIcon className="w-5 h-5" />
+                </div>
+                <div className="flex-1">
+                  <h2 className="text-2xl font-bold text-gray-900">
+                    Nuevo Registro
+                  </h2>
+                  <p className="text-gray-500 text-sm mt-1">
+                    Complete la información para añadir un nuevo documento
+                    académico
+                  </p>
+                </div>
               </div>
               <div className="w-full sm:w-auto">
                 <SemesterSelector
@@ -611,7 +616,7 @@ export default function AgregarDocumentoPage() {
                                 : "bg-purple-100 text-purple-600"
                             }`}
                           >
-                            <User className="w-5 h-5" />
+                            <UserIcon className="w-5 h-5" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <label

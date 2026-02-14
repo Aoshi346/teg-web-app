@@ -482,8 +482,12 @@ export default function TesisDetailsPage() {
                                     <p className="mt-1 whitespace-pre-wrap">
                                       {typeof ev.comments === "string"
                                         ? ev.comments
-                                        : (ev.comments as any).general ||
-                                          "Sin comentarios"}
+                                        : (
+                                            ev.comments as Record<
+                                              string,
+                                              string
+                                            >
+                                          ).general || "Sin comentarios"}
                                     </p>
                                   </div>
                                 )}
