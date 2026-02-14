@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import DashboardHeader from "@/components/layout/DashboardHeader";
 import PageTransition from "@/components/ui/PageTransition";
 import SemesterSelector from "@/components/ui/SemesterSelector";
-import { getProyectos, Project } from "@/lib/data/mockData";
+import { Project } from "@/types/project";
 import { getAllProjects } from "@/features/projects/projectService";
 import {
   getAvailableSemesters,
@@ -51,19 +51,16 @@ export default function ProyectosPage(props: ProyectosPageProps = {}) {
         getAllProjects(),
         getSemesters(),
       ]);
-      const onlyProyectos = apiProjects.filter(p => p.type === "proyecto");
-      if (mounted && onlyProyectos.length > 0) {
-        setAllProjects(onlyProyectos);
-      } else if (mounted) {
-        // Fallback to local mock data
-        setAllProjects(getProyectos());
-      }
+      const onlyProyectos = apiProjects.filter((p) => p.type === "proyecto");
       if (mounted) {
+        setAllProjects(onlyProyectos);
         setSemesterOptions(semestersFromApi.map((s) => s.period));
       }
     })();
-    return () => { mounted = false; };
-  }, []);
+    return () => {
+      mounted = false;
+    };
+  }, [isStudent]);
 
   // Semester state - persisted in localStorage
   const availableSemesters = useMemo(
@@ -335,8 +332,14 @@ export default function ProyectosPage(props: ProyectosPageProps = {}) {
                         key={project.id}
                         project={project}
                         type="proyecto"
-                        primaryHref={isStudent ? `/dashboard/proyectos/${project.id}` : `/dashboard/proyectos/${project.id}/evaluar`}
-                        primaryLabel={isStudent ? "Ver Detalles" : "Revisar Ahora"}
+                        primaryHref={
+                          isStudent
+                            ? `/dashboard/proyectos/${project.id}`
+                            : `/dashboard/proyectos/${project.id}/evaluar`
+                        }
+                        primaryLabel={
+                          isStudent ? "Ver Detalles" : "Revisar Ahora"
+                        }
                         canEdit={!isStudent}
                       />
                     ))}

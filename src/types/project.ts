@@ -16,12 +16,12 @@ export interface Project {
   submittedDate: string;
   reviewDate?: string;
   status: ProjectStatus;
-  score: number;
-  diagramacionScore: number;
-  contenidoScore: number;
-  stage1Passed: boolean;
+  score?: number;
+  diagramacionScore?: number;
+  contenidoScore?: number;
+  stage1Passed?: boolean;
   semester: string; // e.g., "2026-02"
-  type: ProjectType;
-  files: ProjectFile[];
-  failedAttempts: number;
+  type?: ProjectType;
+  files?: ProjectFile[];
+  failedAttempts?: number;
 }

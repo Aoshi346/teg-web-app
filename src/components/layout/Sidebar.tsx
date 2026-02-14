@@ -82,6 +82,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       const semester = user?.semester?.toLowerCase() || "";
       const isTesis = semester.includes("10");
       return [
+        { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
         isTesis
           ? {
               icon: BookOpen,

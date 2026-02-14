@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import DashboardHeader from "@/components/layout/DashboardHeader";
 import PageTransition from "@/components/ui/PageTransition";
-import { getProyectos } from "@/lib/data/mockData";
+import { Project } from "@/types/project";
 import {
   getProject,
   getEvaluationsByProject,
@@ -34,9 +34,7 @@ export default function ProyectoDetailsPage() {
   const params = useParams();
   const id = Number(params.id);
 
-  const [project, setProject] = React.useState<
-    ReturnType<typeof getProyectos>[number] | null
-  >(null);
+  const [project, setProject] = React.useState<Project | null>(null);
   const [evaluations, setEvaluations] = React.useState<ApiEvaluation[]>([]);
   const [isUploading, setIsUploading] = React.useState(false);
   const [uploadError, setUploadError] = React.useState<string | null>(null);
@@ -66,9 +64,6 @@ export default function ProyectoDetailsPage() {
               new Date(b.graded_at).getTime() - new Date(a.graded_at).getTime(),
           ),
         );
-      } else if (mounted) {
-        const local = getProyectos().find((p) => p.id === id);
-        setProject(local || null);
       }
     })();
     return () => {

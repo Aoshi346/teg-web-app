@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import DashboardHeader from "@/components/layout/DashboardHeader";
 import PageTransition from "@/components/ui/PageTransition";
-import { getTesis } from "@/lib/data/mockData";
+import { Project } from "@/types/project";
 import {
   getProject,
   getEvaluationsByProject,
@@ -32,7 +32,7 @@ export default function TesisDetailsPage() {
   const id = Number(params.id);
   const userRole = React.useMemo(() => getUserRole(), []);
 
-  const [project, setProject] = React.useState<ReturnType<typeof getTesis>[number] | null>(null);
+  const [project, setProject] = React.useState<Project | null>(null);
   const [evaluations, setEvaluations] = React.useState<ApiEvaluation[]>([]);
   const [isUploading, setIsUploading] = React.useState(false);
   const [uploadError, setUploadError] = React.useState<string | null>(null);
@@ -47,16 +47,14 @@ export default function TesisDetailsPage() {
         setEvaluations(
           evals.sort(
             (a, b) =>
-              new Date(b.graded_at).getTime() -
-              new Date(a.graded_at).getTime(),
+              new Date(b.graded_at).getTime() - new Date(a.graded_at).getTime(),
           ),
         );
-      } else if (mounted) {
-        const local = getTesis().find(p => p.id === id);
-        setProject(local || null);
       }
     })();
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, [id]);
 
   const handleFileUpload = async (file: File) => {
@@ -66,16 +64,20 @@ export default function TesisDetailsPage() {
       const uploaded = await uploadProjectFile(id, file);
       setProject((prev) => {
         if (!prev) return prev;
-        const updatedFiles = [...(prev.files || []), {
-          name: uploaded.name,
-          url: uploaded.url,
-          type: uploaded.file_type,
-          date: uploaded.date,
-        }];
+        const updatedFiles = [
+          ...(prev.files || []),
+          {
+            name: uploaded.name,
+            url: uploaded.url,
+            type: uploaded.file_type,
+            date: uploaded.date,
+          },
+        ];
         return { ...prev, files: updatedFiles };
       });
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Error al subir el archivo.";
+      const message =
+        error instanceof Error ? error.message : "Error al subir el archivo.";
       setUploadError(message);
     } finally {
       setIsUploading(false);
@@ -403,7 +405,9 @@ export default function TesisDetailsPage() {
                             {isUploading ? "Subiendo..." : "Subir Documento"}
                           </label>
                           {uploadError && (
-                            <p className="text-xs text-red-600 font-semibold">{uploadError}</p>
+                            <p className="text-xs text-red-600 font-semibold">
+                              {uploadError}
+                            </p>
                           )}
                         </div>
                       )}
@@ -436,10 +440,14 @@ export default function TesisDetailsPage() {
                                           : "bg-rose-50 text-rose-700 border border-rose-200"
                                       }`}
                                     >
-                                      {ev.pass_status === "Pass" ? "Aprobado" : "Rechazado"}
+                                      {ev.pass_status === "Pass"
+                                        ? "Aprobado"
+                                        : "Rechazado"}
                                     </div>
                                     <span className="text-xs text-gray-500">
-                                      {new Date(ev.graded_at).toLocaleDateString()}
+                                      {new Date(
+                                        ev.graded_at,
+                                      ).toLocaleDateString()}
                                     </span>
                                   </div>
                                   <span className="text-sm font-bold text-gray-900">
@@ -468,15 +476,20 @@ export default function TesisDetailsPage() {
                                 )}
                                 {ev.comments && (
                                   <div className="mt-3 p-3 bg-white rounded-lg border border-gray-100 text-sm text-gray-700">
-                                    <span className="font-semibold text-gray-900">Comentario:</span>
+                                    <span className="font-semibold text-gray-900">
+                                      Comentario:
+                                    </span>
                                     <p className="mt-1 whitespace-pre-wrap">
                                       {typeof ev.comments === "string"
                                         ? ev.comments
-                                        : (ev.comments as any).general || "Sin comentarios"}
+                                        : (ev.comments as any).general ||
+                                          "Sin comentarios"}
                                     </p>
                                   </div>
                                 )}
-                                <div className="mt-2 text-xs text-gray-500">Evaluación #{idx + 1}</div>
+                                <div className="mt-2 text-xs text-gray-500">
+                                  Evaluación #{idx + 1}
+                                </div>
                               </div>
                             ))}
                           </div>

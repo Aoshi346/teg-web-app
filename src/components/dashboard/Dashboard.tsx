@@ -61,8 +61,15 @@ const StatCard: React.FC<StatCardProps> = memo(
     useEffect(() => {
       if (!mainValueRef.current) return;
 
-      const counter = { value: 0 };
       const targetValue = parseInt(mainValue, 10);
+
+      // If mainValue is not numeric (e.g. "Activo", "N/A"), skip counter animation
+      if (isNaN(targetValue)) {
+        mainValueRef.current.textContent = mainValue;
+        return;
+      }
+
+      const counter = { value: 0 };
 
       // Kill previous animation if exists
       if (animationRef.current) {
@@ -528,17 +535,24 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
     if (!dashboardData) return [];
 
     if (isStudent) {
+      const hasProject = dashboardData.projectsToReview.length > 0;
+      const projectStatus = dashboardData.projectsToReview[0]?.status;
+
+      let mainLabel = "Sube tu proyecto para comenzar";
+      if (hasProject) {
+        mainLabel =
+          projectStatus === "checked"
+            ? "Aprobado ✓"
+            : projectStatus === "rejected"
+              ? "Requiere correcciones"
+              : "En espera de revisión";
+      }
+
       return [
         {
-          title: "Mi Proyecto",
-          mainValue:
-            dashboardData.projectsToReview.length > 0 ? "Activo" : "N/A",
-          mainLabel:
-            dashboardData.projectsToReview[0]?.status === "checked"
-              ? "Aprobado"
-              : dashboardData.projectsToReview[0]?.status === "pending"
-                ? "En Revisión"
-                : "Pendiente",
+          title: hasProject ? "Mi Proyecto" : "Proyecto",
+          mainValue: hasProject ? "Activo" : "Sin Proyecto",
+          mainLabel,
           icon: <FileText className="w-8 h-8 sm:w-10 sm:h-10 text-white" />,
           secondaryStats: [],
           variant: "colorful" as const,
@@ -633,7 +647,10 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
               </div>
               <SemesterSelector
                 selectedSemester={semester}
-                availableSemesters={getAvailableSemesters(apiProjects, semesterOptions)}
+                availableSemesters={getAvailableSemesters(
+                  apiProjects,
+                  semesterOptions,
+                )}
                 onSemesterChange={(sem) => {
                   setStoredSemester(sem);
                   setSemester(sem);

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import PageTransition from "@/components/ui/PageTransition";
 import DashboardHeader from "@/components/layout/DashboardHeader";
 import EvaluationForm from "@/components/evaluation/EvaluationForm";
-import { getTesis } from "@/lib/data/mockData";
+import { getProject } from "@/features/projects/projectService";
 import { TESIS_STAGE2_QUESTIONS } from "@/lib/questions/questions";
 import { AlertCircle, ArrowLeft } from "lucide-react";
 
@@ -19,11 +19,9 @@ export default function EvaluarTesisFase2Page({
   const [isAllowed, setIsAllowed] = useState<boolean | null>(null);
 
   useEffect(() => {
-    // Check stage 1 pass status using mock data
-    const checkStatus = () => {
+    const checkStatus = async () => {
       const id = Number(projectId);
-      const theses = getTesis();
-      const project = theses.find((p) => p.id === id);
+      const project = await getProject(id);
 
       // Allow if project exists and stage1Passed is true
       if (project && project.stage1Passed) {

@@ -3,7 +3,7 @@
 import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Calendar, Clock, XCircle, Pencil } from "lucide-react";
-import { Project } from "@/lib/data/mockData";
+import { Project } from "@/types/project";
 
 interface ProjectCardProps {
   project: Project;

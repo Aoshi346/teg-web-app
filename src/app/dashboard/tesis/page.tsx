@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import DashboardHeader from "@/components/layout/DashboardHeader";
 import PageTransition from "@/components/ui/PageTransition";
 import SemesterSelector from "@/components/ui/SemesterSelector";
-import { getTesis, Project } from "@/lib/data/mockData";
+import { Project } from "@/types/project";
 import { getAllProjects } from "@/features/projects/projectService";
 import {
   getAvailableSemesters,
@@ -51,19 +51,16 @@ export default function TesisPage(props: TesisPageProps = {}) {
         getAllProjects(),
         getSemesters(),
       ]);
-      const onlyTesis = apiProjects.filter(p => p.type === "tesis");
-      if (mounted && onlyTesis.length > 0) {
-        setAllProjects(onlyTesis);
-      } else if (mounted) {
-        // Fallback to local mock data
-        setAllProjects(getTesis());
-      }
+      const onlyTesis = apiProjects.filter((p) => p.type === "tesis");
       if (mounted) {
+        setAllProjects(onlyTesis);
         setSemesterOptions(semestersFromApi.map((s) => s.period));
       }
     })();
-    return () => { mounted = false; };
-  }, []);
+    return () => {
+      mounted = false;
+    };
+  }, [isStudent]);
 
   // Semester state - persisted in localStorage
   const availableSemesters = useMemo(
@@ -341,8 +338,14 @@ export default function TesisPage(props: TesisPageProps = {}) {
                         key={project.id}
                         project={project}
                         type="tesis"
-                        primaryHref={isStudent ? `/dashboard/tesis/${project.id}` : `/dashboard/tesis/${project.id}/evaluar`}
-                        primaryLabel={isStudent ? "Ver Detalles" : "Revisar Ahora"}
+                        primaryHref={
+                          isStudent
+                            ? `/dashboard/tesis/${project.id}`
+                            : `/dashboard/tesis/${project.id}/evaluar`
+                        }
+                        primaryLabel={
+                          isStudent ? "Ver Detalles" : "Revisar Ahora"
+                        }
                         canEdit={!isStudent}
                       />
                     ))}

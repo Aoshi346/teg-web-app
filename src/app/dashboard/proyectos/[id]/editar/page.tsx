@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import DashboardHeader from "@/components/layout/DashboardHeader";
 import PageTransition from "@/components/ui/PageTransition";
 import DocumentForm from "@/components/dashboard/DocumentForm";
-import { getProyectos, Project } from "@/lib/data/mockData";
+import { Project } from "@/types/project";
 import { getProject } from "@/features/projects/projectService";
 import { ArrowLeft } from "lucide-react";
 
@@ -25,10 +25,6 @@ export default function EditarProyectoPage({
         const apiProject = await getProject(parseInt(id));
         if (apiProject && apiProject.type === "proyecto") {
           setProject(apiProject as Project);
-        } else {
-          const allProyectos = getProyectos();
-          const found = allProyectos.find((p) => p.id === parseInt(id));
-          if (found) setProject(found);
         }
       })();
     }
