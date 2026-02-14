@@ -110,8 +110,8 @@ export async function getProject(id: number): Promise<Project | null> {
   try {
     const p = await api.get<ApiProject>(`/projects/${id}/`);
     return mapApiProject(p);
-  } catch (error) {
-    console.error(`Failed to fetch project ${id}`, error);
+  } catch {
+    console.warn(`Project ${id} not found or inaccessible`);
     return null;
   }
 }

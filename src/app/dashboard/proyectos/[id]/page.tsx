@@ -14,6 +14,7 @@ import {
   AlertTriangle,
   RefreshCw,
   Sparkles,
+  UserCog,
 } from "lucide-react";
 import DashboardHeader from "@/components/layout/DashboardHeader";
 import PageTransition from "@/components/ui/PageTransition";
@@ -23,19 +24,34 @@ import {
   getEvaluationsByProject,
   ApiEvaluation,
   uploadProjectFile,
+  reassignStudent,
 } from "@/features/projects/projectService";
-import { getUserRole } from "@/features/auth/clientAuth";
+import { getUserRole, getAllUsers } from "@/features/auth/clientAuth";
+import type { User as AuthUser } from "@/features/auth/clientAuth";
 
 export default function ProyectoDetailsPage() {
   const router = useRouter();
   const params = useParams();
   const id = Number(params.id);
 
-  const [project, setProject] = React.useState<ReturnType<typeof getProyectos>[number] | null>(null);
+  const [project, setProject] = React.useState<
+    ReturnType<typeof getProyectos>[number] | null
+  >(null);
   const [evaluations, setEvaluations] = React.useState<ApiEvaluation[]>([]);
   const [isUploading, setIsUploading] = React.useState(false);
   const [uploadError, setUploadError] = React.useState<string | null>(null);
   const userRole = React.useMemo(() => getUserRole(), []);
+
+  // Reassign student state (admin only)
+  const [showReassign, setShowReassign] = React.useState(false);
+  const [studentOptions, setStudentOptions] = React.useState<
+    { id: number; label: string }[]
+  >([]);
+  const [selectedStudentId, setSelectedStudentId] = React.useState<number | "">(
+    "",
+  );
+  const [isReassigning, setIsReassigning] = React.useState(false);
+  const [reassignError, setReassignError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     let mounted = true;
@@ -44,14 +60,62 @@ export default function ProyectoDetailsPage() {
       if (mounted && apiProject && apiProject.type === "proyecto") {
         setProject(apiProject);
         const evals = await getEvaluationsByProject(id);
-        setEvaluations(evals.sort((a, b) => new Date(b.graded_at).getTime() - new Date(a.graded_at).getTime()));
+        setEvaluations(
+          evals.sort(
+            (a, b) =>
+              new Date(b.graded_at).getTime() - new Date(a.graded_at).getTime(),
+          ),
+        );
       } else if (mounted) {
-        const local = getProyectos().find(p => p.id === id);
+        const local = getProyectos().find((p) => p.id === id);
         setProject(local || null);
       }
     })();
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, [id]);
+
+  // Load student options when admin opens reassign
+  React.useEffect(() => {
+    if (userRole !== "Administrador" || !showReassign) return;
+    (async () => {
+      const users = await getAllUsers();
+      setStudentOptions(
+        users
+          .filter(
+            (u: AuthUser) =>
+              u.role === "Estudiante" && typeof u.id === "number",
+          )
+          .map((u: AuthUser) => ({
+            id: u.id!,
+            label: u.fullName?.trim() ? u.fullName! : u.email,
+          })),
+      );
+    })();
+  }, [userRole, showReassign]);
+
+  const handleReassign = async () => {
+    if (!selectedStudentId || !project) return;
+    setIsReassigning(true);
+    setReassignError(null);
+    try {
+      await reassignStudent(id, {
+        student: selectedStudentId as number,
+      });
+      // Refresh the project with new student name
+      const refreshed = await getProject(id);
+      if (refreshed) setProject(refreshed);
+      setShowReassign(false);
+      setSelectedStudentId("");
+    } catch (err) {
+      setReassignError(
+        err instanceof Error ? err.message : "Error al reasignar estudiante.",
+      );
+    } finally {
+      setIsReassigning(false);
+    }
+  };
 
   const handleFileUpload = async (file: File) => {
     setUploadError(null);
@@ -60,16 +124,20 @@ export default function ProyectoDetailsPage() {
       const uploaded = await uploadProjectFile(id, file);
       setProject((prev) => {
         if (!prev) return prev;
-        const updatedFiles = [...(prev.files || []), {
-          name: uploaded.name,
-          url: uploaded.url,
-          type: uploaded.file_type,
-          date: uploaded.date,
-        }];
+        const updatedFiles = [
+          ...(prev.files || []),
+          {
+            name: uploaded.name,
+            url: uploaded.url,
+            type: uploaded.file_type,
+            date: uploaded.date,
+          },
+        ];
         return { ...prev, files: updatedFiles };
       });
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Error al subir el archivo.";
+      const message =
+        error instanceof Error ? error.message : "Error al subir el archivo.";
       setUploadError(message);
     } finally {
       setIsUploading(false);
@@ -301,13 +369,68 @@ export default function ProyectoDetailsPage() {
                         <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-400 to-sky-400 flex items-center justify-center text-white text-xl font-bold shadow-lg shadow-blue-400/20">
                           {project.student.charAt(0)}
                         </div>
-                        <div>
+                        <div className="flex-1">
                           <p className="font-bold text-gray-900 text-lg">
                             {project.student}
                           </p>
                           <p className="text-sm text-gray-500">Estudiante</p>
                         </div>
+                        {userRole === "Administrador" && (
+                          <button
+                            onClick={() => setShowReassign(!showReassign)}
+                            className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+                            title="Reasignar estudiante"
+                          >
+                            <UserCog className="w-5 h-5" />
+                          </button>
+                        )}
                       </div>
+                      {showReassign && userRole === "Administrador" && (
+                        <div className="mt-4 pt-4 border-t border-gray-100 space-y-3">
+                          <label className="text-xs font-semibold text-purple-700 block">
+                            Reasignar a otro estudiante
+                          </label>
+                          <select
+                            value={selectedStudentId}
+                            onChange={(e) =>
+                              setSelectedStudentId(
+                                e.target.value ? Number(e.target.value) : "",
+                              )
+                            }
+                            className="w-full px-3 py-2.5 bg-white border border-gray-200 rounded-lg shadow-sm focus:border-purple-500 focus:ring-4 focus:ring-purple-500/10 transition-all text-sm font-medium"
+                          >
+                            <option value="">Seleccione un estudiante</option>
+                            {studentOptions.map((s) => (
+                              <option key={s.id} value={s.id}>
+                                {s.label}
+                              </option>
+                            ))}
+                          </select>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={handleReassign}
+                              disabled={!selectedStudentId || isReassigning}
+                              className="px-4 py-2 text-xs font-bold text-white bg-purple-600 hover:bg-purple-700 rounded-lg shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {isReassigning ? "Reasignando..." : "Confirmar"}
+                            </button>
+                            <button
+                              onClick={() => {
+                                setShowReassign(false);
+                                setReassignError(null);
+                              }}
+                              className="px-4 py-2 text-xs font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                            >
+                              Cancelar
+                            </button>
+                          </div>
+                          {reassignError && (
+                            <p className="text-xs text-red-600 font-semibold">
+                              {reassignError}
+                            </p>
+                          )}
+                        </div>
+                      )}
                     </div>
 
                     {/* Advisor Info */}
@@ -438,7 +561,9 @@ export default function ProyectoDetailsPage() {
                             {isUploading ? "Subiendo..." : "Subir Documento"}
                           </label>
                           {uploadError && (
-                            <p className="text-xs text-red-600 font-semibold">{uploadError}</p>
+                            <p className="text-xs text-red-600 font-semibold">
+                              {uploadError}
+                            </p>
                           )}
                         </div>
                       )}
@@ -471,10 +596,14 @@ export default function ProyectoDetailsPage() {
                                           : "bg-rose-50 text-rose-700 border border-rose-200"
                                       }`}
                                     >
-                                      {ev.pass_status === "Pass" ? "Aprobado" : "Rechazado"}
+                                      {ev.pass_status === "Pass"
+                                        ? "Aprobado"
+                                        : "Rechazado"}
                                     </div>
                                     <span className="text-xs text-gray-500">
-                                      {new Date(ev.graded_at).toLocaleDateString()}
+                                      {new Date(
+                                        ev.graded_at,
+                                      ).toLocaleDateString()}
                                     </span>
                                   </div>
                                   <span className="text-sm font-bold text-gray-900">
@@ -503,15 +632,26 @@ export default function ProyectoDetailsPage() {
                                 )}
                                 {ev.comments && (
                                   <div className="mt-3 p-3 bg-white rounded-lg border border-gray-100 text-sm text-gray-700">
-                                    <span className="font-semibold text-gray-900">Comentario:</span>
+                                    <span className="font-semibold text-gray-900">
+                                      Comentario:
+                                    </span>
                                     <p className="mt-1 whitespace-pre-wrap">
                                       {typeof ev.comments === "string"
                                         ? ev.comments
-                                        : (ev.comments as any).general || "Sin comentarios"}
+                                        : String(
+                                            (
+                                              ev.comments as Record<
+                                                string,
+                                                unknown
+                                              >
+                                            ).general || "Sin comentarios",
+                                          )}
                                     </p>
                                   </div>
                                 )}
-                                <div className="mt-2 text-xs text-gray-500">Intento {idx + 1}/2</div>
+                                <div className="mt-2 text-xs text-gray-500">
+                                  Intento {idx + 1}/2
+                                </div>
                               </div>
                             ))}
                           </div>

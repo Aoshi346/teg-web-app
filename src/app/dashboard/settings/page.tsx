@@ -155,7 +155,9 @@ export default function SettingsPage({
     const sessionUser = getUser();
     if (sessionUser) {
       setProfileEmail(sessionUser.email || "");
-      setProfileName(sessionUser.fullName || sessionUser.email.split("@")[0] || "Usuario");
+      setProfileName(
+        sessionUser.fullName || sessionUser.email.split("@")[0] || "Usuario",
+      );
       setProfilePhone(sessionUser.phone || "");
       setProfileSemester(sessionUser.semester || "");
     } else if (typeof window !== "undefined") {
@@ -222,14 +224,16 @@ export default function SettingsPage({
   const handleSaveUser = async (
     userData: Omit<UserData, "id"> & { id?: number },
   ) => {
-    const payload: AuthUser = {
+    const isEditing = !!userData.id;
+    const payload: Partial<AuthUser> = {
       email: userData.email,
       role: userData.role as AuthUser["role"],
       fullName: userData.fullName,
       semester: userData.semester,
       phone: userData.phone,
-      password: "password123", // default password for manual creation
-      status: "pending",
+      ...(isEditing
+        ? {} // Don't send password or reset status when editing
+        : { password: "password123", status: "pending" }),
     };
 
     try {
@@ -237,7 +241,7 @@ export default function SettingsPage({
         await updateUserApi(userData.id, payload);
         showToast("Usuario actualizado correctamente.", "success");
       } else {
-        await createUser(payload);
+        await createUser(payload as AuthUser);
         showToast(
           "Usuario creado correctamente. Estado inicial: pendiente.",
           "success",
@@ -735,16 +739,21 @@ export default function SettingsPage({
                     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                       <div className="p-4 sm:p-6 border-b border-gray-50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-gray-50/30">
                         <div>
-                          <h2 className="text-lg font-bold text-gray-900">Gestión de Semestres</h2>
+                          <h2 className="text-lg font-bold text-gray-900">
+                            Gestión de Semestres
+                          </h2>
                           <p className="text-sm text-gray-500">
-                            Registra los períodos académicos para vincularlos a los trabajos.
+                            Registra los períodos académicos para vincularlos a
+                            los trabajos.
                           </p>
                         </div>
                       </div>
                       <div className="p-4 sm:p-6 grid gap-6 lg:grid-cols-2">
                         <div className="space-y-4">
                           <div className="space-y-1">
-                            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Nuevo semestre</p>
+                            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                              Nuevo semestre
+                            </p>
                             <p className="text-sm text-gray-600">
                               Selecciona el año y el período, luego agrega.
                             </p>
@@ -754,13 +763,17 @@ export default function SettingsPage({
                               type="number"
                               min={2020}
                               value={newSemesterYear}
-                              onChange={(e) => setNewSemesterYear(Number(e.target.value))}
+                              onChange={(e) =>
+                                setNewSemesterYear(Number(e.target.value))
+                              }
                               className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none"
                               placeholder="Año"
                             />
                             <select
                               value={newSemesterPeriod}
-                              onChange={(e) => setNewSemesterPeriod(e.target.value)}
+                              onChange={(e) =>
+                                setNewSemesterPeriod(e.target.value)
+                              }
                               className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none"
                             >
                               <option value="01">01 (Ene-Jun)</option>
@@ -775,12 +788,17 @@ export default function SettingsPage({
                             </button>
                           </div>
                           <p className="text-xs text-gray-400">
-                            Sugerencias: {getAvailableSemesterPeriods().slice(0, 4).join(", ")}
+                            Sugerencias:{" "}
+                            {getAvailableSemesterPeriods()
+                              .slice(0, 4)
+                              .join(", ")}
                           </p>
                         </div>
 
                         <div className="space-y-3">
-                          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Semestres disponibles</p>
+                          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                            Semestres disponibles
+                          </p>
                           {semesters.length === 0 ? (
                             <div className="text-sm text-gray-500 bg-gray-50 border border-gray-200 rounded-xl p-4">
                               Aún no hay semestres registrados.
@@ -796,10 +814,14 @@ export default function SettingsPage({
                                     <p className="text-sm font-semibold text-gray-900">
                                       {formatSemesterLabel(semester.period)}
                                     </p>
-                                    <p className="text-xs text-gray-500">{semester.period}</p>
+                                    <p className="text-xs text-gray-500">
+                                      {semester.period}
+                                    </p>
                                   </div>
                                   <button
-                                    onClick={() => handleDeleteSemester(semester.id)}
+                                    onClick={() =>
+                                      handleDeleteSemester(semester.id)
+                                    }
                                     disabled={isSavingSemester}
                                     className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-60"
                                     title="Eliminar semestre"
@@ -1078,15 +1100,16 @@ export default function SettingsPage({
                                         Aprobar
                                       </button>
                                     )}
-                                    {user.role !== "Administrador" && user.email !== email && (
-                                      <button
-                                        onClick={() => openDeleteModal(user)}
-                                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                                        title="Eliminar"
-                                      >
-                                        <Trash2 className="w-4 h-4" />
-                                      </button>
-                                    )}
+                                    {user.role !== "Administrador" &&
+                                      user.email !== email && (
+                                        <button
+                                          onClick={() => openDeleteModal(user)}
+                                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                          title="Eliminar"
+                                        >
+                                          <Trash2 className="w-4 h-4" />
+                                        </button>
+                                      )}
                                     <button
                                       onClick={() => handleEditUser(user)}
                                       className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
@@ -1137,12 +1160,15 @@ export default function SettingsPage({
                                 >
                                   <Edit className="w-4 h-4" />
                                 </button>
-                                <button
-                                  onClick={() => openDeleteModal(user)}
-                                  className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
+                                {user.role !== "Administrador" &&
+                                  user.email !== email && (
+                                    <button
+                                      onClick={() => openDeleteModal(user)}
+                                      className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </button>
+                                  )}
                               </div>
                             </div>
                             <div className="mt-3 flex flex-wrap gap-2">
@@ -1176,11 +1202,10 @@ export default function SettingsPage({
                       {users.length > 0 && (
                         <div className="p-4 border-t border-gray-100 flex items-center justify-between bg-gray-50/30">
                           <p className="text-sm text-gray-500">
-                            Mostrando {
-                              users.length === 0
-                                ? 0
-                                : (currentPage - 1) * usersPerPage + 1
-                            }
+                            Mostrando{" "}
+                            {users.length === 0
+                              ? 0
+                              : (currentPage - 1) * usersPerPage + 1}
                             -
                             {Math.min(currentPage * usersPerPage, users.length)}{" "}
                             de {users.length}
