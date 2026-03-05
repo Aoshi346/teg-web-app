@@ -86,7 +86,8 @@ export default function AgregarDocumentoPage() {
   const [availableSemesters, setAvailableSemesters] = useState<string[]>([]);
   const [students, setStudents] = useState<UserOption[]>([]);
   const [potentialPartners, setPotentialPartners] = useState<UserOption[]>([]);
-  const [professors, setProfessors] = useState<UserOption[]>([]);
+  // Proper tutors list
+  const [tutorsList, setTutorsList] = useState<UserOption[]>([]);
   const userRole = useMemo(() => getUserRole(), []);
   const currentUser = useMemo(() => getUser(), []);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -143,18 +144,23 @@ export default function AgregarDocumentoPage() {
           status: u.status,
         }));
 
-      const professorOptions = users
-        .filter((u) => u.role === "Tutor" && typeof u.id === "number")
-        .map((u) => ({
-          id: u.id!,
-          label: u.fullName?.trim() ? u.fullName : u.email,
-          email: u.email,
-          role: u.role,
-          status: u.status,
-        }));
-
       setStudents(studentOptions);
-      setProfessors(professorOptions);
+
+      // Fetch Tutors
+      try {
+        const tutors = await api.get<ApiUser[]>("/users/?role=Tutor");
+        setTutorsList(
+          tutors.map((u) => ({
+            id: u.id!,
+            label: u.full_name || u.email,
+            email: u.email,
+            role: "Tutor",
+            status: "active",
+          })),
+        );
+      } catch (err) {
+        console.error("Failed to fetch tutors", err);
+      }
       setPotentialPartners(studentOptions); // Default for Admin
 
       if (userRole === "Estudiante") {
@@ -229,20 +235,6 @@ export default function AgregarDocumentoPage() {
   // Advisor Handlers
   const handleAdvisorChange = (index: number, value: string) => {
     const numericValue = value ? Number(value) : "";
-
-    // Avoid duplicate selection
-    if (
-      numericValue !== "" &&
-      formData.advisors.some((id, i) => i !== index && id === numericValue)
-    ) {
-      setBannerState({
-        visible: true,
-        message: "Este tutor ya está seleccionado.",
-        type: "warning",
-      });
-      return;
-    }
-
     const newAdvisors = [...formData.advisors];
     newAdvisors[index] = numericValue;
     setFormData((prev) => ({ ...prev, advisors: newAdvisors }));
@@ -284,27 +276,21 @@ export default function AgregarDocumentoPage() {
       return;
     }
 
-    // Comprehensive Validation
-    const errorsFound = {
-      title: !formData.title.trim(),
-      student: userRole === "Administrador" ? !formData.studentId : false,
-      advisors: formData.advisors.map((a) => !a),
-      files: userRole === "Estudiante" && selectedFiles.length === 0,
-    };
+    // Validation
+    const titleError = !formData.title.trim();
+    const studentError = !formData.studentId;
+    const advisorsErrors = formData.advisors.map((a) => a === "");
+    const filesError = userRole === "Estudiante" && selectedFiles.length === 0;
 
-    const hasAdvisorErrors = errorsFound.advisors.some(Boolean);
+    const hasErrors =
+      titleError || studentError || advisorsErrors.some(Boolean) || filesError;
 
-    if (
-      errorsFound.title ||
-      errorsFound.student ||
-      hasAdvisorErrors ||
-      errorsFound.files
-    ) {
+    if (hasErrors) {
       setErrors({
-        title: errorsFound.title,
-        student: errorsFound.student,
-        advisors: errorsFound.advisors,
-        files: errorsFound.files,
+        title: titleError,
+        student: studentError,
+        advisors: advisorsErrors,
+        files: filesError,
       });
 
       setBannerState({
@@ -322,18 +308,17 @@ export default function AgregarDocumentoPage() {
       files: false,
     });
 
-    const validAdvisors = formData.advisors.filter((a) => a !== "");
-    const advisorNames = validAdvisors
-      .map((id) => professors.find((p) => p.id === id)?.label)
-      .filter(Boolean)
-      .join(", ");
-
     setIsSubmitting(true);
 
     try {
+      const validAdvisors = formData.advisors.filter(
+        (a) => a !== "",
+      ) as number[];
+
       const created = await createProject({
-        title: formData.title.trim(),
-        advisor: advisorNames,
+        title: formData.title,
+        advisor: "", // Legacy
+        advisors: validAdvisors,
         period: formData.semesterPeriod,
         project_type: documentType,
         status: "pending",
@@ -856,12 +841,9 @@ export default function AgregarDocumentoPage() {
                                     <option value="">
                                       Seleccione un tutor
                                     </option>
-                                    {professors.map((prof) => (
-                                      <option key={prof.id} value={prof.id}>
-                                        {prof.label}{" "}
-                                        {prof.status === "pending"
-                                          ? "(Pendiente)"
-                                          : ""}
+                                    {tutorsList.map((t) => (
+                                      <option key={t.id} value={t.id}>
+                                        {t.label}
                                       </option>
                                     ))}
                                   </select>

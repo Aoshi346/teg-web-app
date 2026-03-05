@@ -8,11 +8,22 @@ export interface ProjectFile {
 export type ProjectStatus = "checked" | "pending" | "rejected";
 export type ProjectType = "proyecto" | "tesis";
 
+export interface Comment {
+  id: number;
+  project: number;
+  author: number;
+  authorName: string;
+  content: string;
+  createdAt: string;
+}
+
 export interface Project {
   id: number;
   title: string;
   student: string; // display name
   advisor: string;
+  advisorNames?: string[];
+  advisors?: number[];
   partner?: number;
   partnerName?: string;
   submittedDate: string;
@@ -27,3 +38,4 @@ export interface Project {
   files?: ProjectFile[];
   failedAttempts?: number;
 }
+

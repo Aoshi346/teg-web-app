@@ -17,6 +17,8 @@ export interface ApiProject {
   partner?: number;
   partner_name?: string;
   advisor: string;
+  advisors?: number[];
+  advisor_names?: string[];
   submitted_date: string;
   review_date?: string;
   status: "checked" | "pending" | "rejected";
@@ -43,6 +45,7 @@ export interface ApiEvaluation {
   graded_at: string;
 }
 
+
 export async function getAllProjects(): Promise<Project[]> {
   try {
     const response = await api.get<ApiProject[]>("/projects/");
@@ -67,6 +70,8 @@ function mapApiProject(p: ApiProject): Project {
     partner: p.partner,
     partnerName: p.partner_name,
     advisor: p.advisor,
+    advisors: p.advisors,
+    advisorNames: p.advisor_names,
     submittedDate: p.submitted_date,
     reviewDate: p.review_date,
     status: p.status,
@@ -132,8 +137,30 @@ export async function uploadProjectFile(projectId: number, file: File): Promise<
   return postForm<ApiFile>(`/projects/${projectId}/files/`, formData);
 }
 
-// Admin-only: Reassign student for a project
+export interface ApiComment {
+  id: number;
+  project: number;
+  author: number;
+  author_name: string;
+  content: string;
+  created_at: string;
+}
+
+export async function getComments(projectId: number): Promise<ApiComment[]> {
+  try {
+    return await api.get<ApiComment[]>(`/comments/?project=${projectId}`);
+  } catch (error) {
+    console.error(`Failed to fetch comments for project ${projectId}`, error);
+    return [];
+  }
+}
+
+export async function createComment(projectId: number, content: string): Promise<ApiComment> {
+  return api.post<ApiComment>(`/comments/`, { project: projectId, content });
+}
+
 export async function reassignStudent(id: number, payload: { student?: number; student_email?: string }): Promise<ApiProject> {
   return api.post<ApiProject>(`/projects/${id}/reassign_student/`, payload);
 }
+
 

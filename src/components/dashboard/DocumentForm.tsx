@@ -69,9 +69,9 @@ export default function DocumentForm({
 
   // Form State
   const [title, setTitle] = useState(initialData?.title || "");
-  const [advisors, setAdvisors] = useState<string[]>(
-    initialData?.advisor
-      ? initialData.advisor.split(",").map((s) => s.trim())
+  const [advisors, setAdvisors] = useState<(number | "")[]>(
+    initialData?.advisors && initialData.advisors.length > 0
+      ? initialData.advisors
       : [""],
   );
 
@@ -120,6 +120,9 @@ export default function DocumentForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { showBanner, bannerProps } = useValidation();
   const [studentsList, setStudentsList] = useState<
+    Array<{ id: number; label: string }>
+  >([]);
+  const [tutorsList, setTutorsList] = useState<
     Array<{ id: number; label: string }>
   >([]);
   const [selectedStudentId, setSelectedStudentId] = useState<number | null>(
@@ -173,14 +176,28 @@ export default function DocumentForm({
           console.error("Failed to fetch potential partners", err);
         }
       }
+
+      // Fetch Tutors for everyone
+      try {
+        const tutors = await api.get<ApiUser[]>("/users/?role=Tutor");
+        setTutorsList(
+          tutors.map((u) => ({
+            id: u.id!,
+            label: u.full_name || u.email,
+          })),
+        );
+      } catch (err) {
+        console.error("Failed to fetch tutors", err);
+      }
     };
     fetchUsers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode, userRole, currentUser?.id]);
 
   const handleAdvisorChange = (index: number, value: string) => {
+    const numericValue = value ? Number(value) : "";
     const newAdvisors = [...advisors];
-    newAdvisors[index] = value;
+    newAdvisors[index] = numericValue;
     setAdvisors(newAdvisors);
     if (errors.advisors[index]) {
       const newErrs = [...errors.advisors];
@@ -210,7 +227,7 @@ export default function DocumentForm({
 
     // Validation Logic
     const titleError = !title.trim();
-    const advisorsErrors = advisors.map((a) => !a.trim());
+    const advisorsErrors = advisors.map((a) => a === "");
 
     const hasErrors = titleError || advisorsErrors.some(Boolean);
 
@@ -229,11 +246,12 @@ export default function DocumentForm({
     setIsSubmitting(true);
 
     try {
-      const validAdvisors = advisors.filter((a) => a.trim());
+      const validAdvisors = advisors.filter((a) => a !== "") as number[];
 
-      const payload: Partial<Project> = {
+      const payload: Partial<Project> & { advisors: number[] } = {
         title: title.trim(),
-        advisor: validAdvisors.join(", "),
+        advisor: "", // Legacy field ignored or we could constructs names?
+        advisors: validAdvisors,
         period: semesterPeriod,
         type: documentType,
         partner: partnerId || undefined, // Use undefined if null to skip or handle properly
@@ -246,7 +264,8 @@ export default function DocumentForm({
         // Backend create (student assigned server-side)
         await createProject({
           title: payload.title || "",
-          advisor: payload.advisor || "",
+          advisor: "",
+          advisors: payload.advisors,
           period: payload.period || "",
           partner: payload.partner,
           project_type: documentType,
@@ -267,7 +286,8 @@ export default function DocumentForm({
         // Backend update first
         await apiUpdateProject(updatedDoc.id, {
           title: updatedDoc.title,
-          advisor: updatedDoc.advisor,
+          advisor: "", // Legacy
+          advisors: payload.advisors,
           period: updatedDoc.period,
           partner: payload.partner,
           project_type: documentType,
@@ -502,15 +522,20 @@ export default function DocumentForm({
                       >
                         Tutor {index + 1}
                       </label>
-                      <input
-                        type="text"
+                      <select
                         value={advisor}
                         onChange={(e) =>
                           handleAdvisorChange(index, e.target.value)
                         }
                         className={`w-full px-3 py-2.5 bg-white border rounded-lg shadow-sm focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all text-sm font-medium ${errors.advisors[index] ? "border-red-300" : "border-gray-200"}`}
-                        placeholder="Nombre del tutor"
-                      />
+                      >
+                        <option value="">Seleccionar Tutor</option>
+                        {tutorsList.map((t) => (
+                          <option key={t.id} value={t.id}>
+                            {t.label}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                     {advisors.length > 1 && (
                       <button

@@ -2,6 +2,7 @@
 
 import React from "react";
 import { useRouter, useParams } from "next/navigation";
+import CommentsSection from "@/components/dashboard/CommentsSection";
 import {
   ArrowLeft,
   Calendar,
@@ -533,6 +534,7 @@ export default function TesisDetailsPage() {
                   )}
                 </div>
               </div>
+              <CommentsSection projectId={project.id} />
             </div>
           </div>
         </main>

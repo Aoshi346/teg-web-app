@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import DashboardHeader from "@/components/layout/DashboardHeader";
 import PageTransition from "@/components/ui/PageTransition";
+import CommentsSection from "@/components/dashboard/CommentsSection";
 import { Project } from "@/types/project";
 import {
   getProject,
@@ -697,6 +698,7 @@ export default function ProyectoDetailsPage() {
                   )}
                 </div>
               </div>
+              <CommentsSection projectId={project.id} />
             </div>
           </div>
         </main>
