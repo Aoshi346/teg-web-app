@@ -16,7 +16,6 @@ export interface ApiProject {
   student_name?: string; // From serializer
   partner?: number;
   partner_name?: string;
-  advisor: string;
   advisors?: number[];
   advisor_names?: string[];
   submitted_date: string;
@@ -69,7 +68,6 @@ function mapApiProject(p: ApiProject): Project {
     student: p.student_name || `Estudiante ${p.student}`,
     partner: p.partner,
     partnerName: p.partner_name,
-    advisor: p.advisor,
     advisors: p.advisors,
     advisorNames: p.advisor_names,
     submittedDate: p.submitted_date,

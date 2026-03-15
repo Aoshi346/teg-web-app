@@ -284,11 +284,11 @@ export default function TesisDetailsPage() {
                       </h3>
                       <div className="flex items-center gap-4">
                         <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center text-white text-xl font-bold shadow-lg shadow-teal-500/25">
-                          {project.advisor.charAt(0)}
+                          {(project.advisorNames?.[0] || "?").charAt(0)}
                         </div>
                         <div>
                           <p className="font-bold text-gray-900 text-lg">
-                            {project.advisor}
+                            {project.advisorNames?.[0] || "Sin tutor"}
                           </p>
                           <p className="text-sm text-gray-500">Tutor</p>
                         </div>

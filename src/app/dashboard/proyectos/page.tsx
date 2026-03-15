@@ -99,7 +99,7 @@ export default function ProyectosPage(props: ProyectosPageProps = {}) {
       const matchesSearch =
         project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         project.student.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        project.advisor.toLowerCase().includes(searchQuery.toLowerCase());
+        (project.advisorNames || []).some(n => n.toLowerCase().includes(searchQuery.toLowerCase()));
 
       const matchesFilter =
         filterStatus === "all" || project.status === filterStatus;

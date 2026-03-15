@@ -678,9 +678,6 @@ export default function EvaluationForm({
             | "checked"
             | "rejected"
             | "pending",
-          score: sectionScores ? sectionScores.total : score,
-          diagramacionScore: sectionScores?.diagramacion,
-          contenidoScore: sectionScores?.contenido,
           reviewDate: new Date().toISOString().split("T")[0],
         };
 
@@ -692,9 +689,6 @@ export default function EvaluationForm({
           }
           await updateProject(updatedProject.id, {
             status: updatedProject.status,
-            score: updatedProject.score ?? 0,
-            diagramacion_score: updatedProject.diagramacionScore ?? 0,
-            contenido_score: updatedProject.contenidoScore ?? 0,
             review_date: updatedProject.reviewDate,
             stage1_passed: updatedProject.stage1Passed ?? false,
           });
@@ -716,9 +710,6 @@ export default function EvaluationForm({
           }
           await updateProject(updatedProject.id, {
             status: updatedProject.status,
-            score: updatedProject.score ?? 0,
-            diagramacion_score: updatedProject.diagramacionScore ?? 0,
-            contenido_score: updatedProject.contenidoScore ?? 0,
             review_date: updatedProject.reviewDate,
             failed_attempts: updatedProject.failedAttempts ?? 0,
           });

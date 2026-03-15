@@ -213,13 +213,13 @@ export default function ProjectCard({
         {/* Tutor */}
         <div className="flex items-center gap-3 group/item">
           <div className="w-10 h-10 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center text-xs font-bold text-gray-500 group-hover/item:bg-white group-hover/item:shadow-md group-hover/item:scale-110 transition-all duration-300">
-            {getInitials(project.advisor)}
+            {getInitials(project.advisorNames?.[0] || "?")}
           </div>
           <div>
             <p className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-0.5">
               TUTOR
             </p>
-            <p className="font-bold text-gray-900 text-sm">{project.advisor}</p>
+            <p className="font-bold text-gray-900 text-sm">{project.advisorNames?.[0] || "Sin tutor"}</p>
           </div>
         </div>
 

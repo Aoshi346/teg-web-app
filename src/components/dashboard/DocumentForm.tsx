@@ -250,7 +250,6 @@ export default function DocumentForm({
 
       const payload: Partial<Project> & { advisors: number[] } = {
         title: title.trim(),
-        advisor: "", // Legacy field ignored or we could constructs names?
         advisors: validAdvisors,
         period: semesterPeriod,
         type: documentType,
@@ -264,7 +263,6 @@ export default function DocumentForm({
         // Backend create (student assigned server-side)
         await createProject({
           title: payload.title || "",
-          advisor: "",
           advisors: payload.advisors,
           period: payload.period || "",
           partner: payload.partner,
@@ -286,7 +284,6 @@ export default function DocumentForm({
         // Backend update first
         await apiUpdateProject(updatedDoc.id, {
           title: updatedDoc.title,
-          advisor: "", // Legacy
           advisors: payload.advisors,
           period: updatedDoc.period,
           partner: payload.partner,

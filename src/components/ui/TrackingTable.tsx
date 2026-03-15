@@ -125,7 +125,7 @@ const TrackingTable: React.FC<TrackingTableProps> = ({ items, onReview, onView, 
                                                 </p>
                                                 <p className="text-xs text-gray-500 mt-1 flex items-center gap-1.5 truncate max-w-[280px]">
                                                     <User className="w-3 h-3" />
-                                                    <span>Tutor: {item.advisor}</span>
+                                                    <span>Tutor: {item.advisorNames?.[0] || "Sin tutor"}</span>
                                                 </p>
                                             </div>
                                         </div>

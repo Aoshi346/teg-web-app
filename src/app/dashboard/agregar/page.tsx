@@ -317,7 +317,6 @@ export default function AgregarDocumentoPage() {
 
       const created = await createProject({
         title: formData.title,
-        advisor: "", // Legacy
         advisors: validAdvisors,
         period: formData.semesterPeriod,
         project_type: documentType,

@@ -21,7 +21,6 @@ export interface Project {
   id: number;
   title: string;
   student: string; // display name
-  advisor: string;
   advisorNames?: string[];
   advisors?: number[];
   partner?: number;
