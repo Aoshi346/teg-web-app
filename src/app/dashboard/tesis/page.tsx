@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useMemo } from "react";
-import { gsap } from "gsap";
+import React, { useState, useEffect, useMemo } from "react";
 import { Search, CheckCircle, Clock, XCircle, FileText } from "lucide-react";
 import { useRouter } from "next/navigation";
 import DashboardHeader from "@/components/layout/DashboardHeader";
@@ -43,10 +42,14 @@ export default function TesisPage(props: TesisPageProps = {}) {
   // Load tesis including user-added ones
   const [allProjects, setAllProjects] = useState<Project[]>([]);
   const [semesterOptions, setSemesterOptions] = useState<string[]>([]);
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
 
   useEffect(() => {
     let mounted = true;
     (async () => {
+      // Small delay to ensure the React router drops the Page skeleton immediately
+      await new Promise(resolve => setTimeout(resolve, 0));
+      
       const [apiProjects, semestersFromApi] = await Promise.all([
         getAllProjects(),
         getSemesters(),
@@ -55,6 +58,7 @@ export default function TesisPage(props: TesisPageProps = {}) {
       if (mounted) {
         setAllProjects(onlyTesis);
         setSemesterOptions(semestersFromApi.map((s) => s.period));
+        setIsDataLoaded(true);
       }
     })();
     return () => {
@@ -125,57 +129,10 @@ export default function TesisPage(props: TesisPageProps = {}) {
     [filteredProjects],
   );
 
-  // Entrance animations - only on first visit per session, not on navigation
-  const hasAnimatedRef = useRef(false);
-
+  // Entrance animations removed in favor of instantaneous module rendering
+  // Data still fetches gracefully via the useEffect below.
   useEffect(() => {
-    // Skip if already animated this session
-    if (hasAnimatedRef.current) return;
-
-    // Check if we've already visited this page in this session
-    const sessionKey = "visited_tesis_page";
-    const hasVisitedBefore = sessionStorage.getItem(sessionKey);
-
-    // Check if we just logged in or navigating within dashboard
-    let skipAnimations = false;
-    try {
-      const justLoggedIn = sessionStorage.getItem("justLoggedIn");
-      if (justLoggedIn || hasVisitedBefore) {
-        skipAnimations = true;
-      }
-    } catch {}
-
-    // Mark as visited for future navigations
-    try {
-      sessionStorage.setItem(sessionKey, "true");
-    } catch {}
-
-    const cards = gsap.utils.toArray<HTMLElement>(".project-card");
-    const sections = gsap.utils.toArray<HTMLElement>(".section-container");
-
-    // Always ensure elements are visible immediately
-    cards.forEach((card) => {
-      if (card) gsap.set(card, { opacity: 1, y: 0 });
-    });
-    sections.forEach((section) => {
-      if (section) gsap.set(section, { opacity: 1, y: 0 });
-    });
-
-    hasAnimatedRef.current = true;
-
-    // Skip animations for instant navigation
-    if (skipAnimations || (cards.length === 0 && sections.length === 0)) {
-      return;
-    }
-
-    // Only animate on very first visit - quick fade in
-    gsap.set([...cards, ...sections], { opacity: 0.8 });
-    gsap.to([...sections, ...cards], {
-      opacity: 1,
-      duration: 0.15,
-      stagger: 0.02,
-      ease: "power2.out",
-    });
+    // Component mounts instantly without visual fade block.
   }, []); // Only run once on mount
 
   return (
@@ -292,7 +249,11 @@ export default function TesisPage(props: TesisPageProps = {}) {
             </div>
 
             {/* Checked Projects Section */}
-            {(filterStatus === "all" || filterStatus === "checked") &&
+            {!isDataLoaded ? (
+              <div className="flex justify-center items-center py-20">
+                <div className="w-8 h-8 rounded-full border-4 border-slate-200 border-t-blue-600 animate-spin" />
+              </div>
+            ) : (filterStatus === "all" || filterStatus === "checked") &&
               checkedProjects.length > 0 && (
                 <div className="section-container mb-8">
                   <div className="flex items-center justify-between mb-4 sm:mb-6">
@@ -353,8 +314,7 @@ export default function TesisPage(props: TesisPageProps = {}) {
                 </div>
               )}
 
-            {/* Rejected Projects Section */}
-            {(filterStatus === "all" || filterStatus === "rejected") &&
+            {isDataLoaded && (filterStatus === "all" || filterStatus === "rejected") &&
               rejectedProjects.length > 0 && (
                 <div className="section-container mt-8">
                   <div className="flex items-center justify-between mb-4 sm:mb-6">
@@ -381,8 +341,7 @@ export default function TesisPage(props: TesisPageProps = {}) {
                 </div>
               )}
 
-            {/* Empty State */}
-            {filteredProjects.length === 0 && (
+            {isDataLoaded && filteredProjects.length === 0 && (
               <div className="section-container text-center py-12">
                 <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                 <h3 className="text-xl font-semibold text-gray-700 mb-2">

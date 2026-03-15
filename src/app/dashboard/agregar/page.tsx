@@ -94,6 +94,9 @@ export default function AgregarDocumentoPage() {
   const isStudent = userRole === "Estudiante";
   const isStaffReviewer = userRole === "Tutor" || userRole === "Jurado";
   const studentSemester = (currentUser?.semester || "").toLowerCase();
+  
+  const [dataLoaded, setDataLoaded] = useState({ semesters: false, users: false });
+  const isDataLoaded = dataLoaded.semesters && dataLoaded.users;
 
   const allowedDocumentTypes = useMemo(() => {
     if (!isStudent) return ["proyecto", "tesis"] as DocumentType[];
@@ -105,6 +108,8 @@ export default function AgregarDocumentoPage() {
   // Load semesters from backend projects and choose a safe default
   useEffect(() => {
     const loadSemesters = async () => {
+      // Small native promise delay to skip the blocking layout paint
+      await new Promise(resolve => setTimeout(resolve, 0));
       const [projects, semestersFromApi] = await Promise.all([
         getAllProjects(),
         getSemesters(),
@@ -125,6 +130,7 @@ export default function AgregarDocumentoPage() {
       setAvailableSemesters(semesters.length ? semesters : [chosen]);
       setFormData((prev) => ({ ...prev, semesterPeriod: chosen }));
       setStoredSemester(chosen);
+      setDataLoaded(p => ({ ...p, semesters: true }));
     };
 
     loadSemesters();
@@ -133,6 +139,8 @@ export default function AgregarDocumentoPage() {
   // Fetch selectable users (students & tutors)
   useEffect(() => {
     const loadUsers = async () => {
+      // Small native promise delay to skip the blocking layout paint
+      await new Promise(resolve => setTimeout(resolve, 0));
       const users = await getAllUsers();
       const studentOptions = users
         .filter((u) => u.role === "Estudiante" && typeof u.id === "number")
@@ -188,6 +196,7 @@ export default function AgregarDocumentoPage() {
       } else if (studentOptions.length === 1) {
         setFormData((prev) => ({ ...prev, studentId: studentOptions[0].id }));
       }
+      setDataLoaded(p => ({ ...p, users: true }));
     };
 
     loadUsers();
@@ -426,8 +435,14 @@ export default function AgregarDocumentoPage() {
               </div>
             )}
 
-            <div className="grid lg:grid-cols-3 gap-6">
-              {/* Left Column: Document Type Selection */}
+            {!isDataLoaded ? (
+              <div className="flex justify-center items-center py-24">
+                <div className="w-10 h-10 rounded-full border-4 border-slate-200 border-t-blue-600 animate-spin shadow-sm" />
+              </div>
+            ) : (
+              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="grid lg:grid-cols-3 gap-6">
+                  {/* Left Column: Document Type Selection */}
               <div className="lg:col-span-1 space-y-4">
                 <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
                   {isStudent ? "Documento asignado" : "Tipo de Documento"}
@@ -939,6 +954,8 @@ export default function AgregarDocumentoPage() {
                 </form>
               </div>
             </div>
+            </div>
+            )}
           </div>
         </main>
       </PageTransition>

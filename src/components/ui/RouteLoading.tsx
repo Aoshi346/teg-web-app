@@ -35,15 +35,14 @@ export default function RouteLoading() {
       }
     } catch {}
 
-    // Skip if this is a dashboard route and we're navigating between dashboard pages
-    // Only show loading for non-dashboard routes or first dashboard load
+    // Skip if navigating between dashboard pages entirely
     const isDashboardRoute = pathname?.startsWith('/dashboard');
     const wasDashboardRoute = prevPathnameRef.current?.startsWith('/dashboard');
     
     // If navigating between dashboard pages, ALWAYS skip loading for instant feel
     if (isDashboardRoute && wasDashboardRoute) {
       prevPathnameRef.current = pathname;
-      skipNextRef.current = false;
+      setIsLoading(false);
       return;
     }
 
@@ -51,12 +50,10 @@ export default function RouteLoading() {
     setIsLoading(true);
     
     if (progressRef.current) {
-      // Reset and animate progress bar - very quick for dashboard routes
       gsap.set(progressRef.current, { width: '0%' });
-      const duration = isDashboardRoute ? 0.15 : 0.2;
       gsap.to(progressRef.current, {
         width: '90%',
-        duration,
+        duration: 0.2, // normal duration for external routes
         ease: 'power2.out',
       });
     }
@@ -68,15 +65,18 @@ export default function RouteLoading() {
           duration: 0.08,
           ease: 'power2.in',
           onComplete: () => {
-            setIsLoading(false);
-            prevPathnameRef.current = pathname;
+             // Use setTimeout to ensure the React state update doesn't block painting
+            setTimeout(() => {
+               setIsLoading(false);
+               prevPathnameRef.current = pathname;
+            }, 0);
           },
         });
       } else {
         setIsLoading(false);
         prevPathnameRef.current = pathname;
       }
-    }, isDashboardRoute ? 50 : 100);
+    }, 100);
 
     return () => clearTimeout(timer);
   }, [pathname]);

@@ -57,6 +57,7 @@ export default function SettingsPage({
   const [activeTab, setActiveTab] = useState<
     "profile" | "security" | "notifications" | "users"
   >("profile");
+  const [isDataLoaded, setIsDataLoaded] = useState(true);
 
   // Profile State
   // const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
@@ -169,8 +170,16 @@ export default function SettingsPage({
   useEffect(() => {
     if (role !== "Administrador") return;
     if (activeTab === "users") {
-      loadUsers();
-      loadSemesters();
+      setIsDataLoaded(false);
+      const initTab = async () => {
+        // Drop the current render frame
+        await new Promise(resolve => setTimeout(resolve, 0));
+        await Promise.all([loadUsers(), loadSemesters()]);
+        setIsDataLoaded(true);
+      };
+      initTab();
+    } else {
+      setIsDataLoaded(true);
     }
   }, [activeTab, role, loadUsers, loadSemesters]);
 
@@ -745,7 +754,12 @@ export default function SettingsPage({
 
                 {/* Admin Users Section */}
                 {activeTab === "users" && role === "Administrador" && (
-                  <div className="space-y-8">
+                  !isDataLoaded ? (
+                    <div className="flex justify-center items-center py-24">
+                      <div className="w-10 h-10 rounded-full border-4 border-slate-200 border-t-blue-600 animate-spin shadow-sm" />
+                    </div>
+                  ) : (
+                  <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
                     {/* Semester Management */}
                     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                       <div className="p-4 sm:p-6 border-b border-gray-50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-gray-50/30">
@@ -1250,6 +1264,7 @@ export default function SettingsPage({
                       )}
                     </div>
                   </div>
+                  )
                 )}
               </div>
             </div>

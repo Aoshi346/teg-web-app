@@ -38,9 +38,13 @@ export default function TrackingPage({
   const [currentPage, setCurrentPage] = useState(1);
   const userRole = useMemo(() => getUserRole(), []);
   const isStudent = userRole === "Estudiante";
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
+      // Small delay to drop the React render frame immediately
+      await new Promise(resolve => setTimeout(resolve, 0));
+      
       const [apiProjects, semestersFromApi] = await Promise.all([
         getAllProjects(),
         getSemesters(),
@@ -65,6 +69,7 @@ export default function TrackingPage({
       } else {
         setSemester(chosen);
       }
+      setIsDataLoaded(true);
     };
 
     fetchData();
@@ -187,8 +192,12 @@ export default function TrackingPage({
               </div>
             </div>
 
-            {filteredItems.length === 0 ? (
-              <div className="p-6 bg-white border border-gray-200 rounded-2xl text-center shadow-sm">
+            {!isDataLoaded ? (
+              <div className="flex justify-center items-center py-20">
+                <div className="w-8 h-8 rounded-full border-4 border-slate-200 border-t-blue-600 animate-spin" />
+              </div>
+            ) : filteredItems.length === 0 ? (
+              <div className="p-6 bg-white border border-gray-200 rounded-2xl animate-in fade-in slide-in-from-bottom-4 duration-500 text-center shadow-sm">
                 <p className="text-base font-semibold text-gray-800">
                   No hay entregas que coincidan.
                 </p>
@@ -197,14 +206,15 @@ export default function TrackingPage({
                 </p>
               </div>
             ) : (
-              <TrackingTable
-                items={paginatedItems}
-                userRole={userRole}
-                pagination={{
-                  currentPage,
-                  totalPages,
-                  onPageChange: setCurrentPage,
-                }}
+              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <TrackingTable
+                  items={paginatedItems}
+                  userRole={userRole}
+                  pagination={{
+                    currentPage,
+                    totalPages,
+                    onPageChange: setCurrentPage,
+                  }}
                 onView={(item) => {
                   const isTesis = item.type === "tesis";
                   const basePath = isTesis
@@ -221,9 +231,10 @@ export default function TrackingPage({
                           ? "/dashboard/tesis"
                           : "/dashboard/proyectos";
                         router.push(`${basePath}/${item.id}`);
-                      }
-                }
-              />
+                        }
+                  }
+                />
+              </div>
             )}
           </div>
         </main>

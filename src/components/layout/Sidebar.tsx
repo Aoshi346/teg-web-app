@@ -86,12 +86,12 @@ const Sidebar: React.FC<SidebarProps> = ({
         isTesis
           ? {
               icon: BookOpen,
-              label: "Trabajo Especial (TEG)",
+              label: "TEG",
               href: "/dashboard/tesis",
             }
           : {
               icon: FileText,
-              label: "Proyecto (PTEG)",
+              label: "PTEG",
               href: "/dashboard/proyectos",
             },
         { icon: TrendingUp, label: "Seguimiento", href: "/dashboard/tracking" },
@@ -103,24 +103,24 @@ const Sidebar: React.FC<SidebarProps> = ({
       { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
       {
         icon: FileText,
-        label: "Proyecto (PTEG)",
+        label: "PTEG",
         href: "/dashboard/proyectos",
       },
       {
         icon: BookOpen,
-        label: "Trabajo Especial (TEG)",
+        label: "TEG",
         href: "/dashboard/tesis",
       },
       {
         icon: ScanLine,
-        label: "Escanear Documento",
+        label: "Escanear",
         href: "/dashboard/scan",
         requiredRole: ["Administrador", "Estudiante", "Tutor", "Jurado"],
       },
       { icon: TrendingUp, label: "Seguimiento", href: "/dashboard/tracking" },
       {
         icon: PlusCircle,
-        label: "Agregar Documento",
+        label: "Agregar",
         href: "/dashboard/agregar",
       },
       { icon: Settings, label: "Configuración", href: "/dashboard/settings" },
@@ -182,7 +182,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           <>
             {/* Mobile drawer (left off-canvas) - rendered in portal to ensure it overlays app content */}
             <div
-              className={`lg:hidden fixed inset-y-0 left-0 z-[100] w-[85vw] max-w-xs sm:max-w-sm bg-white border-r border-gray-200 shadow-2xl transform transition-transform duration-300 ease-out ${
+              className={`lg:hidden fixed inset-y-0 left-0 z-[100] w-[85vw] max-w-xs sm:max-w-sm bg-white border-r border-slate-200 shadow-2xl transform transition-transform duration-300 ease-out ${
                 mobileOpen ? "translate-x-0" : "-translate-x-full"
               }`}
               role="dialog"
@@ -190,7 +190,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               aria-label="Menú de navegación"
             >
               <div className="flex flex-col h-full pt-[env(safe-area-inset-top)]">
-                <div className="p-4 flex items-center justify-between border-b border-gray-200">
+                <div className="p-4 flex items-center justify-between border-b border-slate-100">
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="w-10 h-10 rounded-xl flex items-center justify-center">
                       <Image
@@ -203,16 +203,16 @@ const Sidebar: React.FC<SidebarProps> = ({
                       />
                     </div>
                     <div>
-                      <h1 className="text-lg font-bold text-gray-900">
+                      <h1 className="text-lg font-bold text-slate-900 font-montserrat tracking-tight">
                         Tesisfar
                       </h1>
-                      <p className="text-xs text-gray-500">Gestión de TEG</p>
+                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest">Gestión de TEG</p>
                     </div>
                   </div>
                   <button
                     ref={closeBtnRef}
                     onClick={() => setMobileOpen(false)}
-                    className="p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+                    className="p-2 rounded-lg text-slate-400 hover:text-slate-800 hover:bg-slate-100 transition-colors"
                     aria-label="Cerrar menú"
                   >
                     <X className="w-5 h-5" />
@@ -239,21 +239,34 @@ const Sidebar: React.FC<SidebarProps> = ({
                             onClick={() => setMobileOpen(false)}
                             onMouseEnter={() => handleLinkHover(item.href)}
                             prefetch={true}
-                            className={`w-full flex items-center gap-3 py-3 px-3 rounded-lg transition-all duration-200 relative group ${
+                            className={`w-full flex items-center gap-3 py-3 px-4 rounded-xl transition-all duration-300 relative group overflow-hidden border border-transparent ${
                               isActive
-                                ? "bg-blue-600 text-white shadow-md shadow-blue-600/30"
-                                : "text-gray-700 hover:bg-gray-100 hover:translate-x-1"
+                                ? "text-blue-700 bg-blue-50/80 shadow-sm border-blue-100/50"
+                                : "text-slate-600 hover:bg-blue-50/80 hover:text-blue-700 hover:shadow-sm hover:border-blue-100/50"
                             }`}
                             title={`${item.label} (Alt+${index + 1})`}
                           >
+                            {/* Accent Glow Background for Active Item */}
+                            {isActive && (
+                              <div
+                                className="absolute inset-0 opacity-10 pointer-events-none"
+                                style={{
+                                  background:
+                                    "linear-gradient(90deg, var(--accent-start, #3b82f6), var(--accent-end, #2563eb))",
+                                }}
+                              />
+                            )}
+                            
                             <item.icon
-                              className={`w-5 h-5 flex-shrink-0 transition-transform duration-200 ${isActive ? "scale-110" : "group-hover:scale-110"}`}
+                              className={`w-5 h-5 flex-shrink-0 transition-transform duration-200 relative z-10 ${isActive ? "scale-110 text-blue-600" : "group-hover:text-blue-600 group-hover:scale-110"}`}
                             />
-                            <span className="text-sm font-medium whitespace-nowrap overflow-hidden">
+                            <span className={`text-sm font-bold whitespace-nowrap overflow-hidden font-montserrat tracking-wide relative z-10 transition-colors duration-200 ${isActive ? "text-blue-800" : "group-hover:text-blue-800"}`}>
                               {item.label}
                             </span>
                             {isActive && (
-                              <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-white rounded-r-full" />
+                              <div 
+                                className="absolute left-0 top-0 bottom-0 w-1.5 rounded-r-full bg-blue-600 shadow-[0_0_10px_rgba(37,99,235,0.4)]" 
+                              />
                             )}
                           </Link>
                         </li>
@@ -276,13 +289,13 @@ const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Desktop persistent side rail */}
       <aside
-        className={`hidden lg:flex lg:flex-col h-screen bg-white border-r border-gray-200 shadow-none z-50 ${
+        className={`hidden lg:flex lg:flex-col h-screen bg-white border-r border-slate-200 shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-50 ${
           isCollapsed ? "w-20" : "w-64"
         }`}
         style={{ position: "relative" }}
       >
         <div
-          className={`p-4 h-[89px] flex items-center flex-shrink-0 border-b border-gray-200 ${isCollapsed ? "px-3 justify-center" : "px-6 justify-start"}`}
+          className={`p-4 h-[89px] flex items-center flex-shrink-0 border-b border-slate-100 ${isCollapsed ? "px-3 justify-center" : "px-6 justify-start"}`}
         >
           <div
             className={`flex items-center gap-3 min-w-0 transition-all duration-300 ${isCollapsed ? "gap-0" : ""}`}
@@ -298,9 +311,9 @@ const Sidebar: React.FC<SidebarProps> = ({
               />
             </div>
             {!isCollapsed && (
-              <div className="overflow-hidden transition-all duration-200">
-                <h1 className="text-lg font-bold text-gray-900">Tesisfar</h1>
-                <p className="text-xs text-gray-500">Gestión de TEG</p>
+              <div className="overflow-hidden transition-all duration-200 flex flex-col justify-center">
+                <h1 className="text-xl font-bold text-slate-900 font-montserrat tracking-tight leading-none mb-1">Tesisfar</h1>
+                <p className="text-[11px] uppercase tracking-wider font-bold text-slate-500">Gestión de TEG</p>
               </div>
             )}
           </div>
@@ -325,10 +338,10 @@ const Sidebar: React.FC<SidebarProps> = ({
                     href={item.href}
                     onMouseEnter={() => handleLinkHover(item.href)}
                     prefetch={true}
-                    className={`w-full flex items-center ${isCollapsed ? "justify-center gap-0 px-3" : "gap-3 px-4"} py-3 rounded-lg transition-all duration-200 relative group ${
+                    className={`w-full flex items-center ${isCollapsed ? "justify-center gap-0 px-3" : "gap-3 px-4"} py-3 rounded-xl transition-all duration-300 relative group overflow-hidden border border-transparent ${
                       isActive
-                        ? "bg-blue-700 text-white shadow-lg shadow-blue-500/30"
-                        : "text-gray-700 hover:bg-gray-100 hover:translate-x-1"
+                        ? "text-blue-700 bg-blue-50/80 shadow-sm border-blue-100/50"
+                        : "text-slate-600 hover:bg-blue-50/80 hover:text-blue-700 hover:shadow-sm hover:border-blue-100/50"
                     }`}
                     title={
                       isCollapsed
@@ -336,16 +349,31 @@ const Sidebar: React.FC<SidebarProps> = ({
                         : `Alt+${index + 1}`
                     }
                   >
+                    {isActive && (
+                      <div
+                        className="absolute inset-0 opacity-10 pointer-events-none transition-opacity duration-300"
+                        style={{
+                          background:
+                            "linear-gradient(90deg, var(--accent-start, #3b82f6), var(--accent-end, #2563eb))",
+                        }}
+                      />
+                    )}
+
                     <item.icon
-                      className={`w-5 h-5 flex-shrink-0 transition-transform duration-200 ${isActive ? "scale-110" : "group-hover:scale-110"}`}
+                      className={`w-5 h-5 flex-shrink-0 transition-transform duration-200 relative z-10 ${isActive ? "scale-110 text-blue-600" : "group-hover:text-blue-600 group-hover:scale-110"}`}
                     />
                     <span
-                      className={`font-medium whitespace-nowrap overflow-hidden transition-all duration-200 ${isCollapsed ? "w-0 opacity-0" : "w-auto opacity-100"}`}
+                      className={`font-bold font-montserrat tracking-wide whitespace-nowrap overflow-hidden transition-all duration-300 relative z-10 ${isCollapsed ? "w-0 opacity-0" : "w-auto opacity-100"} ${isActive ? "text-blue-800" : "group-hover:text-blue-800"}`}
                     >
                       {item.label}
                     </span>
                     {isActive && !isCollapsed && (
-                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-white rounded-r-full" />
+                      <div 
+                        className="absolute left-0 top-0 bottom-0 w-1.5 rounded-r-full shadow-[0_0_10px_rgba(249,115,22,0.5)]" 
+                        style={{
+                          background: "linear-gradient(to bottom, var(--accent-start, #f97316), var(--accent-end, #f59e0b))"
+                        }}
+                      />
                     )}
                   </Link>
                 </li>

@@ -121,7 +121,7 @@ export default function DashboardLayout({
   return (
     <>
       <RouteLoading />
-      <div className="h-screen w-full flex bg-gray-100 overflow-x-hidden">
+      <div className="h-screen w-full flex bg-slate-50 overflow-x-hidden">
         <Sidebar
           isCollapsed={isSidebarCollapsed}
           setIsCollapsed={setIsSidebarCollapsed}

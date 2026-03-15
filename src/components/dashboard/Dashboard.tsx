@@ -103,16 +103,19 @@ const StatCard: React.FC<StatCardProps> = memo(
     return (
       <div
         ref={cardRef}
-        className={`kbi-card rounded-2xl p-4 sm:p-6 shadow-lg shadow-gray-900/10 ${
+        className={`kbi-card relative rounded-2xl p-4 sm:p-6 shadow-lg overflow-hidden group transition-all duration-300 ${
           isColorful
             ? `${
                 bgClass ??
-                "bg-gradient-to-br from-emerald-500 via-emerald-600 to-green-700"
-              } border border-transparent ring-1 ring-white/20`
-            : "bg-white border border-gray-200/80 ring-1 ring-gray-200/80"
+                "bg-gradient-to-br from-indigo-600 via-indigo-700 to-slate-900"
+              } border border-white/10 ring-1 ring-black/5 hover:-translate-y-1 hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)]`
+            : "bg-white border border-gray-100 ring-1 ring-gray-900/5 hover:-translate-y-1 hover:shadow-xl hover:border-gray-200"
         }`}
       >
-        <div className="flex items-center gap-3 sm:gap-5">
+        {/* Shimmer Effect */}
+        <div className="absolute inset-0 -translate-x-full group-hover:animate-[shine_1.5s_ease-out] bg-gradient-to-r from-transparent via-white/10 to-transparent pointer-events-none" />
+
+        <div className="relative z-10 flex items-center gap-3 sm:gap-5">
           <div
             className={`flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shadow-inner ${
               isColorful ? "bg-white/15 text-white" : "bg-blue-50 text-blue-600"
@@ -122,8 +125,8 @@ const StatCard: React.FC<StatCardProps> = memo(
           </div>
           <div className="flex-1 min-w-0">
             <h3
-              className={`text-xs sm:text-sm md:text-base font-semibold truncate ${
-                isColorful ? "text-white/90" : "text-gray-600"
+              className={`text-xs sm:text-sm md:text-base font-bold font-montserrat truncate ${
+                isColorful ? "text-white/90" : "text-slate-600"
               }`}
             >
               {title}
@@ -131,15 +134,15 @@ const StatCard: React.FC<StatCardProps> = memo(
             <div className="flex items-baseline gap-1 sm:gap-2 mt-1 sm:mt-2">
               <p
                 ref={mainValueRef}
-                className={`text-2xl sm:text-3xl md:text-4xl xl:text-5xl font-bold leading-tight ${
-                  isColorful ? "text-white" : "text-gray-800"
+                className={`text-2xl sm:text-3xl md:text-5xl font-extrabold font-montserrat tracking-tight leading-tight ${
+                  isColorful ? "text-white drop-shadow-sm" : "text-slate-800"
                 }`}
               >
                 {mainValue}
               </p>
               <p
-                className={`text-xs sm:text-sm font-medium ${
-                  isColorful ? "text-white/80" : "text-gray-600"
+                className={`text-xs sm:text-sm font-semibold ${
+                  isColorful ? "text-white/80" : "text-slate-500"
                 }`}
               >
                 {mainLabel}
@@ -148,10 +151,10 @@ const StatCard: React.FC<StatCardProps> = memo(
           </div>
         </div>
         <div
-          className={`mt-4 sm:mt-6 pt-3 sm:pt-4 grid grid-cols-2 gap-3 sm:flex sm:flex-row sm:justify-around sm:gap-4 ${
+          className={`relative z-10 mt-4 sm:mt-6 pt-3 sm:pt-4 grid grid-cols-2 gap-3 sm:flex sm:flex-row sm:justify-around sm:gap-4 ${
             isColorful
-              ? "border-t border-white/20"
-              : "border-t border-gray-200/75"
+              ? "border-t border-white/10"
+              : "border-t border-slate-100"
           }`}
         >
           {secondaryStats.map((stat) => (
@@ -167,15 +170,15 @@ const StatCard: React.FC<StatCardProps> = memo(
               </div>
               <div className="flex flex-col sm:flex-row sm:items-center sm:gap-1 min-w-0">
                 <span
-                  className={`text-base sm:text-lg font-bold ${
-                    isColorful ? "text-white" : "text-gray-700"
+                  className={`text-base sm:text-lg font-bold font-montserrat ${
+                    isColorful ? "text-white" : "text-slate-700"
                   }`}
                 >
                   {stat.value}
                 </span>
                 <span
-                  className={`text-xs sm:text-sm truncate ${
-                    isColorful ? "text-white/80" : "text-gray-500"
+                  className={`text-xs sm:text-sm font-medium truncate ${
+                    isColorful ? "text-white/70" : "text-slate-500"
                   }`}
                 >
                   {stat.label}
@@ -508,15 +511,8 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
     ) {
       return;
     }
-
-    // Only animate on very first visit - quick fade in
-    gsap.set([...kbiCards, ...contentSections], { opacity: 0.8 });
-    gsap.to([...kbiCards, ...contentSections], {
-      opacity: 1,
-      duration: 0.2,
-      stagger: 0.03,
-      ease: "power2.out",
-    });
+    
+    // Elements are already set to full opacity & translation 0 above
   }, []); // Only run once on mount
 
   useEffect(() => {
@@ -604,7 +600,7 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
           },
         ],
         variant: "colorful" as const,
-        bgClass: "bg-gradient-to-br from-rose-500 via-red-600 to-orange-500",
+        bgClass: "bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#334155]", // Dark Slate theme
       },
     ];
   }, [dashboardData, isStudent]);
@@ -631,14 +627,20 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
         >
           <div className="max-w-7xl mx-auto">
             {/* Current Semester Indicator */}
-            <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-100">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-                  <Calendar className="w-5 h-5 text-white" />
+            <div className="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-[#0f172a] p-5 rounded-2xl border border-[#1e293b] shadow-lg shadow-slate-900/10 relative overflow-hidden group">
+              {/* Decorative accent glow */}
+              <div 
+                className="absolute inset-x-0 top-0 h-1"
+                style={{ background: "linear-gradient(90deg, var(--accent-start, #f97316), var(--accent-end, #f59e0b))" }}
+              />
+              
+              <div className="flex items-center gap-4 relative z-10">
+                <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-sm border border-white/5">
+                  <Calendar className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Período Actual</p>
-                  <p className="text-lg font-bold text-gray-900">
+                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Período Actual</p>
+                  <p className="text-xl font-bold text-white font-montserrat">
                     {formatSemesterLabel(semester)}
                   </p>
                 </div>
@@ -666,9 +668,9 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
 
             {/* Two equal columns for symmetry */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
-              <div className="content-section bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-6 shadow-md shadow-gray-900/5 border border-gray-200/80">
+              <div className="content-section bg-white rounded-3xl p-5 sm:p-7 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] flex flex-col h-full">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
-                  <h3 className="text-base sm:text-lg md:text-xl font-bold text-gray-900">
+                  <h3 className="text-lg md:text-xl font-bold text-slate-900 font-montserrat tracking-tight">
                     {isStudent ? "Mi Proyecto" : "Revisión de Proyectos"}
                   </h3>
                 </div>
@@ -691,20 +693,20 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
                     dashboardData?.projectsToReview.map((project, index) => (
                       <div
                         key={index}
-                        className="flex flex-col gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg sm:rounded-xl hover:bg-gray-100 active:bg-gray-200 transition-all duration-200 cursor-pointer group"
+                        className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 sm:p-5 rounded-2xl border border-slate-100 bg-slate-50/50 hover:bg-white hover:shadow-lg hover:shadow-blue-900/5 hover:-translate-y-1 hover:border-blue-100 transition-all duration-300 group"
                       >
-                        <div className="flex-1 min-w-0 w-full">
-                          <p className="text-xs sm:text-sm font-semibold text-gray-800 line-clamp-2">
+                        <div className="flex-1 min-w-0 w-full rounded-xl">
+                          <p className="text-sm sm:text-base font-bold text-slate-800 line-clamp-2 font-montserrat group-hover:text-blue-700 transition-colors">
                             {project.title}
                           </p>
-                          <p className="text-xs sm:text-sm text-gray-500 mt-1">
-                            {project.student}{" "}
-                            <span className="text-gray-400">•</span>{" "}
-                            <span className="text-xs">{project.date}</span>
-                            <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                          <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm text-slate-500 mt-2">
+                            <span className="font-medium text-slate-600">{project.student}</span>
+                            <span className="hidden sm:inline text-slate-300">•</span>
+                            <span className="text-[11px] sm:text-xs font-medium px-2 py-0.5 bg-slate-100 rounded-md text-slate-600">{project.date}</span>
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] sm:text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-100">
                               {project.type}
                             </span>
-                          </p>
+                          </div>
                         </div>
                         <button
                           onClick={() => {
@@ -714,7 +716,7 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
                                 : `/dashboard/proyectos/${project.id}`;
                             router.push(route);
                           }}
-                          className="w-full bg-blue-600 text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-semibold hover:bg-blue-700 active:bg-blue-800 transition-all duration-200 shadow-md shadow-blue-600/20 hover:shadow-lg transform hover:scale-[1.02] touch-manipulation"
+                          className="w-full sm:w-auto flex-shrink-0 bg-white text-slate-700 border border-slate-200 px-4 py-2.5 rounded-xl text-sm font-semibold hover:text-blue-700 hover:border-blue-200 hover:bg-blue-50 active:bg-blue-100 transition-all duration-200 shadow-sm touch-manipulation group-hover:shadow-md"
                         >
                           {isStudent ? "Ver Detalles" : "Revisar Ahora"}
                         </button>
@@ -725,8 +727,8 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
               </div>
 
               {!isStudent && (
-                <div className="content-section bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 md:p-6 shadow-md shadow-gray-900/5 border border-gray-200/80">
-                  <h3 className="text-base sm:text-lg md:text-xl font-bold text-gray-900 mb-3 sm:mb-4">
+                <div className="content-section bg-white rounded-3xl p-5 sm:p-7 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 transition-all duration-300 hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] flex flex-col h-full">
+                  <h3 className="text-lg md:text-xl font-bold text-slate-900 font-montserrat tracking-tight mb-4 sm:mb-6">
                     Seguimiento de Tesis
                   </h3>
                   <div className="space-y-3 sm:space-y-4">
@@ -744,30 +746,32 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
                       dashboardData?.projectsToReview.map((project, index) => (
                         <div
                           key={index}
-                          className="flex items-center gap-3 p-3 rounded-lg bg-amber-50 border border-amber-100"
+                          className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-4 sm:p-5 rounded-2xl border border-amber-100/50 bg-gradient-to-r from-amber-50/50 to-orange-50/50 hover:to-orange-50 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 group"
                         >
-                          <div className="flex-shrink-0">
-                            <Clock className="w-5 h-5 text-amber-500" />
+                          <div className="flex-shrink-0 w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center text-amber-600 group-hover:bg-amber-500 group-hover:text-white transition-colors duration-300 shadow-sm">
+                            <Clock className="w-5 h-5" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-gray-900 truncate">
+                            <p className="text-sm border-b border-transparent sm:text-base font-bold text-slate-800 truncate font-montserrat group-hover:text-amber-900 transition-colors">
                               {project.title}
                             </p>
-                            <p className="text-xs text-gray-500">
-                              {project.student} • {project.date}
-                            </p>
+                            <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 mt-1 sm:mt-1.5">
+                              <span className="font-medium text-slate-600">{project.student}</span>
+                              <span className="hidden sm:inline text-slate-300">•</span>
+                              <span className="text-[11px] font-medium px-2 py-0.5 bg-white/60 rounded-md text-slate-600 border border-slate-100">{project.date}</span>
+                            </div>
                           </div>
-                          <div className="flex-shrink-0 flex items-center gap-2">
+                          <div className="flex-shrink-0 flex items-center gap-2 mt-2 sm:mt-0">
                             <span
-                              className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                              className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold border ${
                                 project.type === "TEG"
-                                  ? "bg-purple-100 text-purple-700"
-                                  : "bg-blue-100 text-blue-700"
+                                  ? "bg-purple-50 text-purple-700 border-purple-100"
+                                  : "bg-blue-50 text-blue-700 border-blue-100"
                               }`}
                             >
                               {project.type}
                             </span>
-                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-700">
+                            <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-100 text-amber-700 border border-amber-200 shadow-sm">
                               Pendiente
                             </span>
                           </div>
