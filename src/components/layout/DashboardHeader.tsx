@@ -2,7 +2,7 @@
 
 import React, { useContext } from "react";
 import SidebarContext, { SidebarContextType } from "./SidebarContext";
-import Image from 'next/image';
+
 import {
   Bell,
   ChevronDown,
@@ -106,21 +106,27 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ pageTitle, isSidebarC
           <div className="relative" ref={profileRef}>
             <button
               onClick={() => setIsProfileOpen(!isProfileOpen)}
-              className="flex items-center gap-1 sm:gap-2 p-1 pr-1.5 sm:pr-2 rounded-full hover:bg-white hover:shadow-sm active:bg-gray-100 transition-all duration-200 touch-manipulation focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500/20"
+              className={`flex items-center gap-2 sm:gap-3 p-1.5 sm:p-2 pr-3 sm:pr-4 rounded-full border-2 transition-all duration-300 touch-manipulation focus:outline-none bg-white ${isProfileOpen ? 'border-blue-200 shadow-md ring-4 ring-blue-50/50 scale-[0.98]' : 'border-transparent shadow-sm hover:shadow-md hover:border-slate-200 active:scale-[0.98]'}`}
             >
               {userEmail ? (
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${getAvatarColor(userEmail)} shadow-sm ring-2 ring-white`}>
+                <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-xs sm:text-sm font-bold ${getAvatarColor(userEmail)} shadow-sm`}>
                   {userEmail[0].toUpperCase()}
                 </div>
               ) : (
-                <Image src="https://i.pravatar.cc/300" alt="User avatar" width={32} height={32} className="rounded-full border-2 border-white shadow-sm" />
+                <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-slate-100 border-2 border-slate-200 flex items-center justify-center">
+                  <User className="w-4 h-4 text-slate-400" />
+                </div>
               )}
-              <ChevronDown className={`w-3 h-3 sm:w-4 sm:h-4 text-slate-400 hidden sm:block transition-transform duration-200 ${isProfileOpen ? "rotate-180" : ""}`} />
+              <div className="hidden sm:block text-left mr-1">
+                 <p className="text-sm font-bold text-slate-700 leading-tight truncate max-w-[120px]">{userEmail ? userEmail.split('@')[0] : 'Usuario'}</p>
+                 <p className="text-[10px] uppercase tracking-wider font-semibold text-blue-600">{userRole || 'Invitado'}</p>
+              </div>
+              <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-300 ${isProfileOpen ? "rotate-180 text-blue-500" : "group-hover:text-blue-500"}`} />
             </button>
 
             {isProfileOpen && (
-              <div className="absolute right-0 top-full mt-2 w-56 bg-white/95 backdrop-blur-xl rounded-xl shadow-xl border border-slate-100 py-1 z-50 animate-in fade-in zoom-in-95 duration-200 origin-top-right">
-                <div className="px-4 py-3 border-b border-slate-100/80">
+              <div className="absolute right-0 top-full mt-3 w-64 bg-white/95 backdrop-blur-2xl rounded-2xl shadow-2xl border border-slate-100/80 p-2 z-50 animate-in fade-in zoom-in-95 duration-200 origin-top-right overflow-hidden">
+                <div className="px-4 py-3 bg-slate-50/50 rounded-xl mb-2 border border-slate-100/50">
                   <p className="text-sm font-bold text-slate-900 truncate">
                     {userEmail || "Usuario"}
                   </p>
@@ -129,19 +135,23 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ pageTitle, isSidebarC
                   </p>
                 </div>
 
-                <div className="p-1">
+                <div className="px-1 pb-1 space-y-1">
                   <button
-                    className="w-full text-left flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                    className="w-full text-left flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-700 rounded-lg transition-all group"
                     onClick={() => { setIsProfileOpen(false); router.push("/dashboard/settings"); }}
                   >
-                    <User className="w-4 h-4 text-gray-400" />
-                    Mi Perfil
+                    <div className="p-1.5 bg-slate-100 group-hover:bg-blue-100 rounded-md transition-colors">
+                      <User className="w-4 h-4 text-slate-500 group-hover:text-blue-600" />
+                    </div>
+                    Configuración
                   </button>
                   <button
                     onClick={handleLogout}
-                    className="w-full text-left flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                    className="w-full text-left flex items-center gap-3 px-3 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-all group mt-1"
                   >
-                    <LogOut className="w-4 h-4" />
+                    <div className="p-1.5 bg-red-50 group-hover:bg-red-100 rounded-md transition-colors">
+                      <LogOut className="w-4 h-4 text-red-500 group-hover:text-red-700" />
+                    </div>
                     Cerrar Sesión
                   </button>
                 </div>
