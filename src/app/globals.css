@@ -309,3 +309,28 @@ main {
   background: linear-gradient(90deg, #0066ff, #ff6b35);
   border-radius: 9999px;
 }
+
+/* Light dot grid pattern (for light backgrounds) */
+.dot-grid-light {
+  background-image: radial-gradient(circle, rgba(0, 0, 0, 0.07) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Cross / plus grid pattern */
+.cross-pattern {
+  background-image:
+    linear-gradient(rgba(0, 102, 255, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 102, 255, 0.06) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* Topographic contour-like concentric rings (pure CSS) */
+.topo-rings {
+  background-image:
+    radial-gradient(ellipse at 75% 25%, transparent 200px, rgba(0, 102, 255, 0.07) 201px, rgba(0, 102, 255, 0.07) 202px, transparent 203px,
+                    transparent 280px, rgba(0, 102, 255, 0.05) 281px, rgba(0, 102, 255, 0.05) 282px, transparent 283px,
+                    transparent 360px, rgba(0, 102, 255, 0.04) 361px, rgba(0, 102, 255, 0.04) 362px, transparent 363px),
+    radial-gradient(ellipse at 20% 70%, transparent 150px, rgba(255, 107, 53, 0.06) 151px, rgba(255, 107, 53, 0.06) 152px, transparent 153px,
+                    transparent 230px, rgba(255, 107, 53, 0.05) 231px, rgba(255, 107, 53, 0.05) 232px, transparent 233px,
+                    transparent 310px, rgba(255, 107, 53, 0.04) 311px, rgba(255, 107, 53, 0.04) 312px, transparent 313px);
+}

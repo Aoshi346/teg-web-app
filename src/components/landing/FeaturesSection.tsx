@@ -342,16 +342,27 @@ export default function FeaturesSection() {
         ref={studentsSectionRef}
         className="relative w-full bg-gradient-to-b from-slate-50 via-white to-slate-50 py-24 md:py-32 px-4 overflow-hidden"
       >
-        {/* Decorative background elements */}
+        {/* Organic flowing background */}
         <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-          {/* Soft gradient orbs */}
-          <div className="absolute -top-32 -right-32 w-[500px] h-[500px] bg-usm-blue/[0.04] rounded-full blur-3xl" />
-          <div className="absolute -bottom-40 -left-40 w-[600px] h-[600px] bg-usm-orange/[0.03] rounded-full blur-3xl" />
-          {/* Geometric circle outlines */}
-          <div className="absolute top-20 right-[10%] w-64 h-64 rounded-full border border-slate-200/40" />
-          <div className="absolute bottom-10 left-[5%] w-40 h-40 rounded-full border border-slate-200/30" />
-          {/* Subtle grid pattern */}
-          <div className="absolute inset-0 dot-grid opacity-[0.015]" />
+          {/* Large soft gradient washes */}
+          <div className="absolute top-0 right-0 w-full h-[60%] bg-gradient-to-bl from-usm-blue/[0.07] via-transparent to-transparent" />
+          <div className="absolute bottom-0 left-0 w-full h-[50%] bg-gradient-to-tr from-usm-orange/[0.05] via-transparent to-transparent" />
+          
+          {/* Organic blob shapes via SVG */}
+          <svg className="absolute top-[-5%] right-[-10%] w-[500px] h-[500px] md:w-[800px] md:h-[800px] text-usm-blue/[0.06]" viewBox="0 0 200 200" fill="currentColor">
+            <path d="M44.7,-76.4C58.8,-69.2,71.8,-59.1,79.6,-45.8C87.4,-32.5,90,-16.3,88.5,-0.9C87,14.5,81.4,29,72.4,40.8C63.4,52.6,51,61.7,37.5,69.2C24,76.7,9.4,82.5,-4.1,88.6C-17.6,94.7,-35.2,101.1,-48.7,96.1C-62.2,91.1,-71.6,74.7,-78.4,57.9C-85.2,41.1,-89.4,23.9,-89.8,-0.2C-90.1,-24.4,-86.6,-48.8,-73.8,-63.2C-61,-77.5,-38.9,-81.8,-21.2,-76.3C-3.5,-70.9,10.9,-55.6,24.7,-55.6C38.5,-55.6,51.7,-70.9,44.7,-76.4Z" transform="translate(100 100) scale(1.1)" />
+          </svg>
+          
+          <svg className="absolute bottom-[-8%] left-[-8%] w-[400px] h-[400px] md:w-[700px] md:h-[700px] text-usm-orange/[0.05]" viewBox="0 0 200 200" fill="currentColor">
+            <path d="M39.9,-65.7C52.8,-59.5,65,-51.2,73.4,-39.3C81.9,-27.3,86.7,-11.7,85.3,3.2C83.9,18.1,76.3,32.3,66.2,43.9C56.1,55.5,43.5,64.5,29.7,70.6C15.9,76.7,0.9,79.9,-14.6,79.1C-30.1,78.3,-46.1,73.5,-57.3,63.1C-68.5,52.7,-74.9,36.7,-79.2,20.1C-83.5,3.5,-85.7,-13.7,-81,-29.1C-76.3,-44.5,-64.7,-58.1,-50.5,-63.8C-36.3,-69.5,-19.5,-67.3,-2.8,-62.6C13.9,-57.9,27,-71.9,39.9,-65.7Z" transform="translate(100 100) scale(1.2)" />
+          </svg>
+          
+          {/* Soft concentric dashed rings */}
+          <div className="hidden md:block absolute top-[10%] right-[5%] w-[400px] h-[400px] rounded-full border border-dashed border-usm-blue/[0.12]" />
+          <div className="hidden md:block absolute top-[14%] right-[8%] w-[300px] h-[300px] rounded-full border border-dashed border-usm-blue/[0.08]" />
+          
+          <div className="hidden md:block absolute bottom-[8%] left-[3%] w-[450px] h-[450px] rounded-full border border-dashed border-usm-orange/[0.10]" />
+          <div className="hidden md:block absolute bottom-[12%] left-[7%] w-[320px] h-[320px] rounded-full border border-dashed border-usm-orange/[0.07]" />
         </div>
 
         <div className="container mx-auto max-w-6xl relative z-10">
@@ -411,13 +422,27 @@ export default function FeaturesSection() {
 
       {/* Teachers Section with gradient background */}
       <div className="relative bg-gradient-to-b from-slate-50 via-white to-slate-100 overflow-hidden">
-        {/* Decorative background elements */}
+        {/* Organic flowing background */}
         <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-          <div className="absolute -top-24 -left-24 w-[450px] h-[450px] bg-usm-orange/[0.04] rounded-full blur-3xl" />
-          <div className="absolute -bottom-32 -right-32 w-[550px] h-[550px] bg-usm-blue/[0.03] rounded-full blur-3xl" />
-          <div className="absolute top-[15%] left-[8%] w-48 h-48 rounded-full border border-slate-200/30" />
-          <div className="absolute bottom-[20%] right-[12%] w-72 h-72 rounded-full border border-slate-200/20" />
-          <div className="absolute inset-0 dot-grid opacity-[0.015]" />
+          {/* Large soft gradient washes — mirrored */}
+          <div className="absolute top-0 left-0 w-full h-[60%] bg-gradient-to-br from-usm-orange/[0.07] via-transparent to-transparent" />
+          <div className="absolute bottom-0 right-0 w-full h-[50%] bg-gradient-to-tl from-usm-blue/[0.05] via-transparent to-transparent" />
+          
+          {/* Organic blob shapes via SVG — mirrored positions */}
+          <svg className="absolute top-[-5%] left-[-10%] w-[450px] h-[450px] md:w-[750px] md:h-[750px] text-usm-orange/[0.06]" viewBox="0 0 200 200" fill="currentColor">
+            <path d="M47.7,-73.2C62.1,-67.8,74.3,-56.3,81.3,-42.2C88.3,-28.1,90.1,-11.4,87.6,4.1C85.1,19.6,78.3,34,68.7,46.1C59.1,58.2,46.7,68,32.9,74.1C19.1,80.2,3.9,82.6,-11.4,81.1C-26.7,79.6,-42.1,74.2,-54.4,64.4C-66.7,54.6,-75.9,40.4,-80.5,24.8C-85.1,9.2,-85.1,-7.8,-80.2,-22.6C-75.3,-37.4,-65.5,-50,-52.8,-56.8C-40.1,-63.6,-24.5,-64.6,-9.4,-66.4C5.7,-68.2,33.3,-78.6,47.7,-73.2Z" transform="translate(100 100) scale(1.1)" />
+          </svg>
+          
+          <svg className="absolute bottom-[-8%] right-[-8%] w-[380px] h-[380px] md:w-[650px] md:h-[650px] text-usm-blue/[0.05]" viewBox="0 0 200 200" fill="currentColor">
+            <path d="M44.7,-76.4C58.8,-69.2,71.8,-59.1,79.6,-45.8C87.4,-32.5,90,-16.3,88.5,-0.9C87,14.5,81.4,29,72.4,40.8C63.4,52.6,51,61.7,37.5,69.2C24,76.7,9.4,82.5,-4.1,88.6C-17.6,94.7,-35.2,101.1,-48.7,96.1C-62.2,91.1,-71.6,74.7,-78.4,57.9C-85.2,41.1,-89.4,23.9,-89.8,-0.2C-90.1,-24.4,-86.6,-48.8,-73.8,-63.2C-61,-77.5,-38.9,-81.8,-21.2,-76.3C-3.5,-70.9,10.9,-55.6,24.7,-55.6C38.5,-55.6,51.7,-70.9,44.7,-76.4Z" transform="translate(100 100) scale(1.15)" />
+          </svg>
+          
+          {/* Soft concentric dashed rings — mirrored */}
+          <div className="hidden md:block absolute top-[10%] left-[5%] w-[380px] h-[380px] rounded-full border border-dashed border-usm-orange/[0.12]" />
+          <div className="hidden md:block absolute top-[14%] left-[8%] w-[280px] h-[280px] rounded-full border border-dashed border-usm-orange/[0.08]" />
+          
+          <div className="hidden md:block absolute bottom-[8%] right-[5%] w-[420px] h-[420px] rounded-full border border-dashed border-usm-blue/[0.10]" />
+          <div className="hidden md:block absolute bottom-[12%] right-[9%] w-[300px] h-[300px] rounded-full border border-dashed border-usm-blue/[0.07]" />
         </div>
         
         <section
