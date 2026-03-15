@@ -336,21 +336,25 @@ export default function FeaturesSection() {
 
   return (
     <>
-      {/* Wave Separator */}
-      <div className="relative w-full h-24 overflow-hidden bg-usm-navy">
-        <svg className="absolute bottom-0 w-full h-full" preserveAspectRatio="none" viewBox="0 0 1200 120" xmlns="http://www.w3.org/2000/svg">
-          <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" 
-                fill="currentColor" className="text-slate-50" />
-        </svg>
-      </div>
-      
       {/* Students Section */}
       <section
         id="features"
         ref={studentsSectionRef}
-        className="relative w-full bg-gradient-to-b from-slate-50 to-white py-24 md:py-32 px-4"
+        className="relative w-full bg-gradient-to-b from-slate-50 via-white to-slate-50 py-24 md:py-32 px-4 overflow-hidden"
       >
-        <div className="container mx-auto max-w-6xl">
+        {/* Decorative background elements */}
+        <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+          {/* Soft gradient orbs */}
+          <div className="absolute -top-32 -right-32 w-[500px] h-[500px] bg-usm-blue/[0.04] rounded-full blur-3xl" />
+          <div className="absolute -bottom-40 -left-40 w-[600px] h-[600px] bg-usm-orange/[0.03] rounded-full blur-3xl" />
+          {/* Geometric circle outlines */}
+          <div className="absolute top-20 right-[10%] w-64 h-64 rounded-full border border-slate-200/40" />
+          <div className="absolute bottom-10 left-[5%] w-40 h-40 rounded-full border border-slate-200/30" />
+          {/* Subtle grid pattern */}
+          <div className="absolute inset-0 dot-grid opacity-[0.015]" />
+        </div>
+
+        <div className="container mx-auto max-w-6xl relative z-10">
           <div
             ref={studentsHeaderRef}
             className="mb-16 text-center max-w-3xl mx-auto"
@@ -406,10 +410,14 @@ export default function FeaturesSection() {
       </div>
 
       {/* Teachers Section with gradient background */}
-      <div className="relative bg-gradient-to-b from-white via-slate-50 to-slate-100">
-        {/* Subtle pattern overlay */}
-        <div className="absolute inset-0 opacity-[0.03]">
-          <div className="dot-grid" />
+      <div className="relative bg-gradient-to-b from-slate-50 via-white to-slate-100 overflow-hidden">
+        {/* Decorative background elements */}
+        <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+          <div className="absolute -top-24 -left-24 w-[450px] h-[450px] bg-usm-orange/[0.04] rounded-full blur-3xl" />
+          <div className="absolute -bottom-32 -right-32 w-[550px] h-[550px] bg-usm-blue/[0.03] rounded-full blur-3xl" />
+          <div className="absolute top-[15%] left-[8%] w-48 h-48 rounded-full border border-slate-200/30" />
+          <div className="absolute bottom-[20%] right-[12%] w-72 h-72 rounded-full border border-slate-200/20" />
+          <div className="absolute inset-0 dot-grid opacity-[0.015]" />
         </div>
         
         <section

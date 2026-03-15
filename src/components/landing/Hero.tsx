@@ -59,20 +59,12 @@ export default function Hero() {
         scale: 0.98,
       });
       gsap.set(titleSplit.lines, { opacity: 0, y: 40 });
-      // Ensure the generated gradient words inherit the gradient coloring and start hidden
+      // Start gradient words hidden for staggered reveal
       if (gradientSplit && gradientSplit.words) {
         gsap.set(gradientSplit.words, {
           opacity: 0,
           y: 40,
-        });
-        gradientSplit.words.forEach((w) => {
-          const el = w as HTMLElement;
-          el.style.backgroundImage = "linear-gradient(90deg,#67e8f9,#3b82f6)";
-          el.style.setProperty("-webkit-background-clip", "text");
-          el.style.setProperty("background-clip", "text");
-          el.style.setProperty("-webkit-text-fill-color", "transparent");
-          el.style.color = "transparent";
-          el.style.display = "inline-block";
+          display: "inline-block",
         });
       }
       gsap.set(subtitleSplit.lines, { opacity: 0, y: 32 });
