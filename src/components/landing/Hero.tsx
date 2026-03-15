@@ -35,19 +35,13 @@ export default function Hero() {
     const splitInstances: SplitType[] = [];
 
     const ctx = gsap.context(() => {
-      // Split title into lines (avoid double-splitting the gradient words)
+      // Split title into lines
       const titleSplit = new SplitType(titleRef.current!, { types: "lines" });
-      // Split only the gradient phrase so we can style its generated word elements
-      const gradientSplit = gradientRef.current
-        ? new SplitType(gradientRef.current, { types: "words" })
-        : null;
       const subtitleSplit = new SplitType(subtitleRef.current!, {
         types: "lines",
       });
 
-      if (gradientSplit)
-        splitInstances.push(titleSplit, subtitleSplit, gradientSplit);
-      else splitInstances.push(titleSplit, subtitleSplit);
+      splitInstances.push(titleSplit, subtitleSplit);
 
       // initial states
       gsap.set(arrowRef.current, { autoAlpha: 0, y: 24 });
@@ -59,14 +53,6 @@ export default function Hero() {
         scale: 0.98,
       });
       gsap.set(titleSplit.lines, { opacity: 0, y: 40 });
-      // Start gradient words hidden for staggered reveal
-      if (gradientSplit && gradientSplit.words) {
-        gsap.set(gradientSplit.words, {
-          opacity: 0,
-          y: 40,
-          display: "inline-block",
-        });
-      }
       gsap.set(subtitleSplit.lines, { opacity: 0, y: 32 });
 
       const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
@@ -85,21 +71,9 @@ export default function Hero() {
             opacity: 1,
             y: 0,
             duration: 0.9,
-            stagger: 0.06,
+            stagger: 0.1,
           },
           "-=0.6",
-        )
-        // Slide-in gradient words gracefully
-        .to(
-          gradientSplit ? gradientSplit.words : [],
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.9,
-            stagger: 0.08,
-            ease: "power3.out",
-          },
-          "-=0.8",
         )
         .to(
           subtitleSplit.lines,
