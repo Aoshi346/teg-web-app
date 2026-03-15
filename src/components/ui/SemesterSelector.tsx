@@ -68,13 +68,11 @@ export default function SemesterSelector({
         if (!searchQuery) return true;
         const q = searchQuery.toLowerCase();
         const { period, year } = parseSemester(sem);
-        const label = period === 1 ? "ene - jun" : "jul - dic";
         const fullLabel = `semestre ${period}`;
         return (
             year.toString().includes(q) ||
-            label.includes(q) ||
             fullLabel.includes(q) ||
-            formatSemesterLabel(sem).toLowerCase().includes(q)
+            sem.toLowerCase().includes(q)
         );
     });
 
@@ -134,7 +132,7 @@ export default function SemesterSelector({
                 <div className="flex-1 overflow-y-auto p-4 sm:p-5">
                     {filteredSemesters.length === 0 ? (
                         <div className="text-center py-8 text-gray-500">
-                            <p>No se encontraron semestres que coincidan con "{searchQuery}"</p>
+                            <p>No se encontraron semestres que coincidan con &quot;{searchQuery}&quot;</p>
                         </div>
                     ) : (
                         [...groupedSemesters.entries()].map(([year, semesters]) => (
@@ -163,8 +161,8 @@ export default function SemesterSelector({
                         `}
                                             >
                                                 <div className="flex items-center justify-between mb-1">
-                                                    <span className={`text-sm font-bold ${isSelected ? 'text-white' : 'text-gray-900'}`}>
-                                                        {period === 1 ? "Ene - Jun" : "Jul - Dic"}
+                                                  <span className={`text-sm font-bold ${isSelected ? 'text-white' : 'text-gray-900'}`}>
+                                                        Período {semester}
                                                     </span>
                                                     {isSelected && (
                                                         <div className="bg-white/20 p-1 rounded-full">

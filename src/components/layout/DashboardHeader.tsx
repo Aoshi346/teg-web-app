@@ -97,9 +97,9 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ pageTitle, isSidebarC
         <div className="flex items-center gap-3 sm:gap-4 flex-shrink-0">
           {/* Action Area: Notifications */}
           <div className="flex items-center">
-            <button className="relative p-2 rounded-xl hover:bg-slate-100/80 active:bg-slate-200 transition-all duration-200 group touch-manipulation">
+            <button className="relative p-2 rounded-xl bg-slate-50 border border-slate-100/50 hover:bg-white hover:border-blue-200 hover:shadow-sm hover:scale-110 active:scale-95 transition-all duration-200 group touch-manipulation cursor-pointer">
               <Bell className="w-5 h-5 text-slate-500 group-hover:text-blue-600 transition-colors" />
-              <span className="absolute top-1.5 right-1.5 flex h-2.5 w-2.5 items-center justify-center">
+              <span className="absolute top-1 right-1 flex h-2.5 w-2.5 items-center justify-center">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500 border border-white"></span>
               </span>
@@ -113,10 +113,10 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ pageTitle, isSidebarC
           <div className="relative" ref={profileRef}>
             <button
               onClick={() => setIsProfileOpen(!isProfileOpen)}
-              className={`flex items-center gap-3 p-1 rounded-2xl transition-all duration-300 touch-manipulation focus:outline-none ${
+              className={`flex items-center gap-3 p-1 pr-2 rounded-2xl border transition-all duration-300 touch-manipulation focus:outline-none cursor-pointer group/profile ${
                 isProfileOpen 
-                  ? 'bg-blue-50/50 shadow-sm ring-1 ring-blue-100' 
-                  : 'hover:bg-slate-50'
+                  ? 'bg-blue-50/50 border-blue-200 shadow-sm ring-4 ring-blue-50/30' 
+                  : 'bg-white border-slate-100 hover:border-blue-200 hover:shadow-md hover:scale-[1.02] active:scale-95'
               }`}
             >
               <div className="flex items-center gap-3 pr-2">

@@ -223,6 +223,21 @@ export default function ProjectCard({
           </div>
         </div>
 
+        {/* Period */}
+        <div className="flex items-center gap-3 group/item">
+          <div className="w-10 h-10 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center group-hover/item:bg-white group-hover/item:shadow-md group-hover/item:scale-110 transition-all duration-300">
+            <Clock className="w-4 h-4 text-gray-400" />
+          </div>
+          <div>
+            <p className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-0.5">
+              PERÍODO
+            </p>
+            <p className="font-bold text-gray-900 text-sm">
+              {project.period || "N/A"}
+            </p>
+          </div>
+        </div>
+
         {/* Date */}
         <div className="flex items-center gap-3 group/item">
           <div className="w-10 h-10 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center group-hover/item:bg-white group-hover/item:shadow-md group-hover/item:scale-110 transition-all duration-300">

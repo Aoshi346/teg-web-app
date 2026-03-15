@@ -9,6 +9,7 @@ import { api } from "@/lib/api";
 export interface Semester {
     id: number;
     period: string;
+    is_active: boolean;
     created_at: string;
 }
 
@@ -39,8 +40,7 @@ export function parseSemester(semester: string): { year: number; period: number 
  * Format semester for display (e.g., "2026-01" -> "Semestre 01 - 2026")
  */
 export function formatSemesterLabel(semester: string): string {
-    const { year, period } = parseSemester(semester);
-    return `Semestre ${period.toString().padStart(2, "0")} - ${year}`;
+    return semester;
 }
 
 /**
@@ -140,4 +140,19 @@ export function getAvailableSemesterPeriods(): string[] {
     
     // Sort newest first
     return periods.reverse();
+}
+
+export async function fetchActiveSemester(): Promise<Semester | null> {
+    try {
+        return await api.get<Semester>("/semesters/current/");
+    } catch (error) {
+        console.error("Failed to fetch active semester", error);
+        return null;
+    }
+}
+
+export async function setActiveSemester(id: number): Promise<Semester> {
+    const s = await api.post<Semester>(`/semesters/${id}/set_active/`, {});
+    semestersCache = null;
+    return s;
 }

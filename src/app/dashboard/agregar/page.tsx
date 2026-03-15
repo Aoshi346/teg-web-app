@@ -29,6 +29,7 @@ import {
   getSemesters,
   getStoredSemester,
   setStoredSemester,
+  fetchActiveSemester,
 } from "@/lib/semesters";
 import {
   getAllUsers,
@@ -110,9 +111,10 @@ export default function AgregarDocumentoPage() {
     const loadSemesters = async () => {
       // Small native promise delay to skip the blocking layout paint
       await new Promise(resolve => setTimeout(resolve, 0));
-      const [projects, semestersFromApi] = await Promise.all([
+      const [projects, semestersFromApi, active] = await Promise.all([
         getAllProjects(),
         getSemesters(),
+        fetchActiveSemester(),
       ]);
       const semesters = getAvailableSemesters(
         projects,
@@ -121,11 +123,9 @@ export default function AgregarDocumentoPage() {
 
       const stored = getStoredSemester();
       const fallback = getCurrentSemester();
-      const chosen = semesters.length
-        ? semesters.includes(stored)
-          ? stored
-          : semesters[0]
-        : stored || fallback;
+      
+      // Prioritize active semester set by admin
+      const chosen = active ? active.period : (semesters.includes(stored) ? stored : (semesters[0] || fallback));
 
       setAvailableSemesters(semesters.length ? semesters : [chosen]);
       setFormData((prev) => ({ ...prev, semesterPeriod: chosen }));

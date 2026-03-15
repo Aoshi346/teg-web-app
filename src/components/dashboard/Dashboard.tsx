@@ -14,7 +14,6 @@ import {
 } from "lucide-react";
 import DashboardHeader from "@/components/layout/DashboardHeader";
 import PageTransition from "@/components/ui/PageTransition";
-import SemesterSelector from "@/components/ui/SemesterSelector";
 import { Project } from "@/types/project";
 import { getAllProjects } from "@/features/projects/projectService";
 import {
@@ -22,7 +21,7 @@ import {
   getSemesters,
   getStoredSemester,
   setStoredSemester,
-  formatSemesterLabel,
+  fetchActiveSemester,
 } from "@/lib/semesters";
 import { useRouter } from "next/navigation";
 import { getUser } from "@/features/auth/clientAuth";
@@ -244,9 +243,17 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
     }[];
   } | null>(null);
 
-  // Load initial semester
+  // Load initial semester from active or storage
   useEffect(() => {
-    setSemester(getStoredSemester());
+    const initSemester = async () => {
+      const active = await fetchActiveSemester();
+      if (active) {
+        setSemester(active.period);
+      } else {
+        setSemester(getStoredSemester());
+      }
+    };
+    initSemester();
   }, []);
 
   // Load data when semester changes
@@ -641,21 +648,10 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
                 <div>
                   <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Período Actual</p>
                   <p className="text-xl font-bold text-white font-montserrat">
-                    {formatSemesterLabel(semester)}
+                    {semester}
                   </p>
                 </div>
               </div>
-              <SemesterSelector
-                selectedSemester={semester}
-                availableSemesters={getAvailableSemesters(
-                  apiProjects,
-                  semesterOptions,
-                )}
-                onSemesterChange={(sem) => {
-                  setStoredSemester(sem);
-                  setSemester(sem);
-                }}
-              />
             </div>
 
             {!dashboardData ? (
