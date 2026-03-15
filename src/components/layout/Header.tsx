@@ -349,7 +349,7 @@ export default function Header() {
             >
               <Logo className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10" />
               <div className="flex flex-col leading-tight">
-                <span className="text-lg font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-500">
+                <span className="text-lg font-extrabold tracking-tight text-usm-navy">
                   TesisFar
                 </span>
                 <span className="block text-[11px] text-gray-500">
@@ -379,10 +379,10 @@ export default function Header() {
                   onMouseLeave={handleButtonLeave}
                   onClick={handleButtonClick}
                   className="inline-flex items-center gap-3 px-5 py-2.5 text-sm font-semibold text-white
-                        bg-gradient-to-r from-indigo-600 to-blue-500 hover:from-indigo-700 hover:to-blue-600
-                        rounded-full shadow-md hover:shadow-indigo-500/20
-                        focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-indigo-500
-                        transition-transform duration-200 will-change-transform"
+                        bg-usm-orange hover:bg-orange-600
+                        rounded-full shadow-md hover:shadow-orange-500/20
+                        focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-usm-orange
+                        transition-transform duration-200"
                   aria-label="Ingresar"
                   title="Ingresar"
                 >
@@ -398,7 +398,7 @@ export default function Header() {
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 aria-expanded={isMobileMenuOpen}
                 aria-controls="mobile-menu"
-                className="p-2 rounded-full text-gray-700 hover:text-indigo-600 hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-indigo-500"
+                className="p-2 rounded-full text-gray-700 hover:text-usm-blue hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-usm-blue"
               >
                 <AnimatedMenuIcon isOpen={isMobileMenuOpen} />
               </button>
@@ -449,7 +449,7 @@ export default function Header() {
                   setIsMobileMenuOpen(false);
                   setIsLoginModalOpen(true);
                 }}
-                className="w-full inline-flex items-center justify-center gap-3 px-5 py-3 bg-indigo-600 text-white rounded-lg shadow-md"
+                className="w-full inline-flex items-center justify-center gap-3 px-5 py-3 bg-usm-orange hover:bg-orange-600 text-white rounded-lg shadow-md"
               >
                 <LogIn className="h-4 w-4" />
                 Ingresar

@@ -174,8 +174,9 @@ export default function Header() {
         document.documentElement.style.setProperty('--header-height', '72px');
         gsap.to(headerRef.current, {
           height: 72,
-          boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+          boxShadow: '0 4px 20px rgba(0, 102, 255, 0.15)',
+          backgroundColor: 'rgba(255, 255, 255, 0.85)',
+          backdropFilter: 'blur(20px)',
           duration: 0.25,
           ease: 'power2.out',
           onComplete: updateHeaderHeight,
@@ -185,7 +186,8 @@ export default function Header() {
         gsap.to(headerRef.current, {
           height: 88,
           boxShadow: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
-          backgroundColor: 'rgba(255, 255, 255, 0.85)',
+          backgroundColor: 'rgba(255, 255, 255, 0.7)',
+          backdropFilter: 'blur(16px)',
           duration: 0.25,
           ease: 'power2.out',
           onComplete: updateHeaderHeight,
@@ -271,18 +273,18 @@ export default function Header() {
         <header
           ref={headerRef}
           // make header initially transparent so hero background shows underneath
-          className="fixed top-0 z-40 w-full bg-transparent backdrop-blur-lg"
+          className="fixed top-0 z-40 w-full bg-transparent backdrop-blur-xl border-b border-white/10 transition-all duration-300"
           style={headerInlineStyle}
         >
           <div className="container mx-auto flex h-full items-center justify-between px-4 sm:px-6 lg:px-8">
             {/* Logo and Brand Name */}
-            <Link href="/" className="logo-anim flex items-center gap-2 no-underline" aria-label="TesisFar home">
-              <Logo className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10" />
+            <Link href="/" className="logo-anim flex items-center gap-2 no-underline group" aria-label="TesisFar home">
+              <Logo className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 transition-transform duration-300 group-hover:scale-110" />
               <div className="flex flex-col leading-tight">
-                <span className="text-lg font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-500">
+                <span className="text-lg font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-usm-blue to-usm-orange transition-all duration-300 group-hover:from-usm-orange group-hover:to-usm-blue">
                   TesisFar
                 </span>
-                <span className="block text-[11px] text-gray-500">
+                <span className="block text-[11px] text-gray-500 transition-colors duration-300 group-hover:text-gray-600">
                   Gestión del Trabajo Especial de Grado
                 </span>
               </div>
@@ -290,18 +292,18 @@ export default function Header() {
 
             {/* Desktop Action Button */}
             <nav className="hidden md:flex items-center gap-6">
-              <Link href="#features" onClick={(e) => handleScrollToFeatures(e, false)} className="text-sm text-gray-700 hover:text-gray-900">Funciones</Link>
-              <Link href="#contact" className="text-sm text-gray-700 hover:text-gray-900">Contacto</Link>
+              <Link href="#features" onClick={(e) => handleScrollToFeatures(e, false)} className="text-sm text-gray-700 hover:text-usm-blue transition-colors duration-300 font-medium">Funciones</Link>
+              <Link href="#contact" className="text-sm text-gray-700 hover:text-usm-blue transition-colors duration-300 font-medium">Contacto</Link>
               <div className="desktop-btn-anim">
                 <button
                   onMouseEnter={handleButtonHover}
                   onMouseLeave={handleButtonLeave}
                   onClick={handleButtonClick}
-                  className="inline-flex items-center gap-3 px-5 py-2.5 text-sm font-semibold text-white
-                        bg-gradient-to-r from-indigo-600 to-blue-500 hover:from-indigo-700 hover:to-blue-600
-                        rounded-full shadow-md hover:shadow-indigo-500/20
-                        focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-indigo-500
-                        transition-transform duration-200 will-change-transform"
+                  className="inline-flex items-center gap-3 px-6 py-2.5 text-sm font-semibold text-white
+                        bg-gradient-to-r from-usm-blue to-usm-orange hover:from-usm-orange hover:to-usm-blue
+                        rounded-full shadow-lg hover:shadow-usm-blue/30 hover:shadow-xl
+                        focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-usm-blue
+                        transition-all duration-300 will-change-transform hover:scale-105"
                   aria-label="Ingresar"
                   title="Ingresar"
                 >
@@ -328,7 +330,7 @@ export default function Header() {
         {/* Mobile Menu Panel */}
         <div
           ref={mobileMenuRef}
-          className="md:hidden fixed left-0 w-full bg-white/95 backdrop-blur-lg z-30"
+          className="md:hidden fixed left-0 w-full glassmorphism-dark z-30 border-t border-white/10"
           style={{ top: 'var(--header-height)', height: 'calc(100vh - var(--header-height))', visibility: 'hidden' }}
         >
           <div className="container mx-auto px-6 pt-6">
@@ -343,14 +345,14 @@ export default function Header() {
             </div>
 
             <div className="space-y-4">
-              <Link href="#features" onClick={(e) => handleScrollToFeatures(e, true)} className="block text-lg font-medium text-gray-800">Funciones</Link>
-              <Link href="#contact" className="block text-lg font-medium text-gray-800">Contacto</Link>
+              <Link href="#features" onClick={(e) => handleScrollToFeatures(e, true)} className="block text-lg font-medium text-white hover:text-usm-orange transition-colors duration-300">Funciones</Link>
+              <Link href="#contact" className="block text-lg font-medium text-white hover:text-usm-orange transition-colors duration-300">Contacto</Link>
             </div>
 
             <div className="mt-8">
               <button
                 onClick={() => { setIsMobileMenuOpen(false); setIsLoginModalOpen(true); }}
-                className="w-full inline-flex items-center justify-center gap-3 px-5 py-3 bg-indigo-600 text-white rounded-lg shadow-md"
+                className="w-full inline-flex items-center justify-center gap-3 px-5 py-3 bg-gradient-to-r from-usm-blue to-usm-orange text-white rounded-lg shadow-lg hover:shadow-usm-blue/30 transition-all duration-300 hover:scale-105 font-semibold"
               >
                 <LogIn className="h-4 w-4" />
                 Ingresar

@@ -41,6 +41,10 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --color-usm-navy: #011638;
+  --color-usm-blue: #0066ff;
+  --color-usm-orange: #ff6b35;
+  --color-usm-yellow: #ffd23f;
 }
 
 :root {
@@ -125,7 +129,9 @@
 
 /* Prevent horizontal scrolling site-wide while allowing vertical scroll */
 /* Prevent horizontal scrolling site-wide while allowing vertical scroll */
-html, body, #__next {
+html,
+body,
+#__next {
   width: 100%;
   overflow-x: hidden !important;
   overflow-y: auto;
@@ -139,11 +145,11 @@ main {
 
 /* Debug helper: add .outline-debug to any element to visualize bounding boxes while diagnosing overflow */
 .outline-debug {
-  outline: 2px dashed rgba(255,0,0,0.5);
+  outline: 2px dashed rgba(255, 0, 0, 0.5);
 }
 
 .animated-gradient {
-  background: linear-gradient(-45deg, #1e3a8a, #111827, #1e3a8a, #111827);
+  background: linear-gradient(-45deg, #011638, #0066ff, #ff6b35, #011638);
   background-size: 400% 400%;
   animation: gradient 15s ease infinite;
 }
@@ -158,4 +164,148 @@ main {
   100% {
     background-position: 0% 50%;
   }
+}
+
+/* Enhanced gradient backgrounds */
+.hero-gradient {
+  background: radial-gradient(ellipse at top, #0066ff15 0%, transparent 50%),
+              radial-gradient(ellipse at bottom, #ff6b3510 0%, transparent 50%),
+              linear-gradient(135deg, #011638 0%, #011638 100%);
+}
+
+.mesh-gradient {
+  background-image: 
+    radial-gradient(at 40% 20%, rgba(0, 102, 255, 0.08) 0px, transparent 50%),
+    radial-gradient(at 80% 0%, rgba(0, 102, 255, 0.06) 0px, transparent 50%),
+    radial-gradient(at 0% 50%, rgba(255, 107, 53, 0.05) 0px, transparent 50%),
+    radial-gradient(at 80% 50%, rgba(255, 107, 53, 0.04) 0px, transparent 50%),
+    radial-gradient(at 0% 100%, rgba(255, 210, 63, 0.03) 0px, transparent 50%),
+    radial-gradient(at 80% 100%, rgba(0, 102, 255, 0.05) 0px, transparent 50%),
+    radial-gradient(at 0% 0%, rgba(255, 107, 53, 0.04) 0px, transparent 50%);
+}
+
+/* Dot grid pattern */
+.dot-grid {
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+  background-size: 30px 30px;
+}
+
+/* Modern glassmorphism utilities */
+.glassmorphism {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.glassmorphism-dark {
+  background: rgba(1, 22, 56, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* Floating animation utilities */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(0, 102, 255, 0.3); }
+  50% { box-shadow: 0 0 40px rgba(0, 102, 255, 0.6); }
+}
+
+.floating {
+  animation: float 6s ease-in-out infinite;
+}
+
+.pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Card shine / shimmer effect on hover */
+@keyframes shine {
+  0% { left: -75%; }
+  100% { left: 125%; }
+}
+
+.card-shine {
+  position: relative;
+  overflow: hidden;
+}
+
+.card-shine::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -75%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.08),
+    transparent
+  );
+  transform: skewX(-15deg);
+  transition: none;
+  pointer-events: none;
+}
+
+.card-shine:hover::after {
+  animation: shine 0.8s ease-out forwards;
+}
+
+/* Gradient accent border for cards */
+.gradient-border-top {
+  position: relative;
+}
+
+.gradient-border-top::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #0066ff, #ff6b35);
+  border-radius: 9999px 9999px 0 0;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.gradient-border-top:hover::before {
+  opacity: 1;
+}
+
+/* Section badge pill */
+.section-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
+}
+
+/* Subtle gradient underline for headings */
+.gradient-underline {
+  position: relative;
+  display: inline-block;
+}
+
+.gradient-underline::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, #0066ff, #ff6b35);
+  border-radius: 9999px;
 }
