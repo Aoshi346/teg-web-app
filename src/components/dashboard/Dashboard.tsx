@@ -658,9 +658,15 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
               />
             </div>
 
-            <div
-              className={`grid grid-cols-1 ${isStudent ? "lg:grid-cols-1" : "lg:grid-cols-2"} gap-4 sm:gap-6 lg:gap-8 mb-6 sm:mb-8`}
-            >
+            {!dashboardData ? (
+              <div className="flex justify-center items-center py-24">
+                <div className="w-10 h-10 rounded-full border-4 border-slate-200 border-t-blue-600 animate-spin shadow-sm" />
+              </div>
+            ) : (
+              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div
+                  className={`grid grid-cols-1 ${isStudent ? "lg:grid-cols-1" : "lg:grid-cols-2"} gap-4 sm:gap-6 lg:gap-8 mb-6 sm:mb-8`}
+                >
               {stats.map((stat, index) => (
                 <StatCard key={index} {...stat} delay={index * 100} />
               ))}
@@ -782,6 +788,8 @@ const Dashboard: React.FC<DashboardProps> = (props) => {
                 </div>
               )}
             </div>
+              </div>
+            )}
           </div>
         </main>
       </PageTransition>
