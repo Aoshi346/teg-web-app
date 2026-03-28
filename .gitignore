@@ -1,0 +1,110 @@
+# Global ignores for the repo (frontend + backend)
+# Learn more: https://git-scm.com/docs/gitignore
+
+# Node dependencies
+node_modules/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+lerna-debug.log*
+
+# Coverage / testing
+coverage/
+.nyc_output/
+
+# Build outputs
+build/
+dist/
+.out/
+out/
+
+# Next.js
+.next/
+.next/cache/
+
+# Turbo / SWC / cache
+.turbo/
+.swc/
+.cache/
+
+# TypeScript
+*.tsbuildinfo
+# The Next.js auto-generated type helper; do not commit
+next-env.d.ts
+
+# Environment files (keep .env.example committed)
+.env
+.env.*
+!.env.example
+frontend/.env
+frontend/.env.*
+!frontend/env.example
+backend/.env
+backend/.env.*
+!backend/env.example
+
+# Vercel
+.vercel/
+
+# Prisma local databases (keep migrations tracked)
+backend/prisma/dev.db
+backend/prisma/*.db*
+backend/prisma/*.sqlite*
+
+# Uploaded files (e.g., via multer)
+uploads/
+backend/uploads/
+backend/package.json
+backend/package-lock.json
+backend/venv/
+backend/.venv/
+backend/.next/
+backend/node_modules/
+
+# Temporary files
+*.tmp
+*.temp
+tmp/
+
+# OS-specific
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Editors and IDEs
+.vscode/
+.idea/
+*.iml
+.eslintcache
+
+# Yarn Berry (PnP) - allow checked in config but ignore cache
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# NPM pack artifacts
+*.tgz
+
+# Lock files should generally be committed; do NOT ignore:
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# direnv
+.envrc
