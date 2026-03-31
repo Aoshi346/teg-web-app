@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useContext } from "react";
-import SidebarContext, { SidebarContextType } from "./SidebarContext";
-
+import React, { useState, useEffect, useRef } from "react";
+import { useSidebar } from "./SidebarContext";
 import {
   Bell,
   ChevronDown,
@@ -16,33 +15,23 @@ import { useRouter } from "next/navigation";
 
 interface DashboardHeaderProps {
   pageTitle: string;
-  isSidebarCollapsed?: boolean;
-  isMobileSidebarOpen?: boolean;
-  onMobileSidebarToggle?: () => void;
-  onSidebarCollapse?: () => void;
 }
 
-const DashboardHeader: React.FC<DashboardHeaderProps> = ({ pageTitle, isSidebarCollapsed, isMobileSidebarOpen, onMobileSidebarToggle, onSidebarCollapse }) => {
-  // Read sidebar context as a fallback when props are not passed through cloneElement
-  const sidebarCtx = useContext(SidebarContext) as SidebarContextType | undefined;
-
-  const effectiveIsCollapsed = typeof isSidebarCollapsed !== "undefined" ? isSidebarCollapsed : sidebarCtx?.isCollapsed ?? false;
-  const effectiveIsMobileOpen = typeof isMobileSidebarOpen !== "undefined" ? isMobileSidebarOpen : sidebarCtx?.mobileOpen ?? false;
-  const effectiveOnMobileToggle = onMobileSidebarToggle ?? sidebarCtx?.toggleMobile ?? (() => { });
-  const effectiveOnCollapse = onSidebarCollapse ?? sidebarCtx?.toggleCollapse ?? (() => { });
-
+const DashboardHeader: React.FC<DashboardHeaderProps> = ({ pageTitle }) => {
+  const sidebar = useSidebar();
   const router = useRouter();
-  const [userEmail, setUserEmail] = React.useState<string | null>(null);
-  const [userRole, setUserRole] = React.useState<string | null>(null);
-  const [isProfileOpen, setIsProfileOpen] = React.useState(false);
-  const profileRef = React.useRef<HTMLDivElement>(null);
 
-  React.useEffect(() => {
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
     setUserEmail(getUserEmail());
     setUserRole(getUserRole());
 
-    const handleClickOutside = (event: MouseEvent) => {
-      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
         setIsProfileOpen(false);
       }
     };
@@ -55,138 +44,127 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ pageTitle, isSidebarC
     router.push("/");
   };
 
-  // Deterministic avatar color
-  const getAvatarColor = (email: string) => {
-    const colors = ["bg-blue-100 text-blue-600", "bg-purple-100 text-purple-600", "bg-emerald-100 text-emerald-600", "bg-amber-100 text-amber-600"];
-    return colors[email.length % colors.length];
-  };
+  const avatarColors = ["bg-blue-100 text-blue-600", "bg-purple-100 text-purple-600", "bg-emerald-100 text-emerald-600", "bg-amber-100 text-amber-600"];
+  const avatarColor = userEmail ? avatarColors[userEmail.length % avatarColors.length] : avatarColors[0];
 
   return (
-    // ... (header structure)
-    <header className="header-container bg-white/80 backdrop-blur-md border-b border-gray-200/50 sticky top-0 z-10 h-16 sm:h-20 md:h-[89px] flex-shrink-0 transition-all duration-300">
+    <header className="bg-white/80 backdrop-blur-md border-b border-gray-200/50 sticky top-0 z-10 h-14 sm:h-16 md:h-[72px] flex-shrink-0">
       <div className="px-3 sm:px-4 md:px-6 lg:px-8 h-full flex items-center justify-between gap-2">
-        {/* ... (left side controls unchanged) */}
+        {/* Left: menu + title */}
         <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
+          {/* Mobile menu toggle */}
           <button
-            className={`lg:hidden inline-flex items-center justify-center p-2 sm:p-3 rounded-md border transition-colors touch-manipulation ${effectiveIsMobileOpen
-              ? "bg-blue-600 border-blue-600 text-white shadow-sm"
-              : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50 active:bg-slate-100"
-              }`}
-            aria-label={effectiveIsMobileOpen ? "Cerrar menú" : "Abrir menú"}
-            onClick={effectiveOnMobileToggle}
+            className={`lg:hidden inline-flex items-center justify-center p-2.5 rounded-xl border transition-colors touch-manipulation ${
+              sidebar.mobileOpen
+                ? "bg-usm-blue border-usm-blue text-white shadow-sm"
+                : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50 active:bg-slate-100"
+            }`}
+            aria-label={sidebar.mobileOpen ? "Cerrar menú" : "Abrir menú"}
+            onClick={sidebar.toggleMobile}
           >
-            <Menu className="w-5 h-5 sm:w-6 sm:h-6" />
+            <Menu className="w-5 h-5" />
           </button>
+
+          {/* Desktop collapse toggle */}
           <button
-            className="hidden lg:inline-flex items-center justify-center p-2 rounded-md hover:bg-slate-100 hover:text-blue-700 text-slate-600 active:bg-slate-200 transition-colors touch-manipulation"
-            aria-label="Colapsar barra lateral"
-            onClick={() => {
-              // ... existing collapse logic
-              try { if (sidebarCtx && effectiveOnCollapse !== sidebarCtx.toggleCollapse) sidebarCtx.setIsCollapsed(!sidebarCtx.isCollapsed); } catch { }
-              try { effectiveOnCollapse(); } catch { }
-            }}
-            title={effectiveIsCollapsed ? "Expandir barra lateral" : "Colapsar barra lateral"}
+            className="hidden lg:inline-flex items-center justify-center p-2 rounded-lg hover:bg-slate-100 text-slate-600 active:bg-slate-200 transition-colors"
+            aria-label={sidebar.isCollapsed ? "Expandir barra lateral" : "Colapsar barra lateral"}
+            onClick={sidebar.toggleCollapse}
           >
-            <ChevronsLeft className={`w-5 h-5 ${effectiveIsCollapsed ? "rotate-180 transition-transform" : "transition-transform"}`} />
+            <ChevronsLeft className={`w-5 h-5 transition-transform duration-200 ${sidebar.isCollapsed ? "rotate-180" : ""}`} />
           </button>
-          <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-slate-900 font-montserrat tracking-tight truncate">
+
+          {/* Page title */}
+          <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-slate-900 tracking-tight truncate">
             {pageTitle}
           </h2>
         </div>
 
-        <div className="flex items-center gap-3 sm:gap-4 flex-shrink-0">
-          {/* Action Area: Notifications */}
-          <div className="flex items-center">
-            <button className="relative p-2 rounded-xl bg-slate-50 border border-slate-100/50 hover:bg-white hover:border-blue-200 hover:shadow-sm hover:scale-110 active:scale-95 transition-all duration-200 group touch-manipulation cursor-pointer">
-              <Bell className="w-5 h-5 text-slate-500 group-hover:text-blue-600 transition-colors" />
-              <span className="absolute top-1 right-1 flex h-2.5 w-2.5 items-center justify-center">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500 border border-white"></span>
-              </span>
-            </button>
-          </div>
+        {/* Right: notifications + profile */}
+        <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+          {/* Notification bell */}
+          <button className="relative p-2 sm:p-2.5 rounded-xl bg-slate-50 border border-slate-100/50 hover:bg-white hover:border-blue-200 hover:shadow-sm active:scale-95 transition-all duration-200 touch-manipulation">
+            <Bell className="w-4 h-4 sm:w-5 sm:h-5 text-slate-500" />
+            <span className="absolute top-1 right-1 flex h-2.5 w-2.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500 border border-white" />
+            </span>
+          </button>
 
-          {/* Vertical Divider */}
-          <div className="h-8 w-px bg-slate-200/60 hidden sm:block mx-1"></div>
+          {/* Divider (desktop) */}
+          <div className="h-7 w-px bg-slate-200/60 hidden sm:block" />
 
-          {/* User Profile Card */}
+          {/* Profile dropdown */}
           <div className="relative" ref={profileRef}>
             <button
               onClick={() => setIsProfileOpen(!isProfileOpen)}
-              className={`flex items-center gap-3 p-1 pr-2 rounded-2xl border transition-all duration-300 touch-manipulation focus:outline-none cursor-pointer group/profile ${
-                isProfileOpen 
-                  ? 'bg-blue-50/50 border-blue-200 shadow-sm ring-4 ring-blue-50/30' 
-                  : 'bg-white border-slate-100 hover:border-blue-200 hover:shadow-md hover:scale-[1.02] active:scale-95'
+              className={`flex items-center gap-2 p-1 pr-2 rounded-xl border transition-all duration-200 touch-manipulation focus:outline-none ${
+                isProfileOpen
+                  ? "bg-blue-50/50 border-blue-200 shadow-sm"
+                  : "bg-white border-slate-100 hover:border-slate-200 hover:shadow-sm active:scale-95"
               }`}
             >
-              <div className="flex items-center gap-3 pr-2">
-                <div className="relative">
-                  {userEmail ? (
-                    <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center text-sm font-bold ${getAvatarColor(userEmail)} shadow-sm ring-2 ring-white transition-transform duration-300 ${isProfileOpen ? 'scale-90' : ''}`}>
-                      {userEmail[0].toUpperCase()}
-                    </div>
-                  ) : (
-                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center">
-                      <User className="w-5 h-5 text-slate-400" />
-                    </div>
-                  )}
-                  {/* Status Indicator */}
-                  <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-white rounded-full shadow-sm"></div>
-                </div>
-
-                <div className="hidden md:block text-left">
-                  <p className="text-sm font-bold text-slate-800 leading-none truncate max-w-[140px]">
-                    {userEmail ? (userEmail.split('@')[0].charAt(0).toUpperCase() + userEmail.split('@')[0].slice(1)) : 'Usuario'}
-                  </p>
-                  <p className="text-[10px] subpixel-antialiased uppercase tracking-widest font-black text-blue-600 mt-1 flex items-center gap-1 opacity-80">
-                    <span className="w-1 h-1 rounded-full bg-blue-400"></span>
-                    {userRole || 'Invitado'}
-                  </p>
-                </div>
-                
-                <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-300 ${isProfileOpen ? "rotate-180 text-blue-500" : "group-hover:text-slate-600"}`} />
+              {/* Avatar */}
+              <div className="relative">
+                {userEmail ? (
+                  <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center text-sm font-bold ${avatarColor} shadow-sm`}>
+                    {userEmail[0].toUpperCase()}
+                  </div>
+                ) : (
+                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center">
+                    <User className="w-4 h-4 text-slate-400" />
+                  </div>
+                )}
+                <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 border-2 border-white rounded-full" />
               </div>
+
+              {/* Name + role (desktop) */}
+              <div className="hidden md:block text-left">
+                <p className="text-sm font-bold text-slate-800 leading-none truncate max-w-[120px]">
+                  {userEmail ? userEmail.split("@")[0].charAt(0).toUpperCase() + userEmail.split("@")[0].slice(1) : "Usuario"}
+                </p>
+                <p className="text-[10px] uppercase tracking-widest font-bold text-usm-blue mt-0.5 flex items-center gap-1 opacity-80">
+                  <span className="w-1 h-1 rounded-full bg-usm-blue/60" />
+                  {userRole || "Invitado"}
+                </p>
+              </div>
+
+              <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${isProfileOpen ? "rotate-180" : ""}`} />
             </button>
 
+            {/* Dropdown */}
             {isProfileOpen && (
-              <div className="absolute right-0 top-full mt-3 w-72 bg-white/95 backdrop-blur-3xl rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-slate-100 p-2.5 z-50 animate-in fade-in zoom-in-95 slide-in-from-top-2 duration-300 origin-top-right overflow-hidden group/menu">
-                {/* Dropdown Header Card */}
-                <div className="px-4 py-4 bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl mb-3 shadow-lg relative overflow-hidden">
-                  <div className="absolute top-0 right-0 p-8 bg-blue-500/10 rounded-full -mr-4 -mt-4 blur-2xl"></div>
+              <div className="absolute right-0 top-full mt-2 w-64 sm:w-72 bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_16px_40px_rgba(0,0,0,0.12)] border border-slate-100 p-2 z-50 animate-in fade-in zoom-in-95 slide-in-from-top-2 duration-200 origin-top-right">
+                {/* Header card */}
+                <div className="px-4 py-3 bg-gradient-to-br from-slate-900 to-slate-800 rounded-xl mb-2 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-16 h-16 bg-usm-blue/10 rounded-full -mr-4 -mt-4 blur-2xl" />
                   <div className="relative z-10">
                     <p className="text-xs font-bold text-blue-300/80 uppercase tracking-widest mb-1">Identificado como</p>
-                    <p className="text-sm font-bold text-white truncate mb-0.5">
-                      {userEmail || "Usuario"}
-                    </p>
-                    <div className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-blue-500/20 border border-blue-400/20 text-[10px] font-black tracking-widest text-blue-100 uppercase mt-1">
+                    <p className="text-sm font-bold text-white truncate">{userEmail || "Usuario"}</p>
+                    <span className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-usm-blue/20 border border-blue-400/20 text-[10px] font-bold tracking-widest text-blue-100 uppercase mt-1">
                       {userRole || "Invitado"}
-                    </div>
+                    </span>
                   </div>
                 </div>
 
-                <div className="space-y-1">
-                  <div className="px-3 py-1.5">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Cuenta</p>
-                  </div>
+                {/* Actions */}
+                <div className="space-y-0.5">
+                  <p className="px-3 py-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Cuenta</p>
                   <button
-                    className="w-full text-left flex items-center gap-3 px-3 py-3 text-sm font-bold text-slate-600 hover:bg-slate-50 hover:text-blue-700 rounded-xl transition-all group/item"
+                    className="w-full text-left flex items-center gap-3 px-3 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-blue-700 rounded-xl transition-colors"
                     onClick={() => { setIsProfileOpen(false); router.push("/dashboard/settings"); }}
                   >
-                    <div className="p-2 bg-slate-100 group-hover/item:bg-blue-100 rounded-lg transition-colors">
-                      <User className="w-4 h-4 text-slate-500 group-hover/item:text-blue-600" />
-                    </div>
-                    Configuración de Perfil
+                    <div className="p-1.5 bg-slate-100 rounded-lg"><User className="w-4 h-4 text-slate-500" /></div>
+                    Configuración
                   </button>
-                  
-                  <div className="my-2 border-t border-slate-100 mx-2"></div>
-                  
+
+                  <div className="my-1.5 border-t border-slate-100 mx-2" />
+
                   <button
                     onClick={handleLogout}
-                    className="w-full text-left flex items-center gap-3 px-3 py-3 text-sm font-bold text-red-600 hover:bg-red-50 hover:text-red-700 rounded-xl transition-all group/logout"
+                    className="w-full text-left flex items-center gap-3 px-3 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50 rounded-xl transition-colors"
                   >
-                    <div className="p-2 bg-red-50 group-hover/logout:bg-red-100 rounded-lg transition-colors">
-                      <LogOut className="w-4 h-4 text-red-500 group-hover/logout:text-red-600" />
-                    </div>
+                    <div className="p-1.5 bg-red-50 rounded-lg"><LogOut className="w-4 h-4 text-red-500" /></div>
                     Cerrar Sesión
                   </button>
                 </div>
@@ -200,4 +178,3 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ pageTitle, isSidebarC
 };
 
 export default DashboardHeader;
-

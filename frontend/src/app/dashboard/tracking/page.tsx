@@ -121,13 +121,7 @@ export default function TrackingPage({
 
   return (
     <>
-      <DashboardHeader
-        pageTitle="Seguimiento"
-        isSidebarCollapsed={isSidebarCollapsed}
-        isMobileSidebarOpen={isMobileSidebarOpen}
-        onMobileSidebarToggle={handleMobileSidebarToggle}
-        onSidebarCollapse={handleSidebarCollapse}
-      />
+      <DashboardHeader pageTitle="Seguimiento" />
 
       <PageTransition>
         <main className="flex-1 p-3 sm:p-4 md:p-6 lg:p-8 overflow-y-auto bg-gray-50/50">

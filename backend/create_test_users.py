@@ -8,16 +8,15 @@ from django.contrib.auth import get_user_model
 
 
 def upsert_user(email: str, password: str, *, role: str, full_name: str = "", status: str = "active",
-                semester: str | None = None, phone: str | None = None,
+                semester: int | None = None, phone: int | None = None,
                 is_staff: bool = False, is_superuser: bool = False):
     User = get_user_model()
     user, created = User.objects.get_or_create(email=email, defaults={
-        "username": email,
         "full_name": full_name,
         "role": role,
         "status": status,
-        "semester": semester or "",
-        "phone": phone or "",
+        "semester": semester,
+        "phone": phone,
         "is_staff": is_staff,
         "is_superuser": is_superuser,
     })
@@ -59,7 +58,7 @@ def main():
         status="active",
         is_staff=True,
         is_superuser=False,
-        phone="+58-000-0000",
+        phone=580000000,
     )
 
     # Jurado user
@@ -80,7 +79,7 @@ def main():
         role="Estudiante",
         full_name="Student Test",
         status="active",
-        semester="2026-01",
+        semester=10,
         is_staff=False,
         is_superuser=False,
     )

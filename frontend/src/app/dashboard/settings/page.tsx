@@ -335,13 +335,7 @@ export default function SettingsPage({
 
   return (
     <>
-      <DashboardHeader
-        pageTitle="Configuración"
-        isSidebarCollapsed={isSidebarCollapsed}
-        isMobileSidebarOpen={isMobileSidebarOpen}
-        onMobileSidebarToggle={handleMobileSidebarToggle}
-        onSidebarCollapse={handleSidebarCollapse}
-      />
+      <DashboardHeader pageTitle="Configuración" />
 
       <UserModal
         isOpen={isUserModalOpen}

@@ -137,13 +137,7 @@ export default function TesisPage(props: TesisPageProps = {}) {
 
   return (
     <>
-      <DashboardHeader
-        pageTitle="Trabajo Especial de Grado (TEG)"
-        isSidebarCollapsed={isSidebarCollapsed}
-        isMobileSidebarOpen={isMobileSidebarOpen}
-        onMobileSidebarToggle={handleMobileSidebarToggle}
-        onSidebarCollapse={handleSidebarCollapse}
-      />
+      <DashboardHeader pageTitle="Trabajo Especial de Grado (TEG)" />
 
       <PageTransition>
         {/* Main Content */}
