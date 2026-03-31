@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="600" viewBox="0 0 900 600" fill="none">
+  <rect width="900" height="600" rx="20" fill="#eaf2ff"/>
+  <g transform="translate(100,80)">
+    <rect x="0" y="0" width="700" height="150" rx="10" fill="#ffffff" stroke="#cfe6ff"/>
+    <rect x="0" y="180" width="300" height="35" rx="6" fill="#ffffff" stroke="#cfe6ff"/>
+    <rect x="0" y="230" width="500" height="35" rx="6" fill="#ffffff" stroke="#cfe6ff"/>
+    <rect x="0" y="280" width="400" height="35" rx="6" fill="#ffffff" stroke="#cfe6ff"/>
+    <circle cx="610" cy="100" r="60" fill="#fff" stroke="#cfe6ff"/>
+  </g>
+  <text x="130" y="360" font-family="Arial" font-size="28" fill="#2b6cb0">Diagramación: portadas, márgenes y tipografía</text>
+</svg>

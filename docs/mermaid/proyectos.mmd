@@ -1,0 +1,10 @@
+flowchart TD
+  U[Docente] --> Login[Login]
+  Login --> Dash[Dashboard]
+  Dash --> ProyList[Listado de Proyectos]
+  ProyList --> Card[Card ProjectCard]
+  Card --> Det[Detalle de Proyecto]
+  Det --> Eval[Formulario de Evaluación]
+  Eval --> Puntaje["Calcular puntaje 0-20"]
+  Puntaje --> Estado[Asignar estado]
+  Estado --> Resultado[Mostrar resultado]

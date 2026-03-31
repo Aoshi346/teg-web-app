@@ -1,0 +1,390 @@
+"use client";
+
+import React, {
+  useEffect,
+  useRef,
+  useState,
+  useCallback,
+  useMemo,
+} from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { createPortal } from "react-dom";
+import {
+  LayoutDashboard,
+  BookOpen,
+  FileText,
+  PlusCircle,
+  Settings,
+  ScanLine,
+  TrendingUp,
+  X,
+} from "lucide-react";
+import { getUser, getUserRole } from "@/features/auth/clientAuth";
+
+interface SidebarProps {
+  isCollapsed: boolean;
+  setIsCollapsed: (isCollapsed: boolean) => void;
+  mobileOpen: boolean;
+  setMobileOpen: (open: boolean) => void;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({
+  isCollapsed,
+  mobileOpen,
+  setMobileOpen,
+}) => {
+  const pathname = usePathname();
+  const router = useRouter();
+  const closeBtnRef = useRef<HTMLButtonElement>(null);
+  const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
+  const linkRefs = useRef<Map<string, HTMLAnchorElement>>(new Map());
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setPortalTarget(document.body);
+    }
+  }, []);
+
+  // Lock body scroll when mobile drawer is open and focus the close button
+  useEffect(() => {
+    if (mobileOpen) {
+      try {
+        document.body.style.overflow = "hidden";
+        // Focus close button for accessibility
+        setTimeout(() => closeBtnRef.current?.focus(), 0);
+      } catch {}
+    } else {
+      try {
+        document.body.style.overflow = "";
+      } catch {}
+    }
+    return () => {
+      try {
+        document.body.style.overflow = "";
+      } catch {}
+    };
+  }, [mobileOpen]);
+
+  // ... (inside component)
+
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const user = useMemo(() => getUser(), []);
+
+  useEffect(() => {
+    // Get role on mount (client-side only)
+    setUserRole(getUserRole());
+  }, []);
+
+  const menuItems = useMemo(() => {
+    if (userRole === "Estudiante") {
+      const semester = user?.semester?.toLowerCase() || "";
+      const isTesis = semester.includes("10");
+      return [
+        { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
+        isTesis
+          ? {
+              icon: BookOpen,
+              label: "TEG",
+              href: "/dashboard/tesis",
+            }
+          : {
+              icon: FileText,
+              label: "PTEG",
+              href: "/dashboard/proyectos",
+            },
+        { icon: TrendingUp, label: "Seguimiento", href: "/dashboard/tracking" },
+        { icon: Settings, label: "Configuración", href: "/dashboard/settings" },
+      ];
+    }
+
+    const baseItems = [
+      { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
+      {
+        icon: FileText,
+        label: "PTEG",
+        href: "/dashboard/proyectos",
+      },
+      {
+        icon: BookOpen,
+        label: "TEG",
+        href: "/dashboard/tesis",
+      },
+      {
+        icon: ScanLine,
+        label: "Escanear",
+        href: "/dashboard/scan",
+        requiredRole: ["Administrador", "Estudiante", "Tutor", "Jurado"],
+      },
+      { icon: TrendingUp, label: "Seguimiento", href: "/dashboard/tracking" },
+      {
+        icon: PlusCircle,
+        label: "Agregar",
+        href: "/dashboard/agregar",
+      },
+      { icon: Settings, label: "Configuración", href: "/dashboard/settings" },
+    ];
+
+    // Filter items based on role
+    return baseItems.filter((item) => {
+      if (!item.requiredRole) return true;
+      if (!userRole) return true;
+      return item.requiredRole.includes(userRole);
+    });
+  }, [userRole, user]);
+
+  // Prefetch routes on hover for instant navigation
+  const handleLinkHover = useCallback(
+    (href: string) => {
+      router.prefetch(href);
+    },
+    [router],
+  );
+
+  // Menu items are visible immediately - no animation on route changes for instant navigation
+
+  // Keyboard shortcuts for navigation (1-7 for menu items)
+  useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      // Only handle if not typing in an input/textarea
+      if (
+        e.target instanceof HTMLInputElement ||
+        e.target instanceof HTMLTextAreaElement
+      ) {
+        return;
+      }
+
+      // Alt/Cmd + 1-7 for navigation
+      if ((e.altKey || e.metaKey) && e.key >= "1" && e.key <= "7") {
+        e.preventDefault();
+        const index = parseInt(e.key) - 1;
+        if (menuItems[index]) {
+          router.push(menuItems[index].href);
+          setMobileOpen(false);
+        }
+      }
+
+      // Escape to close mobile menu
+      if (e.key === "Escape" && mobileOpen) {
+        setMobileOpen(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyPress);
+    return () => window.removeEventListener("keydown", handleKeyPress);
+  }, [router, mobileOpen, setMobileOpen, menuItems]);
+
+  return (
+    <div className="sidebar-container">
+      {portalTarget &&
+        createPortal(
+          <>
+            {/* Mobile drawer (left off-canvas) - rendered in portal to ensure it overlays app content */}
+            <div
+              className={`lg:hidden fixed inset-y-0 left-0 z-[100] w-[85vw] max-w-xs sm:max-w-sm bg-white border-r border-slate-200 shadow-2xl transform transition-transform duration-300 ease-out ${
+                mobileOpen ? "translate-x-0" : "-translate-x-full"
+              }`}
+              role="dialog"
+              aria-modal="true"
+              aria-label="Menú de navegación"
+            >
+              <div className="flex flex-col h-full pt-[env(safe-area-inset-top)]">
+                <div className="p-4 flex items-center justify-between border-b border-slate-100">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center">
+                      <Image
+                        src="/tesisfar_logo.svg"
+                        alt="Tesisfar logo"
+                        width={32}
+                        height={32}
+                        className="w-8 h-8 object-contain drop-shadow-sm"
+                        draggable={false}
+                      />
+                    </div>
+                    <div>
+                      <h1 className="text-lg font-bold text-slate-900 font-montserrat tracking-tight">
+                        Tesisfar
+                      </h1>
+                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest">Gestión de TEG</p>
+                    </div>
+                  </div>
+                  <button
+                    ref={closeBtnRef}
+                    onClick={() => setMobileOpen(false)}
+                    className="p-2 rounded-lg text-slate-400 hover:text-slate-800 hover:bg-slate-100 transition-colors"
+                    aria-label="Cerrar menú"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+                <nav
+                  className="flex-1 p-4 overflow-y-auto"
+                  aria-label="Main navigation"
+                >
+                  <ul className="space-y-1">
+                    {menuItems.map((item, index) => {
+                      const isActive = pathname
+                        ? item.href === "/dashboard"
+                          ? pathname === item.href
+                          : pathname.startsWith(item.href)
+                        : false;
+                      return (
+                        <li key={index} className="sidebar-menu-item">
+                          <Link
+                            ref={(el) => {
+                              if (el) linkRefs.current.set(item.href, el);
+                            }}
+                            href={item.href}
+                            onClick={() => setMobileOpen(false)}
+                            onMouseEnter={() => handleLinkHover(item.href)}
+                            prefetch={true}
+                            className={`w-full flex items-center gap-3 py-3 px-4 rounded-xl transition-all duration-300 relative group overflow-hidden border border-transparent ${
+                              isActive
+                                ? "text-blue-700 bg-blue-50/80 shadow-sm border-blue-100/50"
+                                : "text-slate-600 hover:bg-blue-50/80 hover:text-blue-700 hover:shadow-sm hover:border-blue-100/50"
+                            }`}
+                            title={`${item.label} (Alt+${index + 1})`}
+                          >
+                            {/* Accent Glow Background for Active Item */}
+                            {isActive && (
+                              <div
+                                className="absolute inset-0 opacity-10 pointer-events-none"
+                                style={{
+                                  background:
+                                    "linear-gradient(90deg, var(--accent-start, #3b82f6), var(--accent-end, #2563eb))",
+                                }}
+                              />
+                            )}
+                            
+                            <item.icon
+                              className={`w-5 h-5 flex-shrink-0 transition-transform duration-200 relative z-10 ${isActive ? "scale-110 text-blue-600" : "group-hover:text-blue-600 group-hover:scale-110"}`}
+                            />
+                            <span className={`text-sm font-bold whitespace-nowrap overflow-hidden font-montserrat tracking-wide relative z-10 transition-colors duration-200 ${isActive ? "text-blue-800" : "group-hover:text-blue-800"}`}>
+                              {item.label}
+                            </span>
+                            {isActive && (
+                              <div 
+                                className="absolute left-0 top-0 bottom-0 w-1.5 rounded-r-full bg-blue-600 shadow-[0_0_10px_rgba(37,99,235,0.4)]" 
+                              />
+                            )}
+                          </Link>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </nav>
+              </div>
+            </div>
+
+            {/* Overlay backdrop - z-[90] ensures it's below the drawer but above main content */}
+            <div
+              className={`lg:hidden fixed inset-0 z-[90] bg-black/50 transition-opacity duration-300 ${mobileOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
+              onClick={() => setMobileOpen(false)}
+              aria-hidden="true"
+            />
+          </>,
+          portalTarget,
+        )}
+
+      {/* Desktop persistent side rail */}
+      <aside
+        className={`hidden lg:flex lg:flex-col h-screen bg-white border-r border-slate-200 shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-50 ${
+          isCollapsed ? "w-20" : "w-64"
+        }`}
+        style={{ position: "relative" }}
+      >
+        <div
+          className={`p-4 h-[89px] flex items-center flex-shrink-0 border-b border-slate-100 ${isCollapsed ? "px-3 justify-center" : "px-6 justify-start"}`}
+        >
+          <div
+            className={`flex items-center gap-3 min-w-0 transition-all duration-300 ${isCollapsed ? "gap-0" : ""}`}
+          >
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center">
+              <Image
+                src="/tesisfar_logo.svg"
+                alt="Tesisfar logo"
+                width={32}
+                height={32}
+                className="w-8 h-8 object-contain drop-shadow-sm"
+                draggable={false}
+              />
+            </div>
+            {!isCollapsed && (
+              <div className="overflow-hidden transition-all duration-200 flex flex-col justify-center">
+                <h1 className="text-xl font-bold text-slate-900 font-montserrat tracking-tight leading-none mb-1">Tesisfar</h1>
+                <p className="text-[11px] uppercase tracking-wider font-bold text-slate-500">Gestión de TEG</p>
+              </div>
+            )}
+          </div>
+        </div>
+        <nav
+          className="flex-1 p-4 overflow-y-auto min-h-0"
+          aria-label="Main navigation"
+        >
+          <ul className="space-y-1">
+            {menuItems.map((item, index) => {
+              const isActive = pathname
+                ? item.href === "/dashboard"
+                  ? item.href === pathname
+                  : pathname.startsWith(item.href)
+                : false;
+              return (
+                <li key={index} className="sidebar-menu-item">
+                  <Link
+                    ref={(el) => {
+                      if (el) linkRefs.current.set(item.href, el);
+                    }}
+                    href={item.href}
+                    onMouseEnter={() => handleLinkHover(item.href)}
+                    prefetch={true}
+                    className={`w-full flex items-center ${isCollapsed ? "justify-center gap-0 px-3" : "gap-3 px-4"} py-3 rounded-xl transition-all duration-300 relative group overflow-hidden border border-transparent ${
+                      isActive
+                        ? "text-blue-700 bg-blue-50/80 shadow-sm border-blue-100/50"
+                        : "text-slate-600 hover:bg-blue-50/80 hover:text-blue-700 hover:shadow-sm hover:border-blue-100/50"
+                    }`}
+                    title={
+                      isCollapsed
+                        ? `${item.label} (Alt+${index + 1})`
+                        : `Alt+${index + 1}`
+                    }
+                  >
+                    {isActive && (
+                      <div
+                        className="absolute inset-0 opacity-10 pointer-events-none transition-opacity duration-300"
+                        style={{
+                          background:
+                            "linear-gradient(90deg, var(--accent-start, #3b82f6), var(--accent-end, #2563eb))",
+                        }}
+                      />
+                    )}
+
+                    <item.icon
+                      className={`w-5 h-5 flex-shrink-0 transition-transform duration-200 relative z-10 ${isActive ? "scale-110 text-blue-600" : "group-hover:text-blue-600 group-hover:scale-110"}`}
+                    />
+                    <span
+                      className={`font-bold font-montserrat tracking-wide whitespace-nowrap overflow-hidden transition-all duration-300 relative z-10 ${isCollapsed ? "w-0 opacity-0" : "w-auto opacity-100"} ${isActive ? "text-blue-800" : "group-hover:text-blue-800"}`}
+                    >
+                      {item.label}
+                    </span>
+                    {isActive && !isCollapsed && (
+                      <div 
+                        className="absolute left-0 top-0 bottom-0 w-1.5 rounded-r-full shadow-[0_0_10px_rgba(249,115,22,0.5)]" 
+                        style={{
+                          background: "linear-gradient(to bottom, var(--accent-start, #f97316), var(--accent-end, #f59e0b))"
+                        }}
+                      />
+                    )}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </nav>
+        {/* Removed footer collapse button to allow sidebar to extend fully */}
+      </aside>
+    </div>
+  );
+};
+
+export default Sidebar;
