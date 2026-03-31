@@ -3,7 +3,6 @@
 "use client";
 
 import React, { ReactNode, memo } from "react";
-import { Card, CardTitle, CardContent } from "@/components/ui/card";
 
 type FeatureCardProps = {
   icon: ReactNode;
@@ -12,58 +11,73 @@ type FeatureCardProps = {
   accentColor?: string;
 };
 
-// Use the memoized component for export
-function FeatureCardImpl({ icon, title, children, accentColor = "usm-blue" }: FeatureCardProps) {
-  const gradientFrom = accentColor === "usm-orange" ? "from-usm-orange" : "from-usm-blue";
-  const gradientTo = accentColor === "usm-orange" ? "to-orange-400" : "to-blue-400";
-  const iconBg = accentColor === "usm-orange" ? "bg-gradient-to-br from-usm-orange/15 to-orange-400/10" : "bg-gradient-to-br from-usm-blue/15 to-blue-400/10";
-  const iconBorder = accentColor === "usm-orange" ? "border-usm-orange/20" : "border-usm-blue/20";
-  const iconHoverBg = accentColor === "usm-orange" ? "group-hover:from-usm-orange/25 group-hover:to-orange-400/15" : "group-hover:from-usm-blue/25 group-hover:to-blue-400/15";
-  const iconColor = accentColor === "usm-orange" ? "text-usm-orange" : "text-usm-blue";
+function FeatureCardImpl({
+  icon,
+  title,
+  children,
+  accentColor = "usm-blue",
+}: FeatureCardProps) {
+  const isOrange = accentColor === "usm-orange";
+
+  // Per-accent color scheme — each card gets a colorful tinted background
+  const cardBg = isOrange
+    ? "bg-gradient-to-br from-orange-50 to-amber-50/60"
+    : "bg-gradient-to-br from-blue-50 to-sky-50/60";
+  const borderColor = isOrange
+    ? "border-usm-orange/15 hover:border-usm-orange/30"
+    : "border-usm-blue/15 hover:border-usm-blue/30";
+  const iconBg = isOrange
+    ? "bg-gradient-to-br from-usm-orange to-orange-400"
+    : "bg-gradient-to-br from-usm-blue to-blue-400";
+  const titleHover = isOrange
+    ? "group-hover:text-usm-orange"
+    : "group-hover:text-usm-blue";
+  const accentLine = isOrange
+    ? "from-usm-orange to-orange-400"
+    : "from-usm-blue to-blue-400";
 
   return (
     <div className="h-full">
-      <Card
-        className={`h-full p-0 flex flex-col items-center text-center
-                   bg-white border border-slate-200/60 shadow-lg rounded-2xl
-                   transition-all duration-300 ease-out
-                   hover:-translate-y-2 hover:shadow-2xl
-                   hover:border-slate-300/80 group cursor-pointer
-                   gradient-border-top card-shine overflow-hidden`}
+      <div
+        className={`h-full relative ${cardBg} border ${borderColor} rounded-2xl overflow-hidden
+                   shadow-sm hover:shadow-lg transition-all duration-300 ease-out group`}
       >
-        {/* Colored accent stripe at top */}
-        <div className={`w-full h-1 bg-gradient-to-r ${gradientFrom} ${gradientTo}`} />
+        {/* Top accent bar */}
+        <div className={`w-full h-1 bg-gradient-to-r ${accentLine}`} />
 
-        <div className="p-6 pt-5 flex flex-col items-center">
-          {/* Icon Container */}
-          <div
-            className={`mb-5 flex h-16 w-16 items-center justify-center 
-                       rounded-2xl ${iconBg} border ${iconBorder} shadow-sm
-                       transition-all duration-300 ${iconHoverBg}
-                       group-hover:shadow-md group-hover:scale-110`}
-          >
-            {/* Apply accent color to the icon itself */}
-            <div className={`${iconColor} transition-all duration-300 group-hover:scale-110`}>
-              {icon}
+        <div className="p-6 flex flex-col h-full">
+          {/* Icon — white icon on colored pill */}
+          <div className="mb-5">
+            <div
+              className={`inline-flex h-12 w-12 items-center justify-center rounded-xl ${iconBg}
+                         shadow-md transition-transform duration-300 group-hover:scale-105 group-hover:-translate-y-0.5`}
+            >
+              <div className="text-white">{icon}</div>
             </div>
           </div>
 
-          {/* Text Content */}
-          <div className="flex flex-col gap-2.5">
-            <CardTitle className="text-xl font-bold text-usm-navy transition-colors duration-300 group-hover:text-usm-blue">
-              {title}
-            </CardTitle>
-            <CardContent className="p-0">
-              <p className="text-gray-500 leading-relaxed text-[0.938rem] transition-colors duration-300 group-hover:text-gray-600">
-                {children}
-              </p>
-            </CardContent>
+          {/* Title */}
+          <h3
+            className={`text-lg font-bold text-usm-navy mb-2 leading-snug transition-colors duration-300 ${titleHover}`}
+          >
+            {title}
+          </h3>
+
+          {/* Small accent line */}
+          <div className="mb-3">
+            <div
+              className={`h-0.5 w-8 bg-gradient-to-r ${accentLine} rounded-full transition-all duration-300 group-hover:w-12`}
+            />
           </div>
+
+          {/* Description */}
+          <p className="text-gray-500 leading-relaxed text-[0.9rem] flex-1">
+            {children}
+          </p>
         </div>
-      </Card>
+      </div>
     </div>
   );
 }
 
-// Using memo for performance optimization, preventing re-renders if props haven't changed.
 export default memo(FeatureCardImpl);

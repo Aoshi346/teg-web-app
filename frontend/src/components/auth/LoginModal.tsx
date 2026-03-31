@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { X, Eye, EyeOff, Mail, Lock, User } from "lucide-react";
+import { X, Eye, EyeOff, Mail, Lock, User, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Toast from "@/components/ui/Toast";
@@ -11,303 +11,218 @@ import {
   register as demoRegister,
 } from "@/features/auth/clientAuth";
 import { useRouter } from "next/navigation";
+import { gsap } from "gsap";
 
-// --- Particle Animation Utility ---
-function runParticleAnimation(container: HTMLDivElement): () => void {
-  const canvas = document.createElement("canvas");
-  container.appendChild(canvas);
-  const ctx = canvas.getContext("2d")!;
-  if (!ctx) {
-    console.error("2D context not supported");
-    return () => {};
-  }
+// --- Animated Canvas Background with floating geometric shapes ---
+const BrandCanvas = () => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  let animationFrameId: number;
-  const particles: Particle[] = [];
-  const particleCount = 40;
-  const connectDistance = 80;
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
 
-  const mouse = {
-    x: -1000,
-    y: -1000,
-    radius: 60,
-  };
+    let animId: number;
+    let width = 0;
+    let height = 0;
 
-  const handleMouseMove = (event: MouseEvent) => {
-    const rect = canvas.getBoundingClientRect();
-    mouse.x = event.clientX - rect.left;
-    mouse.y = event.clientY - rect.top;
-  };
+    const colors = {
+      blue: "rgba(0, 102, 255, 0.5)",
+      blueFaint: "rgba(0, 102, 255, 0.12)",
+      orange: "rgba(255, 107, 53, 0.45)",
+      orangeFaint: "rgba(255, 107, 53, 0.10)",
+      yellow: "rgba(255, 210, 63, 0.35)",
+      white: "rgba(255, 255, 255, 0.15)",
+      whiteLine: "rgba(255, 255, 255, 0.06)",
+    };
 
-  const handleMouseOut = () => {
-    mouse.x = -1000;
-    mouse.y = -1000;
-  };
+    type Shape = {
+      x: number;
+      y: number;
+      size: number;
+      type: "circle" | "ring" | "square" | "triangle" | "dot" | "cross";
+      color: string;
+      vx: number;
+      vy: number;
+      rotation: number;
+      rotSpeed: number;
+      pulsePhase: number;
+      pulseSpeed: number;
+      opacity: number;
+    };
 
-  container.addEventListener("mousemove", handleMouseMove);
-  container.addEventListener("mouseout", handleMouseOut);
+    const shapes: Shape[] = [];
+    const shapeCount = 28;
+    const connectDist = 120;
 
-  const colors = {
-    blue: "#3b82f6",
-    green: "#10b981",
-    lightBlue: "#bfdbfe",
-    lightGreen: "#a7f3d0",
-    white: "#ffffff",
-    darkBlue: "#1e40af",
-  };
+    const resize = () => {
+      const rect = canvas.parentElement!.getBoundingClientRect();
+      width = rect.width;
+      height = rect.height;
+      canvas.width = width * window.devicePixelRatio;
+      canvas.height = height * window.devicePixelRatio;
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+      ctx.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
+    };
 
-  class Particle {
-    x: number;
-    y: number;
-    baseSize: number;
-    size: number;
-    speedX: number;
-    speedY: number;
-    color1: string;
-    color2: string | null;
-    shape: "pill" | "capsule" | "cross" | "molecule";
-    rotation: number;
-    rotationSpeed: number;
-    pulseAngle: number;
-    pulseSpeed: number;
+    const createShape = (): Shape => {
+      const typeRoll = Math.random();
+      let type: Shape["type"];
+      if (typeRoll < 0.2) type = "circle";
+      else if (typeRoll < 0.35) type = "ring";
+      else if (typeRoll < 0.5) type = "square";
+      else if (typeRoll < 0.65) type = "triangle";
+      else if (typeRoll < 0.85) type = "dot";
+      else type = "cross";
 
-    constructor() {
-      this.baseSize = 6;
-      this.x =
-        Math.random() * (canvas.width - this.baseSize * 2) + this.baseSize;
-      this.y =
-        Math.random() * (canvas.height - this.baseSize * 2) + this.baseSize;
-      this.speedX = (Math.random() - 0.5) * 0.4;
-      this.speedY = (Math.random() - 0.5) * 0.4;
-      this.rotation = Math.random() * Math.PI * 2;
-      this.rotationSpeed = (Math.random() - 0.5) * 0.01;
-      this.pulseAngle = Math.random() * Math.PI * 2;
-      this.pulseSpeed = (Math.random() - 0.5) * 0.02;
+      const colorPick = [colors.blue, colors.orange, colors.yellow, colors.white];
+      return {
+        x: Math.random() * width,
+        y: Math.random() * height,
+        size: type === "dot" ? 2 + Math.random() * 3 : 6 + Math.random() * 14,
+        type,
+        color: colorPick[Math.floor(Math.random() * colorPick.length)],
+        vx: (Math.random() - 0.5) * 0.4,
+        vy: (Math.random() - 0.5) * 0.4,
+        rotation: Math.random() * Math.PI * 2,
+        rotSpeed: (Math.random() - 0.5) * 0.008,
+        pulsePhase: Math.random() * Math.PI * 2,
+        pulseSpeed: 0.01 + Math.random() * 0.02,
+        opacity: 0.4 + Math.random() * 0.6,
+      };
+    };
 
-      const shapeType = Math.random();
-      if (shapeType < 0.4) {
-        // 40% pill
-        this.shape = "pill";
-        this.color1 = Math.random() < 0.5 ? colors.blue : colors.green;
-        this.color2 = null;
-        this.baseSize = Math.random() * 5 + 5;
-      } else if (shapeType < 0.7) {
-        // 30% capsule
-        this.shape = "capsule";
-        this.color1 = colors.lightBlue;
-        this.color2 = colors.blue;
-        this.baseSize = Math.random() * 6 + 7;
-      } else if (shapeType < 0.9) {
-        // 20% cross
-        this.shape = "cross";
-        this.color1 = colors.green;
-        this.color2 = null;
-        this.baseSize = Math.random() * 4 + 5;
-      } else {
-        // 10% molecule
-        this.shape = "molecule";
-        this.color1 = colors.lightGreen;
-        this.color2 = colors.darkBlue;
-        this.baseSize = Math.random() * 8 + 8;
+    const init = () => {
+      resize();
+      shapes.length = 0;
+      for (let i = 0; i < shapeCount; i++) {
+        shapes.push(createShape());
       }
-      this.size = this.baseSize;
+    };
 
-      const reduced =
-        typeof window !== "undefined" &&
-        window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-      if (reduced) {
-        this.speedX *= 0.1;
-        this.speedY *= 0.1;
-        this.rotationSpeed = 0;
-        this.pulseSpeed = 0;
-      }
-    }
-
-    update() {
-      // Mouse interaction
-      const dx = this.x - mouse.x;
-      const dy = this.y - mouse.y;
-      const distance = Math.hypot(dx, dy);
-      const forceDirectionX = dx / distance;
-      const forceDirectionY = dy / distance;
-      const force = (mouse.radius - distance) / mouse.radius;
-
-      if (distance < mouse.radius) {
-        this.x += forceDirectionX * force * 2.5;
-        this.y += forceDirectionY * force * 2.5;
-      }
-
-      // Wall collision
-      if (this.x > canvas.width + 10 || this.x < -10)
-        this.speedX = -this.speedX;
-      if (this.y > canvas.height + 10 || this.y < -10)
-        this.speedY = -this.speedY;
-
-      this.x += this.speedX;
-      this.y += this.speedY;
-      this.rotation += this.rotationSpeed;
-
-      // Pulsing effect
-      this.pulseAngle += this.pulseSpeed;
-      this.size =
-        this.baseSize + Math.sin(this.pulseAngle) * (this.baseSize * 0.1);
-    }
-
-    draw() {
+    const drawShape = (s: Shape, pulse: number) => {
       ctx.save();
-      ctx.translate(this.x, this.y);
-      ctx.rotate(this.rotation);
-      ctx.shadowColor = "rgba(0,0,0,0.1)";
-      ctx.shadowBlur = 8;
+      ctx.translate(s.x, s.y);
+      ctx.rotate(s.rotation);
+      ctx.globalAlpha = s.opacity * (0.7 + pulse * 0.3);
 
-      if (this.shape === "pill") {
-        const s = this.size;
-        ctx.fillStyle = this.color1;
-        ctx.beginPath();
-        ctx.arc(0, 0, s, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.5)";
-        ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        ctx.moveTo(-s * 0.5, 0);
-        ctx.lineTo(s * 0.5, 0);
-        ctx.stroke();
-      } else if (this.shape === "capsule") {
-        const width = this.size * 1.8;
-        const height = this.size;
-        const radius = height / 2;
+      const sz = s.size * (0.9 + pulse * 0.1);
 
-        // First half
-        ctx.fillStyle = this.color1;
-        ctx.beginPath();
-        ctx.arc(-width / 4, 0, radius, Math.PI / 2, -Math.PI / 2);
-        ctx.rect(-width / 4, -radius, width / 4, height);
-        ctx.fill();
-
-        // Second half
-        ctx.fillStyle = this.color2!;
-        ctx.beginPath();
-        ctx.arc(width / 4, 0, radius, -Math.PI / 2, Math.PI / 2);
-        ctx.rect(0, -radius, width / 4, height);
-        ctx.fill();
-      } else if (this.shape === "cross") {
-        const armLength = this.size * 1.5;
-        const armWidth = this.size * 0.5;
-        ctx.fillStyle = this.color1;
-        ctx.globalAlpha = 0.8;
-        ctx.fillRect(-armLength / 2, -armWidth / 2, armLength, armWidth);
-        ctx.fillRect(-armWidth / 2, -armLength / 2, armWidth, armLength);
-        ctx.globalAlpha = 1;
-      } else if (this.shape === "molecule") {
-        ctx.strokeStyle = this.color1;
-        ctx.fillStyle = this.color2!;
-        ctx.lineWidth = 1.5;
-
-        const r = this.size / 3;
-        const positions = [
-          { x: 0, y: 0 },
-          { x: this.size, y: 0 },
-          { x: this.size / 2, y: (this.size * Math.sqrt(3)) / 2 },
-        ];
-
-        ctx.beginPath();
-        ctx.moveTo(positions[0].x, positions[0].y);
-        ctx.lineTo(positions[1].x, positions[1].y);
-        ctx.lineTo(positions[2].x, positions[2].y);
-        ctx.closePath();
-        ctx.stroke();
-
-        positions.forEach((p) => {
+      switch (s.type) {
+        case "circle":
+          ctx.fillStyle = s.color;
           ctx.beginPath();
-          ctx.arc(p.x, p.y, r, 0, 2 * Math.PI);
+          ctx.arc(0, 0, sz, 0, Math.PI * 2);
           ctx.fill();
-        });
+          break;
+        case "ring":
+          ctx.strokeStyle = s.color;
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.arc(0, 0, sz, 0, Math.PI * 2);
+          ctx.stroke();
+          break;
+        case "square":
+          ctx.fillStyle = s.color;
+          ctx.fillRect(-sz / 2, -sz / 2, sz, sz);
+          break;
+        case "triangle":
+          ctx.fillStyle = s.color;
+          ctx.beginPath();
+          ctx.moveTo(0, -sz);
+          ctx.lineTo(sz * 0.866, sz * 0.5);
+          ctx.lineTo(-sz * 0.866, sz * 0.5);
+          ctx.closePath();
+          ctx.fill();
+          break;
+        case "dot":
+          ctx.fillStyle = s.color;
+          ctx.beginPath();
+          ctx.arc(0, 0, sz, 0, Math.PI * 2);
+          ctx.fill();
+          break;
+        case "cross": {
+          ctx.strokeStyle = s.color;
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(-sz, 0);
+          ctx.lineTo(sz, 0);
+          ctx.moveTo(0, -sz);
+          ctx.lineTo(0, sz);
+          ctx.stroke();
+          break;
+        }
       }
 
       ctx.restore();
-    }
-  }
+    };
 
-  const init = () => {
-    particles.length = 0;
-    const rect = container.getBoundingClientRect();
-    canvas.width = rect.width;
-    canvas.height = rect.height;
-    canvas.style.position = "absolute";
-    canvas.style.inset = "0";
-    canvas.style.width = "100%";
-    canvas.style.height = "100%";
+    const animate = () => {
+      ctx.clearRect(0, 0, width, height);
 
-    for (let i = 0; i < particleCount; i++) {
-      particles.push(new Particle());
-    }
-  };
-
-  const connect = () => {
-    for (let a = 0; a < particles.length; a++) {
-      for (let b = a + 1; b < particles.length; b++) {
-        const distance = Math.hypot(
-          particles[a].x - particles[b].x,
-          particles[a].y - particles[b].y,
-        );
-
-        if (distance < connectDistance) {
-          const opacity = 1 - distance / connectDistance;
-          ctx.strokeStyle = `rgba(191, 219, 254, ${opacity * 0.6})`;
-          ctx.lineWidth = 1;
-          ctx.beginPath();
-          ctx.moveTo(particles[a].x, particles[a].y);
-          ctx.lineTo(particles[b].x, particles[b].y);
-          ctx.stroke();
+      // Connection lines
+      for (let a = 0; a < shapes.length; a++) {
+        for (let b = a + 1; b < shapes.length; b++) {
+          const dx = shapes[a].x - shapes[b].x;
+          const dy = shapes[a].y - shapes[b].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < connectDist) {
+            const opacity = (1 - dist / connectDist) * 0.3;
+            ctx.strokeStyle = colors.whiteLine.replace("0.06", String(opacity * 0.15));
+            ctx.lineWidth = 0.8;
+            ctx.beginPath();
+            ctx.moveTo(shapes[a].x, shapes[a].y);
+            ctx.lineTo(shapes[b].x, shapes[b].y);
+            ctx.stroke();
+          }
         }
       }
-    }
-  };
 
-  const animate = () => {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    particles.forEach((p) => {
-      p.update();
-      p.draw();
-    });
-    connect();
-    animationFrameId = requestAnimationFrame(animate);
-  };
+      // Update and draw shapes
+      for (const s of shapes) {
+        s.x += s.vx;
+        s.y += s.vy;
+        s.rotation += s.rotSpeed;
+        s.pulsePhase += s.pulseSpeed;
+        const pulse = (Math.sin(s.pulsePhase) + 1) / 2;
 
-  const debouncedInit = () => {
-    cancelAnimationFrame(animationFrameId);
+        // Wrap around edges
+        if (s.x < -20) s.x = width + 20;
+        if (s.x > width + 20) s.x = -20;
+        if (s.y < -20) s.y = height + 20;
+        if (s.y > height + 20) s.y = -20;
+
+        drawShape(s, pulse);
+      }
+
+      animId = requestAnimationFrame(animate);
+    };
+
     init();
     animate();
-  };
 
-  init();
-  animate();
+    const onResize = () => {
+      cancelAnimationFrame(animId);
+      init();
+      animate();
+    };
+    window.addEventListener("resize", onResize);
 
-  window.addEventListener("resize", debouncedInit);
-
-  return () => {
-    window.removeEventListener("resize", debouncedInit);
-    container.removeEventListener("mousemove", handleMouseMove);
-    container.removeEventListener("mouseout", handleMouseOut);
-    cancelAnimationFrame(animationFrameId);
-    if (container.contains(canvas)) {
-      container.removeChild(canvas);
-    }
-  };
-}
-
-// --- React Components ---
-const ParticleCanvas = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (containerRef.current) {
-      const cleanup = runParticleAnimation(containerRef.current);
-      return cleanup;
-    }
+    return () => {
+      window.removeEventListener("resize", onResize);
+      cancelAnimationFrame(animId);
+    };
   }, []);
 
-  return <div ref={containerRef} className="absolute inset-0 h-full w-full" />;
+  return (
+    <canvas
+      ref={canvasRef}
+      className="absolute inset-0 w-full h-full"
+      style={{ pointerEvents: "none" }}
+    />
+  );
 };
 
 interface LoginModalProps {
@@ -317,15 +232,17 @@ interface LoginModalProps {
 
 export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const router = useRouter();
+  const modalRef = useRef<HTMLDivElement>(null);
+  const formContainerRef = useRef<HTMLDivElement>(null);
+
   const [isLoginMode, setIsLoginMode] = useState(true);
-  // Form states
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [registerFullName, setRegisterFullName] = useState("");
   const [registerEmail, setRegisterEmail] = useState("");
-  const [registerRole, setRegisterRole] = useState<"Estudiante" | "Tutor" | "Jurado">(
-    "Estudiante",
-  );
+  const [registerRole, setRegisterRole] = useState<
+    "Estudiante" | "Tutor" | "Jurado"
+  >("Estudiante");
   const [registerPassword, setRegisterPassword] = useState("");
   const [registerConfirmPassword, setRegisterConfirmPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
@@ -346,26 +263,53 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
 
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [loading, setLoading] = useState(false);
-
-  // Animation state
   const [isClosing, setIsClosing] = useState(false);
+
+  // GSAP entrance animation
+  useEffect(() => {
+    if (isOpen && modalRef.current) {
+      gsap.fromTo(
+        modalRef.current,
+        { scale: 0.92, opacity: 0, y: 30 },
+        {
+          scale: 1,
+          opacity: 1,
+          y: 0,
+          duration: 0.45,
+          ease: "power3.out",
+        }
+      );
+    }
+  }, [isOpen]);
 
   const handleClose = useCallback(() => {
     setIsClosing(true);
-    setTimeout(() => {
-      onClose();
-      setIsClosing(false);
-    }, 300); // Corresponds to animation duration
+    if (modalRef.current) {
+      gsap.to(modalRef.current, {
+        scale: 0.92,
+        opacity: 0,
+        y: 20,
+        duration: 0.3,
+        ease: "power2.in",
+        onComplete: () => {
+          onClose();
+          setIsClosing(false);
+        },
+      });
+    } else {
+      setTimeout(() => {
+        onClose();
+        setIsClosing(false);
+      }, 300);
+    }
   }, [onClose]);
 
-  // Prevent body from scrolling when the modal is open
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "auto";
     }
-    // Cleanup on unmount
     return () => {
       document.body.style.overflow = "auto";
     };
@@ -379,9 +323,20 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
     return () => window.removeEventListener("keydown", onKey);
   }, [handleClose]);
 
+  // Animate form switch
+  useEffect(() => {
+    if (formContainerRef.current) {
+      gsap.fromTo(
+        formContainerRef.current,
+        { opacity: 0, x: isLoginMode ? -20 : 20 },
+        { opacity: 1, x: 0, duration: 0.35, ease: "power2.out" }
+      );
+    }
+  }, [isLoginMode]);
+
   const showToast = (
     message: string,
-    type: "error" | "success" | "info" = "error",
+    type: "error" | "success" | "info" = "error"
   ) => {
     setToastState({ visible: true, message, type });
   };
@@ -415,7 +370,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
             setIsLoggingIn(false);
             showToast(
               "Tu cuenta aún está pendiente de aprobación por un administrador.",
-              "info",
+              "info"
             );
             return;
           }
@@ -430,7 +385,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
             } catch {
               window.location.href = "/dashboard";
             }
-          }, 1000); // Reduced delay for smoother feel with API
+          }, 1000);
         })
         .catch(() => {
           setIsLoggingIn(false);
@@ -444,8 +399,8 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
         !registerConfirmPassword.trim()
       ) {
         showToast("Por favor completa todos los campos de registro.", "error");
-        return; // Add return
-      } // Add missing brace? No, context shows it
+        return;
+      }
 
       if (registerPassword !== registerConfirmPassword) {
         showToast("Las contraseñas no coinciden", "error");
@@ -460,10 +415,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
         status: "pending" as const,
       };
 
-      setLoading(true); // Reuse existing loading state or isLoggingIn? existing code uses setLoading but it's not in view?
-      // Wait, view shows `setIsLoggingIn` usage in login, but register part used `setLoading` in previous `view_file` (Line 445 in previous view, wait, previous view didn't show register logic fully? Line 443 says "else ...").
-      // Ah, Step 1038 lines 443+.
-      // I'll assume setLoading exists.
+      setLoading(true);
 
       demoRegister(newUser)
         .then((res) => {
@@ -471,7 +423,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
           if (res.success) {
             showToast(
               "Registro exitoso. Espera la aprobación de un administrador.",
-              "success",
+              "success"
             );
             setTimeout(() => {
               setIsLoginMode(true);
@@ -494,9 +446,18 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const backdropClasses = show
     ? "opacity-100"
     : "opacity-0 pointer-events-none";
-  const modalClasses = show
-    ? "opacity-100 scale-100"
-    : "opacity-0 scale-95 pointer-events-none";
+
+  // Shared input styling
+  const inputClass =
+    "pl-12 h-12 bg-slate-50/80 border-slate-200 focus:bg-white focus:ring-2 focus:ring-usm-blue/20 focus:border-usm-blue rounded-xl transition-all duration-200";
+  const inputClassSm =
+    "pl-12 h-11 bg-slate-50/80 border-slate-200 focus:bg-white focus:ring-2 focus:ring-usm-blue/20 focus:border-usm-blue rounded-xl transition-all duration-200 text-sm";
+  const labelClass = "text-sm font-semibold text-slate-700 ml-1";
+  const labelClassSm = "text-xs font-semibold text-slate-700 ml-1";
+  const iconClass =
+    "absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-usm-blue transition-colors duration-200";
+  const iconClassSm =
+    "absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-usm-blue transition-colors duration-200";
 
   return (
     <>
@@ -507,82 +468,100 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
         type={toastState.type}
         onClose={hideToast}
       />
+
+      {/* Backdrop */}
       <div
-        className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-50 transition-opacity ease-in-out duration-300 ${backdropClasses}`}
+        className={`fixed inset-0 bg-usm-navy/60 backdrop-blur-sm z-50 transition-opacity ease-in-out duration-300 ${backdropClasses}`}
         onClick={handleClose}
       />
+
+      {/* Modal wrapper */}
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center p-4"
+        className="fixed inset-0 z-50 flex items-center justify-center p-0 md:p-4"
         role="dialog"
         aria-modal="true"
       >
         <div
+          ref={modalRef}
           onClick={(e) => e.stopPropagation()}
-          className={`bg-white rounded-2xl shadow-2xl w-full max-w-md md:max-w-2xl lg:max-w-4xl flex overflow-hidden transition-all ease-in-out duration-300 ${modalClasses}`}
+          className="bg-white shadow-2xl w-full max-w-md md:max-w-2xl lg:max-w-4xl flex overflow-hidden
+                     modal-mobile-full md:rounded-2xl md:h-auto"
         >
           {/* Left Side: Forms */}
-          <div className="flex-1 p-8 lg:p-12 flex flex-col justify-center">
+          <div className="flex-1 p-6 sm:p-8 lg:p-12 flex flex-col justify-center relative overflow-y-auto max-h-[100dvh] md:max-h-[85vh]">
+            {/* Close button */}
             <button
               onClick={handleClose}
-              className="absolute top-4 right-4 p-1.5 text-gray-400 hover:text-gray-800 hover:bg-gray-100 rounded-full transition-all duration-200 ease-in-out hover:rotate-90 z-20"
+              className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-800 hover:bg-slate-100 rounded-full transition-all duration-200 ease-out hover:rotate-90 z-20"
             >
-              <X className="h-6 w-6" />
+              <X className="h-5 w-5" />
             </button>
 
+            {/* Mobile brand header (visible only on small screens) */}
+            <div className="md:hidden mb-6 text-center">
+              <h2 className="text-2xl font-bold text-usm-navy">TesisFar</h2>
+              <p className="text-sm text-slate-500 mt-1">
+                Gestión del Trabajo Especial de Grado
+              </p>
+            </div>
+
             <div className="w-full">
-              <div className="flex border-b mb-8">
+              {/* Tab switcher */}
+              <div className="flex bg-slate-100 rounded-xl p-1 mb-8">
                 <button
                   onClick={() => setIsLoginMode(true)}
-                  className={`flex-1 py-3 text-center font-semibold transition-colors duration-300 ${isLoginMode ? "text-blue-600 border-b-2 border-blue-600" : "text-gray-500 hover:text-gray-800"}`}
+                  className={`flex-1 py-2.5 text-center text-sm font-semibold rounded-lg transition-all duration-300 ${
+                    isLoginMode
+                      ? "bg-white text-usm-navy shadow-sm"
+                      : "text-slate-500 hover:text-slate-700"
+                  }`}
                 >
                   Iniciar sesión
                 </button>
                 <button
                   onClick={() => setIsLoginMode(false)}
-                  className={`flex-1 py-3 text-center font-semibold transition-colors duration-300 ${!isLoginMode ? "text-blue-600 border-b-2 border-blue-600" : "text-gray-500 hover:text-gray-800"}`}
+                  className={`flex-1 py-2.5 text-center text-sm font-semibold rounded-lg transition-all duration-300 ${
+                    !isLoginMode
+                      ? "bg-white text-usm-navy shadow-sm"
+                      : "text-slate-500 hover:text-slate-700"
+                  }`}
                 >
                   Registrarse
                 </button>
               </div>
 
-              <div className="relative min-h-[510px] overflow-hidden">
-                {/* Login Form */}
-                <div
-                  className={`absolute inset-0 p-1 transition-all duration-500 ease-in-out ${isLoginMode ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-full pointer-events-none"}`}
-                >
+              <div ref={formContainerRef}>
+                {isLoginMode ? (
+                  /* Login Form */
                   <form
                     onSubmit={handleSubmit}
-                    className="space-y-6"
+                    className="space-y-5"
                     noValidate
                   >
                     <div className="space-y-2">
-                      <label className="text-sm font-semibold text-gray-700 ml-1">
-                        Correo electrónico
-                      </label>
+                      <label className={labelClass}>Correo electrónico</label>
                       <div className="relative group">
-                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+                        <Mail className={iconClass} />
                         <Input
                           type="email"
                           value={loginEmail}
                           onChange={(e) => setLoginEmail(e.target.value)}
                           placeholder="nombre@correo.com"
-                          className="pl-12 h-12 bg-gray-50 border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 rounded-xl transition-all duration-200"
+                          className={inputClass}
                           required
                         />
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-semibold text-gray-700 ml-1">
-                        Contraseña
-                      </label>
+                      <label className={labelClass}>Contraseña</label>
                       <div className="relative group">
-                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+                        <Lock className={iconClass} />
                         <Input
                           type={loginShowPassword ? "text" : "password"}
                           value={loginPassword}
                           onChange={(e) => setLoginPassword(e.target.value)}
                           placeholder="Ingresa tu contraseña"
-                          className="pl-12 pr-12 h-12 bg-gray-50 border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 rounded-xl transition-all duration-200"
+                          className={`${inputClass} pr-12`}
                           required
                         />
                         <button
@@ -590,7 +569,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                           onClick={() =>
                             setLoginShowPassword(!loginShowPassword)
                           }
-                          className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                          className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
                         >
                           {loginShowPassword ? (
                             <EyeOff className="h-5 w-5" />
@@ -600,87 +579,94 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                         </button>
                       </div>
                     </div>
-                    <div className="flex items-center justify-between text-sm pt-2">
-                      <label className="flex items-center gap-2 text-gray-600 cursor-pointer hover:text-gray-900 transition-colors">
+                    <div className="flex items-center justify-between text-sm pt-1">
+                      <label className="flex items-center gap-2 text-slate-600 cursor-pointer hover:text-slate-900 transition-colors">
                         <input
                           type="checkbox"
                           checked={rememberMe}
                           onChange={(e) => setRememberMe(e.target.checked)}
-                          className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                          className="w-4 h-4 text-usm-blue border-slate-300 rounded focus:ring-usm-blue cursor-pointer"
                         />
                         Recuérdame
                       </label>
                       <button
                         type="button"
-                        className="font-medium text-blue-600 hover:text-blue-700 transition-colors"
+                        className="font-medium text-usm-blue hover:text-blue-700 transition-colors"
                       >
                         ¿Olvidaste tu contraseña?
                       </button>
                     </div>
                     <Button
                       type="submit"
-                      className="w-full h-12 text-base font-bold bg-blue-600 text-white hover:bg-blue-700 rounded-xl shadow-lg shadow-blue-600/30 hover:shadow-blue-600/40 active:scale-[0.98] transition-all duration-200 mt-4"
+                      className="w-full h-12 text-base font-bold bg-gradient-to-r from-usm-blue to-blue-600 text-white hover:from-blue-700 hover:to-blue-800 rounded-xl shadow-lg shadow-usm-blue/25 hover:shadow-usm-blue/35 active:scale-[0.98] transition-all duration-200 mt-4"
                     >
                       Iniciar sesión
                     </Button>
-                  </form>
-                </div>
 
-                {/* Register Form */}
-                <div
-                  className={`absolute inset-0 p-1 transition-all duration-500 ease-in-out ${!isLoginMode ? "opacity-100 translate-x-0" : "opacity-0 translate-x-full pointer-events-none"}`}
-                >
+                    {/* Mobile: show switch prompt */}
+                    <p className="text-center text-sm text-slate-500 md:hidden pt-2">
+                      ¿No tienes cuenta?{" "}
+                      <button
+                        type="button"
+                        onClick={() => setIsLoginMode(false)}
+                        className="font-semibold text-usm-blue hover:text-blue-700"
+                      >
+                        Regístrate
+                      </button>
+                    </p>
+                  </form>
+                ) : (
+                  /* Register Form */
                   <form
                     onSubmit={handleSubmit}
                     className="space-y-3"
                     noValidate
                   >
                     <div className="space-y-1">
-                      <label className="text-xs font-semibold text-gray-700 ml-1">
-                        Nombre completo
-                      </label>
+                      <label className={labelClassSm}>Nombre completo</label>
                       <div className="relative group">
-                        <User className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+                        <User className={iconClassSm} />
                         <Input
                           type="text"
                           value={registerFullName}
                           onChange={(e) => setRegisterFullName(e.target.value)}
                           placeholder="Tu nombre completo"
-                          className="pl-12 h-11 bg-gray-50 border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 rounded-xl transition-all duration-200 text-sm"
+                          className={inputClassSm}
                           required
                         />
                       </div>
                     </div>
                     <div className="space-y-1">
-                      <label className="text-xs font-semibold text-gray-700 ml-1">
+                      <label className={labelClassSm}>
                         Correo electrónico
                       </label>
                       <div className="relative group">
-                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+                        <Mail className={iconClassSm} />
                         <Input
                           type="email"
                           value={registerEmail}
                           onChange={(e) => setRegisterEmail(e.target.value)}
                           placeholder="nombre@correo.com"
-                          className="pl-12 h-11 bg-gray-50 border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 rounded-xl transition-all duration-200 text-sm"
+                          className={inputClassSm}
                           required
                         />
                       </div>
                     </div>
                     <div className="space-y-1">
-                      <label className="text-xs font-semibold text-gray-700 ml-1">
-                        Rol de usuario
-                      </label>
+                      <label className={labelClassSm}>Rol de usuario</label>
                       <div className="relative group">
-                        <User className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+                        <User className={iconClassSm} />
                         <select
                           value={registerRole}
                           onChange={(e) =>
                             setRegisterRole(
-                              e.target.value as "Estudiante" | "Tutor" | "Jurado",
+                              e.target.value as
+                                | "Estudiante"
+                                | "Tutor"
+                                | "Jurado"
                             )
                           }
-                          className="w-full pl-12 pr-4 h-11 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none appearance-none cursor-pointer transition-all duration-200"
+                          className="w-full pl-12 pr-4 h-11 bg-slate-50/80 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-usm-blue/20 focus:border-usm-blue outline-none appearance-none cursor-pointer transition-all duration-200"
                         >
                           <option value="Estudiante">Estudiante</option>
                           <option value="Tutor">Tutor</option>
@@ -689,17 +675,15 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                       </div>
                     </div>
                     <div className="space-y-1">
-                      <label className="text-xs font-semibold text-gray-700 ml-1">
-                        Contraseña
-                      </label>
+                      <label className={labelClassSm}>Contraseña</label>
                       <div className="relative group">
-                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+                        <Lock className={iconClassSm} />
                         <Input
                           type={registerShowPassword ? "text" : "password"}
                           value={registerPassword}
                           onChange={(e) => setRegisterPassword(e.target.value)}
                           placeholder="Crea una contraseña segura"
-                          className="pl-12 pr-12 h-11 bg-gray-50 border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 rounded-xl transition-all duration-200 text-sm"
+                          className={`${inputClassSm} pr-12`}
                           required
                         />
                         <button
@@ -707,7 +691,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                           onClick={() =>
                             setRegisterShowPassword(!registerShowPassword)
                           }
-                          className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                          className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
                         >
                           {registerShowPassword ? (
                             <EyeOff className="h-4 w-4" />
@@ -718,11 +702,11 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                       </div>
                     </div>
                     <div className="space-y-1">
-                      <label className="text-xs font-semibold text-gray-700 ml-1">
+                      <label className={labelClassSm}>
                         Confirmar contraseña
                       </label>
                       <div className="relative group">
-                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+                        <Lock className={iconClassSm} />
                         <Input
                           type={
                             registerShowConfirmPassword ? "text" : "password"
@@ -732,17 +716,17 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                             setRegisterConfirmPassword(e.target.value)
                           }
                           placeholder="Confirma tu contraseña"
-                          className="pl-12 pr-12 h-11 bg-gray-50 border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 rounded-xl transition-all duration-200 text-sm"
+                          className={`${inputClassSm} pr-12`}
                           required
                         />
                         <button
                           type="button"
                           onClick={() =>
                             setRegisterShowConfirmPassword(
-                              !registerShowConfirmPassword,
+                              !registerShowConfirmPassword
                             )
                           }
-                          className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                          className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
                         >
                           {registerShowConfirmPassword ? (
                             <EyeOff className="h-4 w-4" />
@@ -756,36 +740,65 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                       <Button
                         type="submit"
                         disabled={loading}
-                        className="w-full h-12 text-sm font-bold bg-blue-600 text-white hover:bg-blue-700 rounded-xl shadow-lg shadow-blue-600/30 hover:shadow-blue-600/40 active:scale-[0.98] transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed"
+                        className="w-full h-12 text-sm font-bold bg-gradient-to-r from-usm-orange to-orange-500 text-white hover:from-orange-600 hover:to-orange-700 rounded-xl shadow-lg shadow-usm-orange/25 hover:shadow-usm-orange/35 active:scale-[0.98] transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed"
                       >
                         {loading ? "Registrando..." : "Registrarse"}
                       </Button>
                     </div>
+
+                    {/* Mobile: show switch prompt */}
+                    <p className="text-center text-sm text-slate-500 md:hidden pt-2">
+                      ¿Ya tienes cuenta?{" "}
+                      <button
+                        type="button"
+                        onClick={() => setIsLoginMode(true)}
+                        className="font-semibold text-usm-blue hover:text-blue-700"
+                      >
+                        Inicia sesión
+                      </button>
+                    </p>
                   </form>
-                </div>
+                )}
               </div>
             </div>
           </div>
 
-          {/* Right Side: Info */}
-          <div className="flex-1 relative hidden lg:block bg-gray-900 animated-gradient">
-            <ParticleCanvas />
-            <div className="relative h-full flex flex-col justify-center items-center p-12 text-center z-10">
+          {/* Right Side: Brand Panel — visible on md+ (not just lg) */}
+          <div className="flex-1 relative hidden md:flex brand-gradient-animated overflow-hidden">
+            <BrandCanvas />
+            <div className="relative h-full w-full flex flex-col justify-center items-center p-10 lg:p-12 text-center z-10">
               <div className="text-white space-y-6">
+                {/* Glowing logo */}
                 <div className="relative inline-block">
-                  <div className="absolute inset-0 blur-2xl bg-blue-500/30 rounded-full"></div>
-                  <h3 className="text-6xl font-bold drop-shadow-lg relative">
+                  <div className="absolute inset-0 blur-3xl bg-usm-blue/30 rounded-full scale-150" />
+                  <h3 className="text-5xl lg:text-6xl font-bold drop-shadow-lg relative">
                     TesisFar
                   </h3>
                 </div>
-                <p className="text-lg font-light tracking-wider opacity-90 leading-relaxed max-w-sm mx-auto">
+
+                <p className="text-base lg:text-lg font-light tracking-wide opacity-90 leading-relaxed max-w-xs mx-auto">
                   La plataforma integral para la gestión y seguimiento eficiente
                   de Trabajos Especiales de Grado.
                 </p>
-                <div className="pt-8 flex justify-center gap-4 opacity-70">
-                  <div className="w-2 h-2 rounded-full bg-white"></div>
-                  <div className="w-2 h-2 rounded-full bg-white/50"></div>
-                  <div className="w-2 h-2 rounded-full bg-white/50"></div>
+
+                {/* Feature pills */}
+                <div className="flex flex-wrap justify-center gap-2 pt-4">
+                  {["Entregas", "Evaluaciones", "Seguimiento"].map((tag) => (
+                    <span
+                      key={tag}
+                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-xs font-medium text-white/80"
+                    >
+                      <Sparkles className="h-3 w-3 text-usm-yellow" />
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+
+                {/* Decorative dots */}
+                <div className="pt-6 flex justify-center gap-2 opacity-60">
+                  <div className="w-2 h-2 rounded-full bg-white" />
+                  <div className="w-2 h-2 rounded-full bg-white/40" />
+                  <div className="w-2 h-2 rounded-full bg-white/40" />
                 </div>
               </div>
             </div>

@@ -334,3 +334,146 @@ main {
                     transparent 230px, rgba(255, 107, 53, 0.05) 231px, rgba(255, 107, 53, 0.05) 232px, transparent 233px,
                     transparent 310px, rgba(255, 107, 53, 0.04) 311px, rgba(255, 107, 53, 0.04) 312px, transparent 313px);
 }
+
+/* ===== MODERNIZED LANDING UTILITIES ===== */
+
+/* Film grain noise overlay */
+.noise-overlay {
+  position: relative;
+}
+.noise-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+  pointer-events: none;
+  z-index: 1;
+  mix-blend-mode: overlay;
+}
+
+/* Smooth reveal clip-path */
+@keyframes clipRevealUp {
+  from { clip-path: inset(100% 0 0 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+
+@keyframes clipRevealDown {
+  from { clip-path: inset(0 0 100% 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+
+/* Morphing blob keyframes */
+@keyframes morphBlob {
+  0%, 100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+  25% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
+  50% { border-radius: 50% 60% 30% 60% / 30% 60% 70% 40%; }
+  75% { border-radius: 60% 30% 60% 40% / 70% 40% 50% 60%; }
+}
+
+.morph-blob {
+  animation: morphBlob 12s ease-in-out infinite;
+}
+
+/* Stagger reveal for children */
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* 3D card perspective container */
+.perspective-container {
+  perspective: 1000px;
+}
+
+.tilt-card {
+  transform-style: preserve-3d;
+  transition: transform 0.15s ease-out;
+}
+
+.tilt-card .tilt-inner {
+  transform: translateZ(40px);
+}
+
+/* Magnetic hover glow for cards */
+.glow-card {
+  position: relative;
+}
+
+.glow-card::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: conic-gradient(from var(--glow-angle, 0deg), transparent 60%, #0066ff40 80%, #ff6b3540 90%, transparent 100%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  z-index: -1;
+}
+
+.glow-card:hover::before {
+  opacity: 1;
+}
+
+/* Smooth text mask gradient for hero */
+.text-gradient-mask {
+  background: linear-gradient(135deg, #0066ff, #ff6b35);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Login modal brand gradient */
+.brand-gradient {
+  background: linear-gradient(135deg, #011638 0%, #012a6b 40%, #0066ff 100%);
+}
+
+.brand-gradient-animated {
+  background: linear-gradient(-45deg, #011638, #012a6b, #0066ff, #011638);
+  background-size: 400% 400%;
+  animation: gradient 12s ease infinite;
+}
+
+/* Animated border for focused inputs */
+@keyframes borderPulse {
+  0%, 100% { border-color: #0066ff; box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1); }
+  50% { border-color: #ff6b35; box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1); }
+}
+
+/* Scroll-triggered fade variants */
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.scroll-reveal.revealed {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Horizontal line animation */
+@keyframes expandLine {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+/* Smooth counter animation support */
+@property --num {
+  syntax: '<integer>';
+  initial-value: 0;
+  inherits: false;
+}
+
+/* Modal full-screen mobile */
+@media (max-width: 767px) {
+  .modal-mobile-full {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+  }
+}
