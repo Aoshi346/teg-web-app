@@ -1,11 +1,13 @@
 "use client";
 
-import React, { useState, useCallback, useEffect, useRef } from "react";
+import React, { Suspense, useState, useCallback, useEffect, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Sidebar from "@/components/layout/Sidebar";
 import { SidebarProvider } from "@/components/layout/SidebarContext";
 import { isAuthenticated, getUser, logout } from "@/features/auth/clientAuth";
 import LoginLoading from "@/components/ui/LoginLoading";
+import PageTransition from "@/components/ui/PageTransition";
+import { DashboardSkeleton } from "@/components/ui/DashboardSkeleton";
 
 export default function DashboardLayout({
   children,
@@ -42,6 +44,19 @@ export default function DashboardLayout({
   useEffect(() => {
     setIsMobileSidebarOpen(false);
   }, [pathname]);
+
+  // Prefetch common routes on mount for instant navigation
+  useEffect(() => {
+    const routes = [
+      "/dashboard",
+      "/dashboard/proyectos",
+      "/dashboard/tesis",
+      "/dashboard/tracking",
+      "/dashboard/settings",
+      "/dashboard/agregar",
+    ];
+    routes.forEach((r) => router.prefetch(r));
+  }, [router]);
 
   if (isAuthenticating) {
     return <LoginLoading visible={true} message="Verificando sesión..." />;
@@ -89,7 +104,7 @@ export default function DashboardLayout({
         mobileOpen={isMobileSidebarOpen}
         setMobileOpen={setIsMobileSidebarOpen}
       />
-      <div className="flex-1 flex flex-col min-h-0 overflow-y-auto overflow-x-hidden transition-all duration-300">
+      <div className="flex-1 flex flex-col min-h-0 overflow-y-auto overflow-x-hidden">
         <SidebarProvider
           value={{
             isCollapsed: isSidebarCollapsed,
@@ -100,7 +115,11 @@ export default function DashboardLayout({
             toggleMobile: handleMobileSidebarToggle,
           }}
         >
-          {children}
+          <Suspense fallback={<DashboardSkeleton />}>
+            <PageTransition>
+              {children}
+            </PageTransition>
+          </Suspense>
         </SidebarProvider>
       </div>
     </div>

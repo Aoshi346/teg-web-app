@@ -1,96 +1,85 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from 'react';
-import { usePathname } from 'next/navigation';
-import { gsap } from 'gsap';
+import React, { useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
+import { gsap } from "gsap";
 
+/**
+ * Ultra-lightweight, non-blocking route progress indicator.
+ * Renders a thin gradient bar at the top of the viewport during external route changes.
+ * Dashboard-to-dashboard navigation is instant (no indicator shown).
+ * Only animates `transform: scaleX()` — zero layout thrash, GPU-composited.
+ */
 export default function RouteLoading() {
   const pathname = usePathname();
   const [isLoading, setIsLoading] = useState(false);
-  const progressRef = React.useRef<HTMLDivElement>(null);
-  const prevPathnameRef = useRef<string | null>(null);
-  const isInitialMountRef = useRef(true);
-  const skipNextRef = useRef(false);
+  const barRef = useRef<HTMLDivElement>(null);
+  const prevPathRef = useRef<string | null>(null);
+  const isFirstMount = useRef(true);
+  const tweenRef = useRef<gsap.core.Tween | null>(null);
 
   useEffect(() => {
-    // Skip on initial mount - only show on actual route changes
-    if (isInitialMountRef.current) {
-      isInitialMountRef.current = false;
-      prevPathnameRef.current = pathname;
+    if (isFirstMount.current) {
+      isFirstMount.current = false;
+      prevPathRef.current = pathname;
       return;
     }
 
-    // Only show loading if pathname actually changed
-    if (prevPathnameRef.current === pathname) {
-      return;
-    }
+    if (prevPathRef.current === pathname) return;
 
-    // Skip if we just logged in (handled by LoginLoading)
+    const prev = prevPathRef.current;
+    prevPathRef.current = pathname;
+
+    // Skip for dashboard internal navigation — PageTransition handles it
+    if (prev?.startsWith("/dashboard") && pathname?.startsWith("/dashboard")) return;
+
+    // Skip post-login
     try {
-      const justLoggedIn = sessionStorage.getItem("justLoggedIn");
-      if (justLoggedIn) {
-        prevPathnameRef.current = pathname;
-        skipNextRef.current = true;
-        return;
-      }
+      if (sessionStorage.getItem("justLoggedIn")) return;
     } catch {}
 
-    // Skip if navigating between dashboard pages entirely
-    const isDashboardRoute = pathname?.startsWith('/dashboard');
-    const wasDashboardRoute = prevPathnameRef.current?.startsWith('/dashboard');
-    
-    // If navigating between dashboard pages, ALWAYS skip loading for instant feel
-    if (isDashboardRoute && wasDashboardRoute) {
-      prevPathnameRef.current = pathname;
-      setIsLoading(false);
-      return;
-    }
-
-    skipNextRef.current = false;
     setIsLoading(true);
-    
-    if (progressRef.current) {
-      gsap.set(progressRef.current, { width: '0%' });
-      gsap.to(progressRef.current, {
-        width: '90%',
-        duration: 0.2, // normal duration for external routes
-        ease: 'power2.out',
+
+    if (barRef.current) {
+      tweenRef.current?.kill();
+
+      // Fast fill to 90%, then complete
+      gsap.set(barRef.current, { scaleX: 0, transformOrigin: "left" });
+      tweenRef.current = gsap.to(barRef.current, {
+        scaleX: 0.9,
+        duration: 0.3,
+        ease: "power2.out",
+        onComplete: () => {
+          if (!barRef.current) return;
+          gsap.to(barRef.current, {
+            scaleX: 1,
+            duration: 0.15,
+            ease: "power2.in",
+            onComplete: () => {
+              gsap.to(barRef.current!, {
+                opacity: 0,
+                duration: 0.2,
+                onComplete: () => {
+                  setIsLoading(false);
+                  if (barRef.current) gsap.set(barRef.current, { opacity: 1 });
+                },
+              });
+            },
+          });
+        },
       });
     }
-
-    const timer = setTimeout(() => {
-      if (progressRef.current) {
-        gsap.to(progressRef.current, {
-          width: '100%',
-          duration: 0.08,
-          ease: 'power2.in',
-          onComplete: () => {
-             // Use setTimeout to ensure the React state update doesn't block painting
-            setTimeout(() => {
-               setIsLoading(false);
-               prevPathnameRef.current = pathname;
-            }, 0);
-          },
-        });
-      } else {
-        setIsLoading(false);
-        prevPathnameRef.current = pathname;
-      }
-    }, 100);
-
-    return () => clearTimeout(timer);
   }, [pathname]);
 
   if (!isLoading) return null;
 
   return (
-    <div className="fixed top-0 left-0 right-0 h-0.5 bg-gray-200/50 z-[60]">
+    <div className="fixed top-0 left-0 right-0 h-[2px] z-[60]">
       <div
-        ref={progressRef}
-        className="h-full bg-gradient-to-r from-blue-600 to-blue-500 shadow-lg shadow-blue-500/50"
-        style={{ width: '0%' }}
+        ref={barRef}
+        className="h-full bg-gradient-to-r from-usm-blue via-usm-blue to-usm-orange"
+        style={{ transform: "scaleX(0)", transformOrigin: "left" }}
       />
     </div>
   );
 }
-
