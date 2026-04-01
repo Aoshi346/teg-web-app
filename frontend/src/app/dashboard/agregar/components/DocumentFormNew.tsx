@@ -277,7 +277,7 @@ export default function DocumentFormNew({
           {/* ── Right: Form ── */}
           <form
             onSubmit={handleSubmit(onSubmit)}
-            className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"
+            className="bg-white rounded-2xl shadow-sm border border-gray-100"
           >
             <div className="p-5 sm:p-6 space-y-5">
               {/* Header */}
