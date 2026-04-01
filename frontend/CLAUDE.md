@@ -1,4 +1,4 @@
-z# Frontend Development Guide - TesisFar
+# Frontend Development Guide - TesisFar
 
 ## Quick Reference
 
@@ -23,6 +23,8 @@ User Action → Component → Service Layer (features/) → HTTP Client (lib/api
 - Spanish naming in UI text and some variable names (proyectos, tesis, evaluar, agregar)
 - Tailwind classes applied inline, no CSS modules
 - shadcn/ui components in `src/components/ui/` follow the CVA pattern
+- Form validation uses React Hook Form + Zod (see `agregar/schema.ts`)
+- Searchable dropdowns use the custom `Combobox` component with portal-based rendering
 
 ## When Adding a New Page
 
@@ -44,13 +46,13 @@ User Action → Component → Service Layer (features/) → HTTP Client (lib/api
 1. Add the function to the appropriate service file:
    - Auth/users: `src/features/auth/clientAuth.ts`
    - Projects/evaluations: `src/features/projects/projectService.ts`
+   - Semesters: `src/lib/semesters.ts`
 2. Use the `api` client from `src/lib/api.ts` (handles CSRF + session cookies automatically)
 3. Define TypeScript types in `src/types/project.ts`
 
 ## Authentication Pattern
 
 ```typescript
-// Check auth in components:
 import { isAuthenticated, getUser, getUserRole } from "@/features/auth/credentials";
 
 const user = getUser();           // From sessionStorage
@@ -72,13 +74,44 @@ const menuItems = allItems.filter(item => {
 
 Roles: `Administrador`, `Estudiante`, `Jurado`, `Tutor`
 
-## Evaluation Questions
+## Evaluation System
 
-- Defined in `src/lib/questions/questions.ts`
-- Scoring logic in `src/lib/questions/scoring.ts`
-- Question types: `yes_no`, `frequency`, `ternary`, `text`
-- Two evaluation categories: Diagramacion (formatting) and Contenido (content)
-- Thesis has two phases; proyecto has one
+- Modular architecture under `src/components/evaluation/`
+- Input components in `evaluation/inputs/` (YesNoInput, FrequencyInput, TernaryInput, StarRatingInput, FreeTextInput)
+- Custom hooks in `evaluation/hooks/` (useEvaluationDraft, useScrollSpy, useEvaluationSubmit)
+- Layout: sticky sidebar with section progress + scrollable question grid + sticky action bar
+- Question types: `yesno`, `frequency`, `ternary`, `ternary_na`, `ternary_info`, `stars`, `text`
+- Two evaluation categories: Diagramacion (5pts) and Contenido (15pts), total 20pts, passing = 10pts
+- Thesis has two phases (fase1/fase2); proyecto has one
+- Draft persistence via localStorage (`teg_eval_draft:{type}:{projectId}`)
+- Evaluator comments stored in `Evaluation.comments` as `{ general: "..." }` and displayed to students on project/thesis detail pages
+- Questions/scoring defined in `src/lib/questions/`
+
+## Document Creation (Agregar)
+
+- Modular architecture under `src/app/dashboard/agregar/`
+- Zod schema + React Hook Form for validation (`agregar/schema.ts`)
+- Custom hook `useDocumentData` for data fetching (students, tutors, semesters)
+- Searchable Combobox for student/partner/tutor selection (portal-based, no overflow clipping)
+- Skeleton loading state (`FormSkeleton`)
+- AccessDenied component for Tutor/Jurado roles
+- Semester period is read-only, set by the active semester from admin
+
+## Semester System
+
+- Semesters managed in `src/lib/semesters.ts`
+- Format: `YYYY-01` (first semester) or `YYYY-02` (second semester)
+- Each semester has `start_month` and `end_month` fields (can span years, e.g., Sep 2026 – Jan 2027)
+- Admin creates/activates semesters in Settings page
+- Active semester auto-assigned to new projects
+
+## Settings Page
+
+- 3-column layout: vertical nav | main content | context panel
+- Tabs: Perfil, Seguridad, Notificaciones, Administración
+- Admin sub-tabs: Pendientes, Directorio, Semestres
+- User management with UserModal (create/edit) and searchable user list
+- Semester management with month range pickers and active semester toggle
 
 ## Styling Patterns
 
@@ -95,9 +128,15 @@ Roles: `Administrador`, `Estudiante`, `Jurado`, `Tutor`
 | `src/lib/api.ts` | HTTP client, CSRF handling |
 | `src/features/auth/clientAuth.ts` | Auth + user management API calls |
 | `src/features/auth/credentials.ts` | Session storage helpers |
-| `src/features/projects/projectService.ts` | Project/evaluation/semester API calls |
+| `src/features/projects/projectService.ts` | Project/evaluation/comment API calls |
+| `src/lib/semesters.ts` | Semester CRUD + utilities |
 | `src/components/layout/Sidebar.tsx` | Navigation with role filtering |
-| `src/components/evaluation/EvaluationForm.tsx` | Multi-page evaluation form |
+| `src/components/evaluation/EvaluationForm.tsx` | Evaluation form orchestrator |
+| `src/components/evaluation/EvaluationSidebar.tsx` | Sticky sidebar with section progress |
+| `src/components/evaluation/QuestionCard.tsx` | Single question wrapper with input dispatch |
+| `src/components/evaluation/StickyActionBar.tsx` | Sticky bottom navigation/submit bar |
+| `src/app/dashboard/agregar/schema.ts` | Zod validation schema for document creation |
+| `src/app/dashboard/agregar/hooks/useDocumentData.ts` | Data fetching hook for agregar page |
 | `src/lib/questions/questions.ts` | Evaluation question definitions |
 | `src/lib/questions/scoring.ts` | Score calculation |
 | `src/types/project.ts` | TypeScript interfaces |

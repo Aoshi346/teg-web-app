@@ -627,11 +627,19 @@ export default function ProyectoDetailsPage() {
                                   </div>
                                 )}
                                 {ev.comments && (
-                                  <div className="mt-3 p-3 bg-white rounded-lg border border-gray-100 text-sm text-gray-700">
-                                    <span className="font-semibold text-gray-900">
-                                      Comentario:
-                                    </span>
-                                    <p className="mt-1 whitespace-pre-wrap">
+                                  <div className="mt-3 p-3.5 bg-amber-50/60 rounded-lg border border-amber-200 text-sm">
+                                    <div className="flex items-center gap-2 mb-1.5">
+                                      <svg className="w-4 h-4 text-amber-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" /></svg>
+                                      <span className="font-bold text-amber-900 text-xs uppercase tracking-wide">
+                                        Comentarios del evaluador
+                                      </span>
+                                      {ev.reviewer_name && (
+                                        <span className="text-[11px] text-amber-700 font-medium">
+                                          — {ev.reviewer_name}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <p className="whitespace-pre-wrap text-gray-700 leading-relaxed">
                                       {typeof ev.comments === "string"
                                         ? ev.comments
                                         : String(

@@ -7,6 +7,7 @@
 - **Run server:** `python manage.py runserver` (port 8000)
 - **Dependencies:** `pip install -r requirements.txt`
 - **Database:** SQLite3 at `db.sqlite3`
+- **Virtual env:** `../.venv/` (project root)
 
 ## Architecture
 
@@ -23,9 +24,22 @@ All API logic lives in a single `api` app. Views use DRF ModelViewSets with role
 - Models use Spanish naming for role/status choices (Administrador, Estudiante, Jurado, Tutor)
 - Status values: `checked`, `pending`, `rejected`
 - Project types: `proyecto`, `tesis`
-- Semester format: `YYYY-SS` (e.g., `2025-01`)
+- Semester format: `YYYY-SS` (e.g., `2026-01`)
 - JSON fields are used for flexible evaluation data (ratings, comments, section_scores)
 - File uploads go to `media/project_files/`
+- User model uses `email` as USERNAME_FIELD (no `username` field)
+- `full_name` is a computed `@property` on User that combines `first_name` + `last_name`
+
+## Data Models
+
+| Model | Key Fields |
+|-------|------------|
+| **User** | email (unique), first_name, last_name, cedula, role, status, semester, phone |
+| **Project** | title, student (FK), partner (FK), advisors (M2M to Tutor), status, period, project_type, stage1_passed, failed_attempts |
+| **Evaluation** | project (FK), reviewer (FK), ratings (JSON), comments (JSON `{general: "..."}` — visible to students), score, pass_status, section_scores (JSON) |
+| **AttachedFile** | project (FK), name, file (FileField), file_type (pdf/word) |
+| **Semester** | period (unique, YYYY-SS), is_active, start_month, end_month (supports cross-year ranges) |
+| **Comment** | project (FK), author (FK), content |
 
 ## When Modifying Models
 
@@ -55,6 +69,26 @@ Views filter querysets based on user role:
 2. Login via `/api/auth/login/` with email + password
 3. Django creates a session, sends session cookie
 4. All subsequent requests include session cookie + CSRF header
+
+**Critical cookie settings** (in `core/settings.py`):
+- `CSRF_COOKIE_HTTPONLY = False` — JS must read the csrftoken cookie
+- `CSRF_COOKIE_SAMESITE = "Lax"`
+- `SESSION_COOKIE_SAMESITE = "Lax"`
+
+## Semester System
+
+- Semesters have `period` (e.g., `2026-01`), `start_month`, `end_month`, and `is_active`
+- Start/end months are integers 1-12; end_month < start_month means the semester crosses into the next year
+- Computed `label` property renders human-readable range (e.g., "Septiembre 2026 – Enero 2027")
+- Only one semester can be active at a time (enforced in SemesterViewSet)
+- Projects auto-assigned the active semester's period on creation
+
+## Evaluation System
+
+- Evaluations store `ratings` (JSON dict of question_id → answer_value), `comments` (JSON, typically `{general: "text"}`), `score`, `pass_status`, and `section_scores`
+- Comments are visible to students on project/thesis detail pages
+- Max 2 failed attempts for "proyecto" type (enforced in EvaluationViewSet.perform_create)
+- Thesis supports two-phase evaluation via `stage1_passed` flag on Project
 
 ## File Upload
 
