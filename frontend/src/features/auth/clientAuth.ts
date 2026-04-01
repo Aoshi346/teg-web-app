@@ -8,10 +8,14 @@ export interface User {
   email: string;
   password?: string;
   role: 'Administrador' | 'Estudiante' | 'Jurado' | 'Tutor';
+  firstName?: string;
+  lastName?: string;
   fullName?: string;
+  cedula?: string;
   status: 'active' | 'pending';
   semester?: string;
   phone?: string;
+  dateJoined?: string;
 }
 
 export type ApiUser = {
@@ -19,30 +23,38 @@ export type ApiUser = {
   email: string;
   role: 'Administrador' | 'Estudiante' | 'Jurado' | 'Tutor';
   status: 'active' | 'pending';
+  first_name?: string;
+  last_name?: string;
   full_name?: string;
-  semester?: string | null;
-  phone?: string | null;
+  cedula?: string;
+  semester?: string;
+  phone?: string;
+  date_joined?: string;
 };
 
 function mapApiUser(u: ApiUser | User): User {
+  const api = u as ApiUser;
+  const local = u as User;
   return {
-    id: (u as ApiUser).id,
+    id: api.id ?? local.id,
     email: u.email,
     role: u.role,
-    status: (u as ApiUser).status ?? (u as User).status ?? 'pending',
-    fullName: (u as ApiUser).full_name ?? (u as User).fullName ?? "",
-    semester: u.semester ?? "",
-    phone: u.phone ?? "",
+    status: api.status ?? local.status ?? 'pending',
+    firstName: api.first_name ?? local.firstName ?? "",
+    lastName: api.last_name ?? local.lastName ?? "",
+    fullName: api.full_name ?? local.fullName ?? "",
+    cedula: api.cedula ?? local.cedula ?? "",
+    semester: api.semester ?? local.semester ?? "",
+    phone: api.phone ?? local.phone ?? "",
+    dateJoined: api.date_joined ?? local.dateJoined ?? "",
   };
 }
 
-// Persist user to sessionStorage for sync access in UI components
 function saveUserSession(user: User) {
   if (typeof window === 'undefined') return;
   sessionStorage.setItem(SESSION_KEY, JSON.stringify(user));
 }
 
-// Clear session
 function clearUserSession() {
   if (typeof window === 'undefined') return;
   sessionStorage.removeItem(SESSION_KEY);
@@ -53,7 +65,10 @@ export async function register(user: User): Promise<{ success: boolean; message?
     await api.post('/auth/register/', {
       email: user.email,
       password: user.password,
-      full_name: user.fullName,
+      full_name: user.fullName || `${user.firstName || ""} ${user.lastName || ""}`.trim(),
+      first_name: user.firstName,
+      last_name: user.lastName,
+      cedula: user.cedula,
       role: user.role,
       semester: user.semester,
       phone: user.phone,
@@ -78,7 +93,7 @@ export async function login(email: string, password: string): Promise<{ success:
 }
 
 export function logout() {
-  api.post('/auth/logout/', {}).catch(console.error); // Best effort logout
+  api.post('/auth/logout/', {}).catch(console.error);
   clearUserSession();
 }
 
@@ -91,104 +106,72 @@ export function getUser(): User | null {
   const raw = sessionStorage.getItem(SESSION_KEY);
   if (!raw) return null;
   try {
-    const parsed = JSON.parse(raw);
-    return mapApiUser(parsed);
+    return mapApiUser(JSON.parse(raw));
   } catch {
     return null;
   }
 }
 
 export function getUserEmail(): string | null {
-  const user = getUser();
-  return user ? user.email : null;
+  return getUser()?.email ?? null;
 }
 
 export function getUserRole(): string | null {
-  const user = getUser();
-  return user ? user.role : null;
+  return getUser()?.role ?? null;
 }
 
-// Admin Helper: Get all users
-let usersCache: User[] | null = null;
+// ─── Admin: User Management ───
 
+// No module-level cache — always fetch fresh to avoid stale data
 export async function getAllUsers(): Promise<User[]> {
-  if (usersCache) return usersCache;
   try {
     const apiUsers = await api.get<ApiUser[]>('/users/');
-    const mapped = apiUsers.map(mapApiUser);
-    usersCache = mapped;
-    return mapped;
+    return apiUsers.map(mapApiUser);
   } catch (error) {
     console.error("Failed to fetch users", error);
     return [];
   }
 }
 
-function invalidateUsersCache() {
-  usersCache = null;
-}
+export async function updateProfile(payload: {
+  fullName?: string;
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+  cedula?: string;
+  semester?: string;
+}): Promise<User> {
+  const body: Record<string, string> = {};
+  if (payload.fullName !== undefined) body.full_name = payload.fullName;
+  if (payload.firstName !== undefined) body.first_name = payload.firstName;
+  if (payload.lastName !== undefined) body.last_name = payload.lastName;
+  if (payload.phone !== undefined) body.phone = payload.phone;
+  if (payload.cedula !== undefined) body.cedula = payload.cedula;
+  if (payload.semester !== undefined) body.semester = payload.semester;
 
-// Update current user's profile
-export async function updateProfile(payload: Pick<User, "fullName" | "phone"> & { semester?: string }): Promise<User> {
-  const body: Record<string, string> = {
-    full_name: payload.fullName || "",
-    phone: payload.phone || "",
-  };
-  if (payload.semester !== undefined) {
-    body.semester = payload.semester;
-  }
   const apiUser = await api.patch<ApiUser>("/auth/me/", body);
   const updated = mapApiUser(apiUser);
-  // Refresh session cache
   const current = getUser();
-  saveUserSession({
-    ...(current || {} as User),
-    ...updated,
-  });
+  saveUserSession({ ...(current || {} as User), ...updated });
   return updated;
 }
 
-// Admin Helper: Update user status
-export async function updateUserStatus(email: string, status: 'active' | 'pending'): Promise<void> {
-  // Since we need ID for update, we assume we have user objects with IDs in the list
-  // If not, we'd need to fetch by email or pass the full user object.
-  // For now, this signature is tricky if we don't have ID.
-  // Let's assume the callers (SettingsPage) have access to the ID.
-  // Refactoring usage in SettingsPage will be needed anyway.
-  
-  // NOTE: This function signature matches previous one, but implementation is broken without ID.
-  // We will overload or change signature in next step refactor of SettingsPage.
-  // For now, let's look up the user first (inefficient but compatible) or just expose a new method.
-  
-  // New method preferred: updateStatusById(id, status)
-  // But to keep TypeScript happy temporarily:
-  // We'll throw error or try to find user.
-  console.warn("updateUserStatus(email) is deprecated. Use updateStatusById(id) instead.");
-  
-  // Try to find user by email to get ID - inefficient but implementation compliant
-  const users = await getAllUsers();
-  const user = users.find(u => u.email === email);
-  if (user && user.id) {
-    await updateStatusById(user.id, status);
-  }
-}
-
 export async function updateStatusById(id: number, status: 'active' | 'pending'): Promise<void> {
-   await api.patch(`/users/${id}/`, { status });
-   invalidateUsersCache();
+  await api.patch(`/users/${id}/`, { status });
 }
 
-// Admin helpers
 export async function createUser(user: User): Promise<User> {
   const apiUser = await api.post<ApiUser>('/auth/register/', {
     email: user.email,
     password: user.password,
-    full_name: user.fullName,
+    full_name: user.fullName || `${user.firstName || ""} ${user.lastName || ""}`.trim(),
+    first_name: user.firstName,
+    last_name: user.lastName,
+    cedula: user.cedula,
     role: user.role,
     semester: user.semester,
     phone: user.phone,
   });
-  invalidateUsersCache();
   return mapApiUser(apiUser);
 }
 
@@ -196,18 +179,18 @@ export async function updateUser(id: number, user: Partial<User>): Promise<User>
   const payload: Record<string, unknown> = {};
   if (user.email !== undefined) payload.email = user.email;
   if (user.fullName !== undefined) payload.full_name = user.fullName;
+  if (user.firstName !== undefined) payload.first_name = user.firstName;
+  if (user.lastName !== undefined) payload.last_name = user.lastName;
+  if (user.cedula !== undefined) payload.cedula = user.cedula;
   if (user.role !== undefined) payload.role = user.role;
   if (user.status !== undefined) payload.status = user.status;
   if (user.semester !== undefined) payload.semester = user.semester;
   if (user.phone !== undefined) payload.phone = user.phone;
 
   const apiUser = await api.patch<ApiUser>(`/users/${id}/`, payload);
-  invalidateUsersCache();
   return mapApiUser(apiUser);
 }
 
 export async function deleteUser(id: number): Promise<void> {
   await api.delete<void>(`/users/${id}/`);
-  invalidateUsersCache();
 }
-

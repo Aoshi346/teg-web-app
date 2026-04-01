@@ -46,11 +46,11 @@ class AuthViewSet(viewsets.GenericViewSet):
         user = request.user
 
         if request.method.lower() == 'patch':
-            # Students cannot change their own semester (9no/10mo)
+            # Students cannot change their own semester
             if user.role == 'Estudiante':
-                allowed_fields = {'full_name', 'phone'}
+                allowed_fields = {'full_name', 'first_name', 'last_name', 'phone', 'cedula'}
             else:
-                allowed_fields = {'full_name', 'phone', 'semester'}
+                allowed_fields = {'full_name', 'first_name', 'last_name', 'phone', 'cedula', 'semester'}
             clean_data = {
                 key: value
                 for key, value in request.data.items()

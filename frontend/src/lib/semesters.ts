@@ -10,8 +10,16 @@ export interface Semester {
     id: number;
     period: string;
     is_active: boolean;
+    start_month: number;
+    end_month: number;
+    label: string;
     created_at: string;
 }
+
+export const MONTH_NAMES = [
+    "", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+    "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre",
+] as const;
 
 /**
  * Get the current semester based on the current date
@@ -37,10 +45,20 @@ export function parseSemester(semester: string): { year: number; period: number 
 }
 
 /**
- * Format semester for display (e.g., "2026-01" -> "Semestre 01 - 2026")
+ * Format semester for display (e.g., "2026-01" -> "2026-01")
  */
 export function formatSemesterLabel(semester: string): string {
     return semester;
+}
+
+/**
+ * Format a Semester object with its month range
+ */
+export function formatSemesterFull(s: Semester): string {
+    if (s.label) return s.label;
+    const year = parseInt(s.period.slice(0, 4), 10);
+    const endYear = s.end_month < s.start_month ? year + 1 : year;
+    return `${MONTH_NAMES[s.start_month]} ${year} – ${MONTH_NAMES[s.end_month]} ${endYear}`;
 }
 
 /**
@@ -108,8 +126,23 @@ export async function getSemesters(): Promise<Semester[]> {
     }
 }
 
-export async function createSemester(period: string): Promise<Semester> {
-    const s = await api.post<Semester>("/semesters/", { period });
+export async function createSemester(data: {
+    period: string;
+    start_month: number;
+    end_month: number;
+}): Promise<Semester> {
+    const s = await api.post<Semester>("/semesters/", data);
+    semestersCache = null;
+    return s;
+}
+
+export async function updateSemester(id: number, data: Partial<{
+    period: string;
+    start_month: number;
+    end_month: number;
+    is_active: boolean;
+}>): Promise<Semester> {
+    const s = await api.patch<Semester>(`/semesters/${id}/`, data);
     semestersCache = null;
     return s;
 }

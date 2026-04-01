@@ -16,6 +16,7 @@ export interface UserData {
   id: number;
   fullName: string;
   email: string;
+  cedula?: string;
   semester?: string;
   phone?: string;
   role: "Estudiante" | "Tutor" | "Jurado" | "Administrador";
@@ -37,6 +38,7 @@ export default function UserModal({
 }: UserModalProps) {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
+  const [cedula, setCedula] = useState("");
   const [semester, setSemester] = useState("9no");
   const [phone, setPhone] = useState("");
   const [role, setRole] = useState("Estudiante");
@@ -45,12 +47,14 @@ export default function UserModal({
     if (initialData) {
       setFullName(initialData.fullName || "");
       setEmail(initialData.email || "");
+      setCedula(initialData.cedula || "");
       setSemester(initialData.semester || "9no");
       setPhone(initialData.phone || "");
       setRole(initialData.role || "Estudiante");
     } else {
       setFullName("");
       setEmail("");
+      setCedula("");
       setSemester("9no");
       setPhone("");
       setRole("Estudiante");
@@ -65,6 +69,7 @@ export default function UserModal({
       id: initialData?.id,
       fullName,
       email,
+      cedula,
       semester,
       phone,
       role: role as UserData["role"],
@@ -102,8 +107,8 @@ export default function UserModal({
 
         {/* Compact Form - All visible without scroll */}
         <form onSubmit={handleSubmit} className="p-6 bg-gray-50/50">
-          {/* Row 1: Name & Email */}
-          <div className="grid grid-cols-2 gap-4 mb-4">
+          {/* Row 1: Name, Cedula & Email */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
             <div>
               <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5 block">
                 Nombre Completo
@@ -116,6 +121,21 @@ export default function UserModal({
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="Ej: Juan Pérez"
+                  className="w-full pl-10 pr-3 py-2.5 bg-white ring-1 ring-gray-200 rounded-xl text-sm text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5 block">
+                Cédula
+              </label>
+              <div className="relative">
+                <Shield className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <input
+                  type="text"
+                  value={cedula}
+                  onChange={(e) => setCedula(e.target.value)}
+                  placeholder="V-12345678"
                   className="w-full pl-10 pr-3 py-2.5 bg-white ring-1 ring-gray-200 rounded-xl text-sm text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                 />
               </div>

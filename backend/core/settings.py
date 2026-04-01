@@ -137,3 +137,9 @@ CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
 ]
+
+# Cookie settings for cross-origin frontend at localhost:3000
+CSRF_COOKIE_HTTPONLY = False      # Allow JS to read csrftoken cookie
+CSRF_COOKIE_SAMESITE = "Lax"
+SESSION_COOKIE_SAMESITE = "Lax"
+SESSION_COOKIE_HTTPONLY = True
