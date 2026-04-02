@@ -136,8 +136,6 @@ export function calculateSectionScores(
   let diagramacionEarned = 0;
   let contenidoEarned = 0;
   
-  console.log('[DEBUG] calculateSectionScores called with', questions.length, 'questions');
-  
   for (const question of questions) {
     if (question.answerType === 'text') continue;
 
@@ -159,8 +157,6 @@ export function calculateSectionScores(
     diagramacion: Math.round(diagramacionEarned * 100) / 100,
     contenido: Math.round(contenidoEarned * 100) / 100,
   };
-  
-  console.log('[DEBUG] Section scores result:', result);
   
   return result;
 }

@@ -39,12 +39,29 @@ export default function CommentsSection({ projectId }: CommentsSectionProps) {
   };
 
   useEffect(() => {
-    fetchComments();
-    // Poll for new comments every 10 seconds? Or just on mount.
-    // For now just on mount.
-    const interval = setInterval(fetchComments, 10000);
-    return () => clearInterval(interval);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    let mounted = true;
+    const load = async () => {
+      try {
+        const data = await getComments(projectId);
+        if (!mounted) return;
+        const mapped: Comment[] = data.map((c) => ({
+          id: c.id,
+          project: c.project,
+          author: c.author,
+          authorName: c.author_name,
+          content: c.content,
+          createdAt: c.created_at,
+        }));
+        setComments(mapped);
+      } catch (error) {
+        console.error("Error fetching comments:", error);
+      } finally {
+        if (mounted) setIsLoading(false);
+      }
+    };
+    load();
+    const interval = setInterval(load, 30000);
+    return () => { mounted = false; clearInterval(interval); };
   }, [projectId]);
 
   useEffect(() => {

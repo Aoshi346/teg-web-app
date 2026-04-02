@@ -17,20 +17,7 @@ import {
 import ProjectCard from "@/components/dashboard/ProjectCard";
 import { getUserRole } from "@/features/auth/clientAuth";
 
-interface ProyectosPageProps {
-  handleSidebarCollapse?: () => void;
-  handleMobileSidebarToggle?: () => void;
-  isSidebarCollapsed?: boolean;
-  isMobileSidebarOpen?: boolean;
-}
-
-export default function ProyectosPage(props: ProyectosPageProps = {}) {
-  const {
-    handleSidebarCollapse,
-    handleMobileSidebarToggle,
-    isSidebarCollapsed,
-    isMobileSidebarOpen,
-  } = props;
+export default function ProyectosPage() {
   const router = useRouter();
   const userRole = useMemo(() => getUserRole(), []);
   const isStudent = userRole === "Estudiante";

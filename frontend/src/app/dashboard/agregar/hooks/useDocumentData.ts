@@ -5,9 +5,9 @@ import {
   getAllUsers,
   getUser,
   getUserRole,
-  ApiUser,
+  getStudents,
+  getTutors,
 } from "@/features/auth/clientAuth";
-import { api } from "@/lib/api";
 import {
   getAvailableSemesters,
   getCurrentSemester,
@@ -98,15 +98,20 @@ export function useDocumentData() {
   useEffect(() => {
     (async () => {
       try {
-        // Fetch all users for admin, or relevant subsets for others
-        const users = await getAllUsers();
-        const studentOptions = users
-          .filter((u) => u.role === "Estudiante" && typeof u.id === "number")
-          .map((u) => ({
-            id: u.id!,
-            label: u.fullName?.trim() ? u.fullName : u.email,
-            email: u.email,
-          }));
+        const [studentUsers, tutorUsers] = await Promise.all([
+          getStudents(),
+          getTutors(),
+        ]);
+
+        const toOption = (u: { id?: number; fullName?: string; email: string }) => ({
+          id: u.id!,
+          label: u.fullName?.trim() ? u.fullName : u.email,
+          email: u.email,
+        });
+
+        const studentOptions = studentUsers
+          .filter((u) => typeof u.id === "number")
+          .map(toOption);
 
         setStudents(studentOptions);
         setPartners(
@@ -115,37 +120,11 @@ export function useDocumentData() {
             : studentOptions,
         );
 
-        // If student, also fetch partners from the dedicated endpoint
-        if (userRole === "Estudiante") {
-          try {
-            const response = await api.get<ApiUser[]>("/users/?role=Estudiante");
-            setPartners(
-              response
-                .filter((u) => u.id !== currentUser?.id)
-                .map((u) => ({
-                  id: u.id!,
-                  label: u.full_name || u.email,
-                  email: u.email,
-                })),
-            );
-          } catch {
-            // Keep the already-set partners
-          }
-        }
-
-        // Fetch tutors
-        try {
-          const tutorResponse = await api.get<ApiUser[]>("/users/?role=Tutor");
-          setTutors(
-            tutorResponse.map((u) => ({
-              id: u.id!,
-              label: u.full_name || u.email,
-              email: u.email,
-            })),
-          );
-        } catch (err) {
-          console.error("Failed to fetch tutors", err);
-        }
+        setTutors(
+          tutorUsers
+            .filter((u) => typeof u.id === "number")
+            .map(toOption),
+        );
       } catch (err) {
         console.error("Failed to load users", err);
       } finally {

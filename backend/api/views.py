@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.contrib.auth import login, logout
+from django.db.models import Q
 from .models import User, Project, Evaluation, Semester, AttachedFile, Comment
 from .serializers import (
     RegisterSerializer, LoginSerializer, UserSerializer,
@@ -11,7 +12,6 @@ from .serializers import (
 from django.middleware.csrf import get_token
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import BasePermission
-from rest_framework.exceptions import PermissionDenied
 
 
 class IsAdminUserRole(BasePermission):
@@ -46,7 +46,6 @@ class AuthViewSet(viewsets.GenericViewSet):
         user = request.user
 
         if request.method.lower() == 'patch':
-            # Students cannot change their own semester
             if user.role == 'Estudiante':
                 allowed_fields = {'full_name', 'first_name', 'last_name', 'phone', 'cedula'}
             else:
@@ -81,7 +80,6 @@ class UserViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_permissions(self):
-        # Only admins can create, update, or delete users
         if self.action in ["create", "update", "partial_update", "destroy"]:
             return [permissions.IsAuthenticated(), IsAdminUserRole()]
         return super().get_permissions()
@@ -89,19 +87,25 @@ class UserViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
 
-        # Admin sees everyone
         if getattr(user, "role", None) == "Administrador":
             return User.objects.all()
 
-        # Students need to see available professors to assign as tutors
         if getattr(user, "role", None) == "Estudiante":
-            # If specifically asking for students (e.g. for partner selection), allow it
             if self.request.query_params.get('role') == 'Estudiante':
                  return User.objects.filter(role="Estudiante")
             return User.objects.filter(role="Tutor")
 
-        # Professors only see themselves
         return User.objects.filter(id=user.id)
+
+
+_project_qs_opts = {
+    'select': ('student', 'partner'),
+    'prefetch': ('advisors', 'evaluations', 'files'),
+}
+
+def _optimized_projects(qs):
+    return qs.select_related(*_project_qs_opts['select']).prefetch_related(*_project_qs_opts['prefetch'])
+
 
 class ProjectViewSet(viewsets.ModelViewSet):
     queryset = Project.objects.all()
@@ -110,34 +114,23 @@ class ProjectViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
+
         if user.role == 'Administrador':
-            return Project.objects.all()
-        
+            return _optimized_projects(Project.objects.all())
+
         if user.role == 'Tutor':
-            # Tutors see projects they advise
-            # Also keep old behavior? Tutors used to see nothing?
-            # Proposal: Tutors see projects where they are in 'advisors' list
-            return Project.objects.filter(advisors=user).distinct()
+            return _optimized_projects(Project.objects.filter(advisors=user).distinct())
 
         if user.role == 'Jurado':
-             # Jurados logic (maybe see assigned evaluations?)
-             # For now, maybe they see everything or nothing?
-             # Let's keep it restricted or all?
-             # Previous code: if role in ['Admin', 'Tutor', 'Jurado']: return all()
-             # Wait, previous code let Tutors see ALL projects!
-             # "if user.role in ['Administrador', 'Tutor', 'Jurado']: return Project.objects.all()"
-             # The user asked: "(only the ones he is assigned to)"
-             # So I MUST change this.
-             return Project.objects.all() # Jurados still see all for now? Or restrict? 
-             # Let's restrict Jurados to assignments too?
-             # For now, user only asked about Tutors.
+            # Jurados see all projects for evaluation purposes
+            return _optimized_projects(Project.objects.all())
 
-        # Student sees their projects AND projects where they are a partner
-        from django.db.models import Q
-        return Project.objects.filter(Q(student=user) | Q(partner=user)).distinct()
+        # Student sees own projects + projects where they are a partner
+        return _optimized_projects(
+            Project.objects.filter(Q(student=user) | Q(partner=user)).distinct()
+        )
 
     def perform_create(self, serializer):
-        # Auto-assign student for non-admins; allow admins to create for a specific student
         user = self.request.user
         target_student = user
         if getattr(user, 'role', None) == 'Administrador':
@@ -155,18 +148,16 @@ class ProjectViewSet(viewsets.ModelViewSet):
                 except User.DoesNotExist:
                     raise ValidationError({'student_email': 'User not found'})
 
-        # Auto-assign active semester if not provided
         period = self.request.data.get('period')
         if not period:
             active_semester = Semester.objects.filter(is_active=True).first()
             if active_semester:
                 period = active_semester.period
-        
+
         serializer.save(student=target_student, period=period)
 
     @action(detail=True, methods=['post'], url_path='reassign_student')
     def reassign_student(self, request, pk=None):
-        # Only admins can reassign the student
         user = request.user
         if getattr(user, 'role', None) != 'Administrador':
             return Response({'detail': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
@@ -233,26 +224,24 @@ class IsReviewerRole(BasePermission):
 
 
 class EvaluationViewSet(viewsets.ModelViewSet):
-    queryset = Evaluation.objects.all()
+    queryset = Evaluation.objects.select_related('project', 'reviewer').all()
     serializer_class = EvaluationSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_permissions(self):
-        # Only reviewers (Admin, Tutor, Jurado) can create evaluations
         if self.action == "create":
             return [permissions.IsAuthenticated(), IsReviewerRole()]
         return super().get_permissions()
 
     def get_queryset(self):
         user = self.request.user
-        qs = Evaluation.objects.all()
+        qs = Evaluation.objects.select_related('project', 'reviewer').all()
         project_id = self.request.query_params.get('project')
         if project_id:
             qs = qs.filter(project_id=project_id)
 
         if getattr(user, 'role', None) in ['Administrador', 'Tutor', 'Jurado']:
             return qs
-        # Students only see evaluations of their own projects
         return qs.filter(project__student=user)
 
     def perform_create(self, serializer):
@@ -264,7 +253,6 @@ class EvaluationViewSet(viewsets.ModelViewSet):
         except Project.DoesNotExist:
             raise ValidationError({'project': 'Project not found'})
 
-        # Enforce max two attempts for proyectos
         if project.project_type == 'proyecto' and project.failed_attempts >= 2:
             raise ValidationError({'detail': 'El proyecto ya agotó los 2 intentos permitidos.'})
 
@@ -287,8 +275,6 @@ class SemesterViewSet(viewsets.ModelViewSet):
             return [permissions.IsAuthenticated(), IsAdminUserRole()]
         return [permissions.IsAuthenticated()]
 
-
-
     @action(detail=False, methods=['get'])
     def current(self, request):
         current_semester = Semester.objects.filter(is_active=True).first()
@@ -300,35 +286,38 @@ class SemesterViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated, IsAdminUserRole])
     def set_active(self, request, pk=None):
         semester = self.get_object()
-        # Deactivate all others
         Semester.objects.exclude(pk=semester.pk).update(is_active=False)
         semester.is_active = True
         semester.save()
         return Response(self.get_serializer(semester).data)
 
     def perform_create(self, serializer):
-        if getattr(self.request.user, "role", None) != "Administrador":
-            raise PermissionDenied("Only admins can create semesters.")
-        
-        # If this is the first semester, or is_active is True, handle activation logic
         is_active = self.request.data.get('is_active', False)
         if is_active:
             Semester.objects.all().update(is_active=False)
-            
         serializer.save()
 
+
 class CommentViewSet(viewsets.ModelViewSet):
-    queryset = Comment.objects.all()
+    queryset = Comment.objects.select_related('author').all()
     serializer_class = CommentSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        # Filter by project if provided
         project_id = self.request.query_params.get('project')
         if project_id:
-            return Comment.objects.filter(project_id=project_id)
-        return Comment.objects.all()
+            return Comment.objects.select_related('author').filter(project_id=project_id)
+        # Require project param — don't expose all comments
+        return Comment.objects.none()
+
+    def check_object_permissions(self, request, obj):
+        super().check_object_permissions(request, obj)
+        if self.action in ['update', 'partial_update', 'destroy']:
+            if obj.author != request.user and getattr(request.user, 'role', None) != 'Administrador':
+                self.permission_denied(
+                    request,
+                    message='Solo el autor o un administrador puede modificar este comentario.',
+                )
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
-

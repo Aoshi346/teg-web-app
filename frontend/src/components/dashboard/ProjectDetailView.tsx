@@ -115,7 +115,6 @@ export default function ProjectDetailView({
 }: ProjectDetailViewProps) {
   const router = useRouter();
   const isProyecto = variant === "proyecto";
-  const accent = isProyecto ? "blue" : "emerald";
   const TypeIcon = isProyecto ? GraduationCap : BookOpen;
 
   const failedAttempts = project.failedAttempts || 0;
@@ -140,12 +139,12 @@ export default function ProjectDetailView({
           <div className="flex flex-col sm:flex-row sm:items-start gap-4">
             {/* Left: icon + title + badges */}
             <div className="flex items-start gap-3 flex-1 min-w-0">
-              <div className={`p-2 rounded-lg bg-${accent}-50 text-${accent}-600 flex-shrink-0 mt-0.5`}>
+              <div className={`p-2 rounded-lg flex-shrink-0 mt-0.5 ${isProyecto ? "bg-blue-50 text-blue-600" : "bg-emerald-50 text-emerald-600"}`}>
                 <TypeIcon className="w-5 h-5" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap mb-1">
-                  <span className={`text-[10px] font-bold text-${accent}-600 uppercase tracking-wider`}>
+                  <span className={`text-[10px] font-bold uppercase tracking-wider ${isProyecto ? "text-blue-600" : "text-emerald-600"}`}>
                     {isProyecto ? "Proyecto" : "Tesis"} #{project.id}
                   </span>
                   <span className="text-[10px] text-gray-400">· {project.period}</span>
@@ -209,11 +208,11 @@ export default function ProjectDetailView({
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {/* Col 1: People */}
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 space-y-3">
-          <h3 className={`text-[10px] font-bold text-${accent}-600 uppercase tracking-widest`}>Personas</h3>
+          <h3 className={`text-[10px] font-bold uppercase tracking-widest ${isProyecto ? "text-blue-600" : "text-emerald-600"}`}>Personas</h3>
 
           {/* Student */}
           <div className="flex items-center gap-3">
-            <div className={`w-9 h-9 rounded-lg bg-${accent}-100 text-${accent}-600 flex items-center justify-center text-sm font-bold flex-shrink-0`}>
+            <div className={`w-9 h-9 rounded-lg flex items-center justify-center text-sm font-bold flex-shrink-0 ${isProyecto ? "bg-blue-100 text-blue-600" : "bg-emerald-100 text-emerald-600"}`}>
               {project.student.charAt(0)}
             </div>
             <div className="flex-1 min-w-0">
@@ -221,7 +220,7 @@ export default function ProjectDetailView({
               <p className="text-[11px] text-gray-400">Estudiante</p>
             </div>
             {userRole === "Administrador" && setShowReassign && (
-              <button onClick={() => setShowReassign(!showReassign)} className="p-1.5 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors" title="Reasignar">
+              <button type="button" onClick={() => setShowReassign(!showReassign)} className="p-1.5 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors" title="Reasignar">
                 <UserCog className="w-4 h-4" />
               </button>
             )}
@@ -239,10 +238,10 @@ export default function ProjectDetailView({
                 {studentOptions?.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
               </select>
               <div className="flex gap-2">
-                <button onClick={onReassign} disabled={!selectedStudentId || isReassigning} className="px-3 py-1.5 text-xs font-bold text-white bg-purple-600 hover:bg-purple-700 rounded-lg disabled:opacity-50">
+                <button type="button" onClick={onReassign} disabled={!selectedStudentId || isReassigning} className="px-3 py-1.5 text-xs font-bold text-white bg-purple-600 hover:bg-purple-700 rounded-lg disabled:opacity-50">
                   {isReassigning ? "..." : "Confirmar"}
                 </button>
-                <button onClick={() => { setShowReassign?.(false); setReassignError?.(null); }} className="px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-100 rounded-lg">
+                <button type="button" onClick={() => { setShowReassign?.(false); setReassignError?.(null); }} className="px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-100 rounded-lg">
                   Cancelar
                 </button>
               </div>

@@ -150,18 +150,22 @@ class ProjectSerializer(serializers.ModelSerializer):
     def get_advisor_names(self, obj):
         return [user.full_name for user in obj.advisors.all()]
 
+    def _latest_eval(self, obj):
+        evals = list(obj.evaluations.all())
+        return max(evals, key=lambda e: e.graded_at) if evals else None
+
     def get_score(self, obj):
-        latest = obj.evaluations.order_by('-graded_at').first()
+        latest = self._latest_eval(obj)
         return latest.score if latest else 0
 
     def get_diagramacion_score(self, obj):
-        latest = obj.evaluations.order_by('-graded_at').first()
+        latest = self._latest_eval(obj)
         if latest and isinstance(latest.section_scores, dict):
             return latest.section_scores.get('diagramacion', 0)
         return 0
 
     def get_contenido_score(self, obj):
-        latest = obj.evaluations.order_by('-graded_at').first()
+        latest = self._latest_eval(obj)
         if latest and isinstance(latest.section_scores, dict):
             return latest.section_scores.get('contenido', 0)
         return 0

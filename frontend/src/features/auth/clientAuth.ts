@@ -194,3 +194,13 @@ export async function updateUser(id: number, user: Partial<User>): Promise<User>
 export async function deleteUser(id: number): Promise<void> {
   await api.delete<void>(`/users/${id}/`);
 }
+
+export async function getStudents(): Promise<User[]> {
+  const users = await getAllUsers();
+  return users.filter((u) => u.role === "Estudiante");
+}
+
+export async function getTutors(): Promise<User[]> {
+  const users = await getAllUsers();
+  return users.filter((u) => u.role === "Tutor");
+}
