@@ -148,3 +148,65 @@ class Comment(models.Model):
 
     def __str__(self):
         return f"Comment by {self.author.email} on {self.project.title}"
+
+
+def _get_device_from_user_agent(user_agent: str) -> str:
+    """Extract device from user agent string."""
+    ua = user_agent.lower()
+    if 'mobile' in ua or 'android' in ua and 'mobile' in ua:
+        return 'Mobile Device'
+    if 'iphone' in ua or 'ipad' in ua:
+        return 'iOS Device'
+    if 'android' in ua:
+        return 'Android Device'
+    if 'windows' in ua:
+        return 'Windows'
+    if 'macintosh' in ua or 'mac os' in ua:
+        return 'macOS'
+    if 'linux' in ua:
+        return 'Linux'
+    return 'Unknown Device'
+
+
+def _get_browser_from_user_agent(user_agent: str) -> str:
+    """Extract browser from user agent string."""
+    ua = user_agent.lower()
+    if 'chrome' in ua and 'edg' not in ua:
+        return 'Chrome'
+    if 'firefox' in ua:
+        return 'Firefox'
+    if 'safari' in ua and 'chrome' not in ua:
+        return 'Safari'
+    if 'edg' in ua:
+        return 'Edge'
+    if 'opera' in ua or 'opr' in ua:
+        return 'Opera'
+    return 'Unknown Browser'
+
+
+class SessionLog(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='session_logs')
+    session_key = models.CharField(max_length=40, unique=True)
+    device = models.CharField(max_length=100, blank=True, default='')
+    browser = models.CharField(max_length=100, blank=True, default='')
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_active_at = models.DateTimeField(auto_now=True)
+    is_active = models.BooleanField(default=True)
+    user_agent = models.TextField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-last_active_at']
+        verbose_name = 'Session Log'
+        verbose_name_plural = 'Session Logs'
+
+    def save(self, *args, **kwargs):
+        if self.user_agent:
+            if not self.device:
+                self.device = _get_device_from_user_agent(self.user_agent)
+            if not self.browser:
+                self.browser = _get_browser_from_user_agent(self.user_agent)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"Session for {self.user.email} ({self.device}/{self.browser})"

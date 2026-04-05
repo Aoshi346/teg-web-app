@@ -1,12 +1,12 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model, authenticate
-from .models import Project, AttachedFile, Evaluation, Semester, Comment
+from .models import Project, AttachedFile, Evaluation, Semester, Comment, SessionLog
 
 User = get_user_model()
 
 
 class UserSerializer(serializers.ModelSerializer):
-    full_name = serializers.CharField(source='*', read_only=True)
+    full_name = serializers.CharField(read_only=True)
     date_joined = serializers.DateTimeField(read_only=True)
 
     class Meta:
@@ -137,7 +137,7 @@ class ProjectSerializer(serializers.ModelSerializer):
         }
 
     def validate_period(self, value):
-        if Semester.objects.exists() and not Semester.objects.filter(period=value).exists():
+        if value and Semester.objects.exists() and not Semester.objects.filter(period=value).exists():
             raise serializers.ValidationError("Periodo académico no registrado.")
         return value
 
@@ -152,7 +152,12 @@ class ProjectSerializer(serializers.ModelSerializer):
 
     def _latest_eval(self, obj):
         evals = list(obj.evaluations.all())
-        return max(evals, key=lambda e: e.graded_at) if evals else None
+        if not evals:
+            return None
+        valid_evals = [e for e in evals if e.graded_at is not None]
+        if not valid_evals:
+            return None
+        return max(valid_evals, key=lambda e: e.graded_at)
 
     def get_score(self, obj):
         latest = self._latest_eval(obj)
@@ -198,3 +203,26 @@ class SemesterSerializer(serializers.ModelSerializer):
     class Meta:
         model = Semester
         fields = ['id', 'period', 'is_active', 'start_month', 'end_month', 'label', 'created_at']
+
+
+class SessionLogSerializer(serializers.ModelSerializer):
+    is_current = serializers.SerializerMethodField()
+
+    class Meta:
+        model = SessionLog
+        fields = [
+            'id', 'device', 'browser', 'ip_address',
+            'created_at', 'last_active_at', 'is_active', 'is_current',
+        ]
+        read_only_fields = ['id', 'device', 'browser', 'ip_address', 'created_at', 'last_active_at', 'is_active']
+
+    def get_is_current(self, obj):
+        request = self.context.get('request')
+        if not request:
+            return False
+        return obj.session_key == request.session.session_key if hasattr(request, 'session') else False
+
+
+class SessionTrackSerializer(serializers.Serializer):
+    session_key = serializers.CharField(max_length=40)
+    user_agent = serializers.CharField(required=False, allow_blank=True, default='')

@@ -4,10 +4,11 @@ from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.contrib.auth import login, logout
 from django.db.models import Q
-from .models import User, Project, Evaluation, Semester, AttachedFile, Comment
+from .models import User, Project, Evaluation, Semester, AttachedFile, Comment, SessionLog
 from .serializers import (
     RegisterSerializer, LoginSerializer, UserSerializer,
-    ProjectSerializer, AttachedFileSerializer, EvaluationSerializer, SemesterSerializer, CommentSerializer
+    ProjectSerializer, AttachedFileSerializer, EvaluationSerializer, SemesterSerializer, CommentSerializer,
+    SessionLogSerializer, SessionTrackSerializer,
 )
 from django.middleware.csrf import get_token
 from rest_framework.exceptions import ValidationError
@@ -27,7 +28,23 @@ class AuthViewSet(viewsets.GenericViewSet):
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data
         login(request, user)
+        # Track the session
+        user_agent = request.META.get('HTTP_USER_AGENT', '')
+        SessionLog.objects.update_or_create(
+            session_key=request.session.session_key,
+            user=user,
+            defaults={
+                'is_active': True,
+                'user_agent': user_agent,
+                'ip_address': self._get_client_ip(request),
+            }
+        )
         return Response(UserSerializer(user).data)
+
+    @action(detail=False, methods=['post'])
+    def logout(self, request):
+        logout(request)
+        return Response(status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['post'])
     def register(self, request):
@@ -35,11 +52,6 @@ class AuthViewSet(viewsets.GenericViewSet):
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
         return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
-
-    @action(detail=False, methods=['post'])
-    def logout(self, request):
-        logout(request)
-        return Response(status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['get', 'patch'], permission_classes=[permissions.IsAuthenticated])
     def me(self, request):
@@ -66,6 +78,14 @@ class AuthViewSet(viewsets.GenericViewSet):
             return Response(serializer.data)
 
         return Response(UserSerializer(user).data)
+
+    def _get_client_ip(self, request):
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0].strip()
+        else:
+            ip = request.META.get('REMOTE_ADDR', None)
+        return ip
 
 class CsrfTokenView(views.APIView):
     permission_classes = [permissions.AllowAny]
@@ -298,10 +318,16 @@ class SemesterViewSet(viewsets.ModelViewSet):
         serializer.save()
 
 
+class IsCommentAuthorOrAdmin(BasePermission):
+    def has_object_permission(self, request, view, obj):
+        if view.action in ['update', 'partial_update', 'destroy']:
+            return obj.author == request.user or getattr(request.user, 'role', None) == 'Administrador'
+        return True
+
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.select_related('author').all()
     serializer_class = CommentSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, IsCommentAuthorOrAdmin]
 
     def get_queryset(self):
         project_id = self.request.query_params.get('project')
@@ -310,14 +336,55 @@ class CommentViewSet(viewsets.ModelViewSet):
         # Require project param — don't expose all comments
         return Comment.objects.none()
 
-    def check_object_permissions(self, request, obj):
-        super().check_object_permissions(request, obj)
-        if self.action in ['update', 'partial_update', 'destroy']:
-            if obj.author != request.user and getattr(request.user, 'role', None) != 'Administrador':
-                self.permission_denied(
-                    request,
-                    message='Solo el autor o un administrador puede modificar este comentario.',
-                )
-
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
+
+
+class SessionViewSet(viewsets.GenericViewSet):
+    serializer_class = SessionLogSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return SessionLog.objects.filter(user=self.request.user, is_active=True)
+
+    def list(self, request):
+        sessions = self.get_queryset()
+        serializer = SessionLogSerializer(sessions, many=True, context={'request': request})
+        return Response(serializer.data)
+
+    def destroy(self, request, pk=None):
+        try:
+            session = SessionLog.objects.get(pk=pk, user=request.user)
+        except SessionLog.DoesNotExist:
+            return Response({'detail': 'Session not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        session.is_active = False
+        session.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=False, methods=['post'])
+    def track(self, request):
+        serializer = SessionTrackSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        session_key = serializer.validated_data['session_key']
+        user_agent = serializer.validated_data.get('user_agent', '')
+
+        session, created = SessionLog.objects.update_or_create(
+            session_key=session_key,
+            user=request.user,
+            defaults={
+                'is_active': True,
+                'user_agent': user_agent,
+                'ip_address': self._get_client_ip(request),
+            }
+        )
+        return Response(SessionLogSerializer(session, context={'request': request}).data, status=status.HTTP_201_CREATED)
+
+    def _get_client_ip(self, request):
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0].strip()
+        else:
+            ip = request.META.get('REMOTE_ADDR', None)
+        return ip

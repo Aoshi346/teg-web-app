@@ -60,6 +60,7 @@ import {
   MONTH_NAMES,
   Semester as SemesterApi,
 } from "@/lib/semesters";
+import { getSessions, revokeSession, Session } from "@/features/auth/sessionService";
 
 // ─── Shared Helpers ───
 
@@ -165,6 +166,27 @@ function PanelCard({ title, icon: Icon, children }: { title: string; icon: React
 }
 
 function ContextPanel({ activeTab, role, pendingCount, userCount }: { activeTab: string; role: string | null; pendingCount: number; userCount: number }) {
+  const [sessions, setSessions] = useState<Session[]>([]);
+  const [sessionsLoading, setSessionsLoading] = useState(false);
+
+  const loadSessions = useCallback(async () => {
+    setSessionsLoading(true);
+    try {
+      const data = await getSessions();
+      setSessions(data);
+    } catch {
+      console.error("Failed to load sessions");
+    } finally {
+      setSessionsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (activeTab === "profile") {
+      loadSessions();
+    }
+  }, [activeTab, loadSessions]);
+
   return (
     <div className="space-y-4">
       {/* ── Profile context ── */}
@@ -172,18 +194,35 @@ function ContextPanel({ activeTab, role, pendingCount, userCount }: { activeTab:
         <>
           <PanelCard title="Sesiones Activas" icon={Monitor}>
             <div className="space-y-2.5">
-              {[
-                { device: "Windows 11", browser: "Chrome", icon: Monitor, time: "Ahora", current: true },
-                { device: "iPhone 15", browser: "Safari", icon: Smartphone, time: "Hace 2h", current: false },
-              ].map((s, i) => (
-                <div key={i} className={`flex items-center gap-3 p-2.5 rounded-xl border ${s.current ? "bg-usm-blue/5 border-usm-blue/15" : "bg-slate-50/50 border-slate-100"}`}>
-                  <s.icon className={`w-4 h-4 flex-shrink-0 ${s.current ? "text-usm-blue" : "text-slate-400"}`} />
+              {sessionsLoading ? (
+                <div className="text-xs text-slate-400 text-center py-2">Cargando...</div>
+              ) : sessions.length === 0 ? (
+                <div className="text-xs text-slate-400 text-center py-2">Sin sesiones activas</div>
+              ) : sessions.map((s) => (
+                <div key={s.id} className={`flex items-center gap-3 p-2.5 rounded-xl border ${s.is_current ? "bg-usm-blue/5 border-usm-blue/15" : "bg-slate-50/50 border-slate-100"}`}>
+                  <Monitor className={`w-4 h-4 flex-shrink-0 ${s.is_current ? "text-usm-blue" : "text-slate-400"}`} />
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-semibold text-slate-700">{s.device} <span className="text-slate-400 font-normal">· {s.browser}</span></p>
-                    <p className="text-[10px] text-slate-400">{s.time}{s.current && <span className="text-usm-blue font-bold ml-1">· Este dispositivo</span>}</p>
+                    <p className="text-[10px] text-slate-400">
+                      {s.is_current ? (
+                        <span className="text-usm-blue font-bold">Este dispositivo</span>
+                      ) : (
+                        <span>IP: {s.ip_address || 'Desconocida'}</span>
+                      )}
+                    </p>
                   </div>
-                  {!s.current && (
-                    <button className="text-[10px] font-bold text-red-500 hover:text-red-600 hover:bg-red-50 px-2 py-1 rounded-lg transition-colors">Revocar</button>
+                  {!s.is_current && (
+                    <button
+                      onClick={async () => {
+                        const result = await revokeSession(s.id);
+                        if (result.success) {
+                          await loadSessions();
+                        }
+                      }}
+                      className="text-[10px] font-bold text-red-500 hover:text-red-600 hover:bg-red-50 px-2 py-1 rounded-lg transition-colors"
+                    >
+                      Revocar
+                    </button>
                   )}
                 </div>
               ))}
@@ -193,7 +232,7 @@ function ContextPanel({ activeTab, role, pendingCount, userCount }: { activeTab:
           <PanelCard title="Estado de Cuenta" icon={ShieldCheck}>
             <div className="space-y-2">
               {[
-                { label: "Cuenta verificada", ok: true },
+                { label: "Cuenta verificada", ok: role !== "Estudiante" },
                 { label: "Email confirmado", ok: true },
                 { label: "2FA habilitado", ok: false },
               ].map((item) => (
@@ -233,21 +272,35 @@ function ContextPanel({ activeTab, role, pendingCount, userCount }: { activeTab:
 
           <PanelCard title="Últimos Accesos" icon={Activity}>
             <div className="space-y-2">
-              {[
-                { time: "Hoy, 10:32", ip: "192.168.1.x", ok: true },
-                { time: "Ayer, 18:45", ip: "192.168.1.x", ok: true },
-                { time: "Mar 28, 09:12", ip: "10.0.0.x", ok: false },
-              ].map((log, i) => (
-                <div key={i} className="flex items-center justify-between py-1.5 border-b border-slate-50 last:border-0">
-                  <div>
-                    <p className="text-xs font-medium text-slate-700">{log.time}</p>
-                    <p className="text-[10px] text-slate-400">{log.ip}</p>
+              {sessions.filter(s => s.is_active).slice(0, 5).map((s) => {
+                const date = new Date(s.last_active_at);
+                const now = new Date();
+                const diffMs = now.getTime() - date.getTime();
+                const diffHours = diffMs / (1000 * 60 * 60);
+                let timeStr = "Ahora";
+                if (diffHours >= 24) {
+                  const days = Math.floor(diffHours / 24);
+                  timeStr = days === 1 ? "Ayer" : `Hace ${days}d`;
+                } else if (diffHours >= 1) {
+                  timeStr = `Hace ${Math.floor(diffHours)}h`;
+                } else if (diffHours >= 0.5) {
+                  timeStr = "Hace 30m";
+                }
+                return (
+                  <div key={s.id} className="flex items-center justify-between py-1.5 border-b border-slate-50 last:border-0">
+                    <div>
+                      <p className="text-xs font-medium text-slate-700">{timeStr}</p>
+                      <p className="text-[10px] text-slate-400">{s.ip_address || 'Desconocida'} · {s.device}</p>
+                    </div>
+                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-600">
+                      OK
+                    </span>
                   </div>
-                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md ${log.ok ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-600"}`}>
-                    {log.ok ? "OK" : "Fallido"}
-                  </span>
-                </div>
-              ))}
+                );
+              })}
+              {sessions.filter(s => s.is_active).length === 0 && (
+                <div className="text-xs text-slate-400 text-center py-2">Sin accesos registrados</div>
+              )}
             </div>
           </PanelCard>
         </>
