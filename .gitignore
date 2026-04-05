@@ -16,6 +16,7 @@ venv/
 .venv/
 env/
 .env
+.env.*
 
 # Root Logs
 *.log
