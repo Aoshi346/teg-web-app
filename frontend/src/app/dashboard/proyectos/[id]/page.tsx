@@ -4,7 +4,6 @@ import React from "react";
 import { useRouter, useParams } from "next/navigation";
 import { AlertTriangle, RefreshCw } from "lucide-react";
 import DashboardHeader from "@/components/layout/DashboardHeader";
-import PageTransition from "@/components/ui/PageTransition";
 import ProjectDetailView from "@/components/dashboard/ProjectDetailView";
 import { Project } from "@/types/project";
 import {
@@ -104,7 +103,7 @@ export default function ProyectoDetailsPage() {
   return (
     <>
       <DashboardHeader pageTitle="Detalles del Proyecto" />
-      <PageTransition>
+        
         <main className="flex-1 p-4 sm:p-5 lg:p-6 overflow-y-auto bg-gray-50/50">
           <ProjectDetailView
             project={project}
@@ -150,7 +149,7 @@ export default function ProyectoDetailsPage() {
             }
           />
         </main>
-      </PageTransition>
+        
     </>
   );
 }

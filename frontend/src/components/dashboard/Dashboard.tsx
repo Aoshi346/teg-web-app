@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useRef, useMemo, memo, useState, useCallback } from "react";
-import { gsap } from "gsap";
 import {
   CheckCircle,
   FileText,
@@ -41,38 +40,13 @@ interface StatCardProps {
     icon: React.ReactNode;
   }[];
   icon: React.ReactNode;
-  delay: number;
   accentFrom: string;
   accentTo: string;
   bgClass: string;
 }
 
 const StatCard: React.FC<StatCardProps> = memo(
-  ({ title, mainValue, mainLabel, secondaryStats, icon, delay, accentFrom, accentTo, bgClass }) => {
-    const mainValueRef = useRef<HTMLParagraphElement>(null);
-    const animRef = useRef<gsap.core.Tween | null>(null);
-
-    useEffect(() => {
-      if (!mainValueRef.current) return;
-      const target = parseInt(mainValue, 10);
-      if (isNaN(target)) {
-        mainValueRef.current.textContent = mainValue;
-        return;
-      }
-      const counter = { value: 0 };
-      animRef.current?.kill();
-      animRef.current = gsap.to(counter, {
-        value: target,
-        duration: 1.4,
-        ease: "power3.out",
-        delay: 0.4 + delay / 1000,
-        onUpdate: () => {
-          if (mainValueRef.current) mainValueRef.current.textContent = Math.round(counter.value).toString();
-        },
-      });
-      return () => { animRef.current?.kill(); };
-    }, [mainValue, delay]);
-
+  ({ title, mainValue, mainLabel, secondaryStats, icon, accentFrom, accentTo, bgClass }) => {
     return (
       <div className={`stat-card relative rounded-2xl overflow-hidden group cursor-default transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl ${bgClass}`}>
         {/* Animated gradient border top */}
@@ -117,7 +91,6 @@ const StatCard: React.FC<StatCardProps> = memo(
           {/* Main value — large */}
           <div className="mb-5">
             <p
-              ref={mainValueRef}
               className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white tracking-tighter leading-none"
               style={{ textShadow: `0 0 40px ${accentFrom}30` }}
             >
@@ -214,7 +187,6 @@ ProjectRow.displayName = "ProjectRow";
 // ─── Dashboard ───
 
 const Dashboard: React.FC = () => {
-  const mainRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const user = useMemo(() => getUser(), []);
   const isStudent = user?.role === "Estudiante";
@@ -292,45 +264,7 @@ const Dashboard: React.FC = () => {
     if (available.length > 0 && !available.includes(semester)) { setSemester(available[0]); setStoredSemester(available[0]); }
   }, [apiProjects, semesterOptions, semester]);
 
-  // ─── Orchestrated GSAP entrance timeline ───
-  const hasAnimatedRef = useRef(false);
-
-  useEffect(() => {
-    if (!dashboardData || !mainRef.current || hasAnimatedRef.current) return;
-    hasAnimatedRef.current = true;
-
-    // Always run the entrance animation when dashboard data first loads.
-    // The animation only plays once per component mount (hasAnimatedRef guards re-runs).
-    const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
-
-      // 1. Welcome bar slides down
-      tl.fromTo(".welcome-bar", { opacity: 0, y: -16 }, { opacity: 1, y: 0, duration: 0.45 });
-
-      // 2. Semester bar slides in
-      tl.fromTo(".semester-bar", { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.45 }, "-=0.25");
-
-      // 3. Stat cards stagger up with scale
-      tl.fromTo(".stat-card", { opacity: 0, y: 24, scale: 0.96 }, { opacity: 1, y: 0, scale: 1, duration: 0.55, stagger: 0.1 }, "-=0.2");
-
-      // 4. Content sections fade up
-      tl.fromTo(".content-section", { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5, stagger: 0.08 }, "-=0.25");
-
-      // 5. Project rows stagger in
-      const projectRows = gsap.utils.toArray<HTMLElement>(".project-row");
-      if (projectRows.length > 0) {
-        tl.fromTo(projectRows, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.35, stagger: 0.05 }, "-=0.2");
-      }
-
-      // 6. Feed items cascade
-      const feedItems = gsap.utils.toArray<HTMLElement>(".feed-item");
-      if (feedItems.length > 0) {
-        tl.fromTo(feedItems, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.3, stagger: 0.04 }, "-=0.2");
-      }
-    }, mainRef);
-
-    return () => ctx.revert();
-  }, [dashboardData]);
+  // ─── Orchestrated entrance — CSS-only, no GSAP ───
 
   const stats = useMemo(() => {
     if (!dashboardData) return [];
@@ -384,7 +318,7 @@ const Dashboard: React.FC = () => {
     <>
       <DashboardHeader pageTitle="Dashboard" />
 
-      <main ref={mainRef} className="flex-1 p-3 sm:p-4 md:p-6 lg:p-8 overflow-y-auto bg-slate-50/80">
+      <main className="flex-1 p-3 sm:p-4 md:p-6 lg:p-8 overflow-y-auto bg-slate-50/80">
         <div className="max-w-7xl mx-auto space-y-6">
 
           {/* ─── Welcome bar ─── */}
@@ -440,7 +374,7 @@ const Dashboard: React.FC = () => {
               {/* ─── Stat Cards ─── */}
               <div className={`grid grid-cols-1 ${isStudent ? "" : "lg:grid-cols-2"} gap-5`}>
                 {stats.map((stat, i) => (
-                  <StatCard key={i} {...stat} delay={i * 120} />
+                  <StatCard key={i} {...stat} />
                 ))}
               </div>
 

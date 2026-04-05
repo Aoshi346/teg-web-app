@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import PageTransition from "@/components/ui/PageTransition";
 import DashboardHeader from "@/components/layout/DashboardHeader";
 import EvaluationForm from "@/components/evaluation/EvaluationForm";
 import { getProject } from "@/features/projects/projectService";
@@ -50,7 +49,7 @@ export default function EvaluarTesisFase2Page({
     return (
       <>
         <DashboardHeader pageTitle={`Evaluar Tesis - Fase 2`} />
-        <PageTransition>
+          
           <main className="flex-1 p-4 sm:p-6 lg:p-8 bg-gray-50 flex items-center justify-center">
             <div className="max-w-md w-full bg-white p-8 rounded-xl shadow-lg text-center border border-gray-200">
               <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -81,7 +80,7 @@ export default function EvaluarTesisFase2Page({
               </div>
             </div>
           </main>
-        </PageTransition>
+          
       </>
     );
   }
@@ -90,7 +89,7 @@ export default function EvaluarTesisFase2Page({
     <>
       <DashboardHeader pageTitle={`Evaluar Tesis - Fase 2 (Entrega Final)`} />
 
-      <PageTransition>
+        
         <main className="flex-1 p-4 sm:p-6 lg:p-8 bg-gray-50">
           <div className="max-w-7xl mx-auto">
             <button
@@ -107,7 +106,7 @@ export default function EvaluarTesisFase2Page({
             />
           </div>
         </main>
-      </PageTransition>
+        
     </>
   );
 }

@@ -1,9 +1,15 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { X, CheckCircle, AlertCircle, Info, AlertTriangle } from "lucide-react";
+/**
+ * Toast — legacy floating notification API. Internally delegates to the
+ * unified Notice primitive so every surface in the app shares the same
+ * aesthetic. Prefer `useNotify()` from NotificationProvider for new code.
+ */
 
-export type ToastType = "success" | "error" | "info" | "warning";
+import React, { useEffect, useState } from "react";
+import Notice, { NoticeVariant } from "./Notice";
+
+export type ToastType = NoticeVariant;
 
 interface ToastProps {
   message: string;
@@ -18,68 +24,67 @@ export default function Toast({
   type = "info",
   isVisible,
   onClose,
-  duration = 3000,
+  duration = 3500,
 }: ToastProps) {
-  const [isShowing, setIsShowing] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [leaving, setLeaving] = useState(false);
+  const [progress, setProgress] = useState(1);
 
   useEffect(() => {
-    if (isVisible) {
-      setIsShowing(true);
-      const timer = setTimeout(() => {
-        setIsShowing(false);
-        // Wait for animation to finish before calling onClose
-        setTimeout(onClose, 300);
-      }, duration);
-      return () => clearTimeout(timer);
-    } else {
-      setIsShowing(false);
-    }
+    if (!isVisible) return;
+
+    setMounted(true);
+    setLeaving(false);
+    setProgress(1);
+
+    const start = Date.now();
+    const tick = window.setInterval(() => {
+      const p = Math.max(0, 1 - (Date.now() - start) / duration);
+      setProgress(p);
+    }, 60);
+
+    const hide = window.setTimeout(() => {
+      setLeaving(true);
+      window.setTimeout(() => {
+        setMounted(false);
+        onClose();
+      }, 260);
+    }, duration);
+
+    return () => {
+      window.clearInterval(tick);
+      window.clearTimeout(hide);
+    };
   }, [isVisible, duration, onClose]);
 
-  if (!isVisible && !isShowing) return null;
-
-  const getIcon = () => {
-    switch (type) {
-      case "success":
-        return <CheckCircle className="w-5 h-5 text-emerald-500" />;
-      case "error":
-        return <AlertCircle className="w-5 h-5 text-red-500" />;
-      case "warning":
-        return <AlertTriangle className="w-5 h-5 text-amber-500" />;
-      default:
-        return <Info className="w-5 h-5 text-blue-500" />;
-    }
+  const handleClose = () => {
+    setLeaving(true);
+    window.setTimeout(() => {
+      setMounted(false);
+      onClose();
+    }, 260);
   };
 
-  const getStyles = () => {
-    switch (type) {
-      case "success":
-        return "border-emerald-100 bg-white";
-      case "error":
-        return "border-red-100 bg-white";
-      case "warning":
-        return "border-amber-100 bg-white";
-      default:
-        return "border-blue-100 bg-white";
-    }
-  };
+  if (!isVisible && !mounted) return null;
 
   return (
     <div
-      className={`fixed bottom-4 right-4 z-[110] flex items-center gap-3 px-4 py-3 rounded-xl border shadow-lg transition-all duration-300 transform ${
-        isShowing
-          ? "translate-y-0 opacity-100 scale-100"
-          : "translate-y-2 opacity-0 scale-95"
-      } ${getStyles()}`}
+      className={[
+        "fixed z-[200] top-3 right-3 left-3 sm:left-auto sm:top-6 sm:right-6",
+        "sm:w-[400px] will-change-transform",
+        leaving ? "notice-exit" : "notice-enter",
+      ].join(" ")}
+      style={{
+        top: "max(0.75rem, env(safe-area-inset-top))",
+        right: "max(0.75rem, env(safe-area-inset-right))",
+      }}
     >
-      <div className="flex-shrink-0">{getIcon()}</div>
-      <p className="text-sm font-medium text-gray-700">{message}</p>
-      <button
-        onClick={() => setIsShowing(false)}
-        className="p-1 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
-      >
-        <X className="w-4 h-4" />
-      </button>
+      <Notice
+        variant={type}
+        message={message}
+        onClose={handleClose}
+        progress={progress}
+      />
     </div>
   );
 }

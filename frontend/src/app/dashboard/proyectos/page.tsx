@@ -4,7 +4,6 @@ import React, { useState, useEffect, useMemo } from "react";
 import { Search, CheckCircle, Clock, XCircle, FileText } from "lucide-react";
 import { useRouter } from "next/navigation";
 import DashboardHeader from "@/components/layout/DashboardHeader";
-import PageTransition from "@/components/ui/PageTransition";
 import SemesterSelector from "@/components/ui/SemesterSelector";
 import { Project } from "@/types/project";
 import { getAllProjects } from "@/features/projects/projectService";
@@ -34,9 +33,6 @@ export default function ProyectosPage() {
   useEffect(() => {
     let mounted = true;
     (async () => {
-      // Small delay to ensure the React router drops the Page skeleton immediately
-      await new Promise(resolve => setTimeout(resolve, 0));
-      
       const [apiProjects, semestersFromApi] = await Promise.all([
         getAllProjects(),
         getSemesters(),
@@ -123,7 +119,6 @@ export default function ProyectosPage() {
     <>
       <DashboardHeader pageTitle="Proyectos" />
 
-      <PageTransition>
         <main className="flex-1 p-3 sm:p-4 md:p-6 lg:p-8 overflow-y-auto bg-gray-50">
           <div className="max-w-7xl mx-auto">
             {/* Premium Header Layout */}
@@ -381,7 +376,6 @@ export default function ProyectosPage() {
             )}
           </div>
         </main>
-      </PageTransition>
     </>
   );
 }

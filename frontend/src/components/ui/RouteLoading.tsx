@@ -2,7 +2,6 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
-import { gsap } from "gsap";
 
 /**
  * Ultra-lightweight, non-blocking route progress indicator.
@@ -16,7 +15,8 @@ export default function RouteLoading() {
   const barRef = useRef<HTMLDivElement>(null);
   const prevPathRef = useRef<string | null>(null);
   const isFirstMount = useRef(true);
-  const tweenRef = useRef<gsap.core.Tween | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const tweenRef = useRef<any>(null);
 
   useEffect(() => {
     if (isFirstMount.current) {
@@ -40,10 +40,11 @@ export default function RouteLoading() {
 
     setIsLoading(true);
 
-    if (barRef.current) {
+    let cancelled = false;
+    import("gsap").then(({ gsap }) => {
+      if (cancelled || !barRef.current) return;
       tweenRef.current?.kill();
 
-      // Fast fill to 90%, then complete
       gsap.set(barRef.current, { scaleX: 0, transformOrigin: "left" });
       tweenRef.current = gsap.to(barRef.current, {
         scaleX: 0.9,
@@ -68,7 +69,8 @@ export default function RouteLoading() {
           });
         },
       });
-    }
+    });
+    return () => { cancelled = true; };
   }, [pathname]);
 
   if (!isLoading) return null;

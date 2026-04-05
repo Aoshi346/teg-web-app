@@ -3,7 +3,6 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import DashboardHeader from "@/components/layout/DashboardHeader";
-import PageTransition from "@/components/ui/PageTransition";
 import TrackingTable from "@/components/ui/TrackingTable";
 import SemesterSelector from "@/components/ui/SemesterSelector";
 import {
@@ -42,9 +41,6 @@ export default function TrackingPage({
 
   useEffect(() => {
     const fetchData = async () => {
-      // Small delay to drop the React render frame immediately
-      await new Promise(resolve => setTimeout(resolve, 0));
-      
       const [apiProjects, semestersFromApi] = await Promise.all([
         getAllProjects(),
         getSemesters(),
@@ -123,7 +119,6 @@ export default function TrackingPage({
     <>
       <DashboardHeader pageTitle="Seguimiento" />
 
-      <PageTransition>
         <main className="flex-1 p-3 sm:p-4 md:p-6 lg:p-8 overflow-y-auto bg-gray-50/50">
           <div className="max-w-7xl mx-auto space-y-6">
             <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
@@ -232,7 +227,6 @@ export default function TrackingPage({
             )}
           </div>
         </main>
-      </PageTransition>
     </>
   );
 }

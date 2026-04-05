@@ -2,7 +2,6 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
-import PageTransition from "@/components/ui/PageTransition";
 import DashboardHeader from "@/components/layout/DashboardHeader";
 import EvaluationForm from "@/components/evaluation/EvaluationForm";
 import { TESIS_STAGE1_QUESTIONS } from "@/lib/questions/questions";
@@ -20,7 +19,7 @@ export default function EvaluarTesisFase1Page({
     <>
       <DashboardHeader pageTitle={`Evaluar Tesis - Fase 1 (Artículo)`} />
 
-      <PageTransition>
+        
         <main className="flex-1 p-4 sm:p-6 lg:p-8 bg-gray-50">
           <div className="max-w-7xl mx-auto">
             <button
@@ -37,7 +36,7 @@ export default function EvaluarTesisFase1Page({
             />
           </div>
         </main>
-      </PageTransition>
+        
     </>
   );
 }

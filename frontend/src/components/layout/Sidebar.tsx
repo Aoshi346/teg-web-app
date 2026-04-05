@@ -11,7 +11,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createPortal } from "react-dom";
-import { gsap } from "gsap";
 import {
   LayoutDashboard,
   BookOpen,
@@ -49,33 +48,42 @@ const Sidebar: React.FC<SidebarProps> = ({
     if (typeof window !== "undefined") setPortalTarget(document.body);
   }, []);
 
-  // GSAP-driven mobile drawer animation
+  // GSAP-driven mobile drawer animation — lazy-loaded so gsap never enters
+  // the dashboard shell critical path on desktop.
   useEffect(() => {
     const drawer = drawerRef.current;
     const backdrop = backdropRef.current;
     if (!drawer || !backdrop) return;
 
+    let cancelled = false;
+
     if (mobileOpen) {
       document.body.style.overflow = "hidden";
-      gsap.to(backdrop, { opacity: 1, pointerEvents: "auto", duration: 0.25, ease: "power2.out" });
-      gsap.fromTo(drawer,
-        { x: "-100%" },
-        { x: "0%", duration: 0.4, ease: "power3.out" }
-      );
-      // Stagger menu items
-      const items = drawer.querySelectorAll(".sidebar-menu-item");
-      gsap.fromTo(items,
-        { opacity: 0, x: -16 },
-        { opacity: 1, x: 0, duration: 0.3, stagger: 0.04, delay: 0.15, ease: "power2.out" }
-      );
       setTimeout(() => closeBtnRef.current?.focus(), 100);
+
+      import("gsap").then(({ gsap }) => {
+        if (cancelled) return;
+        gsap.to(backdrop, { opacity: 1, pointerEvents: "auto", duration: 0.25, ease: "power2.out" });
+        gsap.fromTo(drawer,
+          { x: "-100%" },
+          { x: "0%", duration: 0.4, ease: "power3.out" }
+        );
+        const items = drawer.querySelectorAll(".sidebar-menu-item");
+        gsap.fromTo(items,
+          { opacity: 0, x: -16 },
+          { opacity: 1, x: 0, duration: 0.3, stagger: 0.04, delay: 0.15, ease: "power2.out" }
+        );
+      });
     } else {
-      gsap.to(drawer, { x: "-100%", duration: 0.3, ease: "power2.in" });
-      gsap.to(backdrop, { opacity: 0, duration: 0.25, ease: "power2.in", onComplete: () => { backdrop.style.pointerEvents = "none"; } });
       document.body.style.overflow = "";
+      import("gsap").then(({ gsap }) => {
+        if (cancelled) return;
+        gsap.to(drawer, { x: "-100%", duration: 0.3, ease: "power2.in" });
+        gsap.to(backdrop, { opacity: 0, duration: 0.25, ease: "power2.in", onComplete: () => { backdrop.style.pointerEvents = "none"; } });
+      });
     }
 
-    return () => { document.body.style.overflow = ""; };
+    return () => { cancelled = true; document.body.style.overflow = ""; };
   }, [mobileOpen]);
 
   // Swipe-to-close gesture

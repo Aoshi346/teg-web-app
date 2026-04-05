@@ -6,7 +6,6 @@ import Sidebar from "@/components/layout/Sidebar";
 import { SidebarProvider } from "@/components/layout/SidebarContext";
 import { isAuthenticated, getUser, logout } from "@/features/auth/clientAuth";
 import LoginLoading from "@/components/ui/LoginLoading";
-import PageTransition from "@/components/ui/PageTransition";
 import { DashboardSkeleton } from "@/components/ui/DashboardSkeleton";
 
 export default function DashboardLayout({
@@ -116,9 +115,7 @@ export default function DashboardLayout({
           }}
         >
           <Suspense fallback={<DashboardSkeleton />}>
-            <PageTransition>
-              {children}
-            </PageTransition>
+            {children}
           </Suspense>
         </SidebarProvider>
       </div>

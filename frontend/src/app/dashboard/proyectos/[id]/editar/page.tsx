@@ -3,7 +3,6 @@
 import React, { use, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import DashboardHeader from "@/components/layout/DashboardHeader";
-import PageTransition from "@/components/ui/PageTransition";
 import DocumentForm from "@/components/dashboard/DocumentForm";
 import { Project } from "@/types/project";
 import { getProject } from "@/features/projects/projectService";
@@ -50,7 +49,7 @@ export default function EditarProyectoPage({
   return (
     <>
       <DashboardHeader pageTitle="Editar Proyecto" />
-      <PageTransition>
+        
         <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto bg-gray-50">
           <div className="max-w-5xl mx-auto space-y-6">
             <button
@@ -68,7 +67,7 @@ export default function EditarProyectoPage({
             />
           </div>
         </main>
-      </PageTransition>
+        
     </>
   );
 }
