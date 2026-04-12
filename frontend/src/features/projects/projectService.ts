@@ -1,6 +1,26 @@
 import { api, postForm } from "@/lib/api";
 import { Project } from "@/types/project";
 
+// P2: Module-level cache for GET requests — expires after 30 seconds
+const cache = new Map<string, { data: unknown; expiresAt: number }>();
+const CACHE_TTL = 30_000;
+
+function getCached<T>(key: string): T | null {
+  const entry = cache.get(key);
+  if (!entry) return null;
+  if (Date.now() > entry.expiresAt) { cache.delete(key); return null; }
+  return entry.data as T;
+}
+
+function setCache<T>(key: string, data: T): void {
+  cache.set(key, { data, expiresAt: Date.now() + CACHE_TTL });
+}
+
+function invalidateCache(pattern?: string): void {
+  if (!pattern) { cache.clear(); return; }
+  for (const key of cache.keys()) { if (key.includes(pattern)) cache.delete(key); }
+}
+
 export interface ApiFile {
   id: number;
   name: string;
@@ -46,11 +66,13 @@ export interface ApiEvaluation {
 
 
 export async function getAllProjects(): Promise<Project[]> {
+  const cached = getCached<Project[]>("projects_all");
+  if (cached) return cached;
   try {
     const response = await api.get<ApiProject[]>("/projects/");
-    
-    // Map API response to Frontend Project interface
-    return response.map(mapApiProject);
+    const projects = response.map(mapApiProject);
+    setCache("projects_all", projects);
+    return projects;
   } catch (error) {
     console.error("Failed to fetch projects", error);
     return [];

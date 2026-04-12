@@ -2,8 +2,18 @@
 
 import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Calendar, Clock, XCircle, Pencil } from "lucide-react";
+import {
+  Calendar,
+  Clock,
+  CheckCircle,
+  XCircle,
+  Pencil,
+  FileText,
+  GraduationCap,
+  ArrowRight,
+} from "lucide-react";
 import { Project } from "@/types/project";
+import { cn } from "@/lib/utils";
 
 interface ProjectCardProps {
   project: Project;
@@ -13,6 +23,56 @@ interface ProjectCardProps {
   type?: "proyecto" | "tesis";
   canEdit?: boolean;
 }
+
+const STATUS_LABELS: Record<string, string> = {
+  checked: "Aprobado",
+  pending: "Pendiente",
+  rejected: "Rechazado",
+  default: "En curso",
+};
+
+const STATUS_COLORS = {
+  checked: {
+    bg: "bg-emerald-50",
+    text: "text-emerald-700",
+    scoreRing: "text-emerald-500",
+    scoreTrack: "text-gray-100",
+    scoreText: "text-emerald-600",
+    divider: "border-emerald-100",
+    cta: "text-emerald-600 hover:text-emerald-700",
+    ctaArrow: "group-hover:translate-x-0.5",
+  },
+  pending: {
+    bg: "bg-amber-50",
+    text: "text-amber-700",
+    scoreRing: "text-amber-500",
+    scoreTrack: "text-gray-100",
+    scoreText: "text-amber-600",
+    divider: "border-amber-100",
+    cta: "text-amber-600 hover:text-amber-700",
+    ctaArrow: "group-hover:translate-x-0.5",
+  },
+  rejected: {
+    bg: "bg-red-50",
+    text: "text-red-700",
+    scoreRing: "text-red-500",
+    scoreTrack: "text-gray-100",
+    scoreText: "text-red-600",
+    divider: "border-red-100",
+    cta: "text-red-600 hover:text-red-700",
+    ctaArrow: "group-hover:translate-x-0.5",
+  },
+  default: {
+    bg: "bg-blue-50",
+    text: "text-blue-700",
+    scoreRing: "text-blue-500",
+    scoreTrack: "text-gray-100",
+    scoreText: "text-blue-600",
+    divider: "border-blue-100",
+    cta: "text-blue-600 hover:text-blue-700",
+    ctaArrow: "group-hover:translate-x-0.5",
+  },
+};
 
 export default function ProjectCard({
   project,
@@ -24,119 +84,104 @@ export default function ProjectCard({
 }: ProjectCardProps) {
   const router = useRouter();
 
-  // Prefetch the target route on mount for instant navigation
   useEffect(() => {
-    if (primaryHref) {
-      router.prefetch(primaryHref);
-    }
+    if (primaryHref) router.prefetch(primaryHref);
   }, [primaryHref, router]);
 
-  const handlePrimary = (e: React.MouseEvent) => {
+  const navigate = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (primaryHref) router.push(primaryHref);
   };
 
-  const handleEdit = (e: React.MouseEvent) => {
+  const edit = (e: React.MouseEvent) => {
     e.stopPropagation();
-    // Navigate to edit page (even if it doesn't exist yet, this is the correct route pattern)
-    // Assuming /dashboard/proyectos/[id]/editar or /dashboard/tesis/[id]/editar
-    const baseUrl =
+    const base =
       type === "tesis" ? "/dashboard/tesis" : "/dashboard/proyectos";
-    router.push(`${baseUrl}/${project.id}/editar`);
+    router.push(`${base}/${project.id}/editar`);
   };
 
-  const getStatusConfig = () => {
-    switch (project.status) {
-      case "checked":
-        return {
-          wrapper: "hover:border-emerald-300 hover:shadow-emerald-500/10",
-          title: "group-hover:text-emerald-700",
-          ringGradient: ["#10B981", "#34D399"], // Emerald 500 -> 400
-          scoreText: "text-emerald-600",
-          button:
-            "bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/30 hover:shadow-emerald-500/40 hover:-translate-y-0.5 border-transparent",
-          iconBg: "bg-emerald-50 text-emerald-600",
-        };
-      case "pending":
-        return {
-          wrapper: "hover:border-amber-300 hover:shadow-amber-500/10",
-          title: "group-hover:text-amber-700",
-          ringGradient: ["#F59E0B", "#FBBF24"], // Amber 500 -> 400
-          scoreText: "text-amber-600",
-          button:
-            "bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/30 hover:shadow-amber-500/40 hover:-translate-y-0.5 border-transparent",
-          iconBg: "bg-amber-50 text-amber-600",
-        };
-      case "rejected":
-        return {
-          wrapper: "hover:border-red-300 hover:shadow-red-500/10",
-          title: "group-hover:text-red-700",
-          ringGradient: ["#EF4444", "#F87171"], // Red 500 -> 400
-          scoreText: "text-red-600",
-          button:
-            "bg-gradient-to-r from-red-600 to-rose-600 text-white shadow-lg shadow-red-500/30 hover:shadow-red-500/40 hover:-translate-y-0.5 border-transparent",
-          iconBg: "bg-red-50 text-red-600",
-        };
-      default:
-        return {
-          wrapper: "hover:border-blue-300 hover:shadow-blue-500/10",
-          title: "group-hover:text-blue-700",
-          ringGradient: ["#3B82F6", "#60A5FA"],
-          scoreText: "text-blue-600",
-          button:
-            "bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/30 hover:shadow-blue-500/40 hover:-translate-y-0.5 border-transparent",
-          iconBg: "bg-blue-50 text-blue-600",
-        };
-    }
-  };
+  const statusKey =
+    project.status === "checked" ||
+    project.status === "pending" ||
+    project.status === "rejected"
+      ? project.status
+      : "default";
 
-  const config = getStatusConfig();
-  const gradientId = `grad-${project.id}`; // Unique ID for SVG gradient
+  const colors = STATUS_COLORS[statusKey];
 
-  // Helper to get initials
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .slice(0, 2)
-      .join("")
-      .toUpperCase();
-  };
+  const gradientId = `grad-${project.id}`;
+
+  const dateLabel =
+    statusKey === "rejected"
+      ? "Rechazado"
+      : project.reviewDate
+      ? "Revisado"
+      : "Entregado";
+
+  const dateValue = project.reviewDate ?? project.submittedDate;
 
   return (
     <div
-      onClick={handlePrimary}
-      // Reduced padding from p-6 to pi-5
-      className={`project-card relative h-full flex flex-col bg-white rounded-3xl p-5 border border-gray-100 transition-all duration-300 shadow-sm hover:shadow-xl cursor-pointer group ${config.wrapper} ${className ?? ""}`}
-    >
-      {/* Edit Button (Absolute Top Right) */}
-      {canEdit && (
-        <button
-          onClick={handleEdit}
-          className="absolute top-4 right-4 p-2 rounded-full bg-gray-50 text-gray-400 hover:bg-blue-50 hover:text-blue-600 transition-all duration-200 z-10 opacity-0 group-hover:opacity-100 transform translate-x-2 group-hover:translate-x-0"
-          title="Editar Proyecto"
-        >
-          <Pencil className="w-4 h-4" />
-        </button>
+      onClick={navigate}
+      role="article"
+      aria-label={`${project.title} — ${STATUS_LABELS[statusKey]}`}
+      className={cn(
+        "group relative h-full flex flex-col bg-white rounded-xl",
+        "border border-gray-200 shadow-sm",
+        "hover:border-gray-300 hover:shadow-md",
+        "transition-all duration-200 cursor-pointer",
+        className
       )}
+    >
+      <div className="flex flex-col h-full p-5 gap-0">
 
-      {/* Header with Title and Score/Status */}
-      <div className="flex items-start justify-between gap-3 mb-5 pr-8">
-        <h4
-          // Slightly smaller text and tighter leading
-          className={`text-lg font-extrabold text-gray-900 leading-snug line-clamp-3 transition-colors duration-300 ${config.title}`}
-          title={project.title}
-        >
-          {project.title}
-        </h4>
+        {/* ── Header row: status badge + edit icon ── */}
+        <div className="flex items-center justify-between gap-3 mb-4">
 
-        {/* Abstract Status Indicator - Circular for Score or Icon for others */}
-        <div className="flex-shrink-0">
-          {project.status === "checked" && typeof project.score === "number" ? (
-            // Reduced size from w-16 h-16 to w-14 h-14
-            <div className="relative w-14 h-14 flex items-center justify-center">
+          {/* Status badge — flat pill, no border */}
+          <span
+            className={cn(
+              "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full",
+              "text-[10px] font-semibold uppercase tracking-wider",
+              colors.bg,
+              colors.text
+            )}
+          >
+            {statusKey === "checked" && <CheckCircle className="w-2.5 h-2.5" />}
+            {statusKey === "rejected" && <XCircle className="w-2.5 h-2.5" />}
+            {STATUS_LABELS[statusKey]}
+          </span>
+
+          {/* Edit icon — always visible, muted but present */}
+          {canEdit && (
+            <button
+              onClick={edit}
+              aria-label="Editar proyecto"
+              className={cn(
+                "flex items-center justify-center w-7 h-7 rounded-md",
+                "text-gray-400 hover:text-gray-700 hover:bg-gray-100",
+                "transition-all duration-150"
+              )}
+            >
+              <Pencil className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+
+        {/* ── Title row + score ring ── */}
+        <div className="flex items-start justify-between gap-3 mb-5">
+          <h4
+            className="text-[15px] font-bold text-gray-900 leading-snug line-clamp-2 flex-1 pr-2"
+            title={project.title}
+          >
+            {project.title}
+          </h4>
+
+          {/* Score ring — always colored, status-matched */}
+          {typeof project.score === "number" ? (
+            <div className="relative w-11 h-11 flex-shrink-0 mt-0.5">
               <svg
-                className="absolute inset-0 w-full h-full -rotate-90 drop-shadow-sm"
+                className="absolute inset-0 w-full h-full -rotate-90"
                 viewBox="0 0 36 36"
               >
                 <defs>
@@ -147,129 +192,150 @@ export default function ProjectCard({
                     x2="100%"
                     y2="100%"
                   >
-                    <stop offset="0%" stopColor={config.ringGradient[0]} />
-                    <stop offset="100%" stopColor={config.ringGradient[1]} />
+                    <stop offset="0%" stopColor={colors.scoreRing} />
+                    <stop
+                      offset="100%"
+                      stopColor={colors.scoreRing.replace("500", "300")}
+                    />
                   </linearGradient>
                 </defs>
-                {/* Track */}
                 <path
-                  className="text-gray-100"
+                  className={colors.scoreTrack}
                   d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                   fill="none"
                   stroke="currentColor"
-                  strokeWidth="3"
+                  strokeWidth="2"
                 />
-                {/* Progress */}
                 <path
                   stroke={`url(#${gradientId})`}
                   strokeDasharray={`${(project.score / 20) * 100}, 100`}
                   d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                   fill="none"
-                  strokeWidth="3"
+                  strokeWidth="2"
                   strokeLinecap="round"
-                  strokeLinejoin="round"
                 />
               </svg>
-              <div className="flex flex-col items-center justify-center leading-none">
-                <span className={`text-sm font-bold ${config.scoreText}`}>
-                  {project.score.toFixed(2)}
+              <div className="flex flex-col items-center justify-center absolute inset-0 leading-none">
+                <span
+                  className={cn("text-sm font-bold leading-none", colors.scoreText)}
+                >
+                  {project.score.toFixed(1)}
                 </span>
-                <span className="text-[8px] uppercase font-bold text-gray-400 mt-0.5">
+                <span className="text-[7px] font-medium text-gray-300 leading-none mt-[2px]">
                   /20
                 </span>
               </div>
             </div>
           ) : (
-            // Reduced size from w-14 h-14 to w-12 h-12
-            <div
-              className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-inner ${config.iconBg}`}
-            >
-              {project.status === "pending" && <Clock className="w-6 h-6" />}
-              {project.status === "rejected" && <XCircle className="w-6 h-6" />}
-              {!["pending", "rejected"].includes(project.status) && (
-                <Calendar className="w-6 h-6" />
+            /* Station icon chip — neutral gray */
+            <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-gray-50 flex-shrink-0 mt-0.5">
+              {statusKey === "pending" && (
+                <Clock className="w-4 h-4 text-gray-300" />
+              )}
+              {statusKey === "rejected" && (
+                <XCircle className="w-4 h-4 text-gray-300" />
+              )}
+              {statusKey === "default" && (
+                <Calendar className="w-4 h-4 text-gray-300" />
               )}
             </div>
           )}
         </div>
+
+        {/* ── Metadata 2×2 grid — neutral icons, micro labels ── */}
+        <div className="grid grid-cols-2 gap-x-4 gap-y-3 mb-5 flex-1">
+
+          {/* Estudiante */}
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-md flex items-center justify-center bg-gray-50 flex-shrink-0">
+              <GraduationCap className="w-3.5 h-3.5 text-gray-400" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-[9px] font-bold uppercase tracking-widest text-gray-400 leading-none mb-0.5">
+                Estudiante
+              </p>
+              <p className="text-sm font-medium text-gray-800 leading-tight truncate">
+                {project.student}
+              </p>
+            </div>
+          </div>
+
+          {/* Tutor */}
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-md flex items-center justify-center bg-gray-50 flex-shrink-0">
+              <FileText className="w-3.5 h-3.5 text-gray-400" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-[9px] font-bold uppercase tracking-widest text-gray-400 leading-none mb-0.5">
+                Tutor
+              </p>
+              <p className="text-sm font-medium text-gray-800 leading-tight truncate">
+                {project.advisorNames?.[0] || "—"}
+              </p>
+            </div>
+          </div>
+
+          {/* Período */}
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-md flex items-center justify-center bg-gray-50 flex-shrink-0">
+              <Clock className="w-3.5 h-3.5 text-gray-400" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-[9px] font-bold uppercase tracking-widest text-gray-400 leading-none mb-0.5">
+                Período
+              </p>
+              <p className="text-sm font-medium text-gray-800 leading-tight">
+                {project.period || "—"}
+              </p>
+            </div>
+          </div>
+
+          {/* Date */}
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-md flex items-center justify-center bg-gray-50 flex-shrink-0">
+              <Calendar className="w-3.5 h-3.5 text-gray-400" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-[9px] font-bold uppercase tracking-widest text-gray-400 leading-none mb-0.5">
+                {dateLabel}
+              </p>
+              <p className="text-sm font-medium text-gray-800 leading-tight">
+                {dateValue}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Subtle CTA footer — card-level click target ── */}
+        <div className={cn("mt-auto pt-4 border-t border-gray-100", colors.divider)}>
+          <button
+            onClick={navigate}
+            aria-label={primaryLabel ?? "Ver detalles del proyecto"}
+            className={cn(
+              "flex items-center gap-1 text-[12px] font-semibold",
+              "transition-all duration-150",
+              colors.cta
+            )}
+          >
+            <span>
+              {primaryLabel ??
+                (statusKey === "checked"
+                  ? "Ver detalles"
+                  : statusKey === "pending"
+                  ? "Revisar ahora"
+                  : "Ver detalles")}
+            </span>
+            <span
+              className={cn(
+                "transition-transform duration-150",
+                colors.ctaArrow
+              )}
+            >
+              <ArrowRight className="w-3.5 h-3.5" />
+            </span>
+          </button>
+        </div>
       </div>
-
-      {/* Metadata Sections - Compact spacing */}
-      <div className="flex-1 space-y-4 mb-6">
-        {/* Student */}
-        <div className="flex items-center gap-3 group/item">
-          {/* Reduced avatar size from w-12 h-12 to w-10 h-10 */}
-          <div className="w-10 h-10 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center text-xs font-bold text-gray-500 group-hover/item:bg-white group-hover/item:shadow-md group-hover/item:scale-110 transition-all duration-300">
-            {getInitials(project.student)}
-          </div>
-          <div>
-            <p className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-0.5">
-              ESTUDIANTE
-            </p>
-            <p className="font-bold text-gray-900 text-sm">{project.student}</p>
-          </div>
-        </div>
-
-        {/* Tutor */}
-        <div className="flex items-center gap-3 group/item">
-          <div className="w-10 h-10 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center text-xs font-bold text-gray-500 group-hover/item:bg-white group-hover/item:shadow-md group-hover/item:scale-110 transition-all duration-300">
-            {getInitials(project.advisorNames?.[0] || "?")}
-          </div>
-          <div>
-            <p className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-0.5">
-              TUTOR
-            </p>
-            <p className="font-bold text-gray-900 text-sm">{project.advisorNames?.[0] || "Sin tutor"}</p>
-          </div>
-        </div>
-
-        {/* Period */}
-        <div className="flex items-center gap-3 group/item">
-          <div className="w-10 h-10 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center group-hover/item:bg-white group-hover/item:shadow-md group-hover/item:scale-110 transition-all duration-300">
-            <Clock className="w-4 h-4 text-gray-400" />
-          </div>
-          <div>
-            <p className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-0.5">
-              PERÍODO
-            </p>
-            <p className="font-bold text-gray-900 text-sm">
-              {project.period || "N/A"}
-            </p>
-          </div>
-        </div>
-
-        {/* Date */}
-        <div className="flex items-center gap-3 group/item">
-          <div className="w-10 h-10 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center group-hover/item:bg-white group-hover/item:shadow-md group-hover/item:scale-110 transition-all duration-300">
-            <Calendar className="w-4 h-4 text-gray-400" />
-          </div>
-          <div>
-            <p className="text-[10px] uppercase tracking-wider font-bold text-gray-400 mb-0.5">
-              {project.status === "rejected"
-                ? "RECHAZADO"
-                : project.reviewDate
-                  ? "REVISADO"
-                  : "ENTREGADO"}
-            </p>
-            <p className="font-bold text-gray-900 text-sm">
-              {project.reviewDate ?? project.submittedDate}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Action Button - Slightly reduced padding */}
-      <button
-        onClick={handlePrimary}
-        className={`mt-auto w-full py-3 rounded-xl text-sm font-bold border transition-all duration-300 active:scale-[0.98] ${config.button}`}
-      >
-        {primaryLabel ??
-          (project.status === "checked"
-            ? "Ver Detalles"
-            : project.status === "pending"
-              ? "Evaluar Proyecto"
-              : "Ver Motivo")}
-      </button>
     </div>
   );
 }

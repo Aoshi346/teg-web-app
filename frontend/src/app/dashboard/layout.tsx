@@ -1,11 +1,11 @@
 "use client";
 
-import React, { Suspense, useState, useCallback, useEffect, useRef } from "react";
+import React, { Suspense, useState, useCallback, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
+import { redirect } from "next/navigation";
 import Sidebar from "@/components/layout/Sidebar";
 import { SidebarProvider } from "@/components/layout/SidebarContext";
 import { isAuthenticated, getUser, logout } from "@/features/auth/clientAuth";
-import LoginLoading from "@/components/ui/LoginLoading";
 import { DashboardSkeleton } from "@/components/ui/DashboardSkeleton";
 
 export default function DashboardLayout({
@@ -17,19 +17,13 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
-  const [isAuthenticating, setIsAuthenticating] = useState(true);
-  const hasCheckedAuthRef = useRef(false);
 
-  // Synchronous auth check — instant response, no async delay
-  useEffect(() => {
-    if (hasCheckedAuthRef.current) return;
-    if (!isAuthenticated()) {
-      router.push("/");
-    } else {
-      setIsAuthenticating(false);
-      hasCheckedAuthRef.current = true;
-    }
-  }, [router]);
+  // P0 FIX: Synchronous auth check BEFORE any render/flash.
+  // isAuthenticated() reads sessionStorage instantly — no useEffect needed,
+  // no render-then-redirect flash.
+  if (!isAuthenticated()) {
+    redirect("/");
+  }
 
   const handleSidebarCollapse = useCallback(() => {
     setIsSidebarCollapsed((prev) => !prev);
@@ -44,24 +38,17 @@ export default function DashboardLayout({
     setIsMobileSidebarOpen(false);
   }, [pathname]);
 
-  // Prefetch common routes on mount for instant navigation
+  // Prefetch only the top 3 most-visited routes to avoid wasting bandwidth
   useEffect(() => {
     const routes = [
       "/dashboard",
       "/dashboard/proyectos",
       "/dashboard/tesis",
-      "/dashboard/tracking",
-      "/dashboard/settings",
-      "/dashboard/agregar",
     ];
     routes.forEach((r) => router.prefetch(r));
   }, [router]);
 
-  if (isAuthenticating) {
-    return <LoginLoading visible={true} message="Verificando sesión..." />;
-  }
-
-  // Pending account gate
+  // Pending account gate — getUser() is cached from above sync check
   const user = getUser();
   if (user && user.status === "pending") {
     return (

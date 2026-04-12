@@ -1,6 +1,21 @@
 // Client-side auth helper interacting with Django API
 import { api } from "@/lib/api";
 
+// P2: Module-level cache for user list queries (30s TTL)
+const userListCache = new Map<string, { data: User[]; expiresAt: number }>();
+const USER_LIST_TTL = 30_000;
+
+function getCachedUsers(key: string): User[] | null {
+  const entry = userListCache.get(key);
+  if (!entry) return null;
+  if (Date.now() > entry.expiresAt) { userListCache.delete(key); return null; }
+  return entry.data;
+}
+
+function setCachedUsers(key: string, data: User[]): void {
+  userListCache.set(key, { data, expiresAt: Date.now() + USER_LIST_TTL });
+}
+
 const SESSION_KEY = 'tf_session_user';
 
 export interface User {
@@ -196,11 +211,19 @@ export async function deleteUser(id: number): Promise<void> {
 }
 
 export async function getStudents(): Promise<User[]> {
+  const cached = getCachedUsers("students");
+  if (cached) return cached;
   const users = await getAllUsers();
-  return users.filter((u) => u.role === "Estudiante");
+  const students = users.filter((u) => u.role === "Estudiante");
+  setCachedUsers("students", students);
+  return students;
 }
 
 export async function getTutors(): Promise<User[]> {
+  const cached = getCachedUsers("tutors");
+  if (cached) return cached;
   const users = await getAllUsers();
-  return users.filter((u) => u.role === "Tutor");
+  const tutors = users.filter((u) => u.role === "Tutor");
+  setCachedUsers("tutors", tutors);
+  return tutors;
 }
