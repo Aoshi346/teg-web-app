@@ -1,0 +1,46 @@
+---
+title: Agent Teams Pattern (Shared Task List)
+---
+flowchart TB
+    Lead["Main Agent (Team Lead)"]
+
+    Lead -->|"Spawn Team & Assign Tasks"| TaskList
+
+    subgraph TaskList ["Shared Task List"]
+        direction TB
+        T1["☐ Task 1"]
+        T2["☐ Task 2"]
+        T3["☐ Task 3"]
+        T4["☐ Task 4"]
+    end
+
+    subgraph Team [" "]
+        direction LR
+        MA[Teammate A]
+        MB[Teammate B]
+        MC[Teammate C]
+        MA <-->|Communicate| MB
+        MB <-->|Communicate| MC
+    end
+
+    TaskList -->|Claim| MA
+    TaskList -->|Claim| MB
+    TaskList -->|Claim| MC
+
+    MA -->|Work| RA([Result A])
+    MB -->|Work| RB([Result B])
+    MC -->|Work| RC([Result C])
+
+    style Lead fill:#7c2d12,stroke:#fbbf24,color:#fff
+    style TaskList fill:#1e3a8a,stroke:#60a5fa,color:#fff
+    style Team fill:none,stroke:none
+    style T1 fill:#1e40af,stroke:#93c5fd,color:#fff
+    style T2 fill:#1e40af,stroke:#93c5fd,color:#fff
+    style T3 fill:#1e40af,stroke:#93c5fd,color:#fff
+    style T4 fill:#1e40af,stroke:#93c5fd,color:#fff
+    style MA fill:#6d28d9,stroke:#a78bfa,color:#fff
+    style MB fill:#6d28d9,stroke:#a78bfa,color:#fff
+    style MC fill:#6d28d9,stroke:#a78bfa,color:#fff
+    style RA fill:#065f46,stroke:#6ee7b7,color:#fff
+    style RB fill:#065f46,stroke:#6ee7b7,color:#fff
+    style RC fill:#065f46,stroke:#6ee7b7,color:#fff

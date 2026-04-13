@@ -1,0 +1,37 @@
+---
+title: Debate / Adversarial Pattern
+---
+flowchart TD
+    P[Prompt / Task]
+
+    P --> A[Agent A<br/>Proposer]
+    P --> B[Agent B<br/>Critic]
+    P --> C[Agent C<br/>Proposer]
+
+    subgraph Arena [Debate Arena]
+        direction TB
+        M1["A: 'Approach X...'"]
+        M2["B: 'Flaw in X...'"]
+        M3["C: 'Approach Y...'"]
+        M4["B: 'Y is better...'"]
+        M1 --> M2 --> M3 --> M4
+    end
+
+    A --> Arena
+    B --> Arena
+    C --> Arena
+
+    Arena --> J[Judge Agent<br/>Best Answer]
+    J --> Final([Final Result])
+
+    style P fill:#1e3a8a,stroke:#60a5fa,color:#fff
+    style A fill:#7c2d12,stroke:#fbbf24,color:#fff
+    style B fill:#991b1b,stroke:#fca5a5,color:#fff
+    style C fill:#7c2d12,stroke:#fbbf24,color:#fff
+    style J fill:#1e40af,stroke:#60a5fa,color:#fff
+    style Arena fill:#1f2937,stroke:#9ca3af,color:#fff
+    style M1 fill:#374151,stroke:#6b7280,color:#fff
+    style M2 fill:#374151,stroke:#6b7280,color:#fff
+    style M3 fill:#374151,stroke:#6b7280,color:#fff
+    style M4 fill:#374151,stroke:#6b7280,color:#fff
+    style Final fill:#065f46,stroke:#6ee7b7,color:#fff

@@ -1,0 +1,22 @@
+---
+title: Subagents Pattern
+---
+flowchart TD
+    Main[Main Agent]
+    Main -->|Spawn Subagent| S1[Subagent 1]
+    Main -->|Spawn Subagent| S2[Subagent 2]
+    Main -->|Spawn Subagent| S3[Subagent 3]
+
+    S1 -->|Work| R1([Result])
+    S2 -->|Work| R2([Result])
+    S3 -->|Work| R3([Result])
+
+    R1 -->|Report| MainEnd[Main Agent]
+    R2 -->|Report| MainEnd
+    R3 -->|Report| MainEnd
+
+    style Main fill:#7c2d12,stroke:#fbbf24,color:#fff
+    style MainEnd fill:#7c2d12,stroke:#fbbf24,color:#fff
+    style S1 fill:#a16207,stroke:#fbbf24,color:#fff
+    style S2 fill:#a16207,stroke:#fbbf24,color:#fff
+    style S3 fill:#a16207,stroke:#fbbf24,color:#fff

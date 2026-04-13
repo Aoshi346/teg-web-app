@@ -1,0 +1,20 @@
+---
+title: Peer-to-Peer Pattern (Swarm)
+---
+flowchart TD
+    A[Agent A<br/>Frontend]
+    B[Agent B<br/>Backend]
+    C[Agent C<br/>Database]
+    D[Agent D<br/>DevOps]
+
+    A <-->|Handoff| B
+    A <-->|Handoff| C
+    A <-->|Handoff| D
+    B <-->|Handoff| C
+    B <-->|Handoff| D
+    C <-->|Handoff| D
+
+    style A fill:#6d28d9,stroke:#a78bfa,color:#fff
+    style B fill:#6d28d9,stroke:#a78bfa,color:#fff
+    style C fill:#6d28d9,stroke:#a78bfa,color:#fff
+    style D fill:#6d28d9,stroke:#a78bfa,color:#fff

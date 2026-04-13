@@ -1,0 +1,22 @@
+---
+title: Hierarchical Pattern (Orchestrator → Workers)
+---
+flowchart TD
+    O[Orchestrator]
+    O -->|Delegate| A[Agent A<br/>Research]
+    O -->|Delegate| B[Agent B<br/>Code]
+    O -->|Delegate| C[Agent C<br/>Testing]
+
+    A -->|Work| RA([Result A])
+    B -->|Work| RB([Result B])
+    C -->|Work| RC([Result C])
+
+    RA -->|Report| S[Orchestrator<br/>Synthesize]
+    RB -->|Report| S
+    RC -->|Report| S
+
+    style O fill:#7c2d12,stroke:#fbbf24,color:#fff
+    style S fill:#7c2d12,stroke:#fbbf24,color:#fff
+    style A fill:#a16207,stroke:#fbbf24,color:#fff
+    style B fill:#a16207,stroke:#fbbf24,color:#fff
+    style C fill:#a16207,stroke:#fbbf24,color:#fff

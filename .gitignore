@@ -20,3 +20,6 @@ env/
 
 # Root Logs
 *.log
+
+# Claude Code — local-only settings (user-specific tool permissions)
+.claude/settings.local.json

@@ -1,0 +1,16 @@
+---
+title: Sequential Pattern (Pipeline)
+---
+flowchart LR
+    Input([Input / Spec]) --> A[Agent A<br/>Planner]
+    A -->|Plan| B[Agent B<br/>Coder]
+    B -->|Raw Code| C[Agent C<br/>Reviewer]
+    C -->|Reviewed Code| D[Agent D<br/>Tester]
+    D --> Output([Final Result])
+
+    style A fill:#7c2d12,stroke:#fbbf24,color:#fff
+    style B fill:#7c2d12,stroke:#fbbf24,color:#fff
+    style C fill:#7c2d12,stroke:#fbbf24,color:#fff
+    style D fill:#7c2d12,stroke:#fbbf24,color:#fff
+    style Input fill:#1e3a8a,stroke:#60a5fa,color:#fff
+    style Output fill:#1e3a8a,stroke:#60a5fa,color:#fff
