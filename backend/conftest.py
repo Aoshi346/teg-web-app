@@ -16,27 +16,6 @@ from api.models import Project
 
 User = get_user_model()
 
-_USER_PASSWORD = "test-pass-123"
-
-
-def _make_user(email, role, first_name, last_name, status="active"):
-    """
-    Crea un usuario de prueba sin usar create_user(), ya que el UserManager
-    heredado de AbstractUser no es compatible con el modelo User personalizado
-    que elimina el campo `username` (falla en Django 6 al pasar username=... al
-    constructor del modelo).
-    """
-    user = User(
-        email=email,
-        first_name=first_name,
-        last_name=last_name,
-        role=role,
-        status=status,
-    )
-    user.set_password(_USER_PASSWORD)
-    user.save()
-    return user
-
 
 @pytest.fixture
 def api_client():
@@ -45,22 +24,50 @@ def api_client():
 
 @pytest.fixture
 def admin_user(db):
-    return _make_user("admin@test.local", "Administrador", "Admin", "Test")
+    return User.objects.create_user(
+        email="admin@test.local",
+        password="test-pass-123",
+        first_name="Admin",
+        last_name="Test",
+        role="Administrador",
+        status="active",
+    )
 
 
 @pytest.fixture
 def tutor_user(db):
-    return _make_user("tutor@test.local", "Tutor", "Tutor", "Test")
+    return User.objects.create_user(
+        email="tutor@test.local",
+        password="test-pass-123",
+        first_name="Tutor",
+        last_name="Test",
+        role="Tutor",
+        status="active",
+    )
 
 
 @pytest.fixture
 def jurado_user(db):
-    return _make_user("jurado@test.local", "Jurado", "Jurado", "Test")
+    return User.objects.create_user(
+        email="jurado@test.local",
+        password="test-pass-123",
+        first_name="Jurado",
+        last_name="Test",
+        role="Jurado",
+        status="active",
+    )
 
 
 @pytest.fixture
 def student_user(db):
-    return _make_user("student@test.local", "Estudiante", "Student", "Test")
+    return User.objects.create_user(
+        email="student@test.local",
+        password="test-pass-123",
+        first_name="Student",
+        last_name="Test",
+        role="Estudiante",
+        status="active",
+    )
 
 
 @pytest.fixture
