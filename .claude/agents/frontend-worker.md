@@ -45,35 +45,83 @@ You may **not** run:
 - `npm publish`, `npm version`
 - `rm -rf node_modules` (if you suspect corruption, report it instead)
 
+## Project Layout (Feature-Sliced Design)
+
+The frontend follows a feature-first layout. Memorize these aliases:
+
+```
+src/
+  app/                     # Next.js routes only — keep pages thin
+  features/<name>/         # auth, projects, evaluations, semesters, dashboard, settings, landing
+    api/                   # service functions (HTTP calls)
+    components/            # feature-specific components
+    hooks/                 # feature-specific hooks
+    lib/                   # feature-specific helpers (e.g. evaluations/lib/questions)
+    types/                 # feature-specific types
+    index.ts               # public barrel — only export what other features consume
+  widgets/                 # cross-feature layout composites
+    sidebar/               # Sidebar, SidebarContext
+    header/                # Header, DashboardHeader, Footer
+  shared/
+    api/                   # api.ts (HTTP client), normalizeError.ts
+    ui/                    # primitives (button, card, input, Toast, Banner, Notice, etc.)
+    lib/                   # utils.ts (cn helper)
+    hooks/                 # cross-cutting hooks (useValidation)
+    types/                 # ambient types (split-type.d.ts)
+```
+
+### Path aliases
+
+| Alias          | Resolves to        | Use for                                                        |
+|----------------|--------------------|----------------------------------------------------------------|
+| `@/*`          | `./src/*`          | legacy escape hatch — prefer one of the below                  |
+| `@features/*`  | `./src/features/*` | imports across features and from `app/` into a feature        |
+| `@widgets/*`   | `./src/widgets/*`  | layout composites consumed by `app/` pages                     |
+| `@shared/*`    | `./src/shared/*`   | UI primitives, http client, utils, cross-cutting hooks/types  |
+
+Within a single feature, use **relative imports** (`./components/X`). Across features or from `app/`, use the alias.
+
 ## Coding Conventions
 
 Read the conventions in [/CLAUDE.md](../../CLAUDE.md). Key points:
 - All code in **English**. UI strings and domain terms (`agregar`, `evaluar`, `proyectos`, `tesis`, `Administrador`) stay in Spanish.
 - Comments only when non-obvious. Complex hooks/functions get a **Spanish** docstring explaining the **why**.
 - All `dashboard/` pages use `"use client"`.
-- API calls go through service files in `src/features/*/` and use the `api` client from `src/lib/api.ts` (handles CSRF + session cookies automatically).
+- API calls go through service files in `src/features/<name>/api/` and use the `api` client from `@shared/api/api` (handles CSRF + session cookies automatically).
 - Form validation: React Hook Form + Zod. Schemas go in `schema.ts` next to the page.
-- Styling: Tailwind utilities inline. Compose with `cn()` from `src/lib/utils.ts`. No CSS modules.
-- shadcn/ui primitives go in `src/components/ui/` and follow the CVA pattern.
+- Styling: Tailwind utilities inline. Compose with `cn()` from `@shared/lib/utils`. No CSS modules.
+- shadcn/ui primitives live in `@shared/ui/` and follow the CVA pattern.
 - Searchable dropdowns use the existing `Combobox` component.
-- TypeScript types for API entities live in `src/types/`.
+- Feature-owned types live in `src/features/<name>/types/`. Cross-feature ambient types live in `@shared/types/`.
 
 ## When You Add a New Page
 
 1. Create directory under `src/app/dashboard/` (e.g., `dashboard/notifications/page.tsx`)
 2. Add `"use client"` at the top
-3. Add sidebar link in `src/components/layout/Sidebar.tsx` (filter by role if needed)
-4. Use `DashboardHeader` for the page title
-5. Wrap content in `PageTransition` for entry animation
+3. Add sidebar link in `@widgets/sidebar/Sidebar` (filter by role if needed)
+4. Use `DashboardHeader` from `@widgets/header/DashboardHeader`
+5. Wrap content in `PageTransition` from `@shared/ui/PageTransition`
+6. Page-local components/hooks live next to `page.tsx` in a `components/` or `hooks/` folder. **Reusable** components/hooks belong in a feature (`features/<name>/`), not in the route directory.
+
+## When You Add a New Component
+
+Decide WHERE first:
+- **Reusable across features** → `@shared/ui/` (primitive) or a new feature folder
+- **Owned by one feature** → `src/features/<feature>/components/`
+- **Cross-feature layout chrome** (sidebar, header, footer) → `src/widgets/`
+- **Route-local one-off** → next to the `page.tsx` that uses it
+
+Never add to a flat top-level `src/components/` — that directory no longer exists.
 
 ## When You Add an API Call
 
-1. Add the function to the appropriate service file:
-   - Auth/users: `src/features/auth/clientAuth.ts`
-   - Projects/evaluations: `src/features/projects/projectService.ts`
-   - Semesters: `src/lib/semesters.ts`
-2. Use the `api` client from `src/lib/api.ts`
-3. Define TypeScript types in `src/types/`
+1. Add the function to the appropriate service file under `src/features/<feature>/api/`:
+   - Auth/users: `@features/auth/api/clientAuth`
+   - Projects/evaluations: `@features/projects/api/projectService`
+   - Semesters: `@features/semesters/api/semesters`
+2. Use the `api` client from `@shared/api/api`
+3. Define TypeScript types in `src/features/<feature>/types/`
+4. If the function should be consumable from outside the feature, re-export it from the feature's `index.ts` barrel.
 
 ## How You Report Back
 

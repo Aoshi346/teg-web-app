@@ -2,9 +2,9 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
-import DashboardHeader from "@/components/layout/DashboardHeader";
-import EvaluationForm from "@/components/evaluation/EvaluationForm";
-import { TESIS_STAGE1_QUESTIONS } from "@/lib/questions/questions";
+import DashboardHeader from "@widgets/header/DashboardHeader";
+import EvaluationForm from "@features/evaluations/components/EvaluationForm";
+import { TESIS_STAGE1_QUESTIONS } from "@features/evaluations/lib/questions/questions";
 import { ArrowLeft } from "lucide-react";
 
 export default function EvaluarTesisFase1Page({

@@ -1,4 +1,4 @@
-import { ListPageSkeleton } from "@/components/ui/DashboardSkeleton";
+import { ListPageSkeleton } from "@shared/ui/DashboardSkeleton";
 
 export default function Loading() {
   return <ListPageSkeleton />;

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getUserRole } from "@/features/auth/clientAuth";
+import { getUserRole } from "@features/auth/api/clientAuth";
 
 export default function ScanLayout({
     children,

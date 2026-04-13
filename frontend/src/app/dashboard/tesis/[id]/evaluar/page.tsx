@@ -2,9 +2,9 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import DashboardHeader from "@/components/layout/DashboardHeader";
+import DashboardHeader from "@widgets/header/DashboardHeader";
 import { FileText, CheckCircle, Lock, ArrowLeft } from "lucide-react";
-import { getProject } from "@/features/projects/projectService";
+import { getProject } from "@features/projects/api/projectService";
 
 export default function EvaluarTesisPage() {
   const router = useRouter();

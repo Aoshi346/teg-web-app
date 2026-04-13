@@ -3,16 +3,16 @@
 import React from "react";
 import { useRouter, useParams } from "next/navigation";
 import { Sparkles } from "lucide-react";
-import DashboardHeader from "@/components/layout/DashboardHeader";
-import ProjectDetailView from "@/components/dashboard/ProjectDetailView";
-import { Project } from "@/types/project";
+import DashboardHeader from "@widgets/header/DashboardHeader";
+import ProjectDetailView from "@features/projects/components/ProjectDetailView";
+import { Project } from "@features/projects/types/project";
 import {
   getProject,
   getEvaluationsByProject,
   ApiEvaluation,
   uploadProjectFile,
-} from "@/features/projects/projectService";
-import { getUserRole } from "@/features/auth/clientAuth";
+} from "@features/projects/api/projectService";
+import { getUserRole } from "@features/auth/api/clientAuth";
 
 export default function TesisDetailsPage() {
   const router = useRouter();

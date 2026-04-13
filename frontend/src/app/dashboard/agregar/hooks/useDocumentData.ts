@@ -7,7 +7,7 @@ import {
   getUserRole,
   getStudents,
   getTutors,
-} from "@/features/auth/clientAuth";
+} from "@features/auth/api/clientAuth";
 import {
   getAvailableSemesters,
   getCurrentSemester,
@@ -17,8 +17,8 @@ import {
   fetchActiveSemester,
   compareSemesters,
   getAvailableSemesterPeriods,
-} from "@/lib/semesters";
-import { getAllProjects } from "@/features/projects/projectService";
+} from "@features/semesters/api/semesters";
+import { getAllProjects } from "@features/projects/api/projectService";
 
 export interface UserOption {
   id: number;

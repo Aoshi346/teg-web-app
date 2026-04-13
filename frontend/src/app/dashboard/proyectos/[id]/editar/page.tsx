@@ -2,10 +2,10 @@
 
 import React, { use, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import DashboardHeader from "@/components/layout/DashboardHeader";
-import DocumentForm from "@/components/dashboard/DocumentForm";
-import { Project } from "@/types/project";
-import { getProject } from "@/features/projects/projectService";
+import DashboardHeader from "@widgets/header/DashboardHeader";
+import DocumentForm from "@features/dashboard/components/DocumentForm";
+import { Project } from "@features/projects/types/project";
+import { getProject } from "@features/projects/api/projectService";
 import { ArrowLeft } from "lucide-react";
 
 export default function EditarProyectoPage({

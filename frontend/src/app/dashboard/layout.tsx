@@ -3,10 +3,10 @@
 import React, { Suspense, useState, useCallback, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { redirect } from "next/navigation";
-import Sidebar from "@/components/layout/Sidebar";
-import { SidebarProvider } from "@/components/layout/SidebarContext";
-import { isAuthenticated, getUser, logout } from "@/features/auth/clientAuth";
-import { DashboardSkeleton } from "@/components/ui/DashboardSkeleton";
+import Sidebar from "@widgets/sidebar/Sidebar";
+import { SidebarProvider } from "@widgets/sidebar/SidebarContext";
+import { isAuthenticated, getUser, logout } from "@features/auth/api/clientAuth";
+import { DashboardSkeleton } from "@shared/ui/DashboardSkeleton";
 
 export default function DashboardLayout({
   children,
@@ -37,16 +37,6 @@ export default function DashboardLayout({
   useEffect(() => {
     setIsMobileSidebarOpen(false);
   }, [pathname]);
-
-  // Prefetch only the top 3 most-visited routes to avoid wasting bandwidth
-  useEffect(() => {
-    const routes = [
-      "/dashboard",
-      "/dashboard/proyectos",
-      "/dashboard/tesis",
-    ];
-    routes.forEach((r) => router.prefetch(r));
-  }, [router]);
 
   // Pending account gate — getUser() is cached from above sync check
   const user = getUser();

@@ -3,18 +3,18 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Search, CheckCircle, Clock, XCircle, FileText } from "lucide-react";
 import { useRouter } from "next/navigation";
-import DashboardHeader from "@/components/layout/DashboardHeader";
-import SemesterSelector from "@/components/ui/SemesterSelector";
-import { Project } from "@/types/project";
-import { getAllProjects } from "@/features/projects/projectService";
+import DashboardHeader from "@widgets/header/DashboardHeader";
+import SemesterSelector from "@features/semesters/components/SemesterSelector";
+import { Project } from "@features/projects/types/project";
+import { getAllProjects } from "@features/projects/api/projectService";
 import {
   getAvailableSemesters,
   getSemesters,
   getStoredSemester,
   setStoredSemester,
-} from "@/lib/semesters";
-import ProjectCard from "@/components/dashboard/ProjectCard";
-import { getUserRole } from "@/features/auth/clientAuth";
+} from "@features/semesters/api/semesters";
+import ProjectCard from "@features/projects/components/ProjectCard";
+import { getUserRole } from "@features/auth/api/clientAuth";
 
 interface TesisPageProps {
   handleSidebarCollapse?: () => void;

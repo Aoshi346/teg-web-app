@@ -2,7 +2,10 @@
 set -euo pipefail
 
 # ─── TEG Web App — Start Backend & Frontend in parallel ───
-# Usage: ./start.sh [--backend-port 8000] [--frontend-port 3000]
+# Usage: ./start.sh [--backend-port 8000] [--frontend-port 3000] [--turbo]
+#
+#   --turbo      Run Next.js with Turbopack dev server instead of Webpack.
+#                Webpack is the default in dev mode (faster chunk compile on this project).
 #
 # Requires: python3, pip, node, npm
 
@@ -13,12 +16,17 @@ VENV_DIR="$SCRIPT_DIR/.venv"
 
 BACKEND_PORT=8000
 FRONTEND_PORT=3000
+FRONTEND_SCRIPT="dev"
 
 # ─── Parse arguments ───
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --backend-port)  BACKEND_PORT="$2"; shift 2 ;;
-    --frontend-port) FRONTEND_PORT="$2"; shift 2 ;;
+    --backend-port)   BACKEND_PORT="$2"; shift 2 ;;
+    --frontend-port)  FRONTEND_PORT="$2"; shift 2 ;;
+    --turbo|--turbopack)
+      FRONTEND_SCRIPT="dev:turbo"
+      shift
+      ;;
     *) echo "Unknown option: $1"; exit 1 ;;
   esac
 done
@@ -93,8 +101,12 @@ start_frontend() {
   fi
 
   # Start dev server
-  log_orange "Starting Next.js on http://localhost:$FRONTEND_PORT"
-  PORT=$FRONTEND_PORT npm run dev 2>&1 | sed "s/^/  [frontend] /" &
+  local bundler_label="Webpack"
+  if [[ "$FRONTEND_SCRIPT" == "dev:turbo" ]]; then
+    bundler_label="Turbopack"
+  fi
+  log_orange "Starting Next.js ($bundler_label) on http://localhost:$FRONTEND_PORT"
+  PORT=$FRONTEND_PORT npm run "$FRONTEND_SCRIPT" 2>&1 | sed "s/^/  [frontend] /" &
   PIDS+=($!)
 }
 

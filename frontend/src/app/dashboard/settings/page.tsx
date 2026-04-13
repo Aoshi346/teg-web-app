@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import DashboardHeader from "@/components/layout/DashboardHeader";
+import DashboardHeader from "@widgets/header/DashboardHeader";
 import {
   getUserRole,
   getUserEmail,
@@ -13,7 +13,7 @@ import {
   User as AuthUser,
   updateProfile,
   getUser,
-} from "@/features/auth/clientAuth";
+} from "@features/auth/api/clientAuth";
 import {
   User,
   Lock,
@@ -47,9 +47,9 @@ import {
   TrendingUp,
   FileText,
 } from "lucide-react";
-import UserModal, { UserData } from "@/components/ui/UserModal";
-import Toast, { ToastType } from "@/components/ui/Toast";
-import DeleteModal from "@/components/ui/DeleteModal";
+import UserModal, { UserData } from "@features/settings/components/UserModal";
+import Toast, { ToastType } from "@shared/ui/Toast";
+import DeleteModal from "@shared/ui/DeleteModal";
 import {
   createSemester,
   deleteSemester,
@@ -59,8 +59,8 @@ import {
   setActiveSemester,
   MONTH_NAMES,
   Semester as SemesterApi,
-} from "@/lib/semesters";
-import { getSessions, revokeSession, Session } from "@/features/auth/sessionService";
+} from "@features/semesters/api/semesters";
+import { getSessions, revokeSession, Session } from "@features/auth/api/sessionService";
 
 // ─── Shared Helpers ───
 

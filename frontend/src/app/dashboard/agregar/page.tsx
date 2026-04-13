@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import DashboardHeader from "@/components/layout/DashboardHeader";
+import DashboardHeader from "@widgets/header/DashboardHeader";
 import { useDocumentData } from "./hooks/useDocumentData";
 import DocumentFormNew from "./components/DocumentFormNew";
 import FormSkeleton from "./components/FormSkeleton";

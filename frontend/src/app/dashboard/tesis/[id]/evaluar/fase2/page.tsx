@@ -2,10 +2,10 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import DashboardHeader from "@/components/layout/DashboardHeader";
-import EvaluationForm from "@/components/evaluation/EvaluationForm";
-import { getProject } from "@/features/projects/projectService";
-import { TESIS_STAGE2_QUESTIONS } from "@/lib/questions/questions";
+import DashboardHeader from "@widgets/header/DashboardHeader";
+import EvaluationForm from "@features/evaluations/components/EvaluationForm";
+import { getProject } from "@features/projects/api/projectService";
+import { TESIS_STAGE2_QUESTIONS } from "@features/evaluations/lib/questions/questions";
 import { AlertCircle, ArrowLeft } from "lucide-react";
 
 export default function EvaluarTesisFase2Page({

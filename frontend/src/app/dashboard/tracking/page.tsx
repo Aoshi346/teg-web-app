@@ -2,19 +2,19 @@
 
 import React, { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import DashboardHeader from "@/components/layout/DashboardHeader";
-import TrackingTable from "@/components/ui/TrackingTable";
-import SemesterSelector from "@/components/ui/SemesterSelector";
+import DashboardHeader from "@widgets/header/DashboardHeader";
+import TrackingTable from "@shared/ui/TrackingTable";
+import SemesterSelector from "@features/semesters/components/SemesterSelector";
 import {
   getAvailableSemesters,
   getStoredSemester,
   setStoredSemester,
   getCurrentSemester,
   getSemesters,
-} from "@/lib/semesters";
-import { getAllProjects } from "@/features/projects/projectService";
-import { Project } from "@/types/project";
-import { getUserRole } from "@/features/auth/clientAuth";
+} from "@features/semesters/api/semesters";
+import { getAllProjects } from "@features/projects/api/projectService";
+import { Project } from "@features/projects/types/project";
+import { getUserRole } from "@features/auth/api/clientAuth";
 
 const ITEMS_PER_PAGE = 5;
 

@@ -23,12 +23,12 @@ import type { UserOption } from "../hooks/useDocumentData";
 import DocumentTypeSelector from "./DocumentTypeSelector";
 import AdvisorsFieldArray from "./AdvisorsFieldArray";
 import Combobox from "./Combobox";
-import Banner from "@/components/ui/Banner";
+import Banner from "@shared/ui/Banner";
 import {
   createProject,
   uploadProjectFile,
-} from "@/features/projects/projectService";
-import { getCurrentSemester } from "@/lib/semesters";
+} from "@features/projects/api/projectService";
+import { getCurrentSemester } from "@features/semesters/api/semesters";
 
 interface DocumentFormNewProps {
   userRole: string;
