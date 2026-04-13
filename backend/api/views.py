@@ -260,9 +260,12 @@ class EvaluationViewSet(viewsets.ModelViewSet):
         if project_id:
             qs = qs.filter(project_id=project_id)
 
-        if getattr(user, 'role', None) in ['Administrador', 'Tutor', 'Jurado']:
+        role = getattr(user, 'role', None)
+        if role in ['Administrador', 'Jurado']:
             return qs
-        return qs.filter(project__student=user)
+        if role == 'Tutor':
+            return qs.filter(project__advisors=user).distinct()
+        return qs.filter(Q(project__student=user) | Q(project__partner=user)).distinct()
 
     def perform_create(self, serializer):
         project_id = self.request.data.get('project')
