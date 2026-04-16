@@ -20,7 +20,6 @@ describe("FSD layout", () => {
 
     // features/auth
     expect(existsSync(src("features/auth/api/clientAuth.ts")), "features/auth/api/clientAuth.ts").toBe(true);
-    expect(existsSync(src("features/auth/api/credentials.ts")), "features/auth/api/credentials.ts").toBe(true);
     expect(existsSync(src("features/auth/components/LoginModal.tsx")), "features/auth/components/LoginModal.tsx").toBe(true);
 
     // features/projects

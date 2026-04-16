@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model, authenticate
-from .models import Project, AttachedFile, Evaluation, Semester, Comment, SessionLog
+from .models import Project, AttachedFile, Evaluation, Semester, Comment, SessionLog, PresentationDay, Presentation
 
 User = get_user_model()
 
@@ -226,3 +226,65 @@ class SessionLogSerializer(serializers.ModelSerializer):
 class SessionTrackSerializer(serializers.Serializer):
     session_key = serializers.CharField(max_length=40)
     user_agent = serializers.CharField(required=False, allow_blank=True, default='')
+
+
+class PresentationSerializer(serializers.ModelSerializer):
+    start_time = serializers.TimeField(format="%H:%M", input_formats=["%H:%M"])
+
+    # Read-only flattened fields for the frontend
+    student_name = serializers.CharField(
+        source='project.student.full_name', read_only=True
+    )
+    student_email = serializers.CharField(
+        source='project.student.email', read_only=True
+    )
+    project_title = serializers.CharField(
+        source='project.title', read_only=True
+    )
+    project_type = serializers.CharField(
+        source='project.project_type', read_only=True
+    )
+    tutor_name = serializers.SerializerMethodField()
+    jurado_names = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Presentation
+        fields = [
+            'id', 'day', 'project', 'tutor', 'jurado',
+            'start_time', 'duration_minutes', 'order',
+            'student_name', 'student_email', 'project_title', 'project_type',
+            'tutor_name', 'jurado_names',
+        ]
+        read_only_fields = ['day']
+
+    def get_tutor_name(self, obj):
+        return obj.tutor.full_name if obj.tutor else None
+
+    def get_jurado_names(self, obj):
+        return [u.full_name for u in obj.jurado.all()]
+
+    def validate_jurado(self, users):
+        """
+        Verifica que todos los usuarios en la lista de jurado tengan el rol 'Jurado'.
+        El campo limit_choices_to en el modelo no produce un error 400 automáticamente,
+        por lo que esta validación explícita es necesaria para rechazar usuarios con
+        otros roles y retornar una respuesta de error adecuada.
+        """
+        for user in users:
+            if getattr(user, 'role', None) != 'Jurado':
+                raise serializers.ValidationError(
+                    f"El usuario '{user.email}' no tiene el rol Jurado."
+                )
+        return users
+
+
+class PresentationDaySerializer(serializers.ModelSerializer):
+    presentations = PresentationSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = PresentationDay
+        fields = [
+            'id', 'date', 'semester', 'notes', 'created_at', 'created_by',
+            'presentations',
+        ]
+        read_only_fields = ['created_at', 'created_by']

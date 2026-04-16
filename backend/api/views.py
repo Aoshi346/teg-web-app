@@ -4,11 +4,13 @@ from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.contrib.auth import login, logout
 from django.db.models import Q
-from .models import User, Project, Evaluation, Semester, AttachedFile, Comment, SessionLog
+from django.db import IntegrityError
+from .models import User, Project, Evaluation, Semester, AttachedFile, Comment, SessionLog, PresentationDay, Presentation
 from .serializers import (
     RegisterSerializer, LoginSerializer, UserSerializer,
     ProjectSerializer, AttachedFileSerializer, EvaluationSerializer, SemesterSerializer, CommentSerializer,
     SessionLogSerializer, SessionTrackSerializer,
+    PresentationDaySerializer, PresentationSerializer,
 )
 from django.middleware.csrf import get_token
 from rest_framework.exceptions import ValidationError
@@ -391,3 +393,121 @@ class SessionViewSet(viewsets.GenericViewSet):
         else:
             ip = request.META.get('REMOTE_ADDR', None)
         return ip
+
+
+class PresentationDayViewSet(viewsets.ModelViewSet):
+    serializer_class = PresentationDaySerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_permissions(self):
+        if self.action in ["create", "update", "partial_update", "destroy", "bulk", "add_presentation"]:
+            return [permissions.IsAuthenticated(), IsAdminUserRole()]
+        return [permissions.IsAuthenticated()]
+
+    def get_queryset(self):
+        qs = PresentationDay.objects.all().prefetch_related(
+            'presentations__jurado',
+            'presentations__project__student',
+        )
+        params = self.request.query_params
+        from_date = params.get('from')
+        to_date = params.get('to')
+        semester_id = params.get('semester')
+        if from_date:
+            qs = qs.filter(date__gte=from_date)
+        if to_date:
+            qs = qs.filter(date__lte=to_date)
+        if semester_id:
+            qs = qs.filter(semester_id=semester_id)
+        return qs
+
+    def perform_create(self, serializer):
+        serializer.save(created_by=self.request.user)
+
+    @action(
+        detail=False, methods=['post'], url_path='bulk',
+        permission_classes=[permissions.IsAuthenticated, IsAdminUserRole]
+    )
+    def bulk(self, request):
+        """
+        Crea o recupera días de presentación a partir de una lista de fechas.
+        La operación es idempotente: si un día ya existe para esa fecha,
+        simplemente se retorna sin duplicarlo. Esto permite que el admin
+        reenvíe el mismo rango sin errores.
+        """
+        dates = request.data.get('dates', [])
+        semester_id = request.data.get('semester')
+        notes = request.data.get('notes', '')
+
+        if not dates or not semester_id:
+            return Response(
+                {'detail': 'dates and semester are required.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            semester = Semester.objects.get(pk=semester_id)
+        except Semester.DoesNotExist:
+            return Response({'detail': 'Semester not found.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        days = []
+        for date_str in dates:
+            day, _ = PresentationDay.objects.get_or_create(
+                date=date_str,
+                defaults={
+                    'semester': semester,
+                    'notes': notes,
+                    'created_by': request.user,
+                },
+            )
+            days.append(day)
+
+        serializer = PresentationDaySerializer(days, many=True)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    @action(
+        detail=True, methods=['post'], url_path='presentations',
+        permission_classes=[permissions.IsAuthenticated, IsAdminUserRole]
+    )
+    def add_presentation(self, request, pk=None):
+        """
+        Agrega una presentación a un día de presentaciones específico.
+        El día se obtiene del URL (pk), no del payload.
+        Captura la violación de unicidad (mismo proyecto en el mismo día)
+        y la convierte en un error 400 legible.
+        """
+        day = self.get_object()
+        serializer = PresentationSerializer(data=request.data, context={'request': request})
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        project = serializer.validated_data.get('project')
+        if Presentation.objects.filter(day=day, project=project).exists():
+            return Response(
+                {'detail': 'Este proyecto ya está programado para este día.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            presentation = serializer.save(day=day)
+        except IntegrityError:
+            return Response(
+                {'detail': 'Este proyecto ya está programado para este día.'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        return Response(
+            PresentationSerializer(presentation).data,
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class PresentationViewSet(viewsets.ModelViewSet):
+    queryset = Presentation.objects.all()
+    serializer_class = PresentationSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_permissions(self):
+        if self.action in ["create", "update", "partial_update", "destroy"]:
+            return [permissions.IsAuthenticated(), IsAdminUserRole()]
+        return [permissions.IsAuthenticated()]

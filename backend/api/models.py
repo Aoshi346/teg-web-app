@@ -186,6 +186,64 @@ class Comment(models.Model):
         return f"Comment by {self.author.email} on {self.project.title}"
 
 
+class PresentationDay(models.Model):
+    """A planned day of presentations (admin-managed)."""
+
+    date = models.DateField(unique=True)
+    semester = models.ForeignKey(
+        Semester, on_delete=models.CASCADE, related_name='presentation_days'
+    )
+    notes = models.CharField(max_length=255, blank=True, default='')
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(
+        'User', on_delete=models.SET_NULL, null=True,
+        related_name='created_presentation_days'
+    )
+
+    class Meta:
+        ordering = ['date']
+
+    def __str__(self):
+        return str(self.date)
+
+
+class Presentation(models.Model):
+    """A single thesis/project presentation slot inside a day."""
+
+    day = models.ForeignKey(
+        PresentationDay, on_delete=models.CASCADE, related_name='presentations'
+    )
+    project = models.ForeignKey(
+        Project, on_delete=models.CASCADE, related_name='presentations'
+    )
+    tutor = models.ForeignKey(
+        'User', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='tutored_presentations',
+        limit_choices_to={'role': 'Tutor'}
+    )
+    jurado = models.ManyToManyField(
+        'User', related_name='juried_presentations',
+        limit_choices_to={'role': 'Jurado'},
+        blank=True,
+    )
+    start_time = models.TimeField(help_text="Hora de inicio HH:MM")
+    duration_minutes = models.PositiveSmallIntegerField(
+        default=30, help_text="Duración estimada en minutos"
+    )
+    order = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        ordering = ['day__date', 'start_time', 'order']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['day', 'project'], name='unique_project_per_day'
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.project.title} @ {self.day.date} {self.start_time}"
+
+
 def _get_device_from_user_agent(user_agent: str) -> str:
     """Extract device from user agent string."""
     ua = user_agent.lower()

@@ -17,7 +17,7 @@ import {
   FileText,
   PlusCircle,
   Settings,
-  ScanLine,
+  CalendarDays,
   TrendingUp,
   X,
 } from "lucide-react";
@@ -124,17 +124,13 @@ const Sidebar: React.FC<SidebarProps> = ({
       { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
       { icon: FileText, label: "PTEG", href: "/dashboard/proyectos" },
       { icon: BookOpen, label: "TEG", href: "/dashboard/tesis" },
-      { icon: ScanLine, label: "Escanear", href: "/dashboard/scan", requiredRole: ["Administrador", "Estudiante", "Tutor", "Jurado"] },
+      { icon: CalendarDays, label: "Planificación", href: "/dashboard/planificacion" },
       { icon: TrendingUp, label: "Seguimiento", href: "/dashboard/tracking" },
       { icon: PlusCircle, label: "Agregar", href: "/dashboard/agregar" },
       { icon: Settings, label: "Configuración", href: "/dashboard/settings" },
     ];
 
-    return baseItems.filter((item) => {
-      if (!("requiredRole" in item)) return true;
-      if (!userRole) return true;
-      return item.requiredRole?.includes(userRole);
-    });
+    return baseItems;
   }, [userRole, user]);
 
   const handleLinkHover = useCallback((href: string) => {
