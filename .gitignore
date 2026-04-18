@@ -23,3 +23,21 @@ env/
 
 # Claude Code — local-only settings (user-specific tool permissions)
 .claude/settings.local.json
+
+# Database files
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Database backups
+*.bak-*
+*.backup
+
+# Claude Code task state (ephemeral, local only)
+.claude/state/
+
+# Documentation (local docs, not committed)
+docs/
