@@ -67,12 +67,12 @@ function mapApiUser(u: ApiUser | User): User {
 
 function saveUserSession(user: User) {
   if (typeof window === 'undefined') return;
-  sessionStorage.setItem(SESSION_KEY, JSON.stringify(user));
+  localStorage.setItem(SESSION_KEY, JSON.stringify(user));
 }
 
 function clearUserSession() {
   if (typeof window === 'undefined') return;
-  sessionStorage.removeItem(SESSION_KEY);
+  localStorage.removeItem(SESSION_KEY);
 }
 
 export async function register(user: User): Promise<{ success: boolean; message?: string }> {
@@ -118,7 +118,7 @@ export function isAuthenticated(): boolean {
 
 export function getUser(): User | null {
   if (typeof window === 'undefined') return null;
-  const raw = sessionStorage.getItem(SESSION_KEY);
+  const raw = localStorage.getItem(SESSION_KEY);
   if (!raw) return null;
   try {
     return mapApiUser(JSON.parse(raw));

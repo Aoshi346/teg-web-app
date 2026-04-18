@@ -5,13 +5,13 @@ import { getUserRole } from "@features/auth/api/clientAuth";
 import { usePlanificacion } from "../hooks/usePlanificacion";
 import { useDateSelection } from "../hooks/useDateSelection";
 import { Presentation, PresentationDay, PresentationCreate } from "../types/planificacion";
-import WeekCalendar from "./WeekCalendar";
-import DayCard from "./DayCard";
+import CompactDayCard from "./CompactDayCard";
+import DateSelectionCalendar from "./DateSelectionCalendar";
 import EmptyDayState from "./EmptyDayState";
 import PresentationFormModal from "./PresentationFormModal";
 import ScheduleOverviewCalendar from "./ScheduleOverviewCalendar";
 import PresentationCard from "./PresentationCard";
-import { formatDayNumeral, formatWeekday, formatMonthYear } from "../lib/formatDate";
+import { formatDayNumeral, formatWeekday, formatMonthYear, dateRange } from "../lib/formatDate";
 
 const INITIAL_SHOW_COUNT = 8;
 
@@ -20,7 +20,7 @@ export default function PlanificacionView() {
   const isAdmin = role === "Administrador";
 
   const { days, loading, refresh } = usePlanificacion();
-  const { mode, setMode, selected, rangeStart, toggleDay, clearAll } = useDateSelection();
+  const { mode, setMode, selected, toggleDay, clearAll } = useDateSelection();
 
   const [modalOpen, setModalOpen] = useState(false);
   const [modalDayId, setModalDayId] = useState<number>(0);
@@ -268,26 +268,28 @@ export default function PlanificacionView() {
             </div>
           </div>
 
-          {/* Admin-only: mode toggle + editor calendar + day cards in 12-col grid */}
+          {/* Admin-only: compact day management panel */}
           {isAdmin && (
-            <>
-              {/* Mode toggle */}
-              <div className="bg-white/60 backdrop-blur-xl rounded-[2rem] border border-gray-200/60 shadow-xl shadow-slate-200/40 p-5 sm:p-6 mb-8">
-                <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-gray-700 mb-1">
-                      Modo de selección
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {mode === "rango"
-                        ? "Selecciona un rango de fechas continuo."
-                        : "Selecciona días individuales."}
-                    </p>
-                  </div>
+            <div className="bg-white/60 backdrop-blur-xl rounded-[2rem] border border-gray-200/60 shadow-xl shadow-slate-200/40 p-5 sm:p-6 mb-8">
+              {/* Header: mode toggle + created-days count + create CTA */}
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-5">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-gray-700 mb-0.5">
+                    Días de presentación
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {days.length === 0
+                      ? "Sin días creados."
+                      : `${days.length} ${days.length === 1 ? "día creado" : "días creados"} — haz clic en uno para expandrirlo.`}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-3 flex-wrap">
+                  {/* Mode toggle */}
                   <div
                     role="radiogroup"
                     aria-label="Modo de selección"
-                    className="flex items-center bg-gray-100/80 p-1 rounded-xl self-start sm:self-auto"
+                    className="flex items-center bg-gray-100/80 p-1 rounded-xl"
                   >
                     {(["rango", "individual"] as const).map((m) => (
                       <button
@@ -295,7 +297,7 @@ export default function PlanificacionView() {
                         role="radio"
                         aria-checked={mode === m}
                         onClick={() => setMode(m)}
-                        className={`px-5 py-2 text-sm font-semibold rounded-lg transition-all duration-200 capitalize ${
+                        className={`px-4 py-1.5 text-sm font-semibold rounded-lg transition-all duration-200 capitalize ${
                           mode === m
                             ? "bg-white text-gray-900 shadow-sm ring-1 ring-black/5"
                             : "text-gray-500 hover:text-gray-900 hover:bg-white/50"
@@ -305,68 +307,77 @@ export default function PlanificacionView() {
                       </button>
                     ))}
                   </div>
+
+                  {/* Create days CTA */}
+                  <button
+                    onClick={handleCreateDays}
+                    disabled={selected.size === 0}
+                    className="h-9 px-4 rounded-xl text-sm font-bold bg-[#0f172a] text-white hover:bg-[#1e293b] transition-all shadow-lg shadow-slate-900/10 disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
+                  >
+                    + Crear días
+                  </button>
                 </div>
               </div>
 
-              {/* 12-col grid: editor calendar + day cards */}
-              <div className="grid grid-cols-1 xl:grid-cols-12 gap-8">
-                {/* Editor calendar */}
-                <div className="xl:col-span-7">
-                  <WeekCalendar
-                    mode={mode}
+              {/* Date selection calendar + day cards */}
+              {loading ? (
+                <div className="flex justify-center py-10">
+                  <div className="w-8 h-8 rounded-full border-4 border-slate-200 border-t-blue-600 animate-spin" />
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 xl:grid-cols-[320px_1fr] gap-6">
+                  {/* Left: Interactive date selection calendar */}
+                  <DateSelectionCalendar
                     selected={selected}
-                    existingDays={days}
-                    rangeStart={rangeStart}
-                    isAdmin={isAdmin}
+                    mode={mode}
                     onToggleDay={toggleDay}
-                    onCreateDays={handleCreateDays}
+                    onRangeSelect={(start, end) => {
+                      const dates = dateRange(start, end);
+                      dates.forEach((d: string) => toggleDay(d));
+                    }}
                   />
-                </div>
 
-                {/* Day cards */}
-                <div className="xl:col-span-5">
-                  {loading ? (
-                    <div className="flex justify-center py-20">
-                      <div className="w-8 h-8 rounded-full border-4 border-slate-200 border-t-blue-600 animate-spin" />
-                    </div>
-                  ) : days.length === 0 ? (
-                    <EmptyDayState isAdmin={isAdmin} />
-                  ) : (
-                    <div className="space-y-6">
-                      {days.map((day, idx) => (
-                        <DayCard
-                          key={day.id}
-                          day={day}
-                          isAdmin={isAdmin}
-                          onAddPresentation={handleAddPresentation}
-                          onEditPresentation={handleEditPresentation}
-                          onDeletePresentation={handleDeletePresentation}
-                          onDeleteDay={handleDeleteDay}
-                          style={{
-                            animationDelay: `${Math.min(idx, 5) * 60}ms`,
-                          }}
-                        />
-                      ))}
-                    </div>
-                  )}
+                  {/* Right: Day cards */}
+                  <div>
+                    {days.length === 0 ? (
+                      <EmptyDayState isAdmin={isAdmin} />
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                        {days.map((day, idx) => (
+                          <CompactDayCard
+                            key={day.id}
+                            day={day}
+                            isAdmin={isAdmin}
+                            onAddPresentation={handleAddPresentation}
+                            onEditPresentation={handleEditPresentation}
+                            onDeletePresentation={handleDeletePresentation}
+                            onDeleteDay={handleDeleteDay}
+                            style={{
+                              animationDelay: `${Math.min(idx, 5) * 60}ms`,
+                            }}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </>
+              )}
+            </div>
           )}
 
-          {/* Non-admin: day cards full width */}
+          {/* Non-admin: compact day cards full width */}
           {!isAdmin && (
-            <div>
+            <div className="bg-white/60 backdrop-blur-xl rounded-[2rem] border border-gray-200/60 shadow-xl shadow-slate-200/40 p-5 sm:p-6">
               {loading ? (
-                <div className="flex justify-center py-20">
+                <div className="flex justify-center py-10">
                   <div className="w-8 h-8 rounded-full border-4 border-slate-200 border-t-blue-600 animate-spin" />
                 </div>
               ) : days.length === 0 ? (
                 <EmptyDayState isAdmin={false} />
               ) : (
-                <div className="space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                   {days.map((day, idx) => (
-                    <DayCard
+                    <CompactDayCard
                       key={day.id}
                       day={day}
                       isAdmin={false}
