@@ -7,14 +7,82 @@ interface PresentationCardProps {
   isAdmin: boolean;
   onEdit?: (presentation: Presentation) => void;
   onDelete?: (presentation: Presentation) => void;
+  /** Compact mode for the two-column presentation list. */
+  compact?: boolean;
 }
+
+const TYPE_COLORS: Record<string, string> = {
+  tesis: "#ff6b35",
+  proyecto: "#0066ff",
+};
 
 export default function PresentationCard({
   presentation,
   isAdmin,
   onEdit,
   onDelete,
+  compact = false,
 }: PresentationCardProps) {
+  const accentColor = TYPE_COLORS[presentation.project_type] ?? "#6b7280";
+
+  if (compact) {
+    return (
+      <div
+        className="flex items-start gap-3 py-3 px-3 group hover:bg-gray-50 transition-colors duration-150 rounded-xl"
+        style={{ borderLeft: `3px solid ${accentColor}` }}
+      >
+        {/* Time */}
+        <span className="flex-shrink-0 inline-flex items-center gap-1 mt-0.5 px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 text-[11px] font-bold">
+          <Clock className="w-3 h-3" />
+          <time dateTime={presentation.start_time}>{presentation.start_time}</time>
+        </span>
+
+        {/* Content */}
+        <div className="flex-1 min-w-0">
+          <p
+            className="text-sm font-semibold text-gray-900 leading-snug truncate"
+            title={presentation.project_title}
+          >
+            {presentation.project_title}
+          </p>
+          <p className="text-xs text-gray-500 mt-0.5 truncate">
+            {presentation.student_name}
+          </p>
+          <p className="text-[11px] text-gray-400 mt-0.5 truncate">
+            {[
+              presentation.tutor_name ? `Tutor: ${presentation.tutor_name}` : null,
+              presentation.jurado_names?.length
+                ? `Jurados: ${presentation.jurado_names.join(", ")}`
+                : null,
+            ]
+              .filter(Boolean)
+              .join(" · ")}
+          </p>
+        </div>
+
+        {/* Admin actions */}
+        {isAdmin && (
+          <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-150 flex-shrink-0">
+            <button
+              aria-label="Editar presentación"
+              onClick={() => onEdit?.(presentation)}
+              className="p-1 rounded text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+            >
+              <Pencil className="w-3.5 h-3.5" />
+            </button>
+            <button
+              aria-label="Eliminar presentación"
+              onClick={() => onDelete?.(presentation)}
+              className="p-1 rounded text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="flex gap-4 py-4 px-1 group hover:bg-gray-50 transition-colors duration-150 rounded-lg">
       {/* Time chip */}

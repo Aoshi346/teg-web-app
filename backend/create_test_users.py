@@ -8,13 +8,14 @@ from django.contrib.auth import get_user_model
 
 
 def upsert_user(email: str, password: str, *, first_name: str, last_name: str,
-                role: str, status: str = "active", cedula: str = "",
-                semester: str = "", phone: str = "",
+                role: str, status: str = "active", nationality: str = "V",
+                cedula: int = None, semester: str = "", phone: str = "",
                 is_staff: bool = False, is_superuser: bool = False):
     User = get_user_model()
     user, created = User.objects.get_or_create(email=email, defaults={
         "first_name": first_name,
         "last_name": last_name,
+        "nationality": nationality,
         "cedula": cedula,
         "role": role,
         "status": status,
@@ -27,6 +28,7 @@ def upsert_user(email: str, password: str, *, first_name: str, last_name: str,
     # Update fields if user existed
     user.first_name = first_name
     user.last_name = last_name
+    user.nationality = nationality
     user.cedula = cedula
     user.role = role
     user.status = status
@@ -47,7 +49,8 @@ def main():
         first_name="Administrador",
         last_name="Test",
         role="Administrador",
-        cedula="V-10000001",
+        nationality="V",
+        cedula=10000001,
         is_staff=True,
         is_superuser=True,
     )
@@ -58,7 +61,8 @@ def main():
         first_name="Tutor",
         last_name="Test",
         role="Tutor",
-        cedula="V-10000002",
+        nationality="V",
+        cedula=10000002,
         phone="+58-414-0000000",
         is_staff=True,
     )
@@ -69,7 +73,8 @@ def main():
         first_name="Jurado",
         last_name="Test",
         role="Jurado",
-        cedula="V-10000003",
+        nationality="V",
+        cedula=10000003,
         is_staff=True,
     )
 
@@ -79,7 +84,8 @@ def main():
         first_name="Estudiante",
         last_name="Test",
         role="Estudiante",
-        cedula="V-20000001",
+        nationality="V",
+        cedula=20000001,
         semester="10",
     )
 

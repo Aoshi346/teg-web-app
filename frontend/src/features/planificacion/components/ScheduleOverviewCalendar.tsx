@@ -1,14 +1,10 @@
 import React, { useState, useMemo } from "react";
-import { ChevronLeft, ChevronRight, CalendarDays } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { PresentationDay } from "../types/planificacion";
 import { formatMonthName, isToday, toDateStr } from "../lib/formatDate";
 
 const WEEKDAYS = ["L", "M", "M", "J", "V", "S", "D"];
 
-/**
- * Construye la matriz de semanas para el mes dado (lunes primero).
- * Retorna filas de 7 celdas, cada celda es YYYY-MM-DD o null si está fuera del mes.
- */
 function getMonthMatrix(year: number, month: number): (string | null)[][] {
   const firstDay = new Date(year, month, 1);
   const startOffset = (firstDay.getDay() + 6) % 7;
@@ -25,28 +21,37 @@ function getMonthMatrix(year: number, month: number): (string | null)[][] {
   return rows;
 }
 
-interface ScheduleOverviewCalendarProps {
-  days: PresentationDay[];
+/** Returns which project types a day has so we can show colored dots. */
+function getDayTypeSet(day: PresentationDay): Set<"tesis" | "proyecto"> {
+  const types = new Set<"tesis" | "proyecto">();
+  for (const p of day.presentations) {
+    if (p.project_type === "tesis" || p.project_type === "proyecto") {
+      types.add(p.project_type);
+    }
+  }
+  return types;
 }
 
-/**
- * Calendario de solo lectura que muestra todos los días con presentaciones
- * del semestre activo. Al hacer clic en un día con presentaciones, hace
- * scroll suave a la tarjeta de ese día y la resalta brevemente.
- * Visible para todos los roles (sin gate de admin).
- */
+interface ScheduleOverviewCalendarProps {
+  days: PresentationDay[];
+  /** When true, use tighter padding and smaller cells for the two-column layout. */
+  compact?: boolean;
+  /** Called when a day with presentations is clicked. */
+  onDayClick?: (dateStr: string) => void;
+}
+
 export default function ScheduleOverviewCalendar({
   days,
+  compact = false,
+  onDayClick,
 }: ScheduleOverviewCalendarProps) {
-  const presentationMap = useMemo(() => {
-    const map = new Map<string, number>();
-    for (const day of days) {
-      map.set(day.date, day.presentations.length);
-    }
+  // Map date string -> PresentationDay for O(1) lookups
+  const dayByDate = useMemo(() => {
+    const map = new Map<string, PresentationDay>();
+    for (const d of days) map.set(d.date, d);
     return map;
   }, [days]);
 
-  // Default to the month containing the soonest upcoming day, or current month
   const defaultMonth = useMemo(() => {
     const today = toDateStr(new Date());
     const upcoming = days
@@ -66,41 +71,32 @@ export default function ScheduleOverviewCalendar({
   const matrix = useMemo(() => getMonthMatrix(year, month), [year, month]);
 
   const prevMonth = () => {
-    if (month === 0) {
-      setYear((y) => y - 1);
-      setMonth(11);
-    } else {
-      setMonth((m) => m - 1);
-    }
+    if (month === 0) { setYear((y) => y - 1); setMonth(11); }
+    else setMonth((m) => m - 1);
   };
-
   const nextMonth = () => {
-    if (month === 11) {
-      setYear((y) => y + 1);
-      setMonth(0);
-    } else {
-      setMonth((m) => m + 1);
-    }
+    if (month === 11) { setYear((y) => y + 1); setMonth(0); }
+    else setMonth((m) => m + 1);
   };
 
   const handleDayClick = (dateStr: string) => {
-    const day = days.find((d) => d.date === dateStr);
-    if (!day) return;
-
-    const el = document.getElementById(`day-card-${day.id}`);
-    if (!el) return;
-
-    el.scrollIntoView({ behavior: "smooth", block: "center" });
-
-    // Flash ring-2 ring-[#ffd23f] for 1s then remove
-    el.classList.add("ring-flash-active");
-    setTimeout(() => {
-      el.classList.remove("ring-flash-active");
-    }, 1000);
+    if (!dayByDate.has(dateStr)) return;
+    onDayClick ? onDayClick(dateStr) : (() => {
+      const el = document.querySelector(`[data-date="${dateStr}"]`);
+      if (!el) return;
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      el.classList.add("ring-flash-active");
+      setTimeout(() => el.classList.remove("ring-flash-active"), 1000);
+    })();
   };
 
+  const containerPad = compact ? "p-3" : "p-5 sm:p-6";
+  const cellH = compact ? "h-12" : "h-14 sm:h-16";
+  const dayNumSize = compact ? "text-lg" : "text-xl";
+  const monthLabelSize = compact ? "text-base" : "text-xl";
+
   return (
-    <div className="bg-white/60 backdrop-blur-xl rounded-[2rem] border border-gray-200/60 shadow-xl shadow-slate-200/40 p-5 sm:p-6 mb-8">
+    <div className={`bg-white/60 backdrop-blur-xl rounded-[2rem] border border-gray-200/60 shadow-xl shadow-slate-200/40 ${containerPad}`}>
       <style>{`
         .ring-flash-active {
           outline: 2px solid #ffd23f;
@@ -113,39 +109,29 @@ export default function ScheduleOverviewCalendar({
         }
       `}</style>
 
-      {/* Header */}
-      <div className="mb-4">
-        <h3 className="text-2xl font-bold text-gray-900 tracking-tight">
-          Calendario de presentaciones
-        </h3>
-        <p className="text-sm text-gray-500 font-medium mt-1">
-          Haz clic en un día para ver los detalles.
-        </p>
-      </div>
-
       {/* Month navigation */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-3">
         <button
           onClick={prevMonth}
           aria-label="Mes anterior"
-          className="w-9 h-9 flex items-center justify-center rounded-xl text-gray-500 hover:bg-gray-100 transition-colors"
+          className="w-8 h-8 flex items-center justify-center rounded-xl text-gray-500 hover:bg-gray-100 transition-colors"
         >
-          <ChevronLeft className="w-5 h-5" />
+          <ChevronLeft className="w-4 h-4" />
         </button>
-        <span className="text-xl font-bold text-gray-900 tracking-tight capitalize">
+        <span className={`font-bold text-gray-900 tracking-tight capitalize ${monthLabelSize}`}>
           {formatMonthName(year, month)}
         </span>
         <button
           onClick={nextMonth}
           aria-label="Mes siguiente"
-          className="w-9 h-9 flex items-center justify-center rounded-xl text-gray-500 hover:bg-gray-100 transition-colors"
+          className="w-8 h-8 flex items-center justify-center rounded-xl text-gray-500 hover:bg-gray-100 transition-colors"
         >
-          <ChevronRight className="w-5 h-5" />
+          <ChevronRight className="w-4 h-4" />
         </button>
       </div>
 
       {/* Weekday strip */}
-      <div className="grid grid-cols-7 mb-2">
+      <div className="grid grid-cols-7 mb-1">
         {WEEKDAYS.map((d, i) => (
           <div
             key={i}
@@ -157,22 +143,18 @@ export default function ScheduleOverviewCalendar({
       </div>
 
       {/* Day grid */}
-      <div className="space-y-1">
+      <div className="space-y-0.5">
         {matrix.map((row, ri) => (
-          <div key={ri} className="grid grid-cols-7 gap-1">
+          <div key={ri} className="grid grid-cols-7 gap-0.5">
             {row.map((dateStr, ci) => {
               if (!dateStr) {
-                return (
-                  <div
-                    key={ci}
-                    className="h-16 sm:h-16 w-full"
-                  />
-                );
+                return <div key={ci} className={`${cellH} w-full`} />;
               }
 
-              const count = presentationMap.get(dateStr) ?? 0;
-              const hasDay = count > 0;
+              const day = dayByDate.get(dateStr);
+              const hasDay = !!day;
               const today = isToday(dateStr);
+              const typeSet = day ? getDayTypeSet(day) : new Set<"tesis" | "proyecto">();
 
               return (
                 <button
@@ -181,33 +163,30 @@ export default function ScheduleOverviewCalendar({
                   onClick={() => hasDay && handleDayClick(dateStr)}
                   disabled={!hasDay}
                   className={[
-                    "h-14 sm:h-16 w-full rounded-xl flex flex-col items-center justify-center relative transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd23f]",
-                    hasDay
-                      ? "cursor-pointer hover:bg-blue-50"
-                      : "cursor-default",
-                    today
-                      ? "ring-2 ring-[#ffd23f] ring-offset-1"
-                      : "",
+                    `${cellH} w-full rounded-xl flex flex-col items-center justify-center relative transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd23f]`,
+                    hasDay ? "cursor-pointer hover:bg-blue-50" : "cursor-default",
+                    today && !hasDay ? "ring-2 ring-[#ffd23f] ring-offset-1" : "",
                   ]
                     .join(" ")
                     .trim()}
                   aria-label={
-                    hasDay
-                      ? `${dateStr} — ${count} ${count === 1 ? "presentación" : "presentaciones"}`
+                    hasDay && day
+                      ? `${dateStr} — ${day.presentations.length} ${day.presentations.length === 1 ? "presentación" : "presentaciones"}`
                       : dateStr
                   }
                 >
-                  <span
-                    className={`text-xl font-semibold leading-none ${
-                      hasDay ? "text-gray-900" : "text-gray-400"
-                    }`}
-                  >
+                  <span className={`font-semibold leading-none ${dayNumSize} ${hasDay ? "text-gray-900" : "text-gray-400"}`}>
                     {dateStr.split("-")[2].replace(/^0/, "")}
                   </span>
+                  {/* Colored type dots */}
                   {hasDay && (
-                    <span className="mt-1 inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-[#0066ff]/10 text-[#0066ff] text-[10px] font-bold leading-none">
-                      <CalendarDays className="w-2.5 h-2.5" />
-                      {count}
+                    <span className="mt-0.5 flex items-center gap-0.5">
+                      {typeSet.has("tesis") && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#ff6b35] inline-block" aria-label="TEG" />
+                      )}
+                      {typeSet.has("proyecto") && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#0066ff] inline-block" aria-label="PTEG" />
+                      )}
                     </span>
                   )}
                 </button>
@@ -215,6 +194,18 @@ export default function ScheduleOverviewCalendar({
             })}
           </div>
         ))}
+      </div>
+
+      {/* Legend */}
+      <div className="mt-3 flex items-center justify-center gap-5">
+        <span className="flex items-center gap-1.5 text-xs font-semibold text-gray-600">
+          <span className="w-2 h-2 rounded-full bg-[#ff6b35] inline-block" />
+          TEG
+        </span>
+        <span className="flex items-center gap-1.5 text-xs font-semibold text-gray-600">
+          <span className="w-2 h-2 rounded-full bg-[#0066ff] inline-block" />
+          PTEG
+        </span>
       </div>
     </div>
   );
