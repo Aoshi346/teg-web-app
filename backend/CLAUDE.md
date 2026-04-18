@@ -34,12 +34,16 @@ All API logic lives in a single `api` app. Views use DRF ModelViewSets with role
 
 | Model | Key Fields |
 |-------|------------|
-| **User** | email (unique), first_name, last_name, cedula, role, status, semester, phone |
+| **User** | email (unique), first_name, last_name, `nationality` (V/E/P), `cedula` (PositiveIntegerField), role, status, semester, phone. `UniqueConstraint(nationality, cedula)` (excludes nulls). `UserSerializer` exposes read-only `cedula_display` = `"V-30243721"` for frontend convenience. |
 | **Project** | title, student (FK), partner (FK), advisors (M2M to Tutor), status, period, project_type, stage1_passed, failed_attempts |
 | **Evaluation** | project (FK), reviewer (FK), ratings (JSON), comments (JSON `{general: "..."}` — visible to students), score, pass_status, section_scores (JSON) |
 | **AttachedFile** | project (FK), name, file (FileField), file_type (pdf/word) |
 | **Semester** | period (unique, YYYY-SS), is_active, start_month, end_month (supports cross-year ranges) |
 | **Comment** | project (FK), author (FK), content |
+| **PresentationDay** | date (unique), semester (FK), notes, created_by (FK User, nullable) |
+| **Presentation** | day (FK), project (FK), tutor (FK User, Tutor only), jurado (M2M via `PresentationJuror`), start_time, duration_minutes, order. `UniqueConstraint(day, project)`. |
+| **PresentationJuror** | presentation (FK), juror (FK User, Jurado only), individual_score (nullable), notified, notified_at, confirmed_attendance, attended, created_at, updated_at. `unique_together=(presentation, juror)`. Uses `db_table='api_presentation_jurado'` so the original implicit-M2M rows were preserved when it became explicit. |
+| **SessionLog** | user (FK), session_key (unique), device, browser, ip_address, user_agent, is_active |
 
 ## When Modifying Models
 

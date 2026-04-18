@@ -1,6 +1,17 @@
+from django.contrib.auth import authenticate, get_user_model
 from rest_framework import serializers
-from django.contrib.auth import get_user_model, authenticate
-from .models import Project, AttachedFile, Evaluation, Semester, Comment, SessionLog, PresentationDay, Presentation
+
+from .models import (
+    AttachedFile,
+    Comment,
+    Evaluation,
+    Presentation,
+    PresentationDay,
+    PresentationJuror,
+    Project,
+    Semester,
+    SessionLog,
+)
 
 User = get_user_model()
 
@@ -8,13 +19,20 @@ User = get_user_model()
 class UserSerializer(serializers.ModelSerializer):
     full_name = serializers.CharField(read_only=True)
     date_joined = serializers.DateTimeField(read_only=True)
+    cedula_display = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = User
         fields = [
             'id', 'email', 'first_name', 'last_name', 'full_name',
-            'cedula', 'role', 'status', 'semester', 'phone', 'date_joined',
+            'nationality', 'cedula', 'cedula_display',
+            'role', 'status', 'semester', 'phone', 'date_joined',
         ]
+
+    def get_cedula_display(self, obj):
+        if obj.cedula is None:
+            return ''
+        return f'{obj.nationality or "V"}-{obj.cedula}'
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
@@ -52,11 +70,12 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['email', 'password', 'full_name', 'first_name', 'last_name', 'cedula', 'role', 'semester', 'phone']
+        fields = ['email', 'password', 'full_name', 'first_name', 'last_name', 'nationality', 'cedula', 'role', 'semester', 'phone']
         extra_kwargs = {
             'first_name': {'required': False},
             'last_name': {'required': False},
-            'cedula': {'required': False},
+            'nationality': {'required': False},
+            'cedula': {'required': False, 'allow_null': True, 'default': None},
             'semester': {'required': False},
             'phone': {'required': False},
         }
@@ -77,7 +96,8 @@ class RegisterSerializer(serializers.ModelSerializer):
             password=validated_data.pop('password'),
             first_name=first_name,
             last_name=last_name,
-            cedula=validated_data.get('cedula', ''),
+            nationality=validated_data.get('nationality', 'V'),
+            cedula=validated_data.get('cedula', None),
             role=validated_data.get('role', 'Estudiante'),
             semester=validated_data.get('semester', ''),
             phone=validated_data.get('phone', ''),
@@ -228,8 +248,29 @@ class SessionTrackSerializer(serializers.Serializer):
     user_agent = serializers.CharField(required=False, allow_blank=True, default='')
 
 
+class PresentationJurorSerializer(serializers.ModelSerializer):
+    juror_name = serializers.CharField(source='juror.full_name', read_only=True)
+
+    class Meta:
+        model = PresentationJuror
+        fields = (
+            'juror', 'juror_name', 'individual_score',
+            'notified', 'notified_at', 'confirmed_attendance', 'attended',
+        )
+        read_only_fields = fields
+
+
 class PresentationSerializer(serializers.ModelSerializer):
     start_time = serializers.TimeField(format="%H:%M", input_formats=["%H:%M"])
+
+    # DRF marks M2M fields with through= as read-only; declare it explicitly
+    # as writable so that validate_jurado() runs and create/update can manage
+    # PresentationJuror rows directly.
+    jurado = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=User.objects.filter(role='Jurado'),
+        required=False,
+    )
 
     # Read-only flattened fields for the frontend
     student_name = serializers.CharField(
@@ -246,6 +287,7 @@ class PresentationSerializer(serializers.ModelSerializer):
     )
     tutor_name = serializers.SerializerMethodField()
     jurado_names = serializers.SerializerMethodField()
+    juror_entries = PresentationJurorSerializer(many=True, read_only=True)
 
     class Meta:
         model = Presentation
@@ -253,7 +295,7 @@ class PresentationSerializer(serializers.ModelSerializer):
             'id', 'day', 'project', 'tutor', 'jurado',
             'start_time', 'duration_minutes', 'order',
             'student_name', 'student_email', 'project_title', 'project_type',
-            'tutor_name', 'jurado_names',
+            'tutor_name', 'jurado_names', 'juror_entries',
         ]
         read_only_fields = ['day']
 
@@ -276,6 +318,40 @@ class PresentationSerializer(serializers.ModelSerializer):
                     f"El usuario '{user.email}' no tiene el rol Jurado."
                 )
         return users
+
+    def create(self, validated_data):
+        """
+        Crea la presentación y luego crea las filas PresentationJuror para cada
+        jurado. Con through= activo Django prohíbe .jurado.set() / .add(), por lo
+        que se deben insertar las filas del modelo puente explícitamente.
+        """
+        jurors = validated_data.pop('jurado', [])
+        presentation = Presentation.objects.create(**validated_data)
+        for user in jurors:
+            PresentationJuror.objects.create(presentation=presentation, juror=user)
+        return presentation
+
+    def update(self, instance, validated_data):
+        """
+        Actualiza los campos escalares de la presentación. Si se envía 'jurado',
+        sincroniza las filas PresentationJuror: elimina las que ya no están en la
+        lista y agrega las nuevas, preservando los campos extra (individual_score,
+        notified, etc.) de las filas que persisten.
+        """
+        jurors = validated_data.pop('jurado', None)
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        if jurors is not None:
+            current = {pj.juror_id: pj for pj in instance.juror_entries.all()}
+            wanted_ids = {u.id for u in jurors}
+            for pj in list(current.values()):
+                if pj.juror_id not in wanted_ids:
+                    pj.delete()
+            for u in jurors:
+                if u.id not in current:
+                    PresentationJuror.objects.create(presentation=instance, juror=u)
+        return instance
 
 
 class PresentationDaySerializer(serializers.ModelSerializer):

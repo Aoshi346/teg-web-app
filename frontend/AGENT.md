@@ -107,7 +107,7 @@ Sidebar menu items are dynamically filtered by role in `Sidebar.tsx`.
 - Auth guard in `dashboard/layout.tsx` redirects unauthenticated users
 - CSRF token fetched from `/api/csrf/` and sent with every request
 - Login/register via `LoginModal` component
-- User fields: id, email, firstName, lastName, fullName, cedula, role, status, semester, phone, dateJoined
+- User fields: id, email, firstName, lastName, fullName, nationality (`V`/`E`/`P`), cedula (number), cedulaDisplay (`"V-30243721"`, read-only), role, status, semester, phone, dateJoined
 
 ## API Integration
 

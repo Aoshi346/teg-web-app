@@ -8,7 +8,7 @@
 
 | File | Purpose |
 |------|---------|
-| `models.py` | Domain models: User, Project, Evaluation, Semester, AttachedFile, Comment, SessionLog |
+| `models.py` | Domain models: User, Project, Evaluation, Semester, AttachedFile, Comment, PresentationDay, Presentation, PresentationJuror, SessionLog |
 | `views.py` | DRF ViewSets with role-based queryset filtering and custom actions |
 | `serializers.py` | Serializers/deserializers for all models |
 | `urls.py` | DRF router registering all ViewSets under `/api/` |
@@ -20,12 +20,15 @@
 
 | Model | Description |
 |-------|-------------|
-| **User** | Custom user with email auth, roles (Administrador/Estudiante/Tutor/Jurado), phone, cedula, semester |
+| **User** | Custom user with email auth, roles (Administrador/Estudiante/Tutor/Jurado), phone, `nationality` (V/E/P), `cedula` (PositiveIntegerField, nullable), semester (program year). `UniqueConstraint(nationality, cedula)`. Serializer exposes read-only `cedula_display` = `"V-30243721"`. |
 | **Project** | Title, student (FK), partner (optional FK), advisors (M2M to Tutor), status, period, project_type (proyecto/tesis), stage1_passed, failed_attempts |
 | **Evaluation** | Project evaluation with JSON ratings/comments/section_scores, score, pass_status (Pass/Fail) |
 | **AttachedFile** | File upload (pdf/doc/docx) attached to a project |
 | **Semester** | Academic period (YYYY-SS format, e.g. 2026-01), active flag, start/end months |
 | **Comment** | Authored comment on a project |
+| **PresentationDay** | Scheduled presentation day, unique by date, tied to a Semester |
+| **Presentation** | Single slot on a day: `project` + `tutor` + `jurado` (M2M *through* PresentationJuror), start_time, duration_minutes, order. Unique `(day, project)`. |
+| **PresentationJuror** | Explicit through-model for the `Presentation.jurado` M2M. Fields: `individual_score`, `notified`, `notified_at`, `confirmed_attendance`, `attended` + timestamps. **Important**: `Presentation.jurado.add(...)` / `.set(...)` are forbidden by Django on a `through=` M2M — create `PresentationJuror` rows directly. Reads (`presentation.jurado.all()`) still work normally. |
 | **SessionLog** | Session tracking with device/browser/ip, active/inactive status |
 
 ## API Endpoints (from `api/urls.py`)

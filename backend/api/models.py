@@ -48,11 +48,21 @@ class User(AbstractUser):
         ('active', 'Active'),
         ('pending', 'Pending'),
     )
+    NATIONALITY_CHOICES = (
+        ('V', 'Venezolano'),
+        ('E', 'Extranjero'),
+        ('P', 'Pasaporte'),
+    )
 
     email = models.EmailField(unique=True)
     first_name = models.CharField(max_length=150, blank=True)
     last_name = models.CharField(max_length=150, blank=True)
-    cedula = models.CharField(max_length=20, blank=True, help_text="Student/staff ID number")
+    nationality = models.CharField(
+        max_length=1, choices=NATIONALITY_CHOICES, default='V', blank=True
+    )
+    cedula = models.PositiveIntegerField(
+        null=True, blank=True, help_text="Numeric-only cédula/ID number"
+    )
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='Estudiante')
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
     semester = models.CharField(max_length=10, blank=True, default='', help_text="e.g. 9no, 10mo, N/A")
@@ -62,6 +72,15 @@ class User(AbstractUser):
     objects = UserManager()
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['first_name', 'last_name']
+
+    class Meta(AbstractUser.Meta):
+        constraints = [
+            models.UniqueConstraint(
+                fields=['nationality', 'cedula'],
+                condition=models.Q(cedula__isnull=False),
+                name='unique_nationality_cedula',
+            ),
+        ]
 
     @property
     def full_name(self):
@@ -222,7 +241,9 @@ class Presentation(models.Model):
         limit_choices_to={'role': 'Tutor'}
     )
     jurado = models.ManyToManyField(
-        'User', related_name='juried_presentations',
+        'User',
+        through='PresentationJuror',
+        related_name='juried_presentations',
         limit_choices_to={'role': 'Jurado'},
         blank=True,
     )
@@ -242,6 +263,41 @@ class Presentation(models.Model):
 
     def __str__(self):
         return f"{self.project.title} @ {self.day.date} {self.start_time}"
+
+
+class PresentationJuror(models.Model):
+    """
+    Modelo puente explícito para la relación M2M entre Presentation y User
+    (rol Jurado). Reemplaza la tabla implícita auto-generada por Django para
+    permitir registrar datos por jurado: puntaje individual, notificación de
+    asistencia y confirmación/presencia el día de la presentación.
+    """
+
+    presentation = models.ForeignKey(
+        Presentation, on_delete=models.CASCADE, related_name='juror_entries'
+    )
+    juror = models.ForeignKey(
+        'User',
+        on_delete=models.CASCADE,
+        limit_choices_to={'role': 'Jurado'},
+        related_name='juror_entries',
+        db_column='user_id',
+    )
+    individual_score = models.FloatField(null=True, blank=True)
+    notified = models.BooleanField(default=False)
+    notified_at = models.DateTimeField(null=True, blank=True)
+    confirmed_attendance = models.BooleanField(default=False)
+    attended = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'api_presentation_jurado'
+        unique_together = ('presentation', 'juror')
+        ordering = ['presentation', 'id']
+
+    def __str__(self):
+        return f"{self.juror.email} → {self.presentation_id}"
 
 
 def _get_device_from_user_agent(user_agent: str) -> str:

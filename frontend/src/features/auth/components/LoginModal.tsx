@@ -13,6 +13,8 @@ import {
 import { useRouter } from "next/navigation";
 import { gsap } from "gsap";
 
+const REMEMBER_EMAIL_KEY = 'tf_remembered_email';
+
 // --- Animated Canvas Background with floating geometric shapes ---
 const BrandCanvas = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -261,6 +263,17 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
     type: "error",
   });
 
+  // Load remembered email on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined' && localStorage.getItem(REMEMBER_EMAIL_KEY)) {
+      const remembered = localStorage.getItem(REMEMBER_EMAIL_KEY);
+      if (remembered) {
+        setLoginEmail(remembered);
+        setRememberMe(true);
+      }
+    }
+  }, []);
+
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
@@ -378,6 +391,11 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
           showToast("Inicio de sesión exitoso.", "success");
           try {
             sessionStorage.setItem("justLoggedIn", "1");
+            if (rememberMe) {
+              localStorage.setItem(REMEMBER_EMAIL_KEY, loginEmail);
+            } else {
+              localStorage.removeItem(REMEMBER_EMAIL_KEY);
+            }
           } catch {}
           setTimeout(() => {
             try {
@@ -584,7 +602,12 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
                         <input
                           type="checkbox"
                           checked={rememberMe}
-                          onChange={(e) => setRememberMe(e.target.checked)}
+                          onChange={(e) => {
+                            setRememberMe(e.target.checked);
+                            if (!e.target.checked) {
+                              localStorage.removeItem(REMEMBER_EMAIL_KEY);
+                            }
+                          }}
                           className="w-4 h-4 text-usm-blue border-slate-300 rounded focus:ring-usm-blue cursor-pointer"
                         />
                         Recuérdame

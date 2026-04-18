@@ -78,13 +78,15 @@ def test_create_user_accepts_custom_fields():
         last_name="Pérez",
         role="Tutor",
         status="active",
-        cedula="V-12345678",
+        nationality="V",
+        cedula=12345678,
         semester="9no",
         phone="+58-414-1234567",
     )
     assert user.role == "Tutor"
     assert user.status == "active"
-    assert user.cedula == "V-12345678"
+    assert user.nationality == "V"
+    assert user.cedula == 12345678
     assert user.semester == "9no"
     assert user.phone == "+58-414-1234567"
 

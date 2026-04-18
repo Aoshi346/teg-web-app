@@ -13,8 +13,6 @@ import {
   UserCheck,
   FileText,
   Calendar,
-  GraduationCap,
-  Briefcase,
 } from "lucide-react";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -52,13 +50,11 @@ export default function FeaturesSection() {
       ) => {
         if (!sectionEl || !headerEl || !cardsEl) return;
 
-        const badge = headerEl.querySelector(".section-badge") as HTMLElement | null;
         const h2 = headerEl.querySelector("h2") as HTMLElement | null;
         const p = headerEl.querySelector("p") as HTMLElement | null;
         const cards = cardsEl.children;
 
         // Set initial hidden states
-        if (badge) gsap.set(badge, { autoAlpha: 0, y: 10, scale: 0.9 });
         if (h2) gsap.set(h2, { autoAlpha: 0, y: 20 });
         if (p) gsap.set(p, { autoAlpha: 0, y: 16 });
 
@@ -79,9 +75,6 @@ export default function FeaturesSection() {
           },
         });
 
-        if (badge) {
-          tl.to(badge, { autoAlpha: 1, y: 0, scale: 1, duration: 0.4, ease: "back.out(1.5)" }, 0);
-        }
         if (h2) {
           tl.to(h2, { autoAlpha: 1, y: 0, duration: 0.5, ease: "power3.out" }, 0.1);
         }
@@ -142,13 +135,7 @@ export default function FeaturesSection() {
 
         <div className="container mx-auto max-w-6xl relative z-10">
           <div ref={studentsHeaderRef} className="mb-14 text-center max-w-3xl mx-auto">
-            <div className="mb-5 flex justify-center">
-              <span className="section-badge bg-usm-blue/10 text-usm-blue border border-usm-blue/20">
-                <GraduationCap className="h-4 w-4" />
-                Para Estudiantes
-              </span>
-            </div>
-            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-usm-navy md:text-5xl gradient-underline">
+            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-usm-navy md:text-5xl">
               Funcionalidades para Estudiantes
             </h2>
             <p className="mt-6 text-base sm:text-lg text-gray-500 leading-relaxed">
@@ -214,15 +201,9 @@ export default function FeaturesSection() {
           aria-labelledby="teachers-heading"
         >
           <div ref={teachersHeaderRef} className="mb-14 text-center max-w-3xl mx-auto">
-            <div className="mb-5 flex justify-center">
-              <span className="section-badge bg-usm-orange/10 text-usm-orange border border-usm-orange/20">
-                <Briefcase className="h-4 w-4" />
-                Para Docentes
-              </span>
-            </div>
             <h2
               id="teachers-heading"
-              className="text-3xl sm:text-4xl font-extrabold tracking-tight text-usm-navy md:text-5xl gradient-underline"
+              className="text-3xl sm:text-4xl font-extrabold tracking-tight text-usm-navy md:text-5xl"
             >
               Funcionalidades para Docentes
             </h2>

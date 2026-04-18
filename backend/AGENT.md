@@ -39,12 +39,15 @@ backend/
 
 | Model | Purpose | Key Fields |
 |-------|---------|------------|
-| **User** | Custom user (extends AbstractUser), email-based auth | email, first_name, last_name, cedula, role, status, semester, phone. `full_name` is a computed `@property` (first + last). Setter splits input into first/last. |
+| **User** | Custom user (extends AbstractUser), email-based auth | email, first_name, last_name, `nationality` (V/E/P), `cedula` (PositiveIntegerField, nullable), role, status, semester (program year), phone. `UniqueConstraint(nationality, cedula)`. `full_name` is a computed `@property` (first + last). Setter splits input into first/last. `UserSerializer` exposes a read-only `cedula_display` (e.g. `"V-30243721"`) for UI convenience. |
 | **Project** | TEG/thesis submissions | title, student (FK), partner (FK), advisors (M2M to Tutor), status, period, project_type, stage1_passed, failed_attempts |
 | **Evaluation** | Reviewer assessments (visible to students) | project (FK), reviewer (FK), ratings (JSON), comments (JSON `{general: "..."}`), score, pass_status, section_scores (JSON) |
 | **AttachedFile** | Uploaded documents (PDF/Word) | project (FK), name, file, file_type, date |
 | **Semester** | Academic periods with date ranges | period (YYYY-SS, unique), is_active, start_month (1-12), end_month (1-12). Computed `label` property handles cross-year ranges. |
 | **Comment** | Project discussion threads | project (FK), author (FK), content |
+| **PresentationDay** | Scheduled presentation day | date (unique), semester (FK), notes, created_by (FK User, nullable) |
+| **Presentation** | Single defense slot | day (FK), project (FK), tutor (FK User, nullable, Tutor only), jurado (M2M *through* `PresentationJuror`), start_time, duration_minutes, order. `UniqueConstraint(day, project)`. |
+| **PresentationJuror** | Explicit M2M through-model for jurors | presentation (FK), juror (FK User, Jurado only), individual_score (nullable), notified, notified_at, confirmed_attendance, attended, created_at, updated_at. `unique_together=(presentation, juror)`. **Important:** `.jurado.add()` / `.set()` is forbidden on `through=` M2Ms — create `PresentationJuror` rows directly. |
 
 ## User Roles
 
@@ -113,12 +116,12 @@ backend/
 
 ## Test Users (via create_test_users.py)
 
-| Email | Role | Password | Cedula |
-|-------|------|----------|--------|
-| admin@example.com | Administrador | 123 | V-10000001 |
-| tutor@example.com | Tutor | 123 | V-10000002 |
-| jurado@example.com | Jurado | 123 | V-10000003 |
-| student@example.com | Estudiante | 123 | V-20000001 |
+| Email | Role | Password | Nationality | Cedula (int) |
+|-------|------|----------|-------------|--------------|
+| admin@example.com | Administrador | 123 | V | 10000001 |
+| tutor@example.com | Tutor | 123 | V | 10000002 |
+| jurado@example.com | Jurado | 123 | V | 10000003 |
+| student@example.com | Estudiante | 123 | V | 20000001 |
 
 ## Development Commands
 
