@@ -27,6 +27,8 @@ export default function PlanificacionView() {
   const [editTarget, setEditTarget] = useState<Presentation | null>(null);
   const [showAll, setShowAll] = useState(false);
   const [highlightedDate, setHighlightedDate] = useState<string | null>(null);
+  const [selectedDays, setSelectedDays] = useState<Set<number>>(new Set());
+  const [showDeleteMode, setShowDeleteMode] = useState(false);
 
   const highlightedTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -127,6 +129,32 @@ export default function PlanificacionView() {
       console.error("Error deleting day", err);
     }
   }, [refresh]);
+
+  const handleSelectDay = useCallback((day: PresentationDay, sel: boolean) => {
+    setSelectedDays((prev) => {
+      const next = new Set(prev);
+      if (sel) next.add(day.id);
+      else next.delete(day.id);
+      return next;
+    });
+  }, []);
+
+  const handleBulkDeleteDays = useCallback(async () => {
+    if (selectedDays.size === 0) return;
+    const confirmMsg = selectedDays.size === 1
+      ? "¿Eliminar el día seleccionado?"
+      : `¿Eliminar los ${selectedDays.size} días seleccionados? Esto eliminará todas sus presentaciones.`;
+    if (!confirm(confirmMsg)) return;
+    try {
+      const { deleteDay } = await import("../api/planificacionService");
+      await Promise.all([...selectedDays].map((id) => deleteDay(id)));
+      setSelectedDays(new Set());
+      setShowDeleteMode(false);
+      await refresh();
+    } catch (err) {
+      console.error("Error deleting days", err);
+    }
+  }, [selectedDays, refresh]);
 
   const handleSavePresentation = useCallback(
     async (dayId: number, payload: PresentationCreate, editId?: number) => {
@@ -285,6 +313,34 @@ export default function PlanificacionView() {
                 </div>
 
                 <div className="flex items-center gap-3 flex-wrap">
+                  {/* Toggle delete mode */}
+                  {days.length > 0 && (
+                    <button
+                      onClick={() => {
+                        setShowDeleteMode((v) => !v);
+                        if (showDeleteMode) setSelectedDays(new Set());
+                      }}
+                      className={[
+                        "h-9 px-4 rounded-xl text-sm font-semibold transition-all",
+                        showDeleteMode
+                          ? "bg-red-50 text-red-600 border border-red-200 hover:bg-red-100"
+                          : "bg-gray-100 text-gray-600 hover:bg-gray-200",
+                      ].join(" ")}
+                    >
+                      {showDeleteMode ? "Cancelar selección" : "Seleccionar días"}
+                    </button>
+                  )}
+
+                  {/* Bulk delete */}
+                  {showDeleteMode && selectedDays.size > 0 && (
+                    <button
+                      onClick={handleBulkDeleteDays}
+                      className="h-9 px-4 rounded-xl text-sm font-bold bg-red-500 text-white hover:bg-red-600 transition-all shadow-lg shadow-red-500/20"
+                    >
+                      Eliminar {selectedDays.size} {selectedDays.size === 1 ? "día" : "días"}
+                    </button>
+                  )}
+
                   {/* Mode toggle */}
                   <div
                     role="radiogroup"
@@ -319,46 +375,54 @@ export default function PlanificacionView() {
                 </div>
               </div>
 
-              {/* Date selection calendar + day cards */}
+              {/* Date selection calendar + day cards - separate scrollable panels */}
               {loading ? (
                 <div className="flex justify-center py-10">
                   <div className="w-8 h-8 rounded-full border-4 border-slate-200 border-t-blue-600 animate-spin" />
                 </div>
               ) : (
-                <div className="grid grid-cols-1 xl:grid-cols-[320px_1fr] gap-6">
-                  {/* Left: Interactive date selection calendar */}
-                  <DateSelectionCalendar
-                    selected={selected}
-                    mode={mode}
-                    onToggleDay={toggleDay}
-                    onRangeSelect={(start, end) => {
-                      const dates = dateRange(start, end);
-                      dates.forEach((d: string) => toggleDay(d));
-                    }}
-                  />
+                <div className="flex flex-col xl:flex-row gap-6">
+                  {/* Left: Interactive date selection calendar - fixed height, own scroll */}
+                  <div className="xl:w-[320px] flex-shrink-0">
+                    <DateSelectionCalendar
+                      selected={selected}
+                      mode={mode}
+                      onToggleDay={toggleDay}
+                      onRangeSelect={(start, end) => {
+                        const dates = dateRange(start, end);
+                        dates.forEach((d: string) => toggleDay(d));
+                      }}
+                      onClearAll={clearAll}
+                    />
+                  </div>
 
-                  {/* Right: Day cards */}
-                  <div>
-                    {days.length === 0 ? (
-                      <EmptyDayState isAdmin={isAdmin} />
-                    ) : (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-                        {days.map((day, idx) => (
-                          <CompactDayCard
-                            key={day.id}
-                            day={day}
-                            isAdmin={isAdmin}
-                            onAddPresentation={handleAddPresentation}
-                            onEditPresentation={handleEditPresentation}
-                            onDeletePresentation={handleDeletePresentation}
-                            onDeleteDay={handleDeleteDay}
-                            style={{
-                              animationDelay: `${Math.min(idx, 5) * 60}ms`,
-                            }}
-                          />
-                        ))}
-                      </div>
-                    )}
+                  {/* Right: Day cards - scrollable container */}
+                  <div className="flex-1 min-h-0">
+                    <div className="bg-white/40 rounded-2xl border border-gray-200/60 p-4 overflow-y-auto max-h-[500px]">
+                      {days.length === 0 ? (
+                        <EmptyDayState isAdmin={isAdmin} />
+                      ) : (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          {days.map((day, idx) => (
+                            <CompactDayCard
+                              key={day.id}
+                              day={day}
+                              isAdmin={isAdmin}
+                              selectable={showDeleteMode}
+                              selected={selectedDays.has(day.id)}
+                              onSelect={handleSelectDay}
+                              onAddPresentation={handleAddPresentation}
+                              onEditPresentation={handleEditPresentation}
+                              onDeletePresentation={handleDeletePresentation}
+                              onDeleteDay={handleDeleteDay}
+                              style={{
+                                animationDelay: `${Math.min(idx, 5) * 60}ms`,
+                              }}
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               )}

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Suspense, useState, useCallback, useEffect } from "react";
+import React, { Suspense, useState, useCallback, useEffect, useMemo } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { redirect } from "next/navigation";
 import Sidebar from "@widgets/sidebar/Sidebar";
@@ -17,11 +17,23 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
 
-  // P0 FIX: Synchronous auth check BEFORE any render/flash.
-  // isAuthenticated() reads sessionStorage instantly — no useEffect needed,
-  // no render-then-redirect flash.
-  if (!isAuthenticated()) {
+  // Wait for hydration so localStorage is available
+  useEffect(() => { setHydrated(true); }, []);
+
+  // P0: Defer redirect until hydrated so localStorage is readable
+  const authed = useMemo(() => hydrated && isAuthenticated(), [hydrated]);
+
+  if (!hydrated) {
+    return (
+      <div className="h-screen w-full flex bg-slate-50">
+        <DashboardSkeleton />
+      </div>
+    );
+  }
+
+  if (!authed) {
     redirect("/");
   }
 

@@ -52,9 +52,12 @@ export function useDateSelection(): UseDateSelectionReturn {
       } else {
         // Rango mode
         if (rangeStart === null) {
+          // Nothing started yet — day click in calendar will call onToggleDay
+          // with the first day. We just track it as rangeStart.
           setRangeStartState(dateStr);
           setSelected(new Set([dateStr]));
         } else {
+          // rangeStart already set — this click completes the range
           const start = rangeStart < dateStr ? rangeStart : dateStr;
           const end = rangeStart < dateStr ? dateStr : rangeStart;
           setSelected(new Set(dateRange(start, end)));

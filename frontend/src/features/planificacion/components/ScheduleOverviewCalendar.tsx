@@ -154,7 +154,19 @@ export default function ScheduleOverviewCalendar({
               const day = dayByDate.get(dateStr);
               const hasDay = !!day;
               const today = isToday(dateStr);
+              const count = day?.presentations.length ?? 0;
               const typeSet = day ? getDayTypeSet(day) : new Set<"tesis" | "proyecto">();
+
+              // Background colors for days with presentations
+              const hasTesis = typeSet.has("tesis");
+              const hasProyecto = typeSet.has("proyecto");
+              const bgColor = hasDay
+                ? hasTesis && hasProyecto
+                  ? "bg-gradient-to-br from-[#ff6b35]/20 to-[#0066ff]/20"
+                  : hasTesis
+                  ? "bg-[#ff6b35]/15"
+                  : "bg-[#0066ff]/15"
+                : "";
 
               return (
                 <button
@@ -164,7 +176,7 @@ export default function ScheduleOverviewCalendar({
                   disabled={!hasDay}
                   className={[
                     `${cellH} w-full rounded-xl flex flex-col items-center justify-center relative transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#ffd23f]`,
-                    hasDay ? "cursor-pointer hover:bg-blue-50" : "cursor-default",
+                    hasDay ? `cursor-pointer hover:opacity-90 ${bgColor}` : "cursor-default",
                     today && !hasDay ? "ring-2 ring-[#ffd23f] ring-offset-1" : "",
                   ]
                     .join(" ")
@@ -178,15 +190,17 @@ export default function ScheduleOverviewCalendar({
                   <span className={`font-semibold leading-none ${dayNumSize} ${hasDay ? "text-gray-900" : "text-gray-400"}`}>
                     {dateStr.split("-")[2].replace(/^0/, "")}
                   </span>
-                  {/* Colored type dots */}
-                  {hasDay && (
-                    <span className="mt-0.5 flex items-center gap-0.5">
-                      {typeSet.has("tesis") && (
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#ff6b35] inline-block" aria-label="TEG" />
-                      )}
-                      {typeSet.has("proyecto") && (
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#0066ff] inline-block" aria-label="PTEG" />
-                      )}
+                  {/* Count badge */}
+                  {hasDay && count > 0 && (
+                    <span className={[
+                      "mt-0.5 inline-flex items-center justify-center rounded-full text-[9px] font-bold",
+                      hasTesis && hasProyecto
+                        ? "bg-gradient-to-r from-[#ff6b35] to-[#0066ff] text-white px-1.5"
+                        : hasTesis
+                        ? "bg-[#ff6b35] text-white px-1.5"
+                        : "bg-[#0066ff] text-white px-1.5"
+                    ].join(" ")}>
+                      {count}
                     </span>
                   )}
                 </button>
