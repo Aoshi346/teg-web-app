@@ -25,18 +25,6 @@ export default function DashboardLayout({
   // P0: Defer redirect until hydrated so localStorage is readable
   const authed = useMemo(() => hydrated && isAuthenticated(), [hydrated]);
 
-  if (!hydrated) {
-    return (
-      <div className="h-screen w-full flex bg-slate-50">
-        <DashboardSkeleton />
-      </div>
-    );
-  }
-
-  if (!authed) {
-    redirect("/");
-  }
-
   const handleSidebarCollapse = useCallback(() => {
     setIsSidebarCollapsed((prev) => !prev);
   }, []);
@@ -49,6 +37,18 @@ export default function DashboardLayout({
   useEffect(() => {
     setIsMobileSidebarOpen(false);
   }, [pathname]);
+
+  if (!hydrated) {
+    return (
+      <div className="h-screen w-full flex bg-slate-50">
+        <DashboardSkeleton />
+      </div>
+    );
+  }
+
+  if (!authed) {
+    redirect("/");
+  }
 
   // Pending account gate — getUser() is cached from above sync check
   const user = getUser();
