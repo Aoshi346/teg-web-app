@@ -12,10 +12,18 @@ import {
 } from "lucide-react";
 import { getUserRole, getUserEmail, logout } from "@features/auth/api/clientAuth";
 import { useRouter } from "next/navigation";
+import { cn } from "@shared/lib/utils";
 
 interface DashboardHeaderProps {
   pageTitle: string;
 }
+
+const AVATAR_GRADIENTS = [
+  "from-indigo-600 to-blue-500",
+  "from-slate-800 to-indigo-700",
+  "from-emerald-600 to-teal-500",
+  "from-rose-500 to-amber-500",
+];
 
 const DashboardHeader: React.FC<DashboardHeaderProps> = ({ pageTitle }) => {
   const sidebar = useSidebar();
@@ -44,20 +52,24 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ pageTitle }) => {
     router.push("/");
   };
 
-  const avatarColors = ["bg-blue-100 text-blue-600", "bg-purple-100 text-purple-600", "bg-emerald-100 text-emerald-600", "bg-amber-100 text-amber-600"];
-  const avatarColor = userEmail ? avatarColors[userEmail.length % avatarColors.length] : avatarColors[0];
+  const gradientIdx = userEmail ? userEmail.length % AVATAR_GRADIENTS.length : 0;
+  const gradient = AVATAR_GRADIENTS[gradientIdx];
+
+  const displayName = userEmail
+    ? userEmail.split("@")[0].charAt(0).toUpperCase() + userEmail.split("@")[0].slice(1)
+    : "Usuario";
 
   return (
-    <header className="bg-white/80 backdrop-blur-md border-b border-gray-200/50 sticky top-0 z-10 h-14 sm:h-16 md:h-[72px] flex-shrink-0">
+    <header className="bg-white border-b border-slate-200 sticky top-0 z-40 h-16 lg:h-[72px] flex-shrink-0">
       <div className="px-3 sm:px-4 md:px-6 lg:px-8 h-full flex items-center justify-between gap-2">
         {/* Left: menu + title */}
         <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
           {/* Mobile menu toggle */}
           <button
-            className={`lg:hidden inline-flex items-center justify-center p-2.5 rounded-xl border transition-colors touch-manipulation ${
+            className={`lg:hidden inline-flex items-center justify-center p-2.5 rounded-lg border transition-colors touch-manipulation ${
               sidebar.mobileOpen
-                ? "bg-usm-blue border-usm-blue text-white shadow-sm"
-                : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50 active:bg-slate-100"
+                ? "bg-primary text-white border-primary"
+                : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
             }`}
             aria-label={sidebar.mobileOpen ? "Cerrar menú" : "Abrir menú"}
             onClick={sidebar.toggleMobile}
@@ -67,7 +79,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ pageTitle }) => {
 
           {/* Desktop collapse toggle */}
           <button
-            className="hidden lg:inline-flex items-center justify-center p-2 rounded-lg hover:bg-slate-100 text-slate-600 active:bg-slate-200 transition-colors"
+            className="hidden lg:inline-flex items-center justify-center p-2 rounded-lg hover:bg-slate-100 text-slate-600 transition-colors"
             aria-label={sidebar.isCollapsed ? "Expandir barra lateral" : "Colapsar barra lateral"}
             onClick={sidebar.toggleCollapse}
           >
@@ -75,7 +87,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ pageTitle }) => {
           </button>
 
           {/* Page title */}
-          <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-slate-900 tracking-tight truncate">
+          <h2 className="text-lg lg:text-xl font-bold text-slate-900 tracking-tight truncate">
             {pageTitle}
           </h2>
         </div>
@@ -83,7 +95,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ pageTitle }) => {
         {/* Right: notifications + profile */}
         <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
           {/* Notification bell */}
-          <button className="relative p-2 sm:p-2.5 rounded-xl bg-slate-50 border border-slate-100/50 hover:bg-white hover:border-blue-200 hover:shadow-sm active:scale-95 transition-all duration-200 touch-manipulation">
+          <button className="relative p-2 sm:p-2.5 rounded-lg hover:bg-slate-100 active:scale-95 transition-all duration-200 touch-manipulation">
             <Bell className="w-4 h-4 sm:w-5 sm:h-5 text-slate-500" />
             <span className="absolute top-1 right-1 flex h-2.5 w-2.5">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
@@ -98,16 +110,18 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ pageTitle }) => {
           <div className="relative" ref={profileRef}>
             <button
               onClick={() => setIsProfileOpen(!isProfileOpen)}
+              aria-expanded={isProfileOpen}
+              aria-haspopup="menu"
               className={`flex items-center gap-2 p-1 pr-2 rounded-xl border transition-all duration-200 touch-manipulation focus:outline-none ${
                 isProfileOpen
-                  ? "bg-blue-50/50 border-blue-200 shadow-sm"
-                  : "bg-white border-slate-100 hover:border-slate-200 hover:shadow-sm active:scale-95"
+                  ? "bg-primary/10 border-primary/20 shadow-sm"
+                  : "bg-transparent border-transparent hover:bg-slate-100"
               }`}
             >
               {/* Avatar */}
               <div className="relative">
                 {userEmail ? (
-                  <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center text-sm font-bold ${avatarColor} shadow-sm`}>
+                  <div className={cn("w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center text-sm font-bold bg-gradient-to-br shadow-sm text-white", gradient)}>
                     {userEmail[0].toUpperCase()}
                   </div>
                 ) : (
@@ -121,10 +135,9 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ pageTitle }) => {
               {/* Name + role (desktop) */}
               <div className="hidden md:block text-left">
                 <p className="text-sm font-bold text-slate-800 leading-none truncate max-w-[120px]">
-                  {userEmail ? userEmail.split("@")[0].charAt(0).toUpperCase() + userEmail.split("@")[0].slice(1) : "Usuario"}
+                  {displayName}
                 </p>
-                <p className="text-[10px] uppercase tracking-widest font-bold text-usm-blue mt-0.5 flex items-center gap-1 opacity-80">
-                  <span className="w-1 h-1 rounded-full bg-usm-blue/60" />
+                <p className="text-[10px] uppercase tracking-widest font-bold text-primary mt-0.5 opacity-80">
                   {userRole || "Invitado"}
                 </p>
               </div>
@@ -132,39 +145,45 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ pageTitle }) => {
               <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${isProfileOpen ? "rotate-180" : ""}`} />
             </button>
 
-            {/* Dropdown */}
+            {/* Dropdown panel */}
             {isProfileOpen && (
-              <div className="absolute right-0 top-full mt-2 w-64 sm:w-72 bg-white/95 backdrop-blur-xl rounded-2xl shadow-[0_16px_40px_rgba(0,0,0,0.12)] border border-slate-100 p-2 z-50 animate-in fade-in zoom-in-95 slide-in-from-top-2 duration-200 origin-top-right">
-                {/* Header card */}
-                <div className="px-4 py-3 bg-gradient-to-br from-slate-900 to-slate-800 rounded-xl mb-2 relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-16 h-16 bg-usm-blue/10 rounded-full -mr-4 -mt-4 blur-2xl" />
-                  <div className="relative z-10">
-                    <p className="text-xs font-bold text-blue-300/80 uppercase tracking-widest mb-1">Identificado como</p>
-                    <p className="text-sm font-bold text-white truncate">{userEmail || "Usuario"}</p>
-                    <span className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-usm-blue/20 border border-blue-400/20 text-[10px] font-bold tracking-widest text-blue-100 uppercase mt-1">
-                      {userRole || "Invitado"}
+              <div className="absolute right-0 top-full mt-3 w-72 bg-white rounded-xl shadow-xl border border-slate-200 p-1.5 z-[60] animate-in fade-in zoom-in-95 slide-in-from-top-2 duration-200 origin-top-right">
+                {/* Header block */}
+                <div className="flex items-center gap-3 px-3 py-3 border-b border-slate-100">
+                  <div
+                    className={cn(
+                      "w-11 h-11 rounded-full bg-gradient-to-br shadow-sm flex items-center justify-center flex-shrink-0",
+                      gradient
+                    )}
+                  >
+                    <span className="font-display text-xl text-white select-none">
+                      {userEmail ? userEmail[0].toUpperCase() : "?"}
                     </span>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold text-slate-900 truncate">{displayName}</p>
+                    <p className="text-xs text-slate-500 truncate mt-0.5">{userEmail || "—"}</p>
+                    <p className="text-[10px] uppercase tracking-widest text-primary mt-1.5 font-semibold">
+                      {userRole || "Invitado"}
+                    </p>
                   </div>
                 </div>
 
                 {/* Actions */}
-                <div className="space-y-0.5">
-                  <p className="px-3 py-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Cuenta</p>
+                <div className="mt-1 space-y-0.5">
                   <button
-                    className="w-full text-left flex items-center gap-3 px-3 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-blue-700 rounded-xl transition-colors"
+                    className="w-full text-left flex items-center gap-3 px-3 py-2 text-sm text-slate-700 rounded-lg hover:bg-slate-50 hover:text-slate-900 transition-colors"
                     onClick={() => { setIsProfileOpen(false); router.push("/dashboard/settings"); }}
                   >
-                    <div className="p-1.5 bg-slate-100 rounded-lg"><User className="w-4 h-4 text-slate-500" /></div>
+                    <User className="w-4 h-4 text-slate-500" />
                     Configuración
                   </button>
 
-                  <div className="my-1.5 border-t border-slate-100 mx-2" />
-
                   <button
                     onClick={handleLogout}
-                    className="w-full text-left flex items-center gap-3 px-3 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50 rounded-xl transition-colors"
+                    className="w-full text-left flex items-center gap-3 px-3 py-2 text-sm font-medium text-slate-700 rounded-lg hover:bg-destructive/10 hover:text-destructive transition-colors"
                   >
-                    <div className="p-1.5 bg-red-50 rounded-lg"><LogOut className="w-4 h-4 text-red-500" /></div>
+                    <LogOut className="w-4 h-4" />
                     Cerrar Sesión
                   </button>
                 </div>

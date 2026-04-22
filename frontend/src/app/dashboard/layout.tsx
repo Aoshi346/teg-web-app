@@ -40,7 +40,7 @@ export default function DashboardLayout({
 
   if (!hydrated) {
     return (
-      <div className="h-screen w-full flex bg-slate-50">
+      <div className="h-screen w-full flex bg-white">
         <DashboardSkeleton />
       </div>
     );
@@ -85,7 +85,7 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="h-screen w-full flex bg-slate-50 overflow-x-hidden">
+    <div className="h-screen w-full flex bg-white overflow-x-hidden">
       <Sidebar
         isCollapsed={isSidebarCollapsed}
         setIsCollapsed={setIsSidebarCollapsed}
