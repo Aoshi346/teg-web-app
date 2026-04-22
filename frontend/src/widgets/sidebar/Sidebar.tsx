@@ -86,14 +86,12 @@ const Sidebar: React.FC<SidebarProps> = ({
     return () => { cancelled = true; document.body.style.overflow = ""; };
   }, [mobileOpen]);
 
-  // Swipe-to-close gesture
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
   }, []);
 
   const handleTouchEnd = useCallback((e: React.TouchEvent) => {
     const diff = touchStartX.current - e.changedTouches[0].clientX;
-    // Swipe left to close (negative diff means swipe left when drawer is on left)
     if (diff > 60) {
       setMobileOpen(false);
     }
@@ -137,7 +135,6 @@ const Sidebar: React.FC<SidebarProps> = ({
     router.prefetch(href);
   }, [router]);
 
-  // Keyboard shortcuts
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
@@ -152,7 +149,6 @@ const Sidebar: React.FC<SidebarProps> = ({
     return () => window.removeEventListener("keydown", handleKey);
   }, [router, mobileOpen, setMobileOpen, menuItems]);
 
-  // Shared link renderer
   const renderLink = (item: typeof menuItems[0], index: number, opts: { collapsed?: boolean; mobile?: boolean } = {}) => {
     const isActive = pathname
       ? item.href === "/dashboard" ? pathname === item.href : pathname.startsWith(item.href)
@@ -165,29 +161,24 @@ const Sidebar: React.FC<SidebarProps> = ({
           href={item.href}
           onClick={opts.mobile ? () => setMobileOpen(false) : undefined}
           onMouseEnter={() => handleLinkHover(item.href)}
+          aria-current={isActive ? "page" : undefined}
           className={`w-full flex items-center ${opts.collapsed ? "justify-center gap-0 px-3" : "gap-3 px-4"} py-3 rounded-xl transition-all duration-200 relative group overflow-hidden border border-transparent ${
             isActive
-              ? "text-blue-700 bg-blue-50/80 shadow-sm border-blue-100/50"
-              : "text-slate-600 hover:bg-blue-50/80 hover:text-blue-700 hover:shadow-sm hover:border-blue-100/50"
+              ? "text-primary bg-primary/10 border-primary/30"
+              : "text-slate-600 hover:bg-primary/5 hover:text-primary hover:border-primary/20"
           }`}
           title={opts.collapsed ? `${item.label} (Alt+${index + 1})` : `Alt+${index + 1}`}
         >
-          {isActive && (
-            <div className="absolute inset-0 opacity-10 pointer-events-none bg-gradient-to-r from-blue-500 to-blue-600" />
-          )}
-          <item.icon className={`w-5 h-5 flex-shrink-0 transition-transform duration-200 relative z-10 ${isActive ? "scale-110 text-blue-600" : "group-hover:text-blue-600 group-hover:scale-110"}`} />
-          <span className={`font-bold tracking-wide whitespace-nowrap overflow-hidden transition-all duration-200 relative z-10 ${opts.collapsed ? "w-0 opacity-0" : "w-auto opacity-100"} ${isActive ? "text-blue-800" : "group-hover:text-blue-800"}`}>
+          <div className={`absolute left-0 top-0 bottom-0 w-[3px] rounded-r-full transition-opacity duration-200 ${isActive ? "opacity-100 bg-primary shadow-[0_0_8px_rgb(0_102_255_/_0.35)]" : "opacity-0"}`} />
+          <item.icon className={`w-5 h-5 flex-shrink-0 transition-transform duration-200 relative z-10 ${isActive ? "scale-110 text-primary" : "text-slate-500 group-hover:text-primary group-hover:scale-110"}`} />
+          <span className={`font-bold tracking-wide whitespace-nowrap overflow-hidden transition-all duration-200 relative z-10 ${opts.collapsed ? "w-0 opacity-0" : "w-auto opacity-100"}`}>
             {item.label}
           </span>
-          {isActive && !opts.collapsed && (
-            <div className="absolute left-0 top-0 bottom-0 w-1.5 rounded-r-full bg-gradient-to-b from-usm-orange to-usm-yellow shadow-[0_0_10px_rgba(249,115,22,0.5)]" />
-          )}
         </Link>
       </li>
     );
   };
 
-  // Logo block
   const LogoBlock = ({ compact = false }: { compact?: boolean }) => (
     <div className={`flex items-center gap-3 min-w-0 ${compact ? "gap-0 justify-center" : ""}`}>
       <div className="w-10 h-10 rounded-xl flex items-center justify-center">
@@ -196,7 +187,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       {!compact && (
         <div className="overflow-hidden flex flex-col justify-center">
           <h1 className="text-xl font-bold text-slate-900 tracking-tight leading-none mb-1">Tesisfar</h1>
-          <p className="text-[11px] uppercase tracking-wider font-bold text-slate-500">Gestión de TEG</p>
+          <p className="text-[11px] uppercase tracking-wider text-slate-500">Gestión de TEG</p>
         </div>
       )}
     </div>
@@ -206,10 +197,9 @@ const Sidebar: React.FC<SidebarProps> = ({
     <div className="sidebar-container">
       {portalTarget && createPortal(
         <>
-          {/* Mobile drawer — GSAP animated */}
           <div
             ref={drawerRef}
-            className="lg:hidden fixed inset-y-0 left-0 z-[100] w-[85vw] max-w-xs sm:max-w-sm bg-white border-r border-slate-200 shadow-2xl"
+            className="lg:hidden fixed inset-y-0 left-0 z-[100] w-[85vw] max-w-xs sm:max-w-sm bg-white border-r border-slate-200 shadow-xl"
             style={{ transform: "translateX(-100%)" }}
             role="dialog"
             aria-modal="true"
@@ -223,7 +213,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 <button
                   ref={closeBtnRef}
                   onClick={() => setMobileOpen(false)}
-                  className="p-2 rounded-lg text-slate-400 hover:text-slate-800 hover:bg-slate-100 transition-colors touch-manipulation"
+                  className="p-2 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors touch-manipulation"
                   aria-label="Cerrar menú"
                 >
                   <X className="w-5 h-5" />
@@ -237,7 +227,6 @@ const Sidebar: React.FC<SidebarProps> = ({
             </div>
           </div>
 
-          {/* Backdrop */}
           <div
             ref={backdropRef}
             className="lg:hidden fixed inset-0 z-[90] bg-black/50"
@@ -249,7 +238,6 @@ const Sidebar: React.FC<SidebarProps> = ({
         portalTarget,
       )}
 
-      {/* Desktop persistent sidebar */}
       <aside
         className={`hidden lg:flex lg:flex-col h-screen bg-white border-r border-slate-200 shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-50 transition-[width] duration-300 ${isCollapsed ? "w-20" : "w-64"}`}
         style={{ position: "relative" }}

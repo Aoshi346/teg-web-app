@@ -41,3 +41,17 @@ env/
 
 # Documentation (local docs, not committed)
 docs/
+
+# Production scripts (VPS/server-specific)
+start.prod.sh
+
+# Collected static files (build output from `manage.py collectstatic`)
+backend/staticfiles/
+
+# Redesign orchestration artifacts (not checked in)
+.claude/state/20260422-*/
+docs/superpowers/specs/2026-04-22-*
+.claude/state/**/*-result.md
+.claude/state/**/*-worker-result.md
+.claude/state/**/frontend-worker-result.md
+.claude/state/**/test-worker-result.md
