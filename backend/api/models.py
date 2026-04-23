@@ -111,6 +111,13 @@ class Project(models.Model):
         ('pending', 'Pendiente'),
         ('rejected', 'Rechazado'),
     )
+    STATE_CHOICES = (
+        ('pending_review_1', 'Pendiente 1ra revisión'),
+        ('pending_review_2', 'Pendiente 2da revisión'),
+        ('pending_defense', 'Pendiente defensa oral'),
+        ('approved', 'Aprobado'),
+        ('failed_final', 'Reprobado (sin más intentos)'),
+    )
 
     title = models.CharField(max_length=255)
     student = models.ForeignKey(User, on_delete=models.CASCADE, related_name='projects')
@@ -126,6 +133,14 @@ class Project(models.Model):
     project_type = models.CharField(max_length=10, choices=TYPE_CHOICES, default='proyecto')
 
     failed_attempts = models.IntegerField(default=0)
+
+    state = models.CharField(
+        max_length=20,
+        choices=STATE_CHOICES,
+        default='pending_review_1',
+        db_index=True,
+        help_text="Estado del ciclo de vida del proyecto. Autogestionado por Evaluation.",
+    )
 
     reviewer = models.ForeignKey(
         User,
@@ -157,9 +172,19 @@ class Evaluation(models.Model):
         ('Pass', 'Pass'),
         ('Fail', 'Fail'),
     )
+    KIND_CHOICES = (
+        ('review', 'Revisión'),
+        ('defense', 'Defensa oral'),
+    )
 
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='evaluations')
     reviewer = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='reviews')
+    kind = models.CharField(
+        max_length=10,
+        choices=KIND_CHOICES,
+        default='review',
+        db_index=True,
+    )
     ratings = models.JSONField(default=dict, blank=True)
     comments = models.JSONField(default=dict, blank=True)
     score = models.FloatField(default=0)
