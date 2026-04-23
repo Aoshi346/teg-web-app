@@ -65,9 +65,27 @@ class TestDeriveState:
         p = _mk(student, failed_attempts=1)
         assert derive_state(p, evaluations=[]) == 'pending_review_2'
 
-    def test_tesis_is_untouched(self, student):
+    def test_derive_state_has_no_tesis_guard(self, student):
+        """
+        Regla: `derive_state` no tiene guardia para TEG — devolverá un estado
+        válido aunque le pasen un proyecto TEG. El filtro `project_type='proyecto'`
+        en la migración 0030 es lo que previene que TEG sea tocado. Este test
+        documenta ese contrato para que nadie añada un guard redundante dentro
+        de `derive_state` sin leer la migración primero.
+        """
         p = _mk(student, project_type='tesis', status='checked')
-        # derive_state only called for PTEG; caller must skip for TEG
-        # but the function itself should still behave; no special case here.
-        # This test just documents that TEG callers skip the function.
-        assert p.project_type == 'tesis'
+        assert derive_state(p, evaluations=[]) == 'approved'
+
+    def test_checked_status_wins_over_failed_attempts(self, student):
+        """Contradiction: status='checked' + failed_attempts=2 → approved (status wins)."""
+        p = _mk(student, status='checked', failed_attempts=2)
+        assert derive_state(p, evaluations=[]) == 'approved'
+
+    def test_pass_eval_wins_over_failed_attempts_counter(self, student):
+        """
+        Tie-breaker: a Pass eval overrides failed_attempts>=2. Rule order is
+        checked → has_pass → fails, so has_pass evaluated before fails.
+        """
+        p = _mk(student, status='pending', failed_attempts=2)
+        evals = [Evaluation(project=p, pass_status='Pass', score=15, kind='review')]
+        assert derive_state(p, evaluations=evals) == 'pending_defense'

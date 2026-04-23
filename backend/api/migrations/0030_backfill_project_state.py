@@ -20,9 +20,10 @@ def backfill(apps, schema_editor):
         p.state = derive_state(p, evals)
         p.save(update_fields=['state'])
 
-    # Every existing Evaluation predates the `kind` field, so ensure it's set
-    # to 'review' explicitly (the default covers new rows, but updates are free).
-    Evaluation.objects.filter(kind='').update(kind='review')
+    # At this point in migration history the only valid kind is 'review'.
+    # The AddField default covers any rows inserted after 0029, but we run
+    # this sweep unconditionally in case a prior data load bypassed the default.
+    Evaluation.objects.update(kind='review')
 
 
 def reverse(apps, schema_editor):
