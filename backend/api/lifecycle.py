@@ -27,6 +27,9 @@ def next_state(project, evaluation_kind: str, pass_status: str) -> str:
             f"Project is {current}; no further evaluations allowed."
         )
 
+    if pass_status not in ('Pass', 'Fail'):
+        raise InvalidTransition(f"Unknown pass_status: {pass_status!r}")
+
     if evaluation_kind == 'review':
         if current == 'pending_review_1':
             return 'pending_defense' if pass_status == 'Pass' else 'pending_review_2'
@@ -38,7 +41,7 @@ def next_state(project, evaluation_kind: str, pass_status: str) -> str:
 
     if evaluation_kind == 'defense':
         if current == 'pending_defense':
-            return 'approved' if pass_status == 'Pass' else current
+            return 'approved' if pass_status == 'Pass' else 'pending_defense'
         raise InvalidTransition(
             f"Cannot record defense on project in state {current}."
         )
@@ -47,7 +50,7 @@ def next_state(project, evaluation_kind: str, pass_status: str) -> str:
 
 
 def status_projection(state: str) -> str:
-    """Maps a lifecycle state to the legacy Project.status value for BC."""
+    """Maps a lifecycle state to the legacy Project.status value for backwards compatibility."""
     if state == 'approved':
         return 'checked'
     if state == 'failed_final':

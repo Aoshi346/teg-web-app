@@ -66,6 +66,24 @@ class TestUnknownInputs:
             next_state(FakeProject(state='pending_review_1'), 'garbage', 'Pass')
 
 
+class TestUnknownPassStatus:
+    def test_lowercase_pass_raises(self):
+        with pytest.raises(InvalidTransition):
+            next_state(FakeProject(state='pending_review_1'), 'review', 'pass')
+
+    def test_none_pass_status_raises(self):
+        with pytest.raises(InvalidTransition):
+            next_state(FakeProject(state='pending_review_1'), 'review', None)
+
+    def test_empty_string_pass_status_raises(self):
+        with pytest.raises(InvalidTransition):
+            next_state(FakeProject(state='pending_review_1'), 'review', '')
+
+    def test_arbitrary_string_pass_status_raises(self):
+        with pytest.raises(InvalidTransition):
+            next_state(FakeProject(state='pending_review_1'), 'review', 'Yes')
+
+
 class TestStatusProjection:
     def test_approved_maps_to_checked(self):
         assert status_projection('approved') == 'checked'
