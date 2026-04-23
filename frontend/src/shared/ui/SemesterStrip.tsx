@@ -39,9 +39,9 @@ export function SemesterStrip({ semester, now, className, ...rest }: SemesterStr
     >
       <Calendar className="h-4 w-4 text-text-muted" aria-hidden />
       <span className="font-semibold text-text-strong">{semester.period}</span>
-      <span className="text-text-muted">·</span>
+      <span className="text-border-default">·</span>
       <span>{semester.label || `${semester.start_month}/${semester.end_month}`}</span>
-      <span className="text-text-muted">·</span>
+      <span className="text-border-default">·</span>
       <span
         className={cn(
           "font-medium",
@@ -56,7 +56,7 @@ export function SemesterStrip({ semester, now, className, ...rest }: SemesterStr
       </span>
       {weekText && (
         <>
-          <span className="text-text-muted">·</span>
+          <span className="text-border-default">·</span>
           <span className="text-text-muted">{weekText}</span>
         </>
       )}
