@@ -11,8 +11,10 @@ import {
   getEvaluationsByProject,
   ApiEvaluation,
   uploadProjectFile,
+  assignReviewer,
 } from "@features/projects/api/projectService";
-import { getUserRole } from "@features/auth/api/clientAuth";
+import { getUserRole, getJurados } from "@features/auth/api/clientAuth";
+import type { User as AuthUser } from "@features/auth/api/clientAuth";
 
 export default function TesisDetailsPage() {
   const router = useRouter();
@@ -24,6 +26,13 @@ export default function TesisDetailsPage() {
   const [evaluations, setEvaluations] = React.useState<ApiEvaluation[]>([]);
   const [isUploading, setIsUploading] = React.useState(false);
   const [uploadError, setUploadError] = React.useState<string | null>(null);
+
+  // Jurado assignment state
+  const [showJuradoModal, setShowJuradoModal] = React.useState(false);
+  const [juradoOptions, setJuradoOptions] = React.useState<{ id: number; label: string }[]>([]);
+  const [selectedJuradoId, setSelectedJuradoId] = React.useState<number | "">("");
+  const [isAssigningJurado, setIsAssigningJurado] = React.useState(false);
+  const [juradoError, setJuradoError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     let mounted = true;
@@ -37,6 +46,52 @@ export default function TesisDetailsPage() {
     })();
     return () => { mounted = false; };
   }, [id]);
+
+  React.useEffect(() => {
+    if (userRole !== "Administrador" || !showJuradoModal) return;
+    (async () => {
+      const jurados = await getJurados();
+      setJuradoOptions(
+        jurados
+          .filter((u: AuthUser) => typeof u.id === "number")
+          .map((u: AuthUser) => ({ id: u.id!, label: u.fullName?.trim() ? u.fullName! : u.email })),
+      );
+    })();
+  }, [userRole, showJuradoModal]);
+
+  const handleAssignJurado = async () => {
+    if (!selectedJuradoId || !project) return;
+    setIsAssigningJurado(true);
+    setJuradoError(null);
+    try {
+      await assignReviewer(id, selectedJuradoId as number);
+      const refreshed = await getProject(id);
+      if (refreshed) setProject(refreshed);
+      setShowJuradoModal(false);
+      setSelectedJuradoId("");
+    } catch (err) {
+      setJuradoError(err instanceof Error ? err.message : "Error al asignar jurado.");
+    } finally {
+      setIsAssigningJurado(false);
+    }
+  };
+
+  const handleRemoveJurado = async () => {
+    if (!project) return;
+    setIsAssigningJurado(true);
+    setJuradoError(null);
+    try {
+      await assignReviewer(id, null);
+      const refreshed = await getProject(id);
+      if (refreshed) setProject(refreshed);
+      setShowJuradoModal(false);
+      setSelectedJuradoId("");
+    } catch (err) {
+      setJuradoError(err instanceof Error ? err.message : "Error al quitar jurado.");
+    } finally {
+      setIsAssigningJurado(false);
+    }
+  };
 
   const handleFileUpload = async (file: File) => {
     setUploadError(null);
@@ -72,6 +127,15 @@ export default function TesisDetailsPage() {
             onFileUpload={handleFileUpload}
             isUploading={isUploading}
             uploadError={uploadError}
+            showJuradoModal={showJuradoModal}
+            setShowJuradoModal={setShowJuradoModal}
+            juradoOptions={juradoOptions}
+            selectedJuradoId={selectedJuradoId}
+            setSelectedJuradoId={setSelectedJuradoId}
+            onAssignJurado={handleAssignJurado}
+            onRemoveJurado={handleRemoveJurado}
+            isAssigningJurado={isAssigningJurado}
+            juradoError={juradoError}
             actions={
               <>
                 {project.status === "pending" && (

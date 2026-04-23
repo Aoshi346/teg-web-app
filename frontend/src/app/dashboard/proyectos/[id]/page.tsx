@@ -12,8 +12,9 @@ import {
   ApiEvaluation,
   uploadProjectFile,
   reassignStudent,
+  assignReviewer,
 } from "@features/projects/api/projectService";
-import { getUserRole, getAllUsers } from "@features/auth/api/clientAuth";
+import { getUserRole, getAllUsers, getJurados } from "@features/auth/api/clientAuth";
 import type { User as AuthUser } from "@features/auth/api/clientAuth";
 
 export default function ProyectoDetailsPage() {
@@ -33,6 +34,13 @@ export default function ProyectoDetailsPage() {
   const [selectedStudentId, setSelectedStudentId] = React.useState<number | "">("");
   const [isReassigning, setIsReassigning] = React.useState(false);
   const [reassignError, setReassignError] = React.useState<string | null>(null);
+
+  // Jurado assignment state
+  const [showJuradoModal, setShowJuradoModal] = React.useState(false);
+  const [juradoOptions, setJuradoOptions] = React.useState<{ id: number; label: string }[]>([]);
+  const [selectedJuradoId, setSelectedJuradoId] = React.useState<number | "">("");
+  const [isAssigningJurado, setIsAssigningJurado] = React.useState(false);
+  const [juradoError, setJuradoError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     let mounted = true;
@@ -58,6 +66,18 @@ export default function ProyectoDetailsPage() {
     })();
   }, [userRole, showReassign]);
 
+  React.useEffect(() => {
+    if (userRole !== "Administrador" || !showJuradoModal) return;
+    (async () => {
+      const jurados = await getJurados();
+      setJuradoOptions(
+        jurados
+          .filter((u: AuthUser) => typeof u.id === "number")
+          .map((u: AuthUser) => ({ id: u.id!, label: u.fullName?.trim() ? u.fullName! : u.email })),
+      );
+    })();
+  }, [userRole, showJuradoModal]);
+
   const handleReassign = async () => {
     if (!selectedStudentId || !project) return;
     setIsReassigning(true);
@@ -72,6 +92,40 @@ export default function ProyectoDetailsPage() {
       setReassignError(err instanceof Error ? err.message : "Error al reasignar.");
     } finally {
       setIsReassigning(false);
+    }
+  };
+
+  const handleAssignJurado = async () => {
+    if (!selectedJuradoId || !project) return;
+    setIsAssigningJurado(true);
+    setJuradoError(null);
+    try {
+      await assignReviewer(id, selectedJuradoId as number);
+      const refreshed = await getProject(id);
+      if (refreshed) setProject(refreshed);
+      setShowJuradoModal(false);
+      setSelectedJuradoId("");
+    } catch (err) {
+      setJuradoError(err instanceof Error ? err.message : "Error al asignar jurado.");
+    } finally {
+      setIsAssigningJurado(false);
+    }
+  };
+
+  const handleRemoveJurado = async () => {
+    if (!project) return;
+    setIsAssigningJurado(true);
+    setJuradoError(null);
+    try {
+      await assignReviewer(id, null);
+      const refreshed = await getProject(id);
+      if (refreshed) setProject(refreshed);
+      setShowJuradoModal(false);
+      setSelectedJuradoId("");
+    } catch (err) {
+      setJuradoError(err instanceof Error ? err.message : "Error al quitar jurado.");
+    } finally {
+      setIsAssigningJurado(false);
     }
   };
 
@@ -122,6 +176,15 @@ export default function ProyectoDetailsPage() {
             isReassigning={isReassigning}
             reassignError={reassignError}
             setReassignError={setReassignError}
+            showJuradoModal={showJuradoModal}
+            setShowJuradoModal={setShowJuradoModal}
+            juradoOptions={juradoOptions}
+            selectedJuradoId={selectedJuradoId}
+            setSelectedJuradoId={setSelectedJuradoId}
+            onAssignJurado={handleAssignJurado}
+            onRemoveJurado={handleRemoveJurado}
+            isAssigningJurado={isAssigningJurado}
+            juradoError={juradoError}
             actions={
               <>
                 {project.status === "pending" && (

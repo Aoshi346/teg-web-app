@@ -20,6 +20,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import CommentsSection from "./CommentsSection";
+import Combobox from "@/app/dashboard/agregar/components/Combobox";
 import type { Project } from "@features/projects/types/project";
 import type { ApiEvaluation } from "@features/projects/api/projectService";
 
@@ -43,6 +44,16 @@ interface ProjectDetailViewProps {
   isReassigning?: boolean;
   reassignError?: string | null;
   setReassignError?: (v: string | null) => void;
+  /* Jurado assignment (admin) */
+  showJuradoModal?: boolean;
+  setShowJuradoModal?: (v: boolean) => void;
+  juradoOptions?: { id: number; label: string }[];
+  selectedJuradoId?: number | "";
+  setSelectedJuradoId?: (v: number | "") => void;
+  onAssignJurado?: () => void;
+  onRemoveJurado?: () => void;
+  isAssigningJurado?: boolean;
+  juradoError?: string | null;
   /* Actions */
   actions?: React.ReactNode;
 }
@@ -111,6 +122,15 @@ export default function ProjectDetailView({
   isReassigning,
   reassignError,
   setReassignError,
+  showJuradoModal,
+  setShowJuradoModal,
+  juradoOptions,
+  selectedJuradoId,
+  setSelectedJuradoId,
+  onAssignJurado,
+  onRemoveJurado,
+  isAssigningJurado,
+  juradoError,
   actions,
 }: ProjectDetailViewProps) {
   const router = useRouter();
@@ -275,6 +295,34 @@ export default function ProjectDetailView({
             </div>
           ))}
 
+          {/* Jurado asignado (admin only) */}
+          {userRole === "Administrador" && (
+            <div className="pt-2 border-t border-gray-100">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-lg bg-orange-100 text-orange-600 flex items-center justify-center text-sm font-bold flex-shrink-0">
+                    {project.reviewerName ? project.reviewerName.charAt(0) : "?"}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-gray-900 truncate">
+                      {project.reviewerName ?? "Sin jurado asignado"}
+                    </p>
+                    <p className="text-[11px] text-gray-400">Jurado asignado</p>
+                  </div>
+                </div>
+                {setShowJuradoModal && (
+                  <button
+                    type="button"
+                    onClick={() => setShowJuradoModal(true)}
+                    className="px-2.5 py-1 text-xs font-semibold text-orange-700 bg-orange-50 hover:bg-orange-100 border border-orange-200 rounded-lg transition-colors flex-shrink-0"
+                  >
+                    {project.reviewerName ? "Cambiar" : "Asignar"}
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Dates — inline */}
           <div className="pt-2 border-t border-gray-100 space-y-1">
             <InfoRow icon={Calendar} label="Entrega" value={project.submittedDate} color="text-gray-400" />
@@ -379,6 +427,65 @@ export default function ProjectDetailView({
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
         <CommentsSection projectId={project.id} />
       </div>
+
+      {/* ─── Jurado assignment modal (admin only) ─── */}
+      {showJuradoModal && setShowJuradoModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            onClick={() => setShowJuradoModal(false)}
+          />
+          <div className="relative w-full max-w-sm bg-white rounded-2xl shadow-2xl ring-1 ring-black/5 overflow-hidden animate-in zoom-in-95 fade-in duration-200">
+            <div className="p-5 border-b border-gray-100">
+              <h3 className="text-base font-bold text-gray-900">Jurado asignado</h3>
+              <p className="text-xs text-gray-500 mt-0.5">
+                {project.reviewerName
+                  ? `Jurado actual: ${project.reviewerName}`
+                  : "Sin jurado asignado"}
+              </p>
+            </div>
+            <div className="p-5 space-y-4">
+              <Combobox
+                options={juradoOptions ?? []}
+                value={selectedJuradoId}
+                onChange={(v) => setSelectedJuradoId?.(v)}
+                placeholder="Buscar jurado..."
+                emptyLabel="Sin jurados disponibles"
+              />
+              {juradoError && (
+                <p className="text-[11px] text-red-600 font-semibold">{juradoError}</p>
+              )}
+            </div>
+            <div className="flex flex-col gap-2 p-5 pt-0">
+              <button
+                type="button"
+                onClick={onAssignJurado}
+                disabled={!selectedJuradoId || isAssigningJurado}
+                className="w-full px-4 py-2.5 text-sm font-semibold text-white bg-orange-600 hover:bg-orange-700 rounded-xl disabled:opacity-50 transition-colors"
+              >
+                {isAssigningJurado ? "Guardando..." : "Guardar"}
+              </button>
+              {project.reviewerName && onRemoveJurado && (
+                <button
+                  type="button"
+                  onClick={onRemoveJurado}
+                  disabled={isAssigningJurado}
+                  className="w-full px-4 py-2.5 text-sm font-semibold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 rounded-xl disabled:opacity-50 transition-colors"
+                >
+                  Quitar asignación
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => setShowJuradoModal(false)}
+                className="w-full px-4 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-50 rounded-xl transition-colors"
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
