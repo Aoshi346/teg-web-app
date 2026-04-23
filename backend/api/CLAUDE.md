@@ -21,7 +21,7 @@
 | Model | Description |
 |-------|-------------|
 | **User** | Custom user with email auth, roles (Administrador/Estudiante/Tutor/Jurado), phone, `nationality` (V/E/P), `cedula` (PositiveIntegerField, nullable), semester (program year). `UniqueConstraint(nationality, cedula)`. Serializer exposes read-only `cedula_display` = `"V-30243721"`. |
-| **Project** | Title, student (FK), partner (optional FK), advisors (M2M to Tutor), status, period, project_type (proyecto/tesis), stage1_passed, failed_attempts |
+| **Project** | Title, student (FK), partner (optional FK), advisors (M2M to Tutor), reviewer (FK to User with role=Jurado, nullable, `related_name=assigned_projects`), status, period, project_type (proyecto/tesis), stage1_passed, failed_attempts |
 | **Evaluation** | Project evaluation with JSON ratings/comments/section_scores, score, pass_status (Pass/Fail) |
 | **AttachedFile** | File upload (pdf/doc/docx) attached to a project |
 | **Semester** | Academic period (YYYY-SS format, e.g. 2026-01), active flag, start/end months |
@@ -38,17 +38,17 @@
 | `/api/auth/` | AuthViewSet | login, logout, register, me |
 | `/api/csrf/` | CsrfTokenView | GET token |
 | `/api/users/` | UserViewSet | CRUD, filtered by role |
-| `/api/projects/` | ProjectViewSet | CRUD + reassign_student, upload_file |
-| `/api/evaluations/` | EvaluationViewSet | CRUD |
+| `/api/projects/` | ProjectViewSet | CRUD + reassign_student, upload_file, assign_reviewer (POST, admin-only, body `{"reviewer": <user_id \| null>}`, rejects non-Jurado users) |
+| `/api/evaluations/` | EvaluationViewSet | CRUD (create restricted to Administrador and Jurado; Jurado can only create on projects where they are the assigned `reviewer`) |
 | `/api/semesters/` | SemesterViewSet | CRUD + current, set_active |
 | `/api/comments/` | CommentViewSet | CRUD (requires project param) |
 | `/api/sessions/` | SessionViewSet | list, destroy, track |
 
 ## Role-Based Access
 
-- **Administrador**: Full access to all models and endpoints
-- **Tutor**: Sees only projects where they are assigned as advisor
-- **Jurado**: Sees all projects (for evaluation), can create evaluations
+- **Administrador**: Full access to all models and endpoints; can assign a Jurado as project `reviewer` via `/api/projects/{id}/assign_reviewer/`
+- **Tutor**: Sees only projects where they are assigned as advisor; can read evaluations of their advisees but cannot create evaluations
+- **Jurado**: Sees only projects where `reviewer` is set to them, and only evaluations on those projects; can create evaluations only on projects assigned to them
 - **Estudiante**: Sees own projects only (as student or partner)
 
 ## Connection to `core/`

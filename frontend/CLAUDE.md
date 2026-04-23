@@ -82,8 +82,8 @@ There is no flat top-level `src/components/` anymore.
 ## When Adding API Calls
 
 1. Add the function to the appropriate service file under `src/features/<feature>/api/`:
-   - Auth/users: `@features/auth/api/clientAuth`
-   - Projects/evaluations: `@features/projects/api/projectService`
+   - Auth/users: `@features/auth/api/clientAuth` (e.g., `getTutors()`, `getJurados()`)
+   - Projects/evaluations: `@features/projects/api/projectService` (e.g., `assignReviewer(projectId, reviewerId | null)`)
    - Semesters: `@features/semesters/api/semesters`
 2. Use the `api` client from `@shared/api/api` (handles CSRF + session cookies automatically)
 3. Define TypeScript types in `src/features/<feature>/types/`
@@ -112,6 +112,8 @@ const menuItems = allItems.filter(item => {
 ```
 
 Roles: `Administrador`, `Estudiante`, `Jurado`, `Tutor`
+
+Jurados only see projects assigned to them (where the project's `reviewer` is the current user) — this is backend-enforced in `ProjectViewSet.get_queryset`, so client lists/counts (e.g., the dashboard Jurado tile) reflect that filter automatically.
 
 ## Evaluation System
 
@@ -165,9 +167,9 @@ Roles: `Administrador`, `Estudiante`, `Jurado`, `Tutor`
 | File | Purpose |
 |------|---------|
 | `src/shared/api/api.ts` | HTTP client, CSRF handling |
-| `src/features/auth/api/clientAuth.ts` | Auth + user management API calls |
+| `src/features/auth/api/clientAuth.ts` | Auth + user management API calls (incl. `getTutors()` and `getJurados()`) |
 | `src/features/auth/api/credentials.ts` | Session storage helpers |
-| `src/features/projects/api/projectService.ts` | Project/evaluation/comment API calls |
+| `src/features/projects/api/projectService.ts` | Project/evaluation/comment API calls (incl. `assignReviewer(id, reviewerId \| null)`) |
 | `src/features/semesters/api/semesters.ts` | Semester CRUD + utilities |
 | `src/widgets/sidebar/Sidebar.tsx` | Navigation with role filtering |
 | `src/features/evaluations/components/EvaluationForm.tsx` | Evaluation form orchestrator |
@@ -178,7 +180,7 @@ Roles: `Administrador`, `Estudiante`, `Jurado`, `Tutor`
 | `src/app/dashboard/agregar/hooks/useDocumentData.ts` | Data fetching hook for agregar page |
 | `src/features/evaluations/lib/questions/questions.ts` | Evaluation question definitions |
 | `src/features/evaluations/lib/questions/scoring.ts` | Score calculation |
-| `src/features/projects/types/project.ts` | TypeScript interfaces |
+| `src/features/projects/types/project.ts` | TypeScript interfaces (`Project` includes `reviewer?: number \| null` and `reviewerName?: string \| null` alongside advisor fields) |
 | `src/app/globals.css` | Theme variables + custom animations |
 
 ## Known Limitations
