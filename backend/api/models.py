@@ -127,6 +127,16 @@ class Project(models.Model):
 
     failed_attempts = models.IntegerField(default=0)
 
+    reviewer = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        related_name='assigned_projects',
+        null=True,
+        blank=True,
+        limit_choices_to={'role': 'Jurado'},
+        help_text="Jurado asignado para evaluar este proyecto",
+    )
+
     def __str__(self):
         return f"{self.title} ({self.student.email})"
 
