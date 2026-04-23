@@ -7,6 +7,7 @@ import {
   getUserRole,
   getStudents,
   getTutors,
+  getJurados,
 } from "@features/auth/api/clientAuth";
 import {
   getAvailableSemesters,
@@ -35,6 +36,7 @@ export function useDocumentData() {
 
   const [students, setStudents] = useState<UserOption[]>([]);
   const [tutors, setTutors] = useState<UserOption[]>([]);
+  const [jurados, setJurados] = useState<UserOption[]>([]);
   const [partners, setPartners] = useState<UserOption[]>([]);
   const [semesters, setSemesters] = useState<string[]>([]);
   const [defaultSemester, setDefaultSemester] = useState("");
@@ -98,9 +100,10 @@ export function useDocumentData() {
   useEffect(() => {
     (async () => {
       try {
-        const [studentUsers, tutorUsers] = await Promise.all([
+        const [studentUsers, tutorUsers, juradoUsers] = await Promise.all([
           getStudents(),
           getTutors(),
+          getJurados(),
         ]);
 
         const toOption = (u: { id?: number; fullName?: string; email: string }) => ({
@@ -125,6 +128,12 @@ export function useDocumentData() {
             .filter((u) => typeof u.id === "number")
             .map(toOption),
         );
+
+        setJurados(
+          juradoUsers
+            .filter((u) => typeof u.id === "number")
+            .map(toOption),
+        );
       } catch (err) {
         console.error("Failed to load users", err);
       } finally {
@@ -144,6 +153,7 @@ export function useDocumentData() {
     isStaffReviewer,
     students,
     tutors,
+    jurados,
     partners,
     semesters,
     defaultSemester,

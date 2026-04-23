@@ -12,6 +12,7 @@ export const documentFormSchema = z
     semesterPeriod: z.string().min(1, "Seleccione un período académico."),
     files: z.array(z.instanceof(File)).optional(),
     userRole: z.string(),
+    reviewer: z.number().int().positive().optional().nullable(),
   })
   .superRefine((data, ctx) => {
     // studentId is required

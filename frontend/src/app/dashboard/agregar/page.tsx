@@ -28,6 +28,7 @@ export default function AgregarDocumentoPage() {
                   isStudent={data.isStudent}
                   students={data.students}
                   tutors={data.tutors}
+                  jurados={data.jurados}
                   partners={data.partners}
                   semesters={data.semesters}
                   defaultSemester={data.defaultSemester}

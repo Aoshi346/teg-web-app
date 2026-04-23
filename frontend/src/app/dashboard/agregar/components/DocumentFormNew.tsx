@@ -17,6 +17,7 @@ import {
   File,
   Calendar,
   GraduationCap,
+  Scale,
 } from "lucide-react";
 import { documentFormSchema, type DocumentFormData } from "../schema";
 import type { UserOption } from "../hooks/useDocumentData";
@@ -41,6 +42,7 @@ interface DocumentFormNewProps {
   isStudent: boolean;
   students: UserOption[];
   tutors: UserOption[];
+  jurados: UserOption[];
   partners: UserOption[];
   semesters: string[];
   defaultSemester: string;
@@ -54,6 +56,7 @@ export default function DocumentFormNew({
   isStudent,
   students,
   tutors,
+  jurados,
   partners,
   semesters,
   defaultSemester,
@@ -84,6 +87,7 @@ export default function DocumentFormNew({
       semesterPeriod: defaultSemester,
       files: [],
       userRole: userRole || "",
+      reviewer: null,
     },
     mode: "onTouched",
   });
@@ -174,6 +178,9 @@ export default function DocumentFormNew({
           ? { student: data.studentId as number }
           : {}),
         ...(data.partnerId ? { partner: data.partnerId as number } : {}),
+        ...(userRole === "Administrador" && data.reviewer
+          ? { reviewer: data.reviewer }
+          : {}),
       });
 
       const files = data.files || [];
@@ -204,6 +211,7 @@ export default function DocumentFormNew({
           semesters[0] || defaultSemester || getCurrentSemester(),
         files: [],
         userRole: userRole || "",
+        reviewer: null,
       });
 
       setTimeout(() => {
@@ -431,6 +439,36 @@ export default function DocumentFormNew({
 
               {/* Advisors — compact */}
               <AdvisorsFieldArray tutors={tutors} />
+
+              {/* Jurado asignado — admin only */}
+              {userRole === "Administrador" && (
+                <div className="space-y-1.5">
+                  <div className="flex items-center gap-1.5">
+                    <Scale className="w-4 h-4 text-amber-500" />
+                    <label className="text-xs font-bold text-gray-700">
+                      Jurado asignado
+                    </label>
+                    <span className="text-[10px] text-gray-400">
+                      (Opcional)
+                    </span>
+                  </div>
+                  <div className="border border-amber-100 bg-amber-50/30 rounded-lg p-3">
+                    <Combobox
+                      options={jurados}
+                      value={watch("reviewer") as number | null}
+                      onChange={(val) =>
+                        setValue("reviewer", val === "" ? null : (val as number), {
+                          shouldValidate: true,
+                        })
+                      }
+                      placeholder="Buscar jurado..."
+                      emptyLabel="Sin jurados"
+                      allowClear
+                      icon={<GraduationCap className="w-4 h-4" />}
+                    />
+                  </div>
+                </div>
+              )}
 
               {/* File Upload (students only) — compact */}
               {userRole === "Estudiante" && (
