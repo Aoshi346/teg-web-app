@@ -128,9 +128,6 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ pageTitle }) => {
                 <p className="text-sm font-bold text-slate-800 leading-none truncate max-w-[120px]">
                   {displayName}
                 </p>
-                <p className="text-[10px] uppercase tracking-widest font-bold text-primary mt-0.5 opacity-80">
-                  {userRole || "Invitado"}
-                </p>
               </div>
 
               <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${isProfileOpen ? "rotate-180" : ""}`} />
