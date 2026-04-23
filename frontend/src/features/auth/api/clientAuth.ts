@@ -227,3 +227,12 @@ export async function getTutors(): Promise<User[]> {
   setCachedUsers("tutors", tutors);
   return tutors;
 }
+
+export async function getJurados(): Promise<User[]> {
+  const cached = getCachedUsers("jurados");
+  if (cached) return cached;
+  const users = await getAllUsers();
+  const jurados = users.filter((u) => u.role === "Jurado");
+  setCachedUsers("jurados", jurados);
+  return jurados;
+}

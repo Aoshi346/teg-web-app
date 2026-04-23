@@ -23,6 +23,8 @@ export interface Project {
   student: string; // display name
   advisorNames?: string[];
   advisors?: number[];
+  reviewer?: number | null;
+  reviewerName?: string | null;
   partner?: number;
   partnerName?: string;
   submittedDate: string;

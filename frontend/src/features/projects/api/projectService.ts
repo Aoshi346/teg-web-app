@@ -38,6 +38,8 @@ export interface ApiProject {
   partner_name?: string;
   advisors?: number[];
   advisor_names?: string[];
+  reviewer?: number | null;
+  reviewer_name?: string | null;
   submitted_date: string;
   review_date?: string;
   status: "checked" | "pending" | "rejected";
@@ -92,6 +94,8 @@ function mapApiProject(p: ApiProject): Project {
     partnerName: p.partner_name,
     advisors: p.advisors,
     advisorNames: p.advisor_names,
+    reviewer: p.reviewer ?? null,
+    reviewerName: p.reviewer_name ?? null,
     submittedDate: p.submitted_date,
     reviewDate: p.review_date,
     status: p.status,
@@ -181,6 +185,10 @@ export async function createComment(projectId: number, content: string): Promise
 
 export async function reassignStudent(id: number, payload: { student?: number; student_email?: string }): Promise<ApiProject> {
   return api.post<ApiProject>(`/projects/${id}/reassign_student/`, payload);
+}
+
+export async function assignReviewer(id: number, reviewerId: number | null): Promise<ApiProject> {
+  return api.post<ApiProject>(`/projects/${id}/assign_reviewer/`, { reviewer: reviewerId });
 }
 
 
