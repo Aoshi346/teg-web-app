@@ -13,7 +13,7 @@ from .serializers import (
     PresentationDaySerializer, PresentationSerializer,
 )
 from django.middleware.csrf import get_token
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.permissions import BasePermission
 
 
@@ -276,6 +276,10 @@ class EvaluationViewSet(viewsets.ModelViewSet):
             project = Project.objects.get(pk=project_id)
         except Project.DoesNotExist:
             raise ValidationError({'project': 'Project not found'})
+
+        user = self.request.user
+        if getattr(user, 'role', None) == 'Jurado' and project.reviewer_id != user.id:
+            raise PermissionDenied("No estás asignado como jurado de este proyecto.")
 
         if project.project_type == 'proyecto' and project.failed_attempts >= 2:
             raise ValidationError({'detail': 'El proyecto ya agotó los 2 intentos permitidos.'})
