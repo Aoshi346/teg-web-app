@@ -175,7 +175,15 @@ class ProjectViewSet(viewsets.ModelViewSet):
             if active_semester:
                 period = active_semester.period
 
-        serializer.save(student=target_student, period=period)
+        reviewer = None
+        reviewer_id = self.request.data.get('reviewer')
+        if getattr(user, 'role', None) == 'Administrador' and reviewer_id:
+            try:
+                reviewer = User.objects.get(id=reviewer_id, role='Jurado')
+            except User.DoesNotExist:
+                raise ValidationError({'reviewer': 'Jurado not found'})
+
+        serializer.save(student=target_student, period=period, reviewer=reviewer)
 
     @action(detail=True, methods=['post'], url_path='reassign_student')
     def reassign_student(self, request, pk=None):
@@ -203,6 +211,25 @@ class ProjectViewSet(viewsets.ModelViewSet):
             raise ValidationError({'detail': 'Provide student id or student_email'})
 
         project.student = target_student
+        project.save()
+        return Response(ProjectSerializer(project).data, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['post'], url_path='assign_reviewer')
+    def assign_reviewer(self, request, pk=None):
+        user = request.user
+        if getattr(user, 'role', None) != 'Administrador':
+            return Response({'detail': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
+
+        project = self.get_object()
+        reviewer_id = request.data.get('reviewer')
+        if reviewer_id in (None, '', 0):
+            project.reviewer = None
+        else:
+            try:
+                reviewer = User.objects.get(id=reviewer_id, role='Jurado')
+            except User.DoesNotExist:
+                return Response({'reviewer': 'Jurado not found'}, status=status.HTTP_400_BAD_REQUEST)
+            project.reviewer = reviewer
         project.save()
         return Response(ProjectSerializer(project).data, status=status.HTTP_200_OK)
 
