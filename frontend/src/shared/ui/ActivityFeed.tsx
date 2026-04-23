@@ -14,11 +14,11 @@ const KIND_ICON: Record<Kind, React.ComponentType<{ className?: string }>> = {
   commented: MessageSquare,
 };
 
-const KIND_COLOR: Record<Kind, string> = {
-  submitted: "text-primary",
-  reviewed: "text-success",
-  rejected: "text-destructive",
-  commented: "text-pending",
+const KIND_CIRCLE: Record<Kind, string> = {
+  submitted: "bg-primary/10 text-primary",
+  reviewed: "bg-success-soft text-success",
+  rejected: "bg-destructive-soft text-destructive",
+  commented: "bg-pending-soft text-pending",
 };
 
 export interface ActivityFeedItem {
@@ -42,22 +42,33 @@ export function ActivityFeed({
   return (
     <aside
       className={cn(
-        "flex h-full flex-col rounded-xl border border-border-subtle bg-surface p-4",
-        "lg:sticky lg:top-[calc(var(--header-height,72px)+1rem)]",
+        "flex h-full min-h-0 flex-col rounded-xl border border-border-subtle bg-surface p-4 shadow-[0_1px_3px_0_rgba(15,23,42,0.04)]",
         className,
       )}
       {...rest}
     >
-      <h3 className="mb-3 text-sm font-bold text-text-strong">{title}</h3>
+      <h3 className="sticky top-0 z-10 border-b border-border-subtle/50 bg-surface pb-3 text-sm font-bold text-text-strong">
+        {title}
+      </h3>
       {items.length === 0 ? (
-        <p className="py-6 text-center text-xs text-text-muted">Sin actividad reciente.</p>
+        <p className="flex flex-1 items-center justify-center py-6 text-center text-xs text-text-muted">
+          Sin actividad reciente.
+        </p>
       ) : (
-        <ol className="flex max-h-[480px] flex-col gap-2 overflow-y-auto pr-1">
+        <ol className="flex flex-1 min-h-0 flex-col gap-3 overflow-y-auto pr-1 pt-2">
           {items.map((item) => {
             const Icon = KIND_ICON[item.kind];
             return (
-              <li key={item.id} className="flex items-start gap-2">
-                <Icon className={cn("mt-0.5 h-4 w-4 flex-shrink-0", KIND_COLOR[item.kind])} aria-hidden />
+              <li key={item.id} className="flex items-start gap-3">
+                <span
+                  className={cn(
+                    "flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full",
+                    KIND_CIRCLE[item.kind],
+                  )}
+                  aria-hidden
+                >
+                  <Icon className="h-3.5 w-3.5" />
+                </span>
                 <div className="min-w-0 flex-1">
                   <p className="text-sm leading-tight text-text-default">{item.text}</p>
                   <p className="text-xs text-text-muted">{item.time}</p>
