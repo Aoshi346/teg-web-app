@@ -7,7 +7,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@shared/lib/utils";
 
 const tileVariants = cva(
-  "group relative flex min-h-[176px] flex-col justify-between rounded-2xl border p-6 transition-shadow focus-visible:outline-none focus-visible:ring-2",
+  "group relative flex flex-col gap-4 rounded-2xl border p-6 transition-shadow focus-visible:outline-none focus-visible:ring-2",
   {
     variants: {
       tone: {

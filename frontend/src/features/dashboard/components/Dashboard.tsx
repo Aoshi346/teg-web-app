@@ -124,8 +124,8 @@ const Dashboard: React.FC = () => {
             <div className="grid flex-1 min-h-0 grid-cols-1 gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)]">
               <div className="flex min-h-0 flex-col gap-4">
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <div className="h-[176px] animate-pulse rounded-2xl bg-surface-sunken" />
-                  <div className="h-[176px] animate-pulse rounded-2xl bg-surface-sunken" />
+                  <div className="h-[140px] animate-pulse rounded-2xl bg-surface-sunken" />
+                  <div className="h-[140px] animate-pulse rounded-2xl bg-surface-sunken" />
                 </div>
                 <div className="flex-1 animate-pulse rounded-xl bg-surface-sunken" />
               </div>
