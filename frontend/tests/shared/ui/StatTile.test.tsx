@@ -28,15 +28,17 @@ describe("StatTile", () => {
     expect(screen.queryByRole("link")).toBeNull();
   });
 
-  it("uses primary background for tone=primary", () => {
+  it("applies primary-tinted gradient for tone=primary", () => {
     const { container } = render(<StatTile tone="primary" label="X" value="1" />);
     const el = container.firstChild as HTMLElement;
-    expect(el.className).toContain("bg-primary");
+    expect(el.className).toContain("via-primary/5");
+    expect(el.className).toContain("to-primary/10");
   });
 
-  it("uses orange background for tone=accent", () => {
+  it("applies orange-tinted gradient for tone=accent", () => {
     const { container } = render(<StatTile tone="accent" label="X" value="1" />);
     const el = container.firstChild as HTMLElement;
-    expect(el.className).toContain("bg-[var(--brand-orange)]");
+    expect(el.className).toContain("via-[var(--brand-orange)]/5");
+    expect(el.className).toContain("to-[var(--brand-orange)]/10");
   });
 });

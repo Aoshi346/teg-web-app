@@ -7,17 +7,31 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@shared/lib/utils";
 
 const tileVariants = cva(
-  "group relative flex min-h-[140px] flex-col justify-between rounded-xl p-5 text-white transition hover:brightness-[1.05] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:ring-white/80",
+  "group relative flex min-h-[176px] flex-col justify-between rounded-2xl border p-6 transition-shadow focus-visible:outline-none focus-visible:ring-2",
   {
     variants: {
       tone: {
-        primary: "bg-primary",
-        accent: "bg-[var(--brand-orange)]",
+        primary:
+          "bg-gradient-to-br from-white via-primary/5 to-primary/10 border-primary/15 shadow-[0_2px_16px_-4px_rgba(0,102,255,0.12)] hover:shadow-[0_4px_24px_-4px_rgba(0,102,255,0.18)] focus-visible:ring-primary/40",
+        accent:
+          "bg-gradient-to-br from-white via-[var(--brand-orange)]/5 to-[var(--brand-orange)]/10 border-[var(--brand-orange)]/20 shadow-[0_2px_16px_-4px_rgba(255,107,53,0.14)] hover:shadow-[0_4px_24px_-4px_rgba(255,107,53,0.22)] focus-visible:ring-[var(--brand-orange)]/40",
       },
     },
     defaultVariants: { tone: "primary" },
   },
 );
+
+const labelClasses: Record<"primary" | "accent", string> = {
+  primary: "text-primary/70",
+  accent: "text-[var(--brand-orange)]/75",
+};
+
+const valueClasses: Record<"primary" | "accent", string> = {
+  primary: "text-primary",
+  accent: "text-[var(--brand-orange)]",
+};
+
+const BULLET_COLORS = ["bg-success", "bg-pending", "bg-destructive"] as const;
 
 export interface StatTileProps extends VariantProps<typeof tileVariants> {
   label: string;
@@ -27,12 +41,36 @@ export interface StatTileProps extends VariantProps<typeof tileVariants> {
   className?: string;
 }
 
+function renderBreakdown(breakdown?: string): React.ReactNode {
+  if (!breakdown) return null;
+  if (!breakdown.includes(" · ")) {
+    return <p className="text-sm text-text-default">{breakdown}</p>;
+  }
+  const parts = breakdown.split(" · ");
+  return (
+    <ul className="flex flex-col gap-1.5">
+      {parts.map((part, i) => (
+        <li key={part + i} className="flex items-center gap-2 text-sm text-text-default">
+          <span
+            className={cn("h-1.5 w-1.5 flex-shrink-0 rounded-full", BULLET_COLORS[i] ?? "bg-text-muted")}
+            aria-hidden
+          />
+          {part}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export function StatTile({ tone, label, value, breakdown, href, className }: StatTileProps) {
+  const toneKey: "primary" | "accent" = tone === "accent" ? "accent" : "primary";
   const content = (
     <>
-      <p className="text-sm font-semibold uppercase tracking-wide text-white/80">{label}</p>
-      <p className="text-4xl font-extrabold leading-none tracking-tight">{value}</p>
-      {breakdown && <p className="text-sm text-white/80">{breakdown}</p>}
+      <p className={cn("text-xs font-semibold uppercase tracking-wide", labelClasses[toneKey])}>{label}</p>
+      <p className={cn("text-5xl font-extrabold leading-none tracking-tight", valueClasses[toneKey])}>
+        {value}
+      </p>
+      {renderBreakdown(breakdown)}
     </>
   );
 
