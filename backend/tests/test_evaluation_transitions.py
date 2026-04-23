@@ -188,3 +188,37 @@ class TestGuards:
         assert resp.status_code == 201, resp.content
         pteg.refresh_from_db()
         assert pteg.state == "pending_defense"
+
+
+class TestDerivedFailedAttempts:
+    @pytest.mark.django_db
+    def test_failed_attempts_is_zero_with_no_evals(self, pteg, jurado_user):
+        client = APIClient()
+        client.force_authenticate(user=jurado_user)
+        resp = client.get(f"/api/projects/{pteg.id}/")
+        assert resp.status_code == 200
+        assert resp.json()["failed_attempts"] == 0
+
+    @pytest.mark.django_db
+    def test_failed_attempts_increments_with_fail_evals(self, pteg, jurado_user):
+        client = APIClient()
+        client.force_authenticate(user=jurado_user)
+        # First fail → pending_review_2
+        client.post(EVALUATIONS_URL, _fail_payload(pteg.id), format="json")
+        resp = client.get(f"/api/projects/{pteg.id}/")
+        assert resp.status_code == 200
+        assert resp.json()["failed_attempts"] == 1
+        # Second fail → failed_final
+        client.post(EVALUATIONS_URL, _fail_payload(pteg.id), format="json")
+        resp = client.get(f"/api/projects/{pteg.id}/")
+        assert resp.status_code == 200
+        assert resp.json()["failed_attempts"] == 2
+
+    @pytest.mark.django_db
+    def test_failed_attempts_is_zero_for_tesis(self, jurado_user, student_user, project_factory):
+        tesis = project_factory(student=student_user, reviewer=jurado_user, project_type='tesis')
+        client = APIClient()
+        client.force_authenticate(user=jurado_user)
+        resp = client.get(f"/api/projects/{tesis.id}/")
+        assert resp.status_code == 200
+        assert resp.json()["failed_attempts"] == 0

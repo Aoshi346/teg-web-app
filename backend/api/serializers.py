@@ -152,6 +152,7 @@ class ProjectSerializer(serializers.ModelSerializer):
     score = serializers.SerializerMethodField()
     diagramacion_score = serializers.SerializerMethodField()
     contenido_score = serializers.SerializerMethodField()
+    failed_attempts = serializers.SerializerMethodField()
 
     class Meta:
         model = Project
@@ -203,6 +204,11 @@ class ProjectSerializer(serializers.ModelSerializer):
         if latest and isinstance(latest.section_scores, dict):
             return latest.section_scores.get('contenido', 0)
         return 0
+
+    def get_failed_attempts(self, obj):
+        if obj.project_type != 'proyecto':
+            return 0
+        return obj.evaluations.filter(kind='review', pass_status='Fail').count()
 
 
 class EvaluationSerializer(serializers.ModelSerializer):
