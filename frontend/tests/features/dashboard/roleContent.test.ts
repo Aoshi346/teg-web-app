@@ -78,6 +78,52 @@ describe("buildDashboardContent — Estudiante", () => {
   });
 });
 
+describe("buildDashboardContent — Jurado", () => {
+  it("counts evaluations by current reviewer and upcoming panels", () => {
+    const user = { role: "Jurado", id: 7 } as unknown as { role: string; id: number };
+    const projects = [
+      proj({ id: 1, type: "proyecto", period: "2026-01" }),
+      proj({ id: 2, type: "tesis", period: "2026-01" }),
+    ];
+    const evaluations = [
+      { id: 100, projectId: 1, reviewerId: 7, period: "2026-01" },
+      { id: 101, projectId: 2, reviewerId: 7, period: "2026-01" },
+      { id: 102, projectId: 1, reviewerId: 9, period: "2026-01" },
+    ];
+    const presentations = [
+      { id: 500, projectTitle: "Defensa A", date: "2026-05-01", jurorIds: [7] },
+      { id: 501, projectTitle: "Defensa B", date: "2026-05-02", jurorIds: [8] },
+    ];
+
+    const result = buildDashboardContent({
+      role: "Jurado",
+      user,
+      semester: "2026-01",
+      projects,
+      evaluations,
+      presentations,
+    });
+    expect(result.stats[0].label).toMatch(/evaluadas/i);
+    expect(result.stats[0].value).toBe("2");
+    expect(result.stats[1].label).toMatch(/panel/i);
+    expect(result.stats[1].value).toBe("1");
+    expect(result.listItems.some((r) => r.title.includes("Defensa A"))).toBe(true);
+  });
+
+  it("renders em-dash when evaluations array is undefined", () => {
+    const user = { role: "Jurado", id: 7 } as unknown as { role: string; id: number };
+    const result = buildDashboardContent({
+      role: "Jurado",
+      user,
+      semester: "2026-01",
+      projects: [],
+      evaluations: undefined,
+      presentations: [],
+    });
+    expect(result.stats[0].value).toBe("—");
+  });
+});
+
 describe("buildDashboardContent — Tutor", () => {
   it("shows only advised projects in stats and list", () => {
     const user = { role: "Tutor", id: 42 } as unknown as { role: string; id: number };

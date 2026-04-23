@@ -229,14 +229,61 @@ function tutorContent(
   };
 }
 
+function juradoContent(input: BuildContentInput, now: Date): DashboardContent {
+  const userId = input.user?.id;
+  const evalCount =
+    input.evaluations == null
+      ? null
+      : input.evaluations.filter(
+          (e) => e.reviewerId === userId && (!e.period || e.period === input.semester)
+        ).length;
+
+  const upcoming =
+    input.presentations == null
+      ? []
+      : input.presentations
+          .filter((p) => userId != null && p.jurorIds.includes(userId))
+          .filter((p) => new Date(p.date).getTime() >= now.getTime() - 86_400_000)
+          .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+  const stats: StatTileData[] = [
+    {
+      tone: "primary",
+      label: "Proyectos evaluadas",
+      value: evalCount == null ? "—" : String(evalCount),
+      breakdown: evalCount == null ? "Datos no disponibles" : `en ${input.semester}`,
+    },
+    {
+      tone: "accent",
+      label: "Próximos paneles",
+      value: String(upcoming.length),
+      breakdown: upcoming.length > 0 ? `Siguiente: ${upcoming[0].date}` : "Sin paneles agendados",
+    },
+  ];
+
+  const listItems: ListRowData[] = upcoming.slice(0, 5).map((p) => ({
+    id: `panel-${p.id}`,
+    title: p.projectTitle,
+    subtitle: `Panel · ${p.date}`,
+    status: "upcoming",
+  }));
+
+  return {
+    stats,
+    listTitle: "Próximos paneles",
+    listItems,
+    listEmpty: { text: "Sin paneles agendados", hint: "Aún no tienes defensas próximas." },
+    feedItems: [],
+  };
+}
+
 export function buildDashboardContent(input: BuildContentInput): DashboardContent {
   const now = new Date();
   const role = (input.role ?? "Estudiante") as Role;
 
   if (role === "Estudiante") return studentContent(input.projects, input.user, input.semester, now);
   if (role === "Tutor") return tutorContent(input.projects, input.user, input.semester, now);
+  if (role === "Jurado") return juradoContent(input, now);
 
-  // Administrador, Jurado — for this task fall back to admin-shape.
-  // Jurado gets a tailored branch in a later task.
   return adminContent(input.projects, input.semester, now);
 }
