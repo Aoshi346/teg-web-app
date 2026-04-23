@@ -4,7 +4,7 @@ from rest_framework.decorators import action
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.contrib.auth import login, logout
 from django.db.models import Q
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 from .models import User, Project, Evaluation, Semester, AttachedFile, Comment, SessionLog, PresentationDay, Presentation
 from .serializers import (
     RegisterSerializer, LoginSerializer, UserSerializer,
@@ -14,6 +14,7 @@ from .serializers import (
 )
 from django.middleware.csrf import get_token
 from rest_framework.exceptions import PermissionDenied, ValidationError
+from .lifecycle import InvalidTransition, next_state, status_projection
 from rest_framework.permissions import BasePermission
 
 
@@ -307,13 +308,27 @@ class EvaluationViewSet(viewsets.ModelViewSet):
             raise ValidationError({'project': 'Project not found'})
 
         user = self.request.user
+        evaluation_kind = self.request.data.get('kind', 'review')
+        pass_status = self.request.data.get('pass_status')
+
         if getattr(user, 'role', None) == 'Jurado' and project.reviewer_id != user.id:
             raise PermissionDenied("No estás asignado como jurado de este proyecto.")
 
-        if project.project_type == 'proyecto' and project.failed_attempts >= 2:
-            raise ValidationError({'detail': 'El proyecto ya agotó los 2 intentos permitidos.'})
+        # Nota: sólo PTEG usa la máquina de estados por ahora. TEG conserva
+        # su lógica actual basada en stage1_passed.
+        new_state = None
+        if project.project_type == 'proyecto':
+            try:
+                new_state = next_state(project, evaluation_kind, pass_status)
+            except InvalidTransition as exc:
+                raise ValidationError({'state': str(exc)}) from exc
 
-        serializer.save(reviewer=self.request.user, project=project)
+        with transaction.atomic():
+            serializer.save(reviewer=user, project=project, kind=evaluation_kind)
+            if new_state is not None:
+                project.state = new_state
+                project.status = status_projection(new_state)
+                project.save(update_fields=['state', 'status'])
 
     def create(self, request, *args, **kwargs):
         try:

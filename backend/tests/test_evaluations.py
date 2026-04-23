@@ -113,23 +113,27 @@ class TestFailedAttemptsLimit:
         assert response.status_code == 201
 
     @pytest.mark.django_db
-    def test_proyecto_with_two_failed_attempts_blocks_creation(
+    def test_proyecto_in_failed_final_state_blocks_creation(
         self, admin_user, student_user, project_factory
     ):
-        project = project_factory(student=student_user, project_type="proyecto", failed_attempts=2)
+        # La máquina de estados reemplazó la guardia failed_attempts >= 2.
+        # Un proyecto en estado terminal (failed_final) ya no acepta evaluaciones.
+        project = project_factory(
+            student=student_user, project_type="proyecto", state="failed_final"
+        )
         client = APIClient()
         client.force_authenticate(user=admin_user)
         response = client.post(EVALUATIONS_URL, _minimal_payload(project.id), format="json")
         assert response.status_code == 400
-        body = response.json()
-        assert "2 intentos" in str(body)
 
     @pytest.mark.django_db
-    def test_proyecto_with_three_failed_attempts_blocks_creation(
+    def test_proyecto_in_approved_state_blocks_creation(
         self, admin_user, student_user, project_factory
     ):
-        """Pins down the >= semantics: any value >= 2 is blocked."""
-        project = project_factory(student=student_user, project_type="proyecto", failed_attempts=3)
+        """Cualquier estado terminal bloquea la creación de nuevas evaluaciones."""
+        project = project_factory(
+            student=student_user, project_type="proyecto", state="approved"
+        )
         client = APIClient()
         client.force_authenticate(user=admin_user)
         response = client.post(EVALUATIONS_URL, _minimal_payload(project.id), format="json")

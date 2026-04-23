@@ -212,6 +212,7 @@ class EvaluationSerializer(serializers.ModelSerializer):
         model = Evaluation
         fields = [
             'id', 'project', 'reviewer', 'reviewer_name',
+            'kind',
             'ratings', 'comments', 'score', 'pass_status',
             'section_scores', 'graded_at',
         ]
@@ -220,6 +221,7 @@ class EvaluationSerializer(serializers.ModelSerializer):
             'section_scores': {'required': False},
             'ratings': {'required': False},
             'comments': {'required': False},
+            'kind': {'required': False, 'default': 'review'},
         }
 
     def get_reviewer_name(self, obj):
