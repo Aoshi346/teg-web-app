@@ -143,6 +143,12 @@ class ProjectSerializer(serializers.ModelSerializer):
     partner_name = serializers.SerializerMethodField()
     advisors = serializers.PrimaryKeyRelatedField(many=True, queryset=User.objects.filter(role='Tutor'), required=False)
     advisor_names = serializers.SerializerMethodField()
+    reviewer = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.filter(role='Jurado'),
+        required=False,
+        allow_null=True,
+    )
+    reviewer_name = serializers.SerializerMethodField()
     score = serializers.SerializerMethodField()
     diagramacion_score = serializers.SerializerMethodField()
     contenido_score = serializers.SerializerMethodField()
@@ -169,6 +175,9 @@ class ProjectSerializer(serializers.ModelSerializer):
 
     def get_advisor_names(self, obj):
         return [user.full_name for user in obj.advisors.all()]
+
+    def get_reviewer_name(self, obj):
+        return obj.reviewer.full_name if obj.reviewer else None
 
     def _latest_eval(self, obj):
         evals = list(obj.evaluations.all())
