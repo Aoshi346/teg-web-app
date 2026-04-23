@@ -77,3 +77,23 @@ describe("buildDashboardContent — Estudiante", () => {
     expect(result.listEmpty.text).toMatch(/sin proyectos/i);
   });
 });
+
+describe("buildDashboardContent — Tutor", () => {
+  it("shows only advised projects in stats and list", () => {
+    const user = { role: "Tutor", id: 42 } as unknown as { role: string; id: number };
+    const projects = [
+      proj({ id: 1, type: "proyecto", status: "pending", advisors: [42] }),
+      proj({ id: 2, type: "tesis", status: "pending", advisors: [42] }),
+      proj({ id: 3, type: "proyecto", status: "pending", advisors: [99] }),
+    ];
+    const result = buildDashboardContent({
+      role: "Tutor",
+      user,
+      semester: "2026-01",
+      projects,
+    });
+    expect(result.stats[0].value).toBe("1");
+    expect(result.stats[1].value).toBe("1");
+    expect(result.listItems.every((r) => r.id === 1 || r.id === 2)).toBe(true);
+  });
+});

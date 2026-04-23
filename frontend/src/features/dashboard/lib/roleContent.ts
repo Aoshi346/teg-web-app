@@ -184,13 +184,59 @@ function studentContent(
   };
 }
 
+function tutorContent(
+  projects: Project[],
+  user: BuildContentInput["user"],
+  semester: string,
+  now: Date
+): DashboardContent {
+  const userId = user?.id;
+  const mine = projects.filter(
+    (p) =>
+      p.period === semester &&
+      Array.isArray(p.advisors) &&
+      userId != null &&
+      p.advisors.includes(userId)
+  );
+  const pteg = mine.filter((p) => p.type === "proyecto");
+  const teg = mine.filter((p) => p.type === "tesis");
+
+  return {
+    stats: [
+      {
+        tone: "primary",
+        label: "Mis Proyectos (PTEG)",
+        value: String(pteg.length),
+        breakdown: buildBreakdown(pteg),
+        href: "/dashboard/proyectos",
+      },
+      {
+        tone: "accent",
+        label: "Mis Tesis (TEG)",
+        value: String(teg.length),
+        breakdown: buildBreakdown(teg),
+        href: "/dashboard/tesis",
+      },
+    ],
+    listTitle: "Requieren atención",
+    listItems: mine
+      .filter((p) => p.status === "pending" || p.status === "rejected")
+      .sort((a, b) => new Date(b.submittedDate).getTime() - new Date(a.submittedDate).getTime())
+      .slice(0, 5)
+      .map(toListRow),
+    listEmpty: { text: "Todo al día", hint: "No hay proyectos que requieran tu atención." },
+    feedItems: toFeedItems(mine, now),
+  };
+}
+
 export function buildDashboardContent(input: BuildContentInput): DashboardContent {
   const now = new Date();
   const role = (input.role ?? "Estudiante") as Role;
 
   if (role === "Estudiante") return studentContent(input.projects, input.user, input.semester, now);
+  if (role === "Tutor") return tutorContent(input.projects, input.user, input.semester, now);
 
-  // Administrador, Tutor, Jurado — for this task all three fall back to admin-shape.
-  // Tutor/Jurado get tailored branches in a later task.
+  // Administrador, Jurado — for this task fall back to admin-shape.
+  // Jurado gets a tailored branch in a later task.
   return adminContent(input.projects, input.semester, now);
 }
