@@ -318,6 +318,8 @@ class EvaluationViewSet(viewsets.ModelViewSet):
         # su lógica actual basada en stage1_passed.
         new_state = None
         if project.project_type == 'proyecto':
+            if pass_status not in ('Pass', 'Fail'):
+                raise ValidationError({'pass_status': 'This field is required and must be "Pass" or "Fail".'})
             try:
                 new_state = next_state(project, evaluation_kind, pass_status)
             except InvalidTransition as exc:

@@ -125,6 +125,7 @@ class TestFailedAttemptsLimit:
         client.force_authenticate(user=admin_user)
         response = client.post(EVALUATIONS_URL, _minimal_payload(project.id), format="json")
         assert response.status_code == 400
+        assert "state" in response.json()  # Error must surface on the 'state' field, not generically.
 
     @pytest.mark.django_db
     def test_proyecto_in_approved_state_blocks_creation(
@@ -138,6 +139,7 @@ class TestFailedAttemptsLimit:
         client.force_authenticate(user=admin_user)
         response = client.post(EVALUATIONS_URL, _minimal_payload(project.id), format="json")
         assert response.status_code == 400
+        assert "state" in response.json()  # Error must surface on the 'state' field, not generically.
 
     @pytest.mark.django_db
     def test_tesis_with_two_failed_attempts_allows_creation(

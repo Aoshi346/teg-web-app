@@ -134,6 +134,8 @@ class TestIllegalTransitions:
         client.force_authenticate(user=jurado_user)
         resp = client.post(EVALUATIONS_URL, _pass_payload(pteg.id, kind="review"), format="json")
         assert resp.status_code == 400
+        pteg.refresh_from_db()
+        assert pteg.state == "approved"
 
     @pytest.mark.django_db
     def test_any_eval_on_failed_final_rejected(self, jurado_user, student_user, project_factory):
@@ -142,6 +144,8 @@ class TestIllegalTransitions:
         client.force_authenticate(user=jurado_user)
         resp = client.post(EVALUATIONS_URL, _fail_payload(pteg.id, kind="review"), format="json")
         assert resp.status_code == 400
+        pteg.refresh_from_db()
+        assert pteg.state == "failed_final"
 
 
 class TestGuards:
@@ -159,6 +163,28 @@ class TestGuards:
         client.force_authenticate(user=jurado_user)
         payload = {"project": pteg.id, "pass_status": "Pass", "score": 15}  # no kind
         resp = client.post(EVALUATIONS_URL, payload, format="json")
+        assert resp.status_code == 201, resp.content
+        pteg.refresh_from_db()
+        assert pteg.state == "pending_defense"
+
+    @pytest.mark.django_db
+    def test_admin_can_evaluate_project_assigned_to_different_jurado(
+        self, admin_user, jurado_user, student_user, project_factory
+    ):
+        """
+        Regla: el guard 'unassigned jurado → 403' SÓLO aplica a Jurado;
+        Administrador bypassa el chequeo y puede evaluar cualquier proyecto
+        independientemente de quién sea el reviewer asignado.
+        """
+        # Project is assigned to jurado_user, NOT to admin.
+        pteg = project_factory(
+            student=student_user,
+            reviewer=jurado_user,
+            state="pending_review_1",
+        )
+        client = APIClient()
+        client.force_authenticate(user=admin_user)
+        resp = client.post(EVALUATIONS_URL, _pass_payload(pteg.id), format="json")
         assert resp.status_code == 201, resp.content
         pteg.refresh_from_db()
         assert pteg.state == "pending_defense"
