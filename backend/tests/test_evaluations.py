@@ -55,16 +55,16 @@ class TestCreatePermissions:
         assert Evaluation.objects.filter(project=project).exists()
 
     @pytest.mark.django_db
-    def test_tutor_can_create_evaluation(self, tutor_user, student_user, project_factory):
+    def test_tutor_cannot_create_evaluation(self, tutor_user, student_user, project_factory):
         project = project_factory(student=student_user)
         client = APIClient()
         client.force_authenticate(user=tutor_user)
         response = client.post(EVALUATIONS_URL, _minimal_payload(project.id), format="json")
-        assert response.status_code == 201
+        assert response.status_code == 403
 
     @pytest.mark.django_db
     def test_jurado_can_create_evaluation(self, jurado_user, student_user, project_factory):
-        project = project_factory(student=student_user)
+        project = project_factory(student=student_user, reviewer=jurado_user)
         client = APIClient()
         client.force_authenticate(user=jurado_user)
         response = client.post(EVALUATIONS_URL, _minimal_payload(project.id), format="json")

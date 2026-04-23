@@ -237,11 +237,11 @@ class ProjectViewSet(viewsets.ModelViewSet):
 
 
 class IsReviewerRole(BasePermission):
-    """Only Administrador, Tutor, and Jurado can create evaluations."""
+    """Only Administrador and Jurado can create evaluations."""
     def has_permission(self, request, view):
         return bool(
             request.user
-            and getattr(request.user, "role", None) in ["Administrador", "Tutor", "Jurado"]
+            and getattr(request.user, "role", None) in ["Administrador", "Jurado"]
         )
 
 
