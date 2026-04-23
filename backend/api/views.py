@@ -262,8 +262,10 @@ class EvaluationViewSet(viewsets.ModelViewSet):
             qs = qs.filter(project_id=project_id)
 
         role = getattr(user, 'role', None)
-        if role in ['Administrador', 'Jurado']:
+        if role == 'Administrador':
             return qs
+        if role == 'Jurado':
+            return qs.filter(project__reviewer=user)
         if role == 'Tutor':
             return qs.filter(project__advisors=user).distinct()
         return qs.filter(Q(project__student=user) | Q(project__partner=user)).distinct()

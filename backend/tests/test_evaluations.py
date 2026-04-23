@@ -210,17 +210,21 @@ class TestQuerysetFiltering:
         assert ids == [eval_p1.id]
 
     @pytest.mark.django_db
-    def test_jurado_lists_all_evaluations(self, admin_user, jurado_user, student_user, project_factory):
-        p1 = project_factory(student=student_user, title="P1")
-        p2 = project_factory(student=student_user, title="P2")
-        Evaluation.objects.create(project=p1, reviewer=admin_user, pass_status="Pass")
-        Evaluation.objects.create(project=p2, reviewer=admin_user, pass_status="Fail")
+    def test_jurado_lists_only_evaluations_on_assigned_projects(
+        self, admin_user, jurado_user, student_user, project_factory
+    ):
+        """Jurado sees evaluations only for projects where they are assigned reviewer."""
+        p_mine = project_factory(student=student_user, title="Mine", reviewer=jurado_user)
+        p_other = project_factory(student=student_user, title="Other")
+        Evaluation.objects.create(project=p_mine, reviewer=admin_user, pass_status="Pass")
+        Evaluation.objects.create(project=p_other, reviewer=admin_user, pass_status="Fail")
 
         client = APIClient()
         client.force_authenticate(user=jurado_user)
         response = client.get(EVALUATIONS_URL)
         assert response.status_code == 200
-        assert len(response.json()) == 2
+        ids = [e["project"] for e in response.json()]
+        assert ids == [p_mine.id]
 
     @pytest.mark.django_db
     def test_student_lists_only_own_project_evaluations(
