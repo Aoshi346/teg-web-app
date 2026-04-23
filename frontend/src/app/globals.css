@@ -56,6 +56,10 @@
   --color-border-subtle: var(--border-subtle);
   --color-border-default: var(--border-default);
   --color-border-strong: var(--border-strong);
+  --color-accent-teg-soft-bg: var(--accent-teg-soft-bg);
+  --color-accent-teg-soft-fg: var(--accent-teg-soft-fg);
+  --color-accent-pteg-soft-bg: var(--accent-pteg-soft-bg);
+  --color-accent-pteg-soft-fg: var(--accent-pteg-soft-fg);
 }
 
 :root {
@@ -97,6 +101,12 @@
   --destructive:        oklch(0.60 0.22 27);
   --destructive-soft:   oklch(0.95 0.04 27);
   --neutral-soft:       oklch(0.96 0.005 250);
+
+  /* Domain-semantic accent tokens (TEG vs PTEG type pills) */
+  --accent-teg-soft-bg:   oklch(0.96 0.03 295);
+  --accent-teg-soft-fg:   oklch(0.42 0.18 292);
+  --accent-pteg-soft-bg:  oklch(0.96 0.03 245);
+  --accent-pteg-soft-fg:  oklch(0.42 0.18 250);
 
   /* Focus ring */
   --ring: var(--primary);
