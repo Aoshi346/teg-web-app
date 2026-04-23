@@ -122,6 +122,20 @@ describe("buildDashboardContent — Jurado", () => {
     });
     expect(result.stats[0].value).toBe("—");
   });
+
+  it("uses assignedProjectsCount when provided, skipping em-dash fallback", () => {
+    const user = { role: "Jurado", id: 7 } as unknown as { role: string; id: number };
+    const result = buildDashboardContent({
+      role: "Jurado",
+      user,
+      semester: "2026-01",
+      projects: [],
+      evaluations: undefined,
+      presentations: [],
+      assignedProjectsCount: 4,
+    });
+    expect(result.stats[0].value).toBe("4");
+  });
 });
 
 describe("buildDashboardContent — Tutor", () => {

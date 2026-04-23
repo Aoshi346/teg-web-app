@@ -91,6 +91,7 @@ const Dashboard: React.FC = () => {
       user: user ? { role: user.role, id: user.id, semester: user.semester } : null,
       semester: semesterPeriod,
       projects,
+      assignedProjectsCount: role === "Jurado" ? projects.length : undefined,
     });
   }, [role, user, semesterPeriod, projects]);
 

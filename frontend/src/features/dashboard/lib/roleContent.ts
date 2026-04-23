@@ -15,6 +15,7 @@ export interface BuildContentInput {
   projects: Project[];
   evaluations?: { id: number; projectId: number; reviewerId?: number; period?: string }[];
   presentations?: { id: number; projectTitle: string; date: string; jurorIds: number[] }[];
+  assignedProjectsCount?: number;
 }
 
 const STATUS_LABEL: Record<ProjectStatus, string> = {
@@ -246,12 +247,27 @@ function juradoContent(input: BuildContentInput, now: Date): DashboardContent {
           .filter((p) => new Date(p.date).getTime() >= now.getTime() - 86_400_000)
           .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
+  const assignedCount = input.assignedProjectsCount;
+  const primaryValue =
+    assignedCount != null
+      ? String(assignedCount)
+      : evalCount == null
+        ? "—"
+        : String(evalCount);
+  const primaryLabel = assignedCount != null ? "Proyectos asignadas" : "Proyectos evaluadas";
+  const primaryBreakdown =
+    assignedCount != null
+      ? `Proyectos en ${input.semester}`
+      : evalCount == null
+        ? "Datos no disponibles"
+        : `en ${input.semester}`;
+
   const stats: StatTileData[] = [
     {
       tone: "primary",
-      label: "Proyectos evaluadas",
-      value: evalCount == null ? "—" : String(evalCount),
-      breakdown: evalCount == null ? "Datos no disponibles" : `en ${input.semester}`,
+      label: primaryLabel,
+      value: primaryValue,
+      breakdown: primaryBreakdown,
     },
     {
       tone: "accent",
