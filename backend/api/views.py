@@ -144,8 +144,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
             return _optimized_projects(Project.objects.filter(advisors=user).distinct())
 
         if user.role == 'Jurado':
-            # Jurados see all projects for evaluation purposes
-            return _optimized_projects(Project.objects.all())
+            return _optimized_projects(Project.objects.filter(reviewer=user))
 
         # Student sees own projects + projects where they are a partner
         return _optimized_projects(
