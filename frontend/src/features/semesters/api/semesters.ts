@@ -14,6 +14,7 @@ export interface Semester {
     end_month: number;
     label: string;
     created_at: string;
+    project_count: number;
 }
 
 export const MONTH_NAMES = [

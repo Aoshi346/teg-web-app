@@ -6,30 +6,17 @@ import {
   getUserRole,
   getUserEmail,
   getAllUsers,
-  updateStatusById,
-  createUser,
-  updateUser as updateUserApi,
-  deleteUser as deleteUserApi,
-  User as AuthUser,
 } from "@features/auth/api/clientAuth";
 import {
   User,
   Lock,
   Bell,
-  Trash2,
-  Edit,
   UserCog,
-  Check,
-  Calendar,
-  Plus,
-  Search,
-  ChevronLeft,
   ChevronRight,
   AlertCircle,
   Eye,
   EyeOff,
-  CheckCircle,
-  Users,
+  Check,
   Monitor,
   Globe,
   ShieldCheck,
@@ -38,74 +25,14 @@ import {
   Clock,
   TrendingUp,
   FileText,
+  Calendar,
 } from "lucide-react";
-import UserModal, { UserData } from "@features/settings/components/UserModal";
+import { UserData } from "@features/settings/components/UserModal";
 import { SettingsShell } from "@features/settings";
 import Toast, { ToastType } from "@shared/ui/Toast";
-import DeleteModal from "@shared/ui/DeleteModal";
-import {
-  createSemester,
-  deleteSemester,
-  formatSemesterFull,
-  getSemesters,
-  setActiveSemester,
-  MONTH_NAMES,
-  Semester as SemesterApi,
-} from "@features/semesters/api/semesters";
 import { getSessions, revokeSession, Session } from "@features/auth/api/sessionService";
 
 // ─── Shared Helpers ───
-
-const ROLE_STYLES: Record<string, string> = {
-  Administrador: "bg-purple-50 text-purple-700 border-purple-200",
-  Tutor: "bg-blue-50 text-blue-700 border-blue-200",
-  Jurado: "bg-amber-50 text-amber-700 border-amber-200",
-  Estudiante: "bg-emerald-50 text-emerald-700 border-emerald-200",
-};
-
-const AVATAR_COLORS = [
-  "bg-blue-500 text-white",
-  "bg-purple-500 text-white",
-  "bg-emerald-500 text-white",
-  "bg-amber-500 text-white",
-  "bg-rose-500 text-white",
-  "bg-cyan-500 text-white",
-];
-
-function getAvatarColor(email: string) {
-  return AVATAR_COLORS[email.length % AVATAR_COLORS.length];
-}
-
-function getInitials(name: string, email: string) {
-  const source = name || email;
-  return source
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .substring(0, 2)
-    .toUpperCase();
-}
-
-function RoleBadge({ role }: { role: string }) {
-  return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold border ${ROLE_STYLES[role] || "bg-slate-50 text-slate-600 border-slate-200"}`}>
-      {role}
-    </span>
-  );
-}
-
-function StatusBadge({ status }: { status: string }) {
-  return (
-    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold border ${
-      status === "active"
-        ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-        : "bg-amber-50 text-amber-700 border-amber-200"
-    }`}>
-      <span className={`w-1.5 h-1.5 rounded-full ${status === "active" ? "bg-emerald-500" : "bg-amber-500"}`} />
-      {status === "active" ? "Activo" : "Pendiente"}
-    </span>
-  );
-}
 
 function SectionCard({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
@@ -385,9 +312,7 @@ function ContextPanel({ activeTab, role, pendingCount, userCount }: { activeTab:
 
 export default function SettingsPage() {
   const [role, setRole] = useState<string | null>(null);
-  const [email, setEmail] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"profile" | "security" | "notifications" | "users">("profile");
-  const [isDataLoaded, setIsDataLoaded] = useState(true);
 
   // Security
   const [currentPassword, setCurrentPassword] = useState("");
@@ -396,58 +321,14 @@ export default function SettingsPage() {
   const [showCurrentPw, setShowCurrentPw] = useState(false);
   const [showNewPw, setShowNewPw] = useState(false);
 
-  // Users (Admin)
+  // Users (Admin) — only used by ContextPanel for summary counts
   const [users, setUsers] = useState<UserData[]>([]);
-  const [isUserModalOpen, setIsUserModalOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState<UserData | null>(null);
-  const [userSearch, setUserSearch] = useState("");
-  const [roleFilter, setRoleFilter] = useState<string>("all");
-
-  // Admin sub-tab
-  const [adminSubTab, setAdminSubTab] = useState<"pending" | "directory" | "semesters">("pending");
-
-  // Semesters
-  const [semesters, setSemesters] = useState<SemesterApi[]>([]);
-  const [newSemesterYear, setNewSemesterYear] = useState(new Date().getFullYear());
-  const [newSemesterPeriod, setNewSemesterPeriod] = useState("01");
-  const [newStartMonth, setNewStartMonth] = useState(1);
-  const [newEndMonth, setNewEndMonth] = useState(6);
-  const [isSavingSemester, setIsSavingSemester] = useState(false);
-
-  // Delete
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [userToDelete, setUserToDelete] = useState<UserData | null>(null);
-
-  // Pagination
-  const [currentPage, setCurrentPage] = useState(1);
-  const usersPerPage = 8;
 
   // Toast
   const [toast, setToast] = useState<{ message: string; type: ToastType; isVisible: boolean }>({ message: "", type: "info", isVisible: false });
   const showToast = useCallback((message: string, type: ToastType = "info") => { setToast({ message, type, isVisible: true }); }, []);
 
-  // Filtered + paginated users
-  const filteredUsers = useMemo(() => {
-    let result = users;
-    if (adminSubTab === "pending") result = result.filter((u) => u.status === "pending");
-    else result = result.filter((u) => u.status === "active");
-    if (roleFilter !== "all") result = result.filter((u) => u.role === roleFilter);
-    if (userSearch.trim()) {
-      const q = userSearch.toLowerCase();
-      result = result.filter((u) => u.fullName?.toLowerCase().includes(q) || u.email.toLowerCase().includes(q));
-    }
-    return result;
-  }, [users, adminSubTab, roleFilter, userSearch]);
-
-  const totalPages = Math.max(1, Math.ceil(filteredUsers.length / usersPerPage));
-  const paginatedUsers = filteredUsers.slice((currentPage - 1) * usersPerPage, currentPage * usersPerPage);
   const pendingCount = users.filter((u) => u.status === "pending").length;
-
-  // Data loading
-  const loadSemesters = useCallback(async () => {
-    try { setSemesters(await getSemesters()); }
-    catch { showToast("Error al cargar semestres", "error"); }
-  }, [showToast]);
 
   const loadUsers = useCallback(async () => {
     try {
@@ -456,69 +337,21 @@ export default function SettingsPage() {
         id: u.id || i + 1, fullName: u.fullName || u.email.split("@")[0], email: u.email,
         cedula: u.cedula || "", role: u.role, semester: u.semester || "N/A", phone: u.phone || "", status: u.status,
       }));
-      mapped.sort((a, b) => (a.status === b.status ? 0 : a.status === "pending" ? -1 : 1));
       setUsers(mapped);
-      setCurrentPage(1);
     } catch { showToast("Error al cargar usuarios", "error"); }
   }, [showToast]);
 
   useEffect(() => {
-    const r = getUserRole(); const e = getUserEmail();
-    setRole(r); setEmail(e);
+    const r = getUserRole();
+    // Note: getUserEmail() read kept to preserve side effects of ContextPanel role-based UI
+    getUserEmail();
+    setRole(r);
   }, []);
 
   useEffect(() => {
-    if (role !== "Administrador" || activeTab !== "users") { setIsDataLoaded(true); return; }
-    setIsDataLoaded(false);
-    Promise.all([loadUsers(), loadSemesters()]).then(() => setIsDataLoaded(true));
-  }, [activeTab, role, loadUsers, loadSemesters]);
-
-  // Reset pagination when filters change
-  useEffect(() => { setCurrentPage(1); }, [adminSubTab, roleFilter, userSearch]);
-
-  // Handlers
-  const handleStatusUpdate = async (id: number | undefined, status: "active" | "pending") => {
-    if (!id) return;
-    try { await updateStatusById(id, status); await loadUsers(); showToast(`Usuario ${status === "active" ? "aprobado" : "desactivado"}.`, "success"); }
-    catch { showToast("Error al actualizar estado.", "error"); }
-  };
-
-  const handleSaveUser = async (userData: Omit<UserData, "id"> & { id?: number }) => {
-    const payload: Partial<AuthUser> = { email: userData.email, role: userData.role as AuthUser["role"], fullName: userData.fullName, cedula: userData.cedula, semester: userData.semester, phone: userData.phone, ...(!userData.id ? { password: "password123", status: "pending" } : {}) };
-    try {
-      if (userData.id) { await updateUserApi(userData.id, payload); showToast("Usuario actualizado.", "success"); }
-      else { await createUser(payload as AuthUser); showToast("Usuario creado (pendiente).", "success"); }
-      await loadUsers();
-    } catch { showToast("Error al guardar usuario.", "error"); }
-    finally { setIsUserModalOpen(false); }
-  };
-
-  const confirmDelete = async () => {
-    if (!userToDelete?.id) return;
-    try { await deleteUserApi(userToDelete.id); showToast("Usuario eliminado.", "success"); await loadUsers(); }
-    catch { showToast("Error al eliminar.", "error"); }
-    finally { setUserToDelete(null); setIsDeleteModalOpen(false); }
-  };
-
-  const handleAddSemester = async () => {
-    const period = `${newSemesterYear}-${newSemesterPeriod.padStart(2, "0")}`;
-    if (!/^\d{4}-(01|02)$/.test(period)) { showToast("Formato inválido.", "error"); return; }
-    if (semesters.some((s) => s.period === period)) { showToast("Ya existe.", "warning"); return; }
-    try {
-      setIsSavingSemester(true);
-      await createSemester({ period, start_month: newStartMonth, end_month: newEndMonth });
-      showToast("Semestre agregado.", "success");
-      await loadSemesters();
-    }
-    catch { showToast("Error al agregar.", "error"); }
-    finally { setIsSavingSemester(false); }
-  };
-
-  const handleDeleteSemester = async (id: number) => {
-    try { setIsSavingSemester(true); await deleteSemester(id); showToast("Semestre eliminado.", "success"); await loadSemesters(); }
-    catch { showToast("Error al eliminar.", "error"); }
-    finally { setIsSavingSemester(false); }
-  };
+    if (role !== "Administrador" || activeTab !== "users") return;
+    loadUsers();
+  }, [activeTab, role, loadUsers]);
 
   // Password strength
   const passwordStrength = useMemo(() => {
@@ -548,8 +381,6 @@ export default function SettingsPage() {
   return (
     <>
       <DashboardHeader pageTitle="Configuración" />
-      <UserModal isOpen={isUserModalOpen} onClose={() => setIsUserModalOpen(false)} onSave={handleSaveUser} initialData={editingUser} />
-      <DeleteModal isOpen={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)} onConfirm={confirmDelete} userName={userToDelete?.fullName || userToDelete?.email} />
       <Toast message={toast.message} type={toast.type} isVisible={toast.isVisible} onClose={() => setToast((p) => ({ ...p, isVisible: false }))} />
 
       <main className="flex-1 p-3 sm:p-4 md:p-6 lg:p-8 overflow-y-auto bg-slate-50/80">
@@ -692,302 +523,7 @@ export default function SettingsPage() {
               )}
 
               {/* ════════ ADMIN ════════ */}
-              {activeTab === "users" && role === "Administrador" && (
-                !isDataLoaded ? (
-                  <div className="space-y-4">
-                    {[1, 2, 3].map((i) => <div key={i} className="h-20 rounded-2xl bg-slate-200/50 animate-pulse" />)}
-                  </div>
-                ) : (
-                  <div className="space-y-5">
-                    {/* Admin sub-tabs — segmented control */}
-                    <div className="flex gap-1 p-1 bg-slate-100 rounded-xl">
-                      {([
-                        { id: "pending" as const, label: "Pendientes", icon: AlertCircle, count: pendingCount },
-                        { id: "directory" as const, label: "Directorio", icon: Users, count: users.filter((u) => u.status === "active").length },
-                        { id: "semesters" as const, label: "Semestres", icon: Calendar, count: semesters.length },
-                      ]).map((sub) => (
-                        <button key={sub.id} onClick={() => setAdminSubTab(sub.id)}
-                          className={`flex-1 flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg text-sm font-semibold transition-all ${
-                            adminSubTab === sub.id ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"
-                          }`}
-                        >
-                          <sub.icon className="w-4 h-4" />
-                          <span className="hidden sm:inline">{sub.label}</span>
-                          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
-                            adminSubTab === sub.id
-                              ? sub.id === "pending" && sub.count > 0 ? "bg-red-100 text-red-600" : "bg-slate-100 text-slate-500"
-                              : "bg-slate-200/60 text-slate-400"
-                          }`}>
-                            {sub.count}
-                          </span>
-                        </button>
-                      ))}
-                    </div>
-
-                    {/* ── Pending Approvals ── */}
-                    {adminSubTab === "pending" && (
-                      <SectionCard>
-                        <SectionHeader title="Solicitudes Pendientes" description="Usuarios esperando aprobación." />
-                        {filteredUsers.length === 0 ? (
-                          <div className="py-12 text-center">
-                            <div className="w-14 h-14 rounded-2xl bg-emerald-50 flex items-center justify-center mx-auto mb-3">
-                              <CheckCircle className="w-7 h-7 text-emerald-400" />
-                            </div>
-                            <p className="text-sm font-semibold text-slate-700">Sin solicitudes pendientes</p>
-                            <p className="text-xs text-slate-400 mt-1">Todos los usuarios han sido procesados.</p>
-                          </div>
-                        ) : (
-                          <div className="divide-y divide-slate-100">
-                            {filteredUsers.map((user) => (
-                              <div key={user.id} className="flex items-center justify-between gap-4 p-4 sm:p-5 hover:bg-slate-50/50 transition-colors">
-                                <div className="flex items-center gap-3 min-w-0">
-                                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold flex-shrink-0 ${getAvatarColor(user.email)}`}>
-                                    {getInitials(user.fullName || "", user.email)}
-                                  </div>
-                                  <div className="min-w-0">
-                                    <p className="text-sm font-bold text-slate-800 truncate">{user.fullName || user.email}</p>
-                                    <p className="text-xs text-slate-500 truncate">{user.email}</p>
-                                  </div>
-                                </div>
-                                <div className="flex items-center gap-2 flex-shrink-0">
-                                  <RoleBadge role={user.role} />
-                                  <button onClick={() => handleStatusUpdate(user.id, "active")}
-                                    className="px-3 py-1.5 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow-sm transition-all active:scale-95 flex items-center gap-1.5">
-                                    <Check className="w-3 h-3" /> Aprobar
-                                  </button>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </SectionCard>
-                    )}
-
-                    {/* ── User Directory ── */}
-                    {adminSubTab === "directory" && (
-                      <SectionCard>
-                        <SectionHeader title="Directorio de Usuarios" description="Todos los usuarios activos del sistema."
-                          actions={
-                            <button onClick={() => { setEditingUser(null); setIsUserModalOpen(true); }}
-                              className="px-4 py-2 bg-usm-blue text-white text-sm font-semibold rounded-xl hover:bg-blue-700 transition-all shadow-sm flex items-center gap-2 active:scale-95">
-                              <Plus className="w-4 h-4" /> Nuevo
-                            </button>
-                          }
-                        />
-                        {/* Filters */}
-                        <div className="p-4 sm:px-6 flex flex-col sm:flex-row gap-3 border-b border-slate-100">
-                          <div className="relative flex-1">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                            <input type="text" value={userSearch} onChange={(e) => setUserSearch(e.target.value)} placeholder="Buscar por nombre o correo..."
-                              className="w-full pl-10 pr-4 py-2 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-usm-blue/20 focus:border-usm-blue outline-none" />
-                          </div>
-                          <select value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)}
-                            className="px-3 py-2 border border-slate-200 rounded-xl text-sm bg-white cursor-pointer focus:ring-2 focus:ring-usm-blue/20 outline-none">
-                            <option value="all">Todos los roles</option>
-                            <option value="Administrador">Administrador</option>
-                            <option value="Tutor">Tutor</option>
-                            <option value="Jurado">Jurado</option>
-                            <option value="Estudiante">Estudiante</option>
-                          </select>
-                        </div>
-
-                        {/* Desktop Table */}
-                        <div className="hidden md:block overflow-x-auto">
-                          <table className="w-full text-sm">
-                            <thead className="text-[11px] text-slate-500 uppercase tracking-wider bg-slate-50/60 border-b border-slate-100">
-                              <tr>
-                                <th className="px-6 py-3 text-left font-semibold">Usuario</th>
-                                <th className="px-6 py-3 text-left font-semibold">Rol</th>
-                                <th className="px-6 py-3 text-left font-semibold">Estado</th>
-                                <th className="px-6 py-3 text-right font-semibold">Acciones</th>
-                              </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100">
-                              {paginatedUsers.map((u) => (
-                                <tr key={u.id} className="hover:bg-slate-50/60 transition-colors">
-                                  <td className="px-6 py-3.5">
-                                    <div className="flex items-center gap-3">
-                                      <div className={`w-9 h-9 rounded-lg flex items-center justify-center text-xs font-bold flex-shrink-0 ${getAvatarColor(u.email)}`}>
-                                        {getInitials(u.fullName || "", u.email)}
-                                      </div>
-                                      <div className="min-w-0">
-                                        <p className="font-semibold text-slate-800 truncate">{u.fullName || u.email}</p>
-                                        <p className="text-xs text-slate-400 truncate">{u.email}</p>
-                                      </div>
-                                    </div>
-                                  </td>
-                                  <td className="px-6 py-3.5"><RoleBadge role={u.role} /></td>
-                                  <td className="px-6 py-3.5"><StatusBadge status={u.status || "pending"} /></td>
-                                  <td className="px-6 py-3.5 text-right">
-                                    <div className="flex items-center justify-end gap-1">
-                                      <button onClick={() => { setEditingUser(u); setIsUserModalOpen(true); }} className="p-1.5 text-slate-400 hover:text-usm-blue hover:bg-blue-50 rounded-lg transition-colors" title="Editar">
-                                        <Edit className="w-4 h-4" />
-                                      </button>
-                                      {u.role !== "Administrador" && u.email !== email && (
-                                        <button onClick={() => { setUserToDelete(u); setIsDeleteModalOpen(true); }} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Eliminar">
-                                          <Trash2 className="w-4 h-4" />
-                                        </button>
-                                      )}
-                                    </div>
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-
-                        {/* Mobile Cards */}
-                        <div className="md:hidden divide-y divide-slate-100">
-                          {paginatedUsers.map((u) => (
-                            <div key={u.id} className="p-4 hover:bg-slate-50/50 transition-colors">
-                              <div className="flex items-center justify-between gap-3">
-                                <div className="flex items-center gap-3 min-w-0">
-                                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-sm font-bold flex-shrink-0 ${getAvatarColor(u.email)}`}>
-                                    {getInitials(u.fullName || "", u.email)}
-                                  </div>
-                                  <div className="min-w-0">
-                                    <p className="font-semibold text-slate-800 truncate">{u.fullName || u.email}</p>
-                                    <p className="text-xs text-slate-400 truncate">{u.email}</p>
-                                  </div>
-                                </div>
-                                <div className="flex items-center gap-1 flex-shrink-0">
-                                  <button onClick={() => { setEditingUser(u); setIsUserModalOpen(true); }} className="p-2 text-usm-blue hover:bg-blue-50 rounded-lg"><Edit className="w-4 h-4" /></button>
-                                  {u.role !== "Administrador" && u.email !== email && (
-                                    <button onClick={() => { setUserToDelete(u); setIsDeleteModalOpen(true); }} className="p-2 text-red-500 hover:bg-red-50 rounded-lg"><Trash2 className="w-4 h-4" /></button>
-                                  )}
-                                </div>
-                              </div>
-                              <div className="mt-2 flex flex-wrap gap-1.5">
-                                <RoleBadge role={u.role} />
-                                <StatusBadge status={u.status || "pending"} />
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-
-                        {/* Pagination */}
-                        {filteredUsers.length > usersPerPage && (
-                          <div className="p-4 border-t border-slate-100 flex items-center justify-between">
-                            <p className="text-xs text-slate-500">{(currentPage - 1) * usersPerPage + 1}-{Math.min(currentPage * usersPerPage, filteredUsers.length)} de {filteredUsers.length}</p>
-                            <div className="flex items-center gap-1">
-                              <button onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} disabled={currentPage === 1} className="p-1.5 text-slate-500 hover:bg-slate-100 rounded-lg disabled:opacity-30"><ChevronLeft className="w-4 h-4" /></button>
-                              <span className="text-xs font-semibold text-slate-600 px-2">{currentPage}/{totalPages}</span>
-                              <button onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="p-1.5 text-slate-500 hover:bg-slate-100 rounded-lg disabled:opacity-30"><ChevronRight className="w-4 h-4" /></button>
-                            </div>
-                          </div>
-                        )}
-                      </SectionCard>
-                    )}
-
-                    {/* ── Semesters ── */}
-                    {adminSubTab === "semesters" && (
-                      <SectionCard>
-                        <SectionHeader title="Períodos Académicos" description="Registra y gestiona semestres. Los proyectos se almacenan en el período correspondiente." />
-                        <div className="p-5 sm:p-6 space-y-6">
-                          {/* Add form */}
-                          <div className="space-y-4">
-                            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Nuevo Semestre</p>
-                            {/* Row 1: Year + Period */}
-                            <div className="grid gap-3 sm:grid-cols-2">
-                              <div>
-                                <label className="text-xs font-semibold text-slate-500 mb-1.5 block">Año</label>
-                                <input type="number" min={2020} max={2099} value={newSemesterYear} onChange={(e) => setNewSemesterYear(Number(e.target.value))}
-                                  className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-usm-blue/20 focus:border-usm-blue outline-none" placeholder="2026" />
-                              </div>
-                              <div>
-                                <label className="text-xs font-semibold text-slate-500 mb-1.5 block">Período</label>
-                                <select value={newSemesterPeriod} onChange={(e) => {
-                                  const val = e.target.value;
-                                  setNewSemesterPeriod(val);
-                                  if (val === "01") { setNewStartMonth(1); setNewEndMonth(6); }
-                                  else { setNewStartMonth(7); setNewEndMonth(12); }
-                                }}
-                                  className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-usm-blue/20 focus:border-usm-blue outline-none cursor-pointer">
-                                  <option value="01">01 — Primer semestre</option>
-                                  <option value="02">02 — Segundo semestre</option>
-                                </select>
-                              </div>
-                            </div>
-                            {/* Row 2: Start/End months */}
-                            <div className="grid gap-3 sm:grid-cols-2">
-                              <div>
-                                <label className="text-xs font-semibold text-slate-500 mb-1.5 block">Mes de inicio</label>
-                                <select value={newStartMonth} onChange={(e) => setNewStartMonth(Number(e.target.value))}
-                                  className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-usm-blue/20 focus:border-usm-blue outline-none cursor-pointer">
-                                  {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
-                                    <option key={m} value={m}>{MONTH_NAMES[m]}</option>
-                                  ))}
-                                </select>
-                              </div>
-                              <div>
-                                <label className="text-xs font-semibold text-slate-500 mb-1.5 block">Mes de fin</label>
-                                <select value={newEndMonth} onChange={(e) => setNewEndMonth(Number(e.target.value))}
-                                  className="w-full px-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-usm-blue/20 focus:border-usm-blue outline-none cursor-pointer">
-                                  {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
-                                    <option key={m} value={m}>{MONTH_NAMES[m]}</option>
-                                  ))}
-                                </select>
-                              </div>
-                            </div>
-                            {/* Preview + Submit */}
-                            <div className="flex items-center justify-between gap-3 pt-1">
-                              <p className="text-xs text-slate-400">
-                                Vista previa: <span className="font-semibold text-slate-600">{newSemesterYear}-{newSemesterPeriod}</span>
-                                {" · "}{MONTH_NAMES[newStartMonth]} {newSemesterYear} – {MONTH_NAMES[newEndMonth]} {newEndMonth < newStartMonth ? newSemesterYear + 1 : newSemesterYear}
-                              </p>
-                              <button onClick={handleAddSemester} disabled={isSavingSemester}
-                                className="px-5 py-2.5 bg-usm-blue text-white text-sm font-semibold rounded-xl hover:bg-blue-700 transition-all shadow-sm disabled:opacity-50 flex items-center gap-1.5 flex-shrink-0">
-                                <Plus className="w-4 h-4" /> Crear período
-                              </button>
-                            </div>
-                          </div>
-
-                          {/* Divider */}
-                          <hr className="border-slate-200" />
-
-                          {/* Existing list */}
-                          <div className="space-y-3">
-                            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Períodos registrados</p>
-                            {semesters.length === 0 ? (
-                              <div className="text-sm text-slate-500 bg-slate-50 border border-dashed border-slate-200 rounded-xl p-6 text-center">Sin semestres registrados.</div>
-                            ) : (
-                              <div className="divide-y divide-slate-100 border border-slate-200 rounded-xl overflow-hidden">
-                                {semesters.map((s) => (
-                                  <div key={s.id} className="flex items-center justify-between px-4 py-3 bg-white hover:bg-slate-50/50 transition-colors">
-                                    <div className="flex items-center gap-3 min-w-0">
-                                      <div className={`w-2 h-2 rounded-full flex-shrink-0 ${s.is_active ? "bg-emerald-500" : "bg-slate-300"}`} />
-                                      <div className="min-w-0">
-                                        <div className="flex items-center gap-2">
-                                          <p className="text-sm font-semibold text-slate-800">{s.period}</p>
-                                          {s.is_active && <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded-full">ACTIVO</span>}
-                                        </div>
-                                        <p className="text-xs text-slate-400">{formatSemesterFull(s)}</p>
-                                      </div>
-                                    </div>
-                                    <div className="flex items-center gap-1 flex-shrink-0">
-                                      {!s.is_active && (
-                                        <button onClick={async () => { try { await setActiveSemester(s.id); showToast("Período activado.", "success"); await loadSemesters(); } catch { showToast("Error.", "error"); } }}
-                                          disabled={isSavingSemester}
-                                          className="px-2.5 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors disabled:opacity-40" title="Activar">
-                                          Activar
-                                        </button>
-                                      )}
-                                      <button onClick={() => handleDeleteSemester(s.id)} disabled={isSavingSemester}
-                                        className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-40" title="Eliminar">
-                                        <Trash2 className="w-4 h-4" />
-                                      </button>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </SectionCard>
-                    )}
-                  </div>
-                )
-              )}
+              {activeTab === "users" && role === "Administrador" && <SettingsShell />}
             </div>
 
             {/* ─── Col 3: Context Panel ─── */}

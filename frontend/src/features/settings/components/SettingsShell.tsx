@@ -6,6 +6,7 @@ import type { SettingsTabId } from "../types/settings";
 import { SecurityTab } from "./security/SecurityTab";
 import { NotificationsTab } from "./notifications/NotificationsTab";
 import { ProfileTab } from "./profile/ProfileTab";
+import { AdminTab } from "./admin/AdminTab";
 
 interface TabDef {
   id: SettingsTabId;
@@ -51,7 +52,7 @@ export function SettingsShell() {
         {active === "profile" && <ProfileTab />}
         {active === "security" && <SecurityTab />}
         {active === "notifications" && <NotificationsTab />}
-        {active === "admin" && <div data-testid="admin-placeholder">Administración (placeholder)</div>}
+        {active === "admin" && <AdminTab />}
       </main>
     </div>
   );

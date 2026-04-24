@@ -12,6 +12,7 @@ const semester = {
   end_month: 6,
   label: "Febrero 2026 – Junio 2026",
   created_at: "2026-01-01T00:00:00Z",
+  project_count: 0,
 };
 
 describe("SemesterStrip", () => {
