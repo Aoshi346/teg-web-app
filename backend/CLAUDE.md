@@ -35,8 +35,8 @@ All API logic lives in a single `api` app. Views use DRF ModelViewSets with role
 | Model | Key Fields |
 |-------|------------|
 | **User** | email (unique), first_name, last_name, `nationality` (V/E/P), `cedula` (PositiveIntegerField), role, status, semester, phone. `UniqueConstraint(nationality, cedula)` (excludes nulls). `UserSerializer` exposes read-only `cedula_display` = `"V-30243721"` for frontend convenience. |
-| **Project** | title, student (FK), partner (FK), advisors (M2M to Tutor), reviewer (FK to User with role=Jurado, nullable, `related_name=assigned_projects`), status, period, project_type, stage1_passed, failed_attempts |
-| **Evaluation** | project (FK), reviewer (FK), ratings (JSON), comments (JSON `{general: "..."}` — visible to students), score, pass_status, section_scores (JSON) |
+| **Project** | title, student (FK), partner (FK), advisors (M2M to Tutor), reviewer (FK to User with role=Jurado, nullable, `related_name=assigned_projects`), status, period, project_type, stage1_passed, `state` (pending_review_1 / pending_review_2 / pending_defense / approved / failed_final) |
+| **Evaluation** | project (FK), reviewer (FK), `kind` (review/defense), ratings (JSON), comments (JSON `{general: "..."}` — visible to students), score, pass_status, section_scores (JSON) |
 | **AttachedFile** | project (FK), name, file (FileField), file_type (pdf/word) |
 | **Semester** | period (unique, YYYY-SS), is_active, start_month, end_month (supports cross-year ranges) |
 | **Comment** | project (FK), author (FK), content |
@@ -92,7 +92,8 @@ Views filter querysets based on user role:
 
 - Evaluations store `ratings` (JSON dict of question_id → answer_value), `comments` (JSON, typically `{general: "text"}`), `score`, `pass_status`, and `section_scores`
 - Comments are visible to students on project/thesis detail pages
-- Max 2 failed attempts for "proyecto" type (enforced in EvaluationViewSet.perform_create)
+- PTEG (`project_type='proyecto'`) uses an explicit lifecycle state machine — `Project.state` moves deterministically via `api/lifecycle.next_state()` as jurados record `Evaluation` rows. Legal transitions: `pending_review_1 → pending_defense` (Pass) or `pending_review_2` (Fail); `pending_review_2 → pending_defense` (Pass) or `failed_final` (Fail); `pending_defense → approved` (defense Pass). `approved` and `failed_final` are terminal — additional evaluations return 400. The legacy 2-attempt cap is enforced by the terminal `failed_final` state.
+- `Evaluation.kind` is `review` (default) or `defense`. A review creates review-type transitions; a defense creates the defense-type transition.
 - Thesis supports two-phase evaluation via `stage1_passed` flag on Project
 - Only **Administrador** and **Jurado** can create evaluations (Tutors retain read access to evaluations of their advisees but can no longer create them). A Jurado can only evaluate a project where they are set as `reviewer` — otherwise `EvaluationViewSet.perform_create` returns 403 "No estás asignado como jurado de este proyecto".
 

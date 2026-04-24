@@ -127,6 +127,7 @@ Jurados only see projects assigned to them (where the project's `reviewer` is th
 - Draft persistence via localStorage (`teg_eval_draft:{type}:{projectId}`)
 - Evaluator comments stored in `Evaluation.comments` as `{ general: "..." }` and displayed to students on project/thesis detail pages
 - Questions/scoring defined in `src/features/evaluations/lib/questions/`
+- PTEG evaluation page (`/dashboard/proyectos/[id]/evaluar`) shows a Revisión / Defensa oral segmented control gated by `Project.state`. Terminal states hide the form entirely. The TEG evaluation page (`/dashboard/tesis/[id]/evaluar`) is unchanged — it retains the `stage1_passed` toggle.
 
 ## Document Creation (Agregar)
 
@@ -180,7 +181,8 @@ Jurados only see projects assigned to them (where the project's `reviewer` is th
 | `src/app/dashboard/agregar/hooks/useDocumentData.ts` | Data fetching hook for agregar page |
 | `src/features/evaluations/lib/questions/questions.ts` | Evaluation question definitions |
 | `src/features/evaluations/lib/questions/scoring.ts` | Score calculation |
-| `src/features/projects/types/project.ts` | TypeScript interfaces (`Project` includes `reviewer?: number \| null` and `reviewerName?: string \| null` alongside advisor fields) |
+| `src/features/projects/types/project.ts` | TypeScript interfaces (`Project` includes `reviewer?: number \| null`, `reviewerName?: string \| null`, and `state: ProjectState` for PTEG lifecycle) |
+| `src/features/projects/api/projectService.ts` (ApiProject) | Extended to include `state` and `Evaluation.kind`. `createEvaluation` accepts `kind: 'review' \| 'defense'`. |
 | `src/app/globals.css` | Theme variables + custom animations |
 
 ## Known Limitations
