@@ -19,11 +19,12 @@ import {
   ActivityFeed,
   ListPanel,
   ListRow,
-  SemesterStrip,
   StatTile,
 } from "@shared/ui";
+import { getSemesterProgress } from "@features/dashboard/lib/semesterWeek";
 
 import { buildDashboardContent } from "../lib/roleContent";
+import { DashboardHero } from "./DashboardHero";
 
 const Dashboard: React.FC = () => {
   const router = useRouter();
@@ -84,6 +85,30 @@ const Dashboard: React.FC = () => {
     }
   }, [projects, semesterOptions, semesterPeriod]);
 
+  const now = useMemo(() => new Date(), []);
+
+  const semesterDaysRemaining = useMemo(() => {
+    if (!semesterObj) return 0;
+    const p = getSemesterProgress(semesterObj, now);
+    if (p.status === "in-progress") {
+      return Math.max(0, (p.totalWeeks - p.week) * 7);
+    }
+    if (p.status === "not-started") return p.daysUntilStart;
+    return 0;
+  }, [semesterObj, now]);
+
+  const todaysDeliveries = useMemo(() => {
+    if (!semesterPeriod) return 0;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return projects.filter((p) => {
+      if (p.period !== semesterPeriod || !p.submittedDate) return false;
+      const d = new Date(p.submittedDate);
+      d.setHours(0, 0, 0, 0);
+      return d.getTime() === today.getTime();
+    }).length;
+  }, [projects, semesterPeriod]);
+
   const content = useMemo(() => {
     if (!semesterPeriod) return null;
     return buildDashboardContent({
@@ -92,68 +117,88 @@ const Dashboard: React.FC = () => {
       semester: semesterPeriod,
       projects,
       assignedProjectsCount: role === "Jurado" ? projects.length : undefined,
+      semesterDaysRemaining,
+      totalProjects: projects.filter((p) => p.period === semesterPeriod).length,
+      todaysDeliveries,
     });
-  }, [role, user, semesterPeriod, projects]);
+  }, [role, user, semesterPeriod, projects, semesterDaysRemaining, todaysDeliveries]);
 
-  const greeting = (() => {
-    const h = new Date().getHours();
-    if (h < 12) return "Buenos días";
-    if (h < 18) return "Buenas tardes";
-    return "Buenas noches";
+  const eyebrow = (() => {
+    const h = now.getHours();
+    const greet = h < 12 ? "Buenos días" : h < 18 ? "Buenas tardes" : "Buenas noches";
+    const dayMonth = now.toLocaleDateString("es-VE", { day: "numeric", month: "long" });
+    return `${greet} · ${dayMonth}`;
   })();
 
-  const subtitle = role === "Estudiante"
-    ? "Resumen de tu trabajo."
-    : "Resumen del período académico.";
+  const greetingByRole: Record<typeof role, string> = {
+    Administrador: "Bienvenido",
+    Tutor: "Hola",
+    Jurado: "Hola",
+    Estudiante: "Hola",
+  };
+
+  const ledeByRole: Record<typeof role, string> = {
+    Administrador: "Resumen del período académico — supervisión global, métricas vivas, atajos contextuales.",
+    Tutor: "Tus proyectos como tutor — los que requieren tu atención más arriba, comentarios sin respuesta a un click.",
+    Jurado: "Tus proyectos asignados, evaluaciones pendientes y defensas próximas en una sola vista.",
+    Estudiante: "Resumen de tu proyecto — estado actual, comentarios pendientes y tiempo restante del período.",
+  };
+
+  const tilesGridClass =
+    role === "Estudiante"
+      ? "grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr]"
+      : "grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4";
 
   return (
     <>
       <DashboardHeader pageTitle="Dashboard" />
-      <main className="flex-1 overflow-hidden bg-surface-muted p-3 sm:p-4 md:p-6 lg:p-8">
-        <div className="mx-auto flex h-full max-w-7xl flex-col gap-4">
-          <section className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <div>
-              <h1 className="text-2xl font-extrabold tracking-tight text-text-strong md:text-3xl">
-                {greeting}, <span className="text-primary">{userName}</span>
-              </h1>
-              <p className="text-sm text-text-muted">{subtitle}</p>
-            </div>
-            {semesterObj && <SemesterStrip semester={semesterObj} />}
-          </section>
+      <main className="flex-1 overflow-y-auto bg-surface-muted p-3 sm:p-4 md:p-6 lg:p-8">
+        <div className="mx-auto flex max-w-7xl flex-col gap-4">
+          {semesterObj ? (
+            <DashboardHero
+              eyebrow={eyebrow}
+              greeting={greetingByRole[role]}
+              userName={userName}
+              lede={ledeByRole[role]}
+              semester={semesterObj}
+              now={now}
+              semesterStats={content?.semesterStats}
+            />
+          ) : (
+            <div className="h-[140px] animate-pulse rounded-2xl bg-surface-sunken" />
+          )}
 
           {isLoading || !content ? (
-            <div className="grid flex-1 min-h-0 grid-cols-1 gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)]">
-              <div className="flex min-h-0 flex-col gap-4">
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <div className="h-[140px] animate-pulse rounded-2xl bg-surface-sunken" />
-                  <div className="h-[140px] animate-pulse rounded-2xl bg-surface-sunken" />
-                </div>
-                <div className="flex-1 animate-pulse rounded-xl bg-surface-sunken" />
+            <>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                {[0, 1, 2, 3].map((i) => (
+                  <div key={i} className="h-[180px] animate-pulse rounded-2xl bg-surface-sunken" />
+                ))}
               </div>
-              <div className="animate-pulse rounded-xl bg-surface-sunken" />
-            </div>
+              <div className="grid grid-cols-1 gap-3 lg:grid-cols-[2fr_1fr]">
+                <div className="h-[260px] animate-pulse rounded-2xl bg-surface-sunken" />
+                <div className="h-[260px] animate-pulse rounded-2xl bg-surface-sunken" />
+              </div>
+            </>
           ) : (
-            <div className="grid flex-1 min-h-0 grid-cols-1 gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)]">
-              <div className="flex min-h-0 flex-col gap-4">
-                <div
-                  className={
-                    content.stats.length === 1
-                      ? "grid grid-cols-1 gap-4"
-                      : "grid grid-cols-1 gap-4 sm:grid-cols-2"
-                  }
-                >
-                  {content.stats.map((s, i) => (
-                    <StatTile
-                      key={`${s.label}-${i}`}
-                      tone={s.tone}
-                      label={s.label}
-                      value={s.value}
-                      breakdown={s.breakdown}
-                      segments={s.segments}
-                      href={s.href}
-                    />
-                  ))}
-                </div>
+            <>
+              <div className={tilesGridClass}>
+                {content.stats.map((s, i) => (
+                  <StatTile
+                    key={`${s.label}-${i}`}
+                    tone={s.tone}
+                    label={s.label}
+                    value={s.value}
+                    breakdown={s.breakdown}
+                    segments={s.segments}
+                    chips={s.chips}
+                    urgent={s.urgent}
+                    href={s.href}
+                    spanCols={role === "Estudiante" && i === 0 ? 2 : 1}
+                  />
+                ))}
+              </div>
+              <div className="grid grid-cols-1 gap-3 lg:grid-cols-[2fr_1fr]">
                 <ListPanel
                   title={content.listTitle}
                   count={content.listItems.length}
@@ -174,9 +219,9 @@ const Dashboard: React.FC = () => {
                     />
                   ))}
                 </ListPanel>
+                <ActivityFeed items={content.feedItems} />
               </div>
-              <ActivityFeed items={content.feedItems} />
-            </div>
+            </>
           )}
         </div>
       </main>
