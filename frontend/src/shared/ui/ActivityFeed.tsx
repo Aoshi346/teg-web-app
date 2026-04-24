@@ -14,11 +14,11 @@ const KIND_ICON: Record<Kind, React.ComponentType<{ className?: string }>> = {
   commented: MessageSquare,
 };
 
-const KIND_CIRCLE: Record<Kind, string> = {
+const KIND_BG: Record<Kind, string> = {
   submitted: "bg-primary/10 text-primary",
-  reviewed: "bg-success-soft text-success",
-  rejected: "bg-destructive-soft text-destructive",
-  commented: "bg-pending-soft text-pending",
+  reviewed: "bg-success/10 text-success",
+  rejected: "bg-destructive/10 text-destructive",
+  commented: "bg-pending/15 text-pending",
 };
 
 export interface ActivityFeedItem {
@@ -42,12 +42,12 @@ export function ActivityFeed({
   return (
     <aside
       className={cn(
-        "flex h-full min-h-0 flex-col rounded-xl border border-border-subtle bg-surface p-4 shadow-[0_1px_3px_0_rgba(15,23,42,0.04)]",
+        "flex h-full min-h-0 flex-col rounded-2xl border border-border-subtle bg-surface p-5 shadow-[0_1px_3px_0_rgba(15,23,48,0.04)]",
         className,
       )}
       {...rest}
     >
-      <h3 className="sticky top-0 z-10 border-b border-border-subtle/50 bg-surface pb-3 text-sm font-bold text-text-strong">
+      <h3 className="mb-3 border-b border-border-subtle pb-3 text-[11px] font-extrabold uppercase tracking-[0.1em] text-text-strong">
         {title}
       </h3>
       {items.length === 0 ? (
@@ -55,23 +55,34 @@ export function ActivityFeed({
           Sin actividad reciente.
         </p>
       ) : (
-        <ol className="flex flex-1 min-h-0 flex-col gap-3 overflow-y-auto pr-1 pt-2">
-          {items.map((item) => {
+        <ol className="flex flex-1 min-h-0 flex-col overflow-y-auto pr-1">
+          {items.map((item, i) => {
             const Icon = KIND_ICON[item.kind];
             return (
-              <li key={item.id} className="flex items-start gap-3">
+              <li
+                key={item.id}
+                className={cn(
+                  "flex items-start gap-3 py-2.5",
+                  i < items.length - 1 && "border-b border-dashed border-border-subtle",
+                )}
+              >
                 <span
+                  data-slot="activity-icon"
                   className={cn(
-                    "flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full",
-                    KIND_CIRCLE[item.kind],
+                    "flex h-[30px] w-[30px] flex-shrink-0 items-center justify-center rounded-[10px]",
+                    KIND_BG[item.kind],
                   )}
                   aria-hidden
                 >
                   <Icon className="h-3.5 w-3.5" />
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm leading-tight text-text-default">{item.text}</p>
-                  <p className="text-xs text-text-muted">{item.time}</p>
+                  <p className="text-xs font-medium leading-snug text-text-default">
+                    {item.text}
+                  </p>
+                  <p className="mt-0.5 text-[10px] font-medium tabular-nums text-text-muted">
+                    {item.time}
+                  </p>
                 </div>
               </li>
             );
