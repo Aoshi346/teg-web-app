@@ -68,20 +68,21 @@ export function ProfileForm({ initialValues, onSubmit }: ProfileFormProps) {
         />
       </div>
 
-      <div className="px-6 pb-4 -mt-[40px] relative z-[2] flex flex-col sm:flex-row sm:items-end gap-3 sm:gap-4">
-        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] text-white flex items-center justify-center text-[28px] font-bold border-4 border-surface shadow-[0_4px_14px_rgba(15,23,42,0.12)] flex-shrink-0">
+      <div className="px-6 -mt-[40px] relative z-[2]">
+        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] text-white flex items-center justify-center text-[28px] font-bold border-4 border-surface shadow-[0_4px_14px_rgba(15,23,42,0.12)]">
           {initials(fullName || "")}
         </div>
-        <div className="flex-1 min-w-0 sm:pb-1">
-          <h3 className="text-[19px] font-extrabold text-text-strong tracking-tight mb-1.5 truncate">
-            {fullName || "—"}
-          </h3>
-          <div className="flex flex-wrap gap-2 items-center text-[12.5px] text-text-muted">
-            <span className={`inline-flex px-2 py-0.5 rounded-full text-[11px] font-bold border ${rolePillClass}`}>
-              {role}
-            </span>
-            <span className="truncate">{email}</span>
-          </div>
+      </div>
+
+      <div className="px-6 pt-3 pb-4">
+        <h3 className="text-[19px] font-extrabold text-text-strong tracking-tight mb-1.5 truncate">
+          {fullName || "—"}
+        </h3>
+        <div className="flex flex-wrap gap-2 items-center text-[12.5px] text-text-muted">
+          <span className={`inline-flex px-2 py-0.5 rounded-full text-[11px] font-bold border ${rolePillClass}`}>
+            {role}
+          </span>
+          <span className="truncate">{email}</span>
         </div>
       </div>
 
