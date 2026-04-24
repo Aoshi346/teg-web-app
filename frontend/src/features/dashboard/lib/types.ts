@@ -1,10 +1,17 @@
 import type { ProjectStatus, ProjectType } from "@features/projects/types/project";
 
+export type BreakdownSegment = {
+  label: string;
+  count: number;
+  href: string;
+};
+
 export interface StatTileData {
   tone: "primary" | "accent";
   label: string;
   value: string;
   breakdown?: string;
+  segments?: BreakdownSegment[];
   href?: string;
 }
 

@@ -220,3 +220,62 @@ describe("buildDashboardContent — PTEG student hint from state", () => {
     expect(content.listItems[0].hint).toMatch(/sin más|no hay más|reprobado/i);
   });
 });
+
+describe("adminContent PTEG state segments", () => {
+  it("returns segments array with per-state counts for admin", () => {
+    const content = buildDashboardContent({
+      role: "Administrador",
+      user: null,
+      semester: "2026-01",
+      projects: [
+        proj({ id: 1, type: "proyecto", state: "pending_review_1" }),
+        proj({ id: 2, type: "proyecto", state: "pending_review_1" }),
+        proj({ id: 3, type: "proyecto", state: "pending_defense" }),
+        proj({ id: 4, type: "proyecto", state: "approved" }),
+        proj({ id: 5, type: "tesis", state: "pending_review_1" }),
+      ],
+    });
+    const ptegTile = content.stats[0];
+    expect(ptegTile.segments).toBeDefined();
+    const byLabel = Object.fromEntries(
+      (ptegTile.segments ?? []).map((s) => [s.label, s.count]),
+    );
+    expect(byLabel["revisión 1"]).toBe(2);
+    expect(byLabel["defensa"]).toBe(1);
+    expect(byLabel["aprobados"]).toBe(1);
+  });
+
+  it("omits segments with count 0", () => {
+    const content = buildDashboardContent({
+      role: "Administrador",
+      user: null,
+      semester: "2026-01",
+      projects: [proj({ id: 10, type: "proyecto", state: "approved" })],
+    });
+    const labels = (content.stats[0].segments ?? []).map((s) => s.label);
+    expect(labels).toEqual(["aprobados"]);
+  });
+
+  it("segments link to /dashboard/proyectos?state=<state>", () => {
+    const content = buildDashboardContent({
+      role: "Administrador",
+      user: null,
+      semester: "2026-01",
+      projects: [proj({ id: 11, type: "proyecto", state: "pending_defense" })],
+    });
+    const seg = content.stats[0].segments?.[0];
+    expect(seg?.href).toBe("/dashboard/proyectos?state=pending_defense");
+  });
+
+  it("non-admin roles do not get segments on tiles", () => {
+    const content = buildDashboardContent({
+      role: "Estudiante",
+      user: { role: "Estudiante", semester: "2026-01" },
+      semester: "2026-01",
+      projects: [proj({ id: 20, type: "proyecto", state: "pending_review_1" })],
+    });
+    for (const tile of content.stats) {
+      expect(tile.segments).toBeUndefined();
+    }
+  });
+});

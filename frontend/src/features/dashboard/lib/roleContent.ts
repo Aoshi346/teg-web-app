@@ -1,5 +1,6 @@
 import type { Project, ProjectState, ProjectStatus } from "@features/projects/types/project";
 import type {
+  BreakdownSegment,
   DashboardContent,
   FeedItemData,
   ListRowData,
@@ -54,6 +55,32 @@ const PTEG_STATE_CONFIG: Record<
     hint: "No hay más intentos disponibles.",
   },
 };
+
+const PTEG_STATE_SEGMENT_LABELS: Record<ProjectState, string> = {
+  pending_review_1: "revisión 1",
+  pending_review_2: "revisión 2",
+  pending_defense: "defensa",
+  approved: "aprobados",
+  failed_final: "reprobados",
+};
+
+function buildPtegStateBreakdown(pteg: Project[]): BreakdownSegment[] {
+  const counts: Record<ProjectState, number> = {
+    pending_review_1: 0,
+    pending_review_2: 0,
+    pending_defense: 0,
+    approved: 0,
+    failed_final: 0,
+  };
+  for (const p of pteg) counts[p.state]++;
+  return (Object.keys(counts) as ProjectState[])
+    .filter((s) => counts[s] > 0)
+    .map((s) => ({
+      label: PTEG_STATE_SEGMENT_LABELS[s],
+      count: counts[s],
+      href: `/dashboard/proyectos?state=${s}`,
+    }));
+}
 
 function buildBreakdown(list: Project[]): string {
   const checked = list.filter((p) => p.status === "checked").length;
@@ -120,7 +147,7 @@ function adminContent(projects: Project[], semester: string, now: Date): Dashboa
       tone: "primary",
       label: "Proyectos (PTEG)",
       value: String(pteg.length),
-      breakdown: buildBreakdown(pteg),
+      segments: buildPtegStateBreakdown(pteg),
       href: "/dashboard/proyectos",
     },
     {
