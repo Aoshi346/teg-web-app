@@ -44,6 +44,7 @@ All API logic lives in a single `api` app. Views use DRF ModelViewSets with role
 | **Presentation** | day (FK), project (FK), tutor (FK User, Tutor only), jurado (M2M via `PresentationJuror`), start_time, duration_minutes, order. `UniqueConstraint(day, project)`. |
 | **PresentationJuror** | presentation (FK), juror (FK User, Jurado only), individual_score (nullable), notified, notified_at, confirmed_attendance, attended, created_at, updated_at. `unique_together=(presentation, juror)`. Uses `db_table='api_presentation_jurado'` so the original implicit-M2M rows were preserved when it became explicit. |
 | **SessionLog** | user (FK), session_key (unique), device, browser, ip_address, user_agent, is_active |
+| **StateOverride** | project (FK, CASCADE), admin (FK, PROTECT), from_state, to_state, reason (text ≥10 chars), created_at. Append-only audit of admin manual state changes on PTEG. Written by `POST /api/projects/{id}/override_state/`. |
 
 ## When Modifying Models
 
@@ -96,6 +97,7 @@ Views filter querysets based on user role:
 - `Evaluation.kind` is `review` (default) or `defense`. A review creates review-type transitions; a defense creates the defense-type transition.
 - Thesis supports two-phase evaluation via `stage1_passed` flag on Project
 - Only **Administrador** and **Jurado** can create evaluations (Tutors retain read access to evaluations of their advisees but can no longer create them). A Jurado can only evaluate a project where they are set as `reviewer` — otherwise `EvaluationViewSet.perform_create` returns 403 "No estás asignado como jurado de este proyecto".
+- **State overrides (admin escape hatch):** `POST /api/projects/{id}/override_state/` with `{state, reason}` creates a `StateOverride` audit row and writes `Project.state` + `Project.status` atomically, bypassing `lifecycle.next_state()`. Admin-only; PTEG-only. `ProjectSerializer` nests recent overrides in its response only when the requesting user is `Administrador`.
 
 ## File Upload
 
