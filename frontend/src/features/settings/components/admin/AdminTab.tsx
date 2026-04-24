@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import type { AdminSubTabId } from "../../types/settings";
 import { SemesterListPanel } from "./semesters/SemesterListPanel";
 import { UserDirectoryPanel } from "./directory/UserDirectoryPanel";
+import { PendingUsersPanel } from "./pending/PendingUsersPanel";
 
 export function AdminTab() {
   const [sub, setSub] = useState<AdminSubTabId>("semesters");
@@ -23,7 +24,7 @@ export function AdminTab() {
         ))}
       </div>
       <div role="tabpanel">
-        {sub === "pending" && <div data-testid="pending-placeholder" className="p-6 bg-white rounded-lg border border-gray-200 text-gray-500 text-sm">Pendientes (placeholder — Task 7)</div>}
+        {sub === "pending" && <PendingUsersPanel />}
         {sub === "directory" && <UserDirectoryPanel />}
         {sub === "semesters" && <SemesterListPanel />}
       </div>
