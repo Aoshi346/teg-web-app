@@ -58,7 +58,7 @@ export function ProfileForm({ initialValues, onSubmit }: ProfileFormProps) {
       onSubmit={submit}
       className="bg-surface border border-border-subtle rounded-[14px] shadow-[0_1px_2px_rgba(15,23,42,0.03)] overflow-hidden"
     >
-      <div className="relative h-[110px] bg-gradient-to-br from-[#1a1f33] via-[#011638] to-[#0066ff]">
+      <div className="relative h-[88px] bg-gradient-to-br from-[#1a1f33] via-[#011638] to-[#0066ff]">
         <div
           className="absolute inset-0 opacity-60 pointer-events-none"
           style={{
@@ -68,19 +68,18 @@ export function ProfileForm({ initialValues, onSubmit }: ProfileFormProps) {
         />
       </div>
 
-      <div className="flex items-end gap-[18px] px-6 -mt-[42px] relative z-[2]">
+      <div className="px-6 pb-4 -mt-[40px] relative z-[2] flex flex-col sm:flex-row sm:items-end gap-3 sm:gap-4">
         <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] text-white flex items-center justify-center text-[28px] font-bold border-4 border-surface shadow-[0_4px_14px_rgba(15,23,42,0.12)] flex-shrink-0">
           {initials(fullName || "")}
         </div>
-        <div className="pb-1.5 flex-1 min-w-0">
-          <h3 className="text-[19px] font-extrabold text-text-strong tracking-tight mb-1 truncate">
+        <div className="flex-1 min-w-0 sm:pb-1">
+          <h3 className="text-[19px] font-extrabold text-text-strong tracking-tight mb-1.5 truncate">
             {fullName || "—"}
           </h3>
-          <div className="flex gap-2.5 items-center text-[12.5px] text-text-muted">
+          <div className="flex flex-wrap gap-2 items-center text-[12.5px] text-text-muted">
             <span className={`inline-flex px-2 py-0.5 rounded-full text-[11px] font-bold border ${rolePillClass}`}>
               {role}
             </span>
-            <span>·</span>
             <span className="truncate">{email}</span>
           </div>
         </div>

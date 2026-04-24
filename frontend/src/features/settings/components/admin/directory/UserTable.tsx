@@ -64,7 +64,8 @@ export function UserTable({ users, search, roleFilter, statusFilter, onEdit, onD
 
   return (
     <div>
-      <table className="w-full border-collapse">
+      <div className="overflow-x-auto">
+      <table className="w-full border-collapse min-w-[640px]">
         <thead>
           <tr>
             <th className={thClass}>{headerLabel("fullName", "Usuario")}</th>
@@ -89,6 +90,7 @@ export function UserTable({ users, search, roleFilter, statusFilter, onEdit, onD
           )}
         </tbody>
       </table>
+      </div>
       {total > 0 && (
         <div className="px-5 py-3 flex justify-between items-center border-t border-border-subtle bg-surface-muted flex-wrap gap-2">
           <div className="text-xs text-text-muted">

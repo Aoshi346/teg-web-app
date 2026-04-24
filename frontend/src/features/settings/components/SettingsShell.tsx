@@ -33,9 +33,9 @@ export function SettingsShell() {
   }, [role]);
 
   return (
-    <main className="w-full px-8 lg:px-10 py-7 pb-16">
+    <main className="w-full px-4 sm:px-6 lg:px-8 py-6 pb-16">
       <div className="mb-6">
-        <h1 className="text-[28px] font-extrabold tracking-tight text-text-strong leading-tight mb-1.5">
+        <h1 className="text-2xl sm:text-[28px] font-extrabold tracking-tight text-text-strong leading-tight mb-1.5">
           Configuración
         </h1>
         <p className="text-sm text-text-muted max-w-[70ch]">
@@ -46,7 +46,7 @@ export function SettingsShell() {
       <div
         role="tablist"
         aria-label="Secciones de configuración"
-        className="inline-flex items-center gap-0.5 p-1 bg-surface border border-border-subtle rounded-[10px] shadow-[0_1px_2px_rgba(15,23,42,0.03)] mb-6"
+        className="flex flex-wrap items-center gap-0.5 p-1 bg-surface border border-border-subtle rounded-[10px] shadow-[0_1px_2px_rgba(15,23,42,0.03)] mb-6 w-fit max-w-full"
       >
         {tabs.map((t) => {
           const isActive = active === t.id;
