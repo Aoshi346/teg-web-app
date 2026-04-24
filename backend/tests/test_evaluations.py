@@ -143,14 +143,29 @@ class TestFailedAttemptsLimit:
 
     @pytest.mark.django_db
     def test_tesis_allows_creation_regardless_of_state(
-        self, admin_user, student_user, project_factory
+        self, jurado_user, student_user, project_factory
     ):
-        """The guard is project_type-specific: tesis creation is never blocked by project state."""
-        project = project_factory(student=student_user, project_type="tesis")
+        """
+        TEG no usa la máquina de estados PTEG — su ciclo se gobierna por
+        stage1_passed. El guard `state in TERMINAL_STATES` que bloquea a
+        proyectos NO debe aplicar a tesis. Se prueba con state='failed_final'
+        (el caso que bloquearía un proyecto) para verificar el bypass.
+        """
+        tesis = project_factory(
+            student=student_user,
+            reviewer=jurado_user,
+            project_type="tesis",
+            state="failed_final",
+        )
         client = APIClient()
-        client.force_authenticate(user=admin_user)
-        response = client.post(EVALUATIONS_URL, _minimal_payload(project.id), format="json")
-        assert response.status_code == 201
+        client.force_authenticate(user=jurado_user)
+        # Any kind/pass_status — tesis skips the state machine entirely.
+        resp = client.post(
+            "/api/evaluations/",
+            {"project": tesis.id, "pass_status": "Pass", "score": 18},
+            format="json",
+        )
+        assert resp.status_code == 201, resp.content
 
 
 # ---------------------------------------------------------------------------
