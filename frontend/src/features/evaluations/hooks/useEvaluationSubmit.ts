@@ -88,14 +88,21 @@ export function useEvaluationSubmit(
           passStatus === "Pass" ? "checked" : "rejected"
         ) as "checked" | "rejected";
         const reviewDate = new Date().toISOString().split("T")[0];
-        await updateProject(projectData.id, {
-          status,
-          review_date: reviewDate,
-          stage1_passed:
-            isStage1 && passStatus === "Pass"
-              ? true
-              : (projectData.stage1Passed ?? false),
-        });
+        try {
+          await updateProject(projectData.id, {
+            status,
+            review_date: reviewDate,
+            stage1_passed:
+              isStage1 && passStatus === "Pass"
+                ? true
+                : (projectData.stage1Passed ?? false),
+          });
+        } catch (err: unknown) {
+          const msg =
+            err instanceof Error ? err.message : "Error al actualizar el proyecto.";
+          onError(msg);
+          return;
+        }
       }
 
       onSuccess({ score, passStatus, ratings, comments });

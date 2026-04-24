@@ -28,17 +28,26 @@ export default function EvaluarProyectoPage() {
 
   const [project, setProject] = useState<Project | null>(null);
   const [kind, setKind] = useState<EvalKind>("review");
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!projectId) return;
     const id = parseInt(projectId);
     if (Number.isNaN(id)) return;
-    getProject(id).then((p) => {
-      if (p) {
-        setProject(p);
-        setKind(defaultKindForState(p.state));
-      }
-    });
+    getProject(id)
+      .then((p) => {
+        if (p) {
+          setProject(p);
+          setKind(defaultKindForState(p.state));
+        } else {
+          setLoadError("Proyecto no encontrado.");
+        }
+      })
+      .catch((err) => {
+        const msg =
+          err instanceof Error ? err.message : "Error al cargar el proyecto.";
+        setLoadError(msg);
+      });
   }, [projectId]);
 
   const isTerminal = project ? TERMINAL_STATES.includes(project.state) : false;
@@ -59,7 +68,14 @@ export default function EvaluarProyectoPage() {
             Volver
           </button>
 
-          {isTerminal ? (
+          {loadError ? (
+            <div className="rounded-xl border border-red-200 bg-red-50 p-8 text-center shadow-sm">
+              <p className="text-lg font-semibold text-red-800">
+                No se pudo cargar el proyecto
+              </p>
+              <p className="mt-2 text-sm text-red-600">{loadError}</p>
+            </div>
+          ) : isTerminal ? (
             <div className="rounded-xl border border-slate-200 bg-white p-8 text-center shadow-sm">
               <p className="text-lg font-semibold text-slate-800">
                 Este proyecto ya finalizó su ciclo.
@@ -85,7 +101,7 @@ export default function EvaluarProyectoPage() {
                       ? "bg-blue-600 text-white"
                       : "text-slate-600 hover:text-slate-900"
                   } ${!canReview ? "cursor-not-allowed opacity-50" : ""}`}
-                  title={canReview ? "" : "Ya aprobó revisión"}
+                  title={canReview ? undefined : "Ya aprobó revisión"}
                 >
                   Revisión
                 </button>
@@ -99,7 +115,7 @@ export default function EvaluarProyectoPage() {
                       ? "bg-blue-600 text-white"
                       : "text-slate-600 hover:text-slate-900"
                   } ${!canDefense ? "cursor-not-allowed opacity-50" : ""}`}
-                  title={canDefense ? "" : "Aún no aprobado para defensa"}
+                  title={canDefense ? undefined : "Aún no aprobado para defensa"}
                 >
                   Defensa oral
                 </button>
