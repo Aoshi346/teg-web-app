@@ -72,16 +72,17 @@ export interface StatTileProps extends VariantProps<typeof tileVariants> {
   spanCols?: 1 | 2;
 }
 
-function renderBreakdown(breakdown?: string): React.ReactNode {
+function renderBreakdown(breakdown: string | undefined, isHero: boolean): React.ReactNode {
   if (!breakdown) return null;
+  const textClass = isHero ? "text-white/80" : "text-text-default";
   if (!breakdown.includes(" · ")) {
-    return <p className="text-sm text-text-default">{breakdown}</p>;
+    return <p className={cn("relative z-10 text-sm", textClass)}>{breakdown}</p>;
   }
   const parts = breakdown.split(" · ");
   return (
-    <ul className="flex flex-col gap-1.5">
+    <ul className="relative z-10 flex flex-col gap-1.5">
       {parts.map((part, i) => (
-        <li key={part + i} className="flex items-center gap-2 text-sm text-text-default">
+        <li key={part + i} className={cn("flex items-center gap-2 text-sm", textClass)}>
           <span
             className={cn("h-1.5 w-1.5 flex-shrink-0 rounded-full", BULLET_COLORS[i] ?? "bg-text-muted")}
             aria-hidden
@@ -93,16 +94,15 @@ function renderBreakdown(breakdown?: string): React.ReactNode {
   );
 }
 
-function renderSegments(segments?: BreakdownSegment[]): React.ReactNode {
+function renderSegments(segments: BreakdownSegment[] | undefined, isHero: boolean): React.ReactNode {
   if (!segments || segments.length === 0) return null;
+  const linkClass = isHero
+    ? "rounded-full border border-white/15 bg-white/10 px-2 py-0.5 text-xs font-semibold text-white transition hover:border-[var(--brand-yellow)]/40 hover:bg-white/20"
+    : "rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary transition hover:bg-primary/20";
   return (
-    <div className="flex flex-wrap gap-1.5">
+    <div className="relative z-10 flex flex-wrap gap-1.5">
       {segments.map((s) => (
-        <Link
-          key={s.label}
-          href={s.href}
-          className="rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary transition hover:bg-primary/20"
-        >
+        <Link key={s.label} href={s.href} className={linkClass}>
           {s.count} {s.label}
         </Link>
       ))}
@@ -222,7 +222,7 @@ export function StatTile({
       className={cn(
         "relative z-10 leading-none tracking-[-0.035em]",
         isHero
-          ? "text-[60px] font-black tracking-[-0.045em]"
+          ? "text-[60px] font-black tracking-[-0.045em] text-white"
           : secondaryTone
             ? "text-[46px] font-black text-text-strong"
             : "text-5xl font-extrabold",
@@ -236,9 +236,9 @@ export function StatTile({
 
   const subEl = chips && chips.length > 0
     ? renderChips(chips)
-    : segments
-      ? renderSegments(segments)
-      : renderBreakdown(breakdown);
+    : segments && segments.length > 0
+      ? renderSegments(segments, isHero)
+      : renderBreakdown(breakdown, isHero);
 
   const inner = (
     <>
