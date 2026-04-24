@@ -1,5 +1,5 @@
 import { api, postForm } from "@shared/api/api";
-import { Project } from "@features/projects/types/project";
+import { Project, ProjectState } from "@features/projects/types/project";
 
 // P2: Module-level cache for GET requests — expires after 30 seconds
 const cache = new Map<string, { data: unknown; expiresAt: number }>();
@@ -52,6 +52,16 @@ export interface ApiProject {
   project_type: "proyecto" | "tesis";
   failed_attempts: number;
   files?: ApiFile[];
+  // Note: outer key is camelCase (from ProjectSerializer.to_representation),
+  // inner fields stay snake_case per DRF default. Do not "normalise" either.
+  stateOverrides?: Array<{
+    id: number;
+    from_state: ApiProject["state"];
+    to_state: ApiProject["state"];
+    reason: string;
+    admin_name: string;
+    created_at: string;
+  }>;
 }
 
 export interface ApiEvaluation {
@@ -114,7 +124,15 @@ function mapApiProject(p: ApiProject): Project {
       type: f.file_type,
       date: f.date
     })) || [],
-    failedAttempts: p.failed_attempts
+    failedAttempts: p.failed_attempts,
+    stateOverrides: p.stateOverrides?.map((o) => ({
+      id: o.id,
+      fromState: o.from_state,
+      toState: o.to_state,
+      reason: o.reason,
+      adminName: o.admin_name,
+      createdAt: o.created_at,
+    })),
   };
 }
 
@@ -192,6 +210,18 @@ export async function reassignStudent(id: number, payload: { student?: number; s
 
 export async function assignReviewer(id: number, reviewerId: number | null): Promise<ApiProject> {
   return api.post<ApiProject>(`/projects/${id}/assign_reviewer/`, { reviewer: reviewerId });
+}
+
+export async function overrideProjectState(
+  projectId: number,
+  payload: { state: ProjectState; reason: string },
+): Promise<Project> {
+  const p = await api.post<ApiProject>(
+    `/projects/${projectId}/override_state/`,
+    payload,
+  );
+  invalidateCache("projects");
+  return mapApiProject(p);
 }
 
 

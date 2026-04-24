@@ -24,6 +24,15 @@ export interface Comment {
   createdAt: string;
 }
 
+export interface StateOverride {
+  id: number;
+  fromState: ProjectState;
+  toState: ProjectState;
+  reason: string;
+  adminName: string;
+  createdAt: string;
+}
+
 export interface Project {
   id: number;
   title: string;
@@ -46,4 +55,5 @@ export interface Project {
   type?: ProjectType;
   files?: ProjectFile[];
   failedAttempts?: number;
+  stateOverrides?: StateOverride[];
 }
