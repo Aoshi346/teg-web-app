@@ -222,3 +222,34 @@ class TestDerivedFailedAttempts:
         resp = client.get(f"/api/projects/{tesis.id}/")
         assert resp.status_code == 200
         assert resp.json()["failed_attempts"] == 0
+
+    @pytest.mark.django_db
+    def test_defense_fail_does_not_count_as_failed_attempt(self, pteg, jurado_user):
+        """
+        Regla: failed_attempts cuenta sólo evaluaciones kind='review'. Una defensa
+        fallida NO incrementa el contador — el proyecto permanece en pending_defense
+        y puede reprogramarse, no consume un intento de revisión.
+        """
+        client = APIClient()
+        client.force_authenticate(user=jurado_user)
+        # First advance to pending_defense via a review Pass
+        client.post(EVALUATIONS_URL, _pass_payload(pteg.id, kind="review"), format="json")
+        # Now post a defense Fail — should NOT increment failed_attempts
+        client.post(EVALUATIONS_URL, _fail_payload(pteg.id, kind="defense"), format="json")
+        resp = client.get(f"/api/projects/{pteg.id}/")
+        assert resp.status_code == 200
+        assert resp.json()["failed_attempts"] == 0
+
+    @pytest.mark.django_db
+    def test_patch_to_failed_attempts_is_noop(self, pteg, jurado_user):
+        """
+        failed_attempts es SerializerMethodField (read-only). PATCH con un valor
+        arbitrario no debe mutarlo — DRF silenciosamente ignora la escritura.
+        Protege contra regresiones cuando Task 7 retira el PATCH del frontend.
+        """
+        client = APIClient()
+        client.force_authenticate(user=jurado_user)
+        resp = client.patch(f"/api/projects/{pteg.id}/", {"failed_attempts": 5}, format="json")
+        assert resp.status_code in (200, 202)
+        resp = client.get(f"/api/projects/{pteg.id}/")
+        assert resp.json()["failed_attempts"] == 0
