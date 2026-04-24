@@ -11,8 +11,6 @@ import {
   XCircle,
   Clock,
   GraduationCap,
-  AlertTriangle,
-  RefreshCw,
   Upload,
   UserCog,
   MessageSquare,
@@ -21,8 +19,34 @@ import {
 } from "lucide-react";
 import CommentsSection from "./CommentsSection";
 import Combobox from "@/app/dashboard/agregar/components/Combobox";
-import type { Project } from "@features/projects/types/project";
+import type { Project, ProjectState } from "@features/projects/types/project";
 import type { ApiEvaluation } from "@features/projects/api/projectService";
+
+const PTEG_STATE_CONFIG: Record<
+  ProjectState,
+  { label: string; pillClass: string }
+> = {
+  pending_review_1: {
+    label: "Pendiente 1ra revisión",
+    pillClass: "text-slate-700 bg-slate-50 border border-slate-200",
+  },
+  pending_review_2: {
+    label: "Intento 2 de 2 — Pendiente revisión",
+    pillClass: "text-amber-700 bg-amber-50 border border-amber-200",
+  },
+  pending_defense: {
+    label: "Pendiente defensa oral",
+    pillClass: "text-blue-700 bg-blue-50 border border-blue-200",
+  },
+  approved: {
+    label: "Aprobado",
+    pillClass: "text-emerald-700 bg-emerald-50 border border-emerald-200",
+  },
+  failed_final: {
+    label: "Reprobado (sin más intentos)",
+    pillClass: "text-red-700 bg-red-50 border border-red-200",
+  },
+};
 
 /* ─── Types ─── */
 interface ProjectDetailViewProps {
@@ -137,10 +161,6 @@ export default function ProjectDetailView({
   const isProyecto = variant === "proyecto";
   const TypeIcon = isProyecto ? GraduationCap : BookOpen;
 
-  const failedAttempts = project.failedAttempts || 0;
-  const isFinalRejection = isProyecto && project.status === "rejected" && failedAttempts >= 2;
-  const canRetry = isProyecto && project.status === "rejected" && failedAttempts < 2;
-
   return (
     <div className="max-w-6xl mx-auto space-y-4">
       {/* Back */}
@@ -175,18 +195,10 @@ export default function ProjectDetailView({
                 <div className="flex flex-wrap items-center gap-2">
                   <StatusBadge status={project.status} />
                   {isProyecto && (
-                    <span className="text-[10px] font-semibold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
-                      Intentos: {Math.min(failedAttempts, 2)}/2
-                    </span>
-                  )}
-                  {isProyecto && canRetry && (
-                    <span className="text-[10px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full flex items-center gap-1">
-                      <RefreshCw className="w-3 h-3" /> Puede reintentar
-                    </span>
-                  )}
-                  {isProyecto && isFinalRejection && (
-                    <span className="text-[10px] font-semibold text-gray-500 bg-gray-100 border border-gray-200 px-2 py-0.5 rounded-full flex items-center gap-1">
-                      <AlertTriangle className="w-3 h-3" /> Finalizado
+                    <span
+                      className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${PTEG_STATE_CONFIG[project.state].pillClass}`}
+                    >
+                      {PTEG_STATE_CONFIG[project.state].label}
                     </span>
                   )}
                   {!isProyecto && project.stage1Passed !== undefined && (
