@@ -120,6 +120,7 @@ const mockProject: Project = {
   student: "Student Name",
   submittedDate: "2026-04-01",
   status: "pending",
+  state: "pending_review_1",
   period: "2026-01",
   advisorNames: [],
   type: "proyecto",

@@ -8,6 +8,13 @@ export interface ProjectFile {
 export type ProjectStatus = "checked" | "pending" | "rejected";
 export type ProjectType = "proyecto" | "tesis";
 
+export type ProjectState =
+  | "pending_review_1"
+  | "pending_review_2"
+  | "pending_defense"
+  | "approved"
+  | "failed_final";
+
 export interface Comment {
   id: number;
   project: number;
@@ -30,13 +37,13 @@ export interface Project {
   submittedDate: string;
   reviewDate?: string;
   status: ProjectStatus;
+  state: ProjectState;
   score?: number;
   diagramacionScore?: number;
   contenidoScore?: number;
   stage1Passed?: boolean;
-  period: string; // Academic period e.g., "2026-02"
+  period: string;
   type?: ProjectType;
   files?: ProjectFile[];
   failedAttempts?: number;
 }
-

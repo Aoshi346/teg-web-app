@@ -32,8 +32,8 @@ export interface ApiFile {
 export interface ApiProject {
   id: number;
   title: string;
-  student: number; // ID
-  student_name?: string; // From serializer
+  student: number;
+  student_name?: string;
   partner?: number;
   partner_name?: string;
   advisors?: number[];
@@ -43,6 +43,7 @@ export interface ApiProject {
   submitted_date: string;
   review_date?: string;
   status: "checked" | "pending" | "rejected";
+  state: "pending_review_1" | "pending_review_2" | "pending_defense" | "approved" | "failed_final";
   score: number;
   diagramacion_score: number;
   contenido_score: number;
@@ -58,6 +59,7 @@ export interface ApiEvaluation {
   project: number;
   reviewer?: number | null;
   reviewer_name?: string;
+  kind?: "review" | "defense";
   ratings: Record<string, number | string>;
   comments: Record<string, unknown> | string;
   score: number;
@@ -99,6 +101,7 @@ function mapApiProject(p: ApiProject): Project {
     submittedDate: p.submitted_date,
     reviewDate: p.review_date,
     status: p.status,
+    state: p.state ?? "pending_review_1",
     score: p.score,
     diagramacionScore: p.diagramacion_score,
     contenidoScore: p.contenido_score,

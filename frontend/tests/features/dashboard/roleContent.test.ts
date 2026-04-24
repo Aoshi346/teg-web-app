@@ -8,6 +8,7 @@ const proj = (overrides: Partial<Project>): Project => ({
   student: "Ana Perez",
   submittedDate: "2026-04-01",
   status: "pending",
+  state: "pending_review_1",
   period: "2026-01",
   type: "proyecto",
   ...overrides,
