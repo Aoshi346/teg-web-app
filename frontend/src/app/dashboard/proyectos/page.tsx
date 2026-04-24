@@ -2,7 +2,12 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import { Search, CheckCircle, Clock, XCircle, FileText } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import {
+  applyStateFilter,
+  readStateFromSearchParams,
+} from "@features/projects/lib/applyStateFilter";
+import { PTEG_STATE_CONFIG } from "@features/projects/lib/ptegStateConfig";
 import DashboardHeader from "@widgets/header/DashboardHeader";
 import SemesterSelector from "@features/semesters/components/SemesterSelector";
 import { Project } from "@features/projects/types/project";
@@ -18,6 +23,8 @@ import { getUserRole } from "@features/auth/api/clientAuth";
 
 export default function ProyectosPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const activeStateFilter = readStateFromSearchParams(searchParams ?? null);
   const userRole = useMemo(() => getUserRole(), []);
   const isStudent = userRole === "Estudiante";
   const [searchQuery, setSearchQuery] = useState("");
@@ -82,7 +89,7 @@ export default function ProyectosPage() {
   );
 
   const filteredProjects = useMemo(() => {
-    return semesterProjects.filter((project) => {
+    const afterStatusSearch = semesterProjects.filter((project) => {
       const matchesSearch =
         project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         project.student.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -92,7 +99,8 @@ export default function ProyectosPage() {
         filterStatus === "all" || project.status === filterStatus;
       return matchesSearch && matchesFilter;
     });
-  }, [semesterProjects, searchQuery, filterStatus]);
+    return applyStateFilter(afterStatusSearch, activeStateFilter);
+  }, [semesterProjects, searchQuery, filterStatus, activeStateFilter]);
 
   const checkedProjects = useMemo(
     () => filteredProjects.filter((p) => p.status === "checked"),
@@ -239,6 +247,23 @@ export default function ProyectosPage() {
                 </div>
               </div>
             </div>
+
+            {activeStateFilter && (
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-sm text-gray-500">Filtrado por:</span>
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs">
+                  {PTEG_STATE_CONFIG[activeStateFilter].label}
+                  <button
+                    type="button"
+                    onClick={() => router.push("/dashboard/proyectos")}
+                    aria-label="Quitar filtro"
+                    className="ml-1 hover:underline"
+                  >
+                    ✕
+                  </button>
+                </span>
+              </div>
+            )}
 
             {!isDataLoaded && (
               <div className="flex justify-center items-center py-20">
