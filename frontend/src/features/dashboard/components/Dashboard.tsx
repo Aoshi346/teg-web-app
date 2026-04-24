@@ -146,7 +146,7 @@ const Dashboard: React.FC = () => {
 
   const tilesGridClass =
     role === "Estudiante"
-      ? "grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr]"
+      ? "grid grid-cols-1 gap-3 sm:grid-cols-3"
       : "grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4";
 
   return (
@@ -194,7 +194,7 @@ const Dashboard: React.FC = () => {
                     chips={s.chips}
                     urgent={s.urgent}
                     href={s.href}
-                    spanCols={role === "Estudiante" && i === 0 ? 2 : 1}
+                    spanCols={role === "Estudiante" && i === 0 ? 3 : 1}
                   />
                 ))}
               </div>

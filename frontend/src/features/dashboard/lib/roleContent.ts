@@ -230,8 +230,9 @@ function studentContent(input: BuildContentInput, now: Date): DashboardContent {
         {
           tone: "hero",
           label: isTesisStudent ? "Mi Tesis (TEG)" : "Mi Proyecto (PTEG)",
-          value: "—",
-          breakdown: "Sin proyecto registrado",
+          value: "Sin registrar",
+          breakdown: `Tienes ${days} días para registrar tu ${isTesisStudent ? "tesis" : "proyecto"} en este período.`,
+          href: "/dashboard/agregar",
         },
         { tone: "blue", label: "Entregas", value: "0", breakdown: "Sin entregas" },
         { tone: "green", label: "Notas", value: "—", breakdown: "Sin actividad" },

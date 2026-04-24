@@ -69,7 +69,7 @@ export interface StatTileProps extends VariantProps<typeof tileVariants> {
   urgent?: boolean;
   href?: string;
   className?: string;
-  spanCols?: 1 | 2;
+  spanCols?: 1 | 2 | 3;
 }
 
 function renderBreakdown(breakdown: string | undefined, isHero: boolean): React.ReactNode {
@@ -217,12 +217,14 @@ export function StatTile({
     </p>
   );
 
+  const heroValueSize =
+    value.length > 12 ? "text-3xl" : value.length > 6 ? "text-4xl" : "text-[60px]";
   const valueEl = (
     <p
       className={cn(
         "relative z-10 leading-none tracking-[-0.035em]",
         isHero
-          ? "text-[60px] font-black tracking-[-0.045em] text-white"
+          ? cn(heroValueSize, "font-black tracking-[-0.045em] text-white")
           : secondaryTone
             ? "text-[46px] font-black text-text-strong"
             : "text-5xl font-extrabold",
@@ -250,7 +252,8 @@ export function StatTile({
   );
 
   const heroStyle = isHero ? { background: HERO_BG } : undefined;
-  const colSpan = spanCols === 2 ? "lg:col-span-2" : "";
+  const colSpan =
+    spanCols === 3 ? "sm:col-span-3" : spanCols === 2 ? "lg:col-span-2" : "";
 
   if (href && !chips) {
     return (
