@@ -5,6 +5,7 @@ import Link from "next/link";
 import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@shared/lib/utils";
+import type { BreakdownSegment } from "@features/dashboard/lib/types";
 
 const tileVariants = cva(
   "group relative flex flex-col gap-4 rounded-2xl border p-6 transition-shadow focus-visible:outline-none focus-visible:ring-2",
@@ -37,6 +38,7 @@ export interface StatTileProps extends VariantProps<typeof tileVariants> {
   label: string;
   value: string;
   breakdown?: string;
+  segments?: BreakdownSegment[];
   href?: string;
   className?: string;
 }
@@ -62,7 +64,24 @@ function renderBreakdown(breakdown?: string): React.ReactNode {
   );
 }
 
-export function StatTile({ tone, label, value, breakdown, href, className }: StatTileProps) {
+function renderSegments(segments?: BreakdownSegment[]): React.ReactNode {
+  if (!segments || segments.length === 0) return null;
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {segments.map((s) => (
+        <Link
+          key={s.label}
+          href={s.href}
+          className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition"
+        >
+          {s.count} {s.label}
+        </Link>
+      ))}
+    </div>
+  );
+}
+
+export function StatTile({ tone, label, value, breakdown, segments, href, className }: StatTileProps) {
   const toneKey: "primary" | "accent" = tone === "accent" ? "accent" : "primary";
   const content = (
     <>
@@ -70,11 +89,11 @@ export function StatTile({ tone, label, value, breakdown, href, className }: Sta
       <p className={cn("text-5xl font-extrabold leading-none tracking-tight", valueClasses[toneKey])}>
         {value}
       </p>
-      {renderBreakdown(breakdown)}
+      {segments ? renderSegments(segments) : renderBreakdown(breakdown)}
     </>
   );
 
-  if (href) {
+  if (href && !segments) {
     return (
       <Link href={href} className={cn(tileVariants({ tone }), className)} aria-label={`${label}: ${value}`}>
         {content}

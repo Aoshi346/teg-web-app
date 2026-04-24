@@ -149,6 +149,7 @@ const Dashboard: React.FC = () => {
                       label={s.label}
                       value={s.value}
                       breakdown={s.breakdown}
+                      segments={s.segments}
                       href={s.href}
                     />
                   ))}
