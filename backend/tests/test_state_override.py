@@ -2,7 +2,8 @@ import pytest
 from django.db.models import ProtectedError
 from rest_framework.test import APIClient
 
-from api.models import Project, StateOverride, User
+from api.lifecycle import status_projection
+from api.models import Evaluation, Project, StateOverride, User
 
 
 @pytest.mark.django_db
@@ -193,3 +194,57 @@ class TestOverrideEndpointValidation:
         assert StateOverride.objects.count() == 0
         project.refresh_from_db()
         assert project.state == "pending_review_1"
+
+
+@pytest.mark.django_db
+class TestOverrideSideEffects:
+    def _setup(self, initial_state="pending_review_1"):
+        student = User.objects.create_user(email="ss@x.com", password="x", role="Estudiante")
+        project = Project.objects.create(
+            title="SS", student=student, project_type="proyecto", state=initial_state
+        )
+        admin = User.objects.create_user(email="admss@x.com", password="x", role="Administrador")
+        client = APIClient()
+        client.force_authenticate(user=admin)
+        return client, project, admin
+
+    def test_writes_state_status_and_override_atomically(self, db):
+        client, project, admin = self._setup("pending_review_1")
+        res = client.post(
+            f"/api/projects/{project.id}/override_state/",
+            {"state": "pending_defense", "reason": "dean appeal doc #4451"},
+            format="json",
+        )
+        assert res.status_code == 200
+        project.refresh_from_db()
+        assert project.state == "pending_defense"
+        assert project.status == status_projection("pending_defense")
+
+        overrides = list(project.state_overrides.all())
+        assert len(overrides) == 1
+        ov = overrides[0]
+        assert ov.from_state == "pending_review_1"
+        assert ov.to_state == "pending_defense"
+        assert ov.admin_id == admin.id
+        assert ov.reason == "dean appeal doc #4451"
+
+    def test_override_does_not_create_evaluation(self, db):
+        client, project, _ = self._setup()
+        client.post(
+            f"/api/projects/{project.id}/override_state/",
+            {"state": "approved", "reason": "correction from grading panel"},
+            format="json",
+        )
+        assert Evaluation.objects.filter(project=project).count() == 0
+
+    def test_bypasses_state_machine(self, db):
+        """pending_review_1 -> approved is illegal via next_state() but legal as an override."""
+        client, project, _ = self._setup("pending_review_1")
+        res = client.post(
+            f"/api/projects/{project.id}/override_state/",
+            {"state": "approved", "reason": "special academic waiver case"},
+            format="json",
+        )
+        assert res.status_code == 200
+        project.refresh_from_db()
+        assert project.state == "approved"
