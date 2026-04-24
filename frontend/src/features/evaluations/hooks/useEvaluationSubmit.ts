@@ -27,6 +27,7 @@ export function useEvaluationSubmit(
   typeParam: string,
   questions: Question[],
   projectData: Project | null,
+  kind: "review" | "defense" = "review",
 ) {
   const router = useRouter();
 
@@ -37,16 +38,6 @@ export function useEvaluationSubmit(
       onSuccess: (result: SubmitResult) => void,
       onError: (msg: string) => void,
     ) => {
-      // Enforce max attempts for proyectos
-      if (
-        documentType !== "Tesis" &&
-        projectData &&
-        (projectData.failedAttempts || 0) >= 2
-      ) {
-        onError("Este proyecto ya agotó los 2 intentos permitidos.");
-        return;
-      }
-
       const score = calculateScore(ratings, questions);
       const passStatus = getPassStatus(score);
 
@@ -55,71 +46,67 @@ export function useEvaluationSubmit(
           ? calculateSectionScores(ratings, questions)
           : null;
 
-      // Persist evaluation
+      // Persist the evaluation. For PTEG the backend updates Project.state
+      // (and legacy status) automatically — see api/lifecycle.next_state().
+      // TEG keeps its two-phase stage1_passed flow: we still PATCH the
+      // project below.
       if (projectId) {
         const id = parseInt(projectId);
         if (Number.isNaN(id)) {
           onError("Proyecto inválido para evaluación.");
           return;
         }
-        await createEvaluation({
-          project: id,
-          ratings: ratings || {},
-          comments: { general: comments || "" },
-          score,
-          pass_status: passStatus,
-          section_scores: sectionScores
-            ? {
-                total: sectionScores.total,
-                diagramacion: sectionScores.diagramacion,
-                contenido: sectionScores.contenido,
-              }
-            : undefined,
-        });
+        try {
+          await createEvaluation({
+            project: id,
+            kind,
+            ratings: ratings || {},
+            comments: { general: comments || "" },
+            score,
+            pass_status: passStatus,
+            section_scores: sectionScores
+              ? {
+                  total: sectionScores.total,
+                  diagramacion: sectionScores.diagramacion,
+                  contenido: sectionScores.contenido,
+                }
+              : undefined,
+          });
+        } catch (err: unknown) {
+          const msg =
+            err instanceof Error ? err.message : "Error al guardar la evaluación.";
+          onError(msg);
+          return;
+        }
       }
 
-      // Update project status
-      if (projectData && projectId) {
+      // TEG-only: PATCH stage1_passed + status. PTEG state is already
+      // updated server-side by the evaluation POST above.
+      if (projectData && projectId && documentType === "Tesis") {
+        const isStage1 = questions.some((q) => q.id === "q57");
         const status = (
           passStatus === "Pass" ? "checked" : "rejected"
         ) as "checked" | "rejected";
         const reviewDate = new Date().toISOString().split("T")[0];
-
-        if (documentType === "Tesis") {
-          const isStage1 = questions.some((q) => q.id === "q57");
-          await updateProject(projectData.id, {
-            status,
-            review_date: reviewDate,
-            stage1_passed:
-              isStage1 && passStatus === "Pass"
-                ? true
-                : (projectData.stage1Passed ?? false),
-          });
-        } else {
-          let failedAttempts = projectData.failedAttempts || 0;
-          if (passStatus === "Fail") {
-            failedAttempts = Math.min(failedAttempts + 1, 2);
-          } else {
-            failedAttempts = 0;
-          }
-          await updateProject(projectData.id, {
-            status,
-            review_date: reviewDate,
-            failed_attempts: failedAttempts,
-          });
-        }
+        await updateProject(projectData.id, {
+          status,
+          review_date: reviewDate,
+          stage1_passed:
+            isStage1 && passStatus === "Pass"
+              ? true
+              : (projectData.stage1Passed ?? false),
+        });
       }
 
       onSuccess({ score, passStatus, ratings, comments });
 
-      // Redirect after delay
       setTimeout(() => {
         router.push(
           typeParam === "tesis" ? "/dashboard/tesis" : "/dashboard/proyectos",
         );
       }, 2000);
     },
-    [projectId, documentType, typeParam, questions, projectData, router],
+    [projectId, documentType, typeParam, questions, projectData, kind, router],
   );
 
   return { submit };

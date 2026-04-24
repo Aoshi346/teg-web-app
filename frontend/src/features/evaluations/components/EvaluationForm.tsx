@@ -20,6 +20,7 @@ interface EvaluationFormProps {
   projectId?: string | null;
   typeParam?: string;
   questions: Question[];
+  kind?: "review" | "defense";
 }
 
 type Ratings = Record<string, number | string>;
@@ -39,6 +40,7 @@ export default function EvaluationForm({
   projectId,
   typeParam = "proyecto",
   questions,
+  kind = "review",
 }: EvaluationFormProps) {
   const router = useRouter();
   const documentType = typeParam.toLowerCase() === "tesis" ? "Tesis" : "Proyecto";
@@ -72,6 +74,7 @@ export default function EvaluationForm({
     typeParam,
     filteredQuestions,
     projectData,
+    kind,
   );
   const { showBanner, bannerProps } = useValidation();
 
