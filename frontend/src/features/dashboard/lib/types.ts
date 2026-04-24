@@ -6,12 +6,29 @@ export type BreakdownSegment = {
   href: string;
 };
 
+export type ChipSegment = {
+  label: string;
+  count: number;
+  href?: string;
+};
+
+export type TileTone =
+  | "primary"
+  | "accent"
+  | "hero"
+  | "blue"
+  | "orange"
+  | "green"
+  | "amber";
+
 export interface StatTileData {
-  tone: "primary" | "accent";
+  tone: TileTone;
   label: string;
   value: string;
   breakdown?: string;
   segments?: BreakdownSegment[];
+  chips?: ChipSegment[];
+  urgent?: boolean;
   href?: string;
 }
 
@@ -34,10 +51,16 @@ export interface FeedItemData {
   time: string;
 }
 
+export interface SemesterMiniStat {
+  num: string;
+  label: string;
+}
+
 export interface DashboardContent {
   stats: StatTileData[];
   listTitle: string;
   listItems: ListRowData[];
   listEmpty: { text: string; hint?: string };
   feedItems: FeedItemData[];
+  semesterStats?: SemesterMiniStat[];
 }
