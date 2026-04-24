@@ -1,4 +1,5 @@
 from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.core.exceptions import ValidationError
 from django.db import models
 
 
@@ -393,3 +394,39 @@ class SessionLog(models.Model):
 
     def __str__(self):
         return f"Session for {self.user.email} ({self.device}/{self.browser})"
+
+
+class StateOverride(models.Model):
+    """Admin-only manual override of Project.state. Bypasses lifecycle.next_state().
+
+    Append-only audit log. No edit/delete endpoint. admin is PROTECTed so
+    audit rows never become orphans; project is CASCADE since overrides are
+    scoped to project lifetime.
+    """
+
+    STATE_CHOICES = Project.STATE_CHOICES
+
+    project = models.ForeignKey(
+        Project,
+        on_delete=models.CASCADE,
+        related_name='state_overrides',
+    )
+    admin = models.ForeignKey(
+        User,
+        on_delete=models.PROTECT,
+        related_name='performed_state_overrides',
+    )
+    from_state = models.CharField(max_length=20, choices=STATE_CHOICES)
+    to_state = models.CharField(max_length=20, choices=STATE_CHOICES)
+    reason = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.project_id}: {self.from_state} → {self.to_state} by {self.admin_id}"
+
+    def clean(self):
+        if self.from_state == self.to_state:
+            raise ValidationError("from_state y to_state no pueden ser iguales.")
