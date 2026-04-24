@@ -1,21 +1,41 @@
-from rest_framework import viewsets, permissions, status, views
-from rest_framework.response import Response
-from rest_framework.decorators import action
-from rest_framework.parsers import MultiPartParser, FormParser
 from django.contrib.auth import login, logout
-from django.db.models import Q
 from django.db import IntegrityError, transaction
-from .models import User, Project, Evaluation, Semester, AttachedFile, Comment, SessionLog, PresentationDay, Presentation
-from .serializers import (
-    RegisterSerializer, LoginSerializer, UserSerializer,
-    ProjectSerializer, AttachedFileSerializer, EvaluationSerializer, SemesterSerializer, CommentSerializer,
-    SessionLogSerializer, SessionTrackSerializer,
-    PresentationDaySerializer, PresentationSerializer,
-)
+from django.db.models import Q
 from django.middleware.csrf import get_token
+from rest_framework import permissions, status, views, viewsets
+from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied, ValidationError
-from .lifecycle import InvalidTransition, next_state, status_projection
+from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import BasePermission
+from rest_framework.response import Response
+
+from .lifecycle import InvalidTransition, next_state, status_projection
+from .models import (
+    AttachedFile,
+    Comment,
+    Evaluation,
+    Presentation,
+    PresentationDay,
+    Project,
+    Semester,
+    SessionLog,
+    StateOverride,
+    User,
+)
+from .serializers import (
+    AttachedFileSerializer,
+    CommentSerializer,
+    EvaluationSerializer,
+    LoginSerializer,
+    PresentationDaySerializer,
+    PresentationSerializer,
+    ProjectSerializer,
+    RegisterSerializer,
+    SemesterSerializer,
+    SessionLogSerializer,
+    SessionTrackSerializer,
+    UserSerializer,
+)
 
 
 class IsAdminUserRole(BasePermission):
@@ -235,6 +255,60 @@ class ProjectViewSet(viewsets.ModelViewSet):
                 return Response({'reviewer': 'Jurado not found'}, status=status.HTTP_400_BAD_REQUEST)
             project.reviewer = reviewer
         project.save()
+        return Response(
+            ProjectSerializer(project, context={'request': request}).data,
+            status=status.HTTP_200_OK,
+        )
+
+    @action(detail=True, methods=['post'], url_path='override_state',
+            permission_classes=[permissions.IsAuthenticated, IsAdminUserRole])
+    def override_state(self, request, pk=None):
+        """
+        Forzar Project.state a cualquier valor, registrando un StateOverride
+        de auditoría. Sólo aplica a PTEG. Bypassea lifecycle.next_state() —
+        por diseño es el mecanismo de escape cuando el ciclo normal no puede
+        llegar al estado deseado.
+        """
+        project = self.get_object()
+
+        if project.project_type != 'proyecto':
+            raise ValidationError(
+                {'project_type': 'El override de estado sólo aplica a PTEG.'}
+            )
+
+        new_state = request.data.get('state')
+        valid_states = [choice[0] for choice in Project.STATE_CHOICES]
+        if new_state not in valid_states:
+            raise ValidationError({'state': 'Estado inválido.'})
+        if new_state == project.state:
+            raise ValidationError({'state': 'El proyecto ya está en ese estado.'})
+
+        reason_raw = request.data.get('reason')
+        if not reason_raw:
+            raise ValidationError({'reason': 'La razón es obligatoria.'})
+        reason = str(reason_raw).strip()
+        if len(reason) < 10:
+            raise ValidationError(
+                {'reason': 'La razón debe tener al menos 10 caracteres.'}
+            )
+
+        from_state = project.state
+
+        # Note: no select_for_update — admin-only escape hatch, <1 row/week
+        # expected traffic; revisit if Postgres + concurrent-admin edits become
+        # a real scenario (spec §4.1).
+        with transaction.atomic():
+            StateOverride.objects.create(
+                project=project,
+                admin=request.user,
+                from_state=from_state,
+                to_state=new_state,
+                reason=reason,
+            )
+            project.state = new_state
+            project.status = status_projection(new_state)
+            project.save(update_fields=['state', 'status'])
+
         return Response(
             ProjectSerializer(project, context={'request': request}).data,
             status=status.HTTP_200_OK,
