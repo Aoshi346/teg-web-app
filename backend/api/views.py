@@ -74,7 +74,11 @@ class AuthViewSet(viewsets.GenericViewSet):
         serializer = RegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
-        return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
+        data = UserSerializer(user).data
+        temp_pw = getattr(user, 'temporary_password', None)
+        if temp_pw:
+            data['temporary_password'] = temp_pw
+        return Response(data, status=status.HTTP_201_CREATED)
 
     @action(detail=False, methods=['get', 'patch'], permission_classes=[permissions.IsAuthenticated])
     def me(self, request):

@@ -1,3 +1,6 @@
+import secrets
+import string
+
 from django.contrib.auth import authenticate, get_user_model
 from rest_framework import serializers
 
@@ -15,6 +18,17 @@ from .models import (
 )
 
 User = get_user_model()
+
+
+def _generate_temporary_password() -> str:
+    """Contraseña aleatoria para usuarios creados por administrador.
+
+    Tres grupos de 4 caracteres alfanuméricos separados por guiones:
+    Ejemplo: X7k9-mP2q-W8nR. Longitud total: 14 caracteres.
+    """
+    alphabet = string.ascii_letters + string.digits
+    groups = ["".join(secrets.choice(alphabet) for _ in range(4)) for _ in range(3)]
+    return "-".join(groups)
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -66,12 +80,18 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class RegisterSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True)
+    password = serializers.CharField(write_only=True, required=False)
     full_name = serializers.CharField(write_only=True, required=False, default="")
+    admin_create = serializers.BooleanField(write_only=True, required=False, default=False)
+    temporary_password = serializers.CharField(read_only=True, required=False)
 
     class Meta:
         model = User
-        fields = ['email', 'password', 'full_name', 'first_name', 'last_name', 'nationality', 'cedula', 'role', 'semester', 'phone']
+        fields = [
+            'email', 'password', 'full_name', 'first_name', 'last_name',
+            'nationality', 'cedula', 'role', 'semester', 'phone',
+            'admin_create', 'temporary_password',
+        ]
         extra_kwargs = {
             'first_name': {'required': False},
             'last_name': {'required': False},
@@ -81,10 +101,28 @@ class RegisterSerializer(serializers.ModelSerializer):
             'phone': {'required': False},
         }
 
+    def validate(self, attrs):
+        """Si no es creación por administrador, la contraseña del cliente es obligatoria.
+
+        Se preserva la semántica original de auto-registro: el usuario siempre
+        debe proveer su propia contraseña. Solo el flujo admin_create puede
+        omitirla para que el backend genere una aleatoria.
+        """
+        if not attrs.get('admin_create') and not attrs.get('password'):
+            raise serializers.ValidationError({'password': 'This field is required.'})
+        return attrs
+
     def create(self, validated_data):
         full_name = validated_data.pop('full_name', '')
         first_name = validated_data.pop('first_name', '')
         last_name = validated_data.pop('last_name', '')
+        admin_create = validated_data.pop('admin_create', False)
+        client_password = validated_data.pop('password', None)
+
+        if admin_create:
+            password = _generate_temporary_password()
+        else:
+            password = client_password
 
         # If full_name provided but not first/last, split it
         if full_name and not first_name:
@@ -94,7 +132,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
         user = User.objects.create_user(
             email=validated_data['email'],
-            password=validated_data.pop('password'),
+            password=password,
             first_name=first_name,
             last_name=last_name,
             nationality=validated_data.get('nationality', 'V'),
@@ -104,7 +142,16 @@ class RegisterSerializer(serializers.ModelSerializer):
             phone=validated_data.get('phone', ''),
             status='pending',
         )
+        if admin_create:
+            user.temporary_password = password
         return user
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        temp_pw = getattr(instance, 'temporary_password', None)
+        if temp_pw:
+            data['temporary_password'] = temp_pw
+        return data
 
 
 class LoginSerializer(serializers.Serializer):
