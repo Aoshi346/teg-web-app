@@ -451,6 +451,16 @@ class SemesterViewSet(viewsets.ModelViewSet):
             Semester.objects.all().update(is_active=False)
         serializer.save()
 
+    def destroy(self, request, *args, **kwargs):
+        semester = self.get_object()
+        count = Project.objects.filter(period=semester.period).count()
+        if count > 0:
+            return Response(
+                {"detail": f"No se puede eliminar: {count} proyectos asignados a este semestre"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return super().destroy(request, *args, **kwargs)
+
 
 class IsCommentAuthorOrAdmin(BasePermission):
     def has_object_permission(self, request, view, obj):

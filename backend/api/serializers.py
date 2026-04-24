@@ -255,10 +255,14 @@ class EvaluationSerializer(serializers.ModelSerializer):
 
 class SemesterSerializer(serializers.ModelSerializer):
     label = serializers.CharField(read_only=True)
+    project_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Semester
-        fields = ['id', 'period', 'is_active', 'start_month', 'end_month', 'label', 'created_at']
+        fields = ['id', 'period', 'is_active', 'start_month', 'end_month', 'label', 'created_at', 'project_count']
+
+    def get_project_count(self, obj):
+        return Project.objects.filter(period=obj.period).count()
 
 
 class SessionLogSerializer(serializers.ModelSerializer):
