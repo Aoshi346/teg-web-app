@@ -11,6 +11,7 @@ from .models import (
     Project,
     Semester,
     SessionLog,
+    StateOverride,
 )
 
 User = get_user_model()
@@ -137,6 +138,14 @@ class AttachedFileSerializer(serializers.ModelSerializer):
         return ""
 
 
+class StateOverrideSerializer(serializers.ModelSerializer):
+    admin_name = serializers.CharField(source='admin.full_name', read_only=True)
+
+    class Meta:
+        model = StateOverride
+        fields = ['id', 'from_state', 'to_state', 'reason', 'admin_name', 'created_at']
+
+
 class ProjectSerializer(serializers.ModelSerializer):
     files = AttachedFileSerializer(many=True, read_only=True, required=False)
     student_name = serializers.SerializerMethodField()
@@ -209,6 +218,16 @@ class ProjectSerializer(serializers.ModelSerializer):
         if obj.project_type != 'proyecto':
             return 0
         return obj.evaluations.filter(kind='review', pass_status='Fail').count()
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        request = self.context.get('request')
+        user = getattr(request, 'user', None) if request else None
+        if user and getattr(user, 'role', None) == 'Administrador':
+            data['stateOverrides'] = StateOverrideSerializer(
+                instance.state_overrides.all(), many=True
+            ).data
+        return data
 
 
 class EvaluationSerializer(serializers.ModelSerializer):

@@ -213,7 +213,10 @@ class ProjectViewSet(viewsets.ModelViewSet):
 
         project.student = target_student
         project.save()
-        return Response(ProjectSerializer(project).data, status=status.HTTP_200_OK)
+        return Response(
+            ProjectSerializer(project, context={'request': request}).data,
+            status=status.HTTP_200_OK,
+        )
 
     @action(detail=True, methods=['post'], url_path='assign_reviewer')
     def assign_reviewer(self, request, pk=None):
@@ -232,7 +235,10 @@ class ProjectViewSet(viewsets.ModelViewSet):
                 return Response({'reviewer': 'Jurado not found'}, status=status.HTTP_400_BAD_REQUEST)
             project.reviewer = reviewer
         project.save()
-        return Response(ProjectSerializer(project).data, status=status.HTTP_200_OK)
+        return Response(
+            ProjectSerializer(project, context={'request': request}).data,
+            status=status.HTTP_200_OK,
+        )
 
     @action(detail=True, methods=['post'], url_path='files', parser_classes=[MultiPartParser, FormParser])
     def upload_file(self, request, pk=None):
