@@ -54,6 +54,7 @@ journey
       Consulta fecha de presentación: 4: Estudiante
     section Cierre
       Defiende ante el jurado: 3: Estudiante
+      Observa avance por estados (pending_review_1 → pending_defense → approved): 3: Estudiante
       Espera el resultado: 1: Estudiante
       Lee comments.general: 3: Estudiante
       Ve pass_status = Pass: 5: Estudiante
@@ -115,6 +116,7 @@ journey
     title Jurado · Fase 1 — Nombramiento y entrada
     section Descubrimiento
       Admin le comunica el nombramiento: 3: Jurado
+      Admin lo asigna como reviewer de un proyecto: 3: Jurado
       Ve el nombre TesisFar: 3: Jurado
     section Consideración
       Pregunta cuántas defensas evaluará: 2: Jurado
