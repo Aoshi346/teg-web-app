@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { ArrowRight, BookOpen, FileText } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 import { cn } from "@shared/lib/utils";
 
@@ -15,11 +15,18 @@ const STATUS_LABEL: Record<Status, string> = {
   upcoming: "Próximo",
 };
 
-const STATUS_CLASS: Record<Status, string> = {
-  checked: "bg-success-soft text-success border-success/20",
-  pending: "bg-pending-soft text-pending border-pending/20",
-  rejected: "bg-destructive-soft text-destructive border-destructive/20",
-  upcoming: "bg-neutral-100 text-slate-700 border-slate-300/50",
+const STATUS_BADGE: Record<Status, string> = {
+  checked: "bg-success/10 text-success border-success/22",
+  pending: "bg-pending/10 text-pending border-pending/22",
+  rejected: "bg-destructive/10 text-destructive border-destructive/22",
+  upcoming: "bg-primary/10 text-primary border-primary/22",
+};
+
+const INDICATOR_BG: Record<Status, string> = {
+  checked: "bg-success ring-success/22",
+  pending: "bg-pending ring-pending/22",
+  rejected: "bg-destructive ring-destructive/22",
+  upcoming: "bg-primary ring-primary/22",
 };
 
 export interface ListRowProps {
@@ -33,72 +40,97 @@ export interface ListRowProps {
   onHoverHref?: () => void;
 }
 
+const SUBTITLE_SEP = " · ";
+
+function renderSubtitle(subtitle: string): React.ReactNode {
+  if (!subtitle.includes(SUBTITLE_SEP)) {
+    return <span>{subtitle}</span>;
+  }
+  const parts = subtitle.split(SUBTITLE_SEP);
+  return parts.map((part, i) => (
+    <React.Fragment key={`${part}-${i}`}>
+      {i > 0 && (
+        <span
+          aria-hidden
+          className="mx-1 inline-block h-[3px] w-[3px] rounded-full bg-border-default align-middle"
+        />
+      )}
+      <span>{part}</span>
+    </React.Fragment>
+  ));
+}
+
 export function ListRow({
   title,
   subtitle,
-  type,
   status,
   hint,
   href,
   onClick,
   onHoverHref,
 }: ListRowProps) {
-  const isTeg = type === "tesis";
-  const PillIcon = isTeg ? BookOpen : FileText;
-
-  return (
-    <div
-      className="flex items-center gap-3 rounded-lg px-3 py-3 transition hover:bg-primary/5"
-      onMouseEnter={onHoverHref}
-    >
-      {type && (
-        <div
-          data-slot="list-row-type"
-          className={cn(
-            "flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg border",
-            isTeg
-              ? "bg-[var(--accent-teg-soft-bg)] text-[var(--accent-teg-soft-fg)] border-[var(--accent-teg-soft-fg)]/15"
-              : "bg-[var(--accent-pteg-soft-bg)] text-[var(--accent-pteg-soft-fg)] border-[var(--accent-pteg-soft-fg)]/15",
-          )}
+  const inner = (
+    <div className="flex flex-1 items-center gap-3 min-w-0">
+      {status && (
+        <span
+          data-slot="list-row-indicator"
           aria-hidden
-        >
-          <PillIcon className="h-4 w-4" />
-        </div>
+          className={cn(
+            "h-2 w-2 flex-shrink-0 rounded-full ring-[3px]",
+            INDICATOR_BG[status],
+          )}
+        />
       )}
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-semibold text-text-strong">{title}</p>
-        {subtitle && <p className="truncate text-xs text-text-muted">{subtitle}</p>}
-        {hint && <p className="truncate text-xs text-primary">{hint}</p>}
+        <p className="truncate text-[13px] font-bold text-text-strong">{title}</p>
+        {subtitle && (
+          <p className="mt-0.5 truncate text-[11px] font-medium text-text-muted">
+            {renderSubtitle(subtitle)}
+          </p>
+        )}
+        {hint && <p className="mt-0.5 truncate text-[11px] text-primary">{hint}</p>}
       </div>
       {status && (
         <span
           className={cn(
-            "rounded-full border px-2.5 py-0.5 text-[11px] font-semibold",
-            STATUS_CLASS[status],
+            "rounded-full border px-2.5 py-0.5 text-[10px] font-extrabold tracking-wide",
+            STATUS_BADGE[status],
           )}
         >
           {STATUS_LABEL[status]}
         </span>
       )}
-      {href ? (
-        <Link
-          href={href}
-          onClick={onClick}
-          aria-label={`Abrir ${title}`}
-          className="inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md text-text-muted transition hover:bg-primary/10 hover:text-primary"
-        >
-          <ArrowRight className="h-4 w-4" />
-        </Link>
-      ) : (
-        <button
-          type="button"
-          onClick={onClick}
-          aria-label={`Abrir ${title}`}
-          className="inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md text-text-muted transition hover:bg-primary/10 hover:text-primary"
-        >
-          <ArrowRight className="h-4 w-4" />
-        </button>
-      )}
+      <ArrowRight
+        aria-hidden
+        className="h-4 w-4 flex-shrink-0 text-text-muted opacity-0 transition group-hover:translate-x-0.5 group-hover:opacity-100"
+      />
     </div>
+  );
+
+  const className =
+    "group flex items-center justify-between gap-3 rounded-xl border border-transparent px-3 py-2.5 transition hover:border-border-subtle hover:bg-surface-muted";
+
+  if (href) {
+    return (
+      <Link
+        href={href}
+        onClick={onClick}
+        onMouseEnter={onHoverHref}
+        aria-label={`Abrir ${title}`}
+        className={className}
+      >
+        {inner}
+      </Link>
+    );
+  }
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={`Abrir ${title}`}
+      className={cn(className, "w-full text-left")}
+    >
+      {inner}
+    </button>
   );
 }

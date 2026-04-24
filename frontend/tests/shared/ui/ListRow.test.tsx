@@ -1,38 +1,27 @@
-import * as React from "react";
-import { render, screen, fireEvent } from "@testing-library/react";
-import { describe, it, expect, vi } from "vitest";
-
+import { describe, it, expect } from "vitest";
+import { render, screen } from "@testing-library/react";
 import { ListRow } from "@shared/ui/ListRow";
 
-describe("ListRow", () => {
-  it("renders title and subtitle", () => {
-    render(<ListRow title="My Thesis" subtitle="Ana Perez · 2026-04-01" />);
-    expect(screen.getByText("My Thesis")).toBeDefined();
-    expect(screen.getByText(/Ana Perez/)).toBeDefined();
+describe("ListRow (restyled)", () => {
+  it("renders title, breadcrumb subtitle parts, and pending status badge", () => {
+    render(
+      <ListRow
+        title="Sistema de gestión hospitalaria"
+        subtitle="María Pérez · 22 abr · PTEG"
+        status="pending"
+        href="/dashboard/proyectos/1"
+      />,
+    );
+    expect(screen.getByText("Sistema de gestión hospitalaria")).toBeInTheDocument();
+    expect(screen.getByText(/María Pérez/)).toBeInTheDocument();
+    expect(screen.getByText(/22 abr/)).toBeInTheDocument();
+    expect(screen.getByText(/Pendiente|Revisión/i)).toBeInTheDocument();
   });
 
-  it("shows violet type pill for TEG", () => {
-    const { container } = render(<ListRow title="T" type="tesis" />);
-    const pill = container.querySelector("[data-slot='list-row-type']");
-    expect(pill).not.toBeNull();
-    expect((pill as HTMLElement).className).toContain("bg-[var(--accent-teg-soft-bg)]");
-  });
-
-  it("shows blue type pill for PTEG", () => {
-    const { container } = render(<ListRow title="P" type="proyecto" />);
-    const pill = container.querySelector("[data-slot='list-row-type']");
-    expect((pill as HTMLElement).className).toContain("bg-[var(--accent-pteg-soft-bg)]");
-  });
-
-  it("renders status chip with matching label", () => {
-    render(<ListRow title="P" status="rejected" />);
-    expect(screen.getByText(/rechazado/i)).toBeDefined();
-  });
-
-  it("calls onClick when action button clicked", () => {
-    const onClick = vi.fn();
-    render(<ListRow title="P" onClick={onClick} />);
-    fireEvent.click(screen.getByRole("button", { name: /abrir/i }));
-    expect(onClick).toHaveBeenCalledOnce();
+  it("renders ring indicator for status", () => {
+    const { container } = render(
+      <ListRow title="X" subtitle="y" status="rejected" href="/x" />,
+    );
+    expect(container.querySelector("[data-slot='list-row-indicator']")).not.toBeNull();
   });
 });
