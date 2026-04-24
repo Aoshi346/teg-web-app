@@ -189,7 +189,16 @@ Jurados only see projects assigned to them (where the project's `reviewer` is th
 | `src/features/projects/lib/applyStateFilter.ts` | Pure helpers `applyStateFilter` and `readStateFromSearchParams` driving the `?state=<value>` filter on `/dashboard/proyectos`. |
 | `src/features/projects/components/StateOverrideModal.tsx` | Admin-only modal that POSTs to `/api/projects/{id}/override_state/`. |
 | `src/features/projects/components/StateOverrideHistory.tsx` | Read-only audit list for admins; returns `null` when `overrides === undefined` (non-admin response). |
-| `src/app/globals.css` | Theme variables + custom animations |
+| `src/features/dashboard/components/Dashboard.tsx` | Sub-D layout: `DashboardHero` + 4-tile strip + 2-col list/feed lower zone. Computes `semesterDaysRemaining` / `todaysDeliveries` / `totalProjects` and feeds them into `buildDashboardContent`. |
+| `src/features/dashboard/components/DashboardHero.tsx` | Editorial banner: eyebrow + greeting (gradient name) + lede + enriched `SemesterStrip`. Uses `dashboard-hero-bg` utility from `globals.css`. |
+| `src/features/dashboard/lib/roleContent.ts` | Emits 4 `StatTileData` per role (hero + 3 secondary), plus optional `semesterStats` for the strip. Comentarios tile dropped — `Project.commentsCount` not in API. |
+| `src/features/dashboard/lib/types.ts` | Adds `TileTone`, `ChipSegment`, `SemesterMiniStat`; extends `StatTileData` with `chips`/`urgent`; adds `DashboardContent.semesterStats?`. |
+| `src/shared/ui/StatTile.tsx` | Tones: `primary`/`accent`/`hero`/`blue`/`orange`/`green`/`amber`. Optional `chips`, `urgent` (renders `pulse-soft` dot), `spanCols: 1\|2`. Hero tile has dot-grid + glow corner + bottom gradient line. |
+| `src/shared/ui/SemesterStrip.tsx` | Card primitive: gradient top border, period + status pill (Activo/Próximo/Finalizado), optional `mainStats` mini-stats, animated progress bar with glow. |
+| `src/shared/ui/ListRow.tsx` | Ring-style status indicator (8px dot with triple-ring shadow), breadcrumb subtitle parsing on ` · `, hover-revealed arrow. `type` prop kept for compat but no longer rendered. |
+| `src/shared/ui/ActivityFeed.tsx` | Square 30×30 `rounded-[10px]` icon blocks, dashed dividers between items, tabular-nums on timestamps. |
+| `src/shared/ui/DateCell.tsx` | 42×42 calendar mini-block (blue header band with Spanish month abbr + day number) — used in Jurado's defense list. |
+| `src/app/globals.css` | Theme variables + custom animations + `pulse-soft` keyframe + `dashboard-hero-bg` utility (radial mesh + dot grid). |
 
 ## Known Limitations
 
