@@ -24,6 +24,7 @@ import type { Project } from "@features/projects/types/project";
 import type { ApiEvaluation } from "@features/projects/api/projectService";
 import { PTEG_STATE_CONFIG, PTEG_STATE_FALLBACK } from "@features/projects/lib/ptegStateConfig";
 import StateOverrideModal from "@features/projects/components/StateOverrideModal";
+import StateOverrideHistory from "@features/projects/components/StateOverrideHistory";
 import { overrideProjectState } from "@features/projects/api/projectService";
 
 /* ─── Types ─── */
@@ -421,6 +422,9 @@ export default function ProjectDetailView({
           )}
         </div>
       </div>
+
+      {/* ─── Override history (admin only; undefined for non-admin responses) ─── */}
+      <StateOverrideHistory overrides={localProject.stateOverrides} />
 
       {/* ─── Actions ─── */}
       {actions && (
