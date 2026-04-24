@@ -158,3 +158,65 @@ describe("buildDashboardContent — Tutor", () => {
     expect(result.listItems.every((r) => r.id === 1 || r.id === 2)).toBe(true);
   });
 });
+
+describe("buildDashboardContent — PTEG student hint from state", () => {
+  const basePTEG = {
+    id: 42,
+    title: "Mi proyecto",
+    student: "Alice",
+    type: "proyecto" as const,
+    status: "pending" as const,
+    period: "2026-01",
+    submittedDate: "2026-01-15",
+  };
+
+  it("shows 'Espera revisión' for pending_review_1", () => {
+    const content = buildDashboardContent({
+      role: "Estudiante",
+      user: { role: "Estudiante", id: 1, semester: "9no" },
+      semester: "2026-01",
+      projects: [{ ...basePTEG, state: "pending_review_1" }],
+    });
+    expect(content.listItems[0].hint).toMatch(/espera|pendiente/i);
+  });
+
+  it("shows retry hint for pending_review_2", () => {
+    const content = buildDashboardContent({
+      role: "Estudiante",
+      user: { role: "Estudiante", id: 1, semester: "9no" },
+      semester: "2026-01",
+      projects: [{ ...basePTEG, state: "pending_review_2" }],
+    });
+    expect(content.listItems[0].hint).toMatch(/intento 2|corrige/i);
+  });
+
+  it("shows defense hint for pending_defense", () => {
+    const content = buildDashboardContent({
+      role: "Estudiante",
+      user: { role: "Estudiante", id: 1, semester: "9no" },
+      semester: "2026-01",
+      projects: [{ ...basePTEG, state: "pending_defense" }],
+    });
+    expect(content.listItems[0].hint).toMatch(/defensa/i);
+  });
+
+  it("shows approved hint for approved", () => {
+    const content = buildDashboardContent({
+      role: "Estudiante",
+      user: { role: "Estudiante", id: 1, semester: "9no" },
+      semester: "2026-01",
+      projects: [{ ...basePTEG, state: "approved", status: "checked" }],
+    });
+    expect(content.listItems[0].hint).toMatch(/aprobad|listo/i);
+  });
+
+  it("shows no-more-attempts hint for failed_final", () => {
+    const content = buildDashboardContent({
+      role: "Estudiante",
+      user: { role: "Estudiante", id: 1, semester: "9no" },
+      semester: "2026-01",
+      projects: [{ ...basePTEG, state: "failed_final", status: "rejected" }],
+    });
+    expect(content.listItems[0].hint).toMatch(/sin más|no hay más|reprobado/i);
+  });
+});

@@ -1,4 +1,4 @@
-import type { Project, ProjectStatus } from "@features/projects/types/project";
+import type { Project, ProjectState, ProjectStatus } from "@features/projects/types/project";
 import type {
   DashboardContent,
   FeedItemData,
@@ -22,6 +22,37 @@ const STATUS_LABEL: Record<ProjectStatus, string> = {
   checked: "aprobados",
   pending: "en revisión",
   rejected: "rechazados",
+};
+
+const PTEG_STATE_CONFIG: Record<
+  ProjectState,
+  { statusLabel: string; breakdown: string; hint: string }
+> = {
+  pending_review_1: {
+    statusLabel: "En revisión",
+    breakdown: "Intento 1 de 2",
+    hint: "Espera el resultado de la revisión.",
+  },
+  pending_review_2: {
+    statusLabel: "En revisión",
+    breakdown: "Intento 2 de 2",
+    hint: "Corrige los comentarios y reenvía.",
+  },
+  pending_defense: {
+    statusLabel: "Defensa pendiente",
+    breakdown: "Revisión aprobada",
+    hint: "Prepárate para la defensa oral.",
+  },
+  approved: {
+    statusLabel: "Aprobado",
+    breakdown: "Defensa aprobada",
+    hint: "Todo listo.",
+  },
+  failed_final: {
+    statusLabel: "Reprobado",
+    breakdown: "Sin más intentos",
+    hint: "No hay más intentos disponibles.",
+  },
 };
 
 function buildBreakdown(list: Project[]): string {
@@ -145,26 +176,30 @@ function studentContent(
     };
   }
 
-  const statusLabel =
-    mine.status === "checked"
+  const isPTEG = mine.type === "proyecto";
+  const pteg = isPTEG ? PTEG_STATE_CONFIG[mine.state] ?? null : null;
+
+  const statusLabel = pteg
+    ? pteg.statusLabel
+    : mine.status === "checked"
       ? "Aprobado"
       : mine.status === "rejected"
         ? "Requiere correcciones"
         : "En revisión";
 
-  const breakdown =
-    mine.type === "tesis"
-      ? mine.stage1Passed
-        ? "Fase 1 aprobada · pendiente defensa"
-        : "Fase 1 en curso"
-      : `Intento ${Math.min((mine.failedAttempts ?? 0) + 1, 2)} de 2`;
+  const breakdown = pteg
+    ? pteg.breakdown
+    : mine.stage1Passed
+      ? "Fase 1 aprobada · pendiente defensa"
+      : "Fase 1 en curso";
 
-  const hint =
-    mine.status === "pending"
+  const hint = pteg
+    ? pteg.hint
+    : mine.status === "pending"
       ? "Espera el resultado de la revisión."
       : mine.status === "rejected"
         ? "Revisa los comentarios y reenvía."
-        : mine.type === "tesis" && !mine.stage1Passed
+        : !mine.stage1Passed
           ? "Prepárate para la defensa oral."
           : "Todo listo.";
 
