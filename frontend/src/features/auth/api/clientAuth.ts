@@ -179,23 +179,27 @@ export async function updateProfile(payload: {
   return updated;
 }
 
-export async function updateStatusById(id: number, status: 'active' | 'pending'): Promise<void> {
+export async function updateStatusById(id: number, status: 'active' | 'pending' | 'rejected'): Promise<void> {
   await api.patch(`/users/${id}/`, { status });
 }
 
-export async function createUser(user: User): Promise<User> {
-  const apiUser = await api.post<ApiUser>('/auth/register/', {
+export async function createUser(user: User): Promise<{ user: User; temporaryPassword: string }> {
+  const apiUser = await api.post<ApiUser & { temporary_password?: string }>('/auth/register/', {
     email: user.email,
-    password: user.password,
+    admin_create: true,
     full_name: user.fullName || `${user.firstName || ""} ${user.lastName || ""}`.trim(),
     first_name: user.firstName,
     last_name: user.lastName,
     cedula: user.cedula,
+    nationality: user.nationality,
     role: user.role,
     semester: user.semester,
     phone: user.phone,
   });
-  return mapApiUser(apiUser);
+  return {
+    user: mapApiUser(apiUser),
+    temporaryPassword: apiUser.temporary_password ?? "",
+  };
 }
 
 export async function updateUser(id: number, user: Partial<User>): Promise<User> {

@@ -14,7 +14,7 @@ interface CedulaFieldProps {
 export function CedulaField({ nationality, cedula, onChange, error, disabled }: CedulaFieldProps) {
   return (
     <div>
-      <label className="block text-xs font-semibold text-gray-700 mb-1">Cédula *</label>
+      <label htmlFor="cedula-field-input" className="block text-xs font-semibold text-gray-700 mb-1">Cédula *</label>
       <div className="flex gap-2">
         <select
           aria-label="Nacionalidad"
@@ -28,6 +28,7 @@ export function CedulaField({ nationality, cedula, onChange, error, disabled }: 
           <option value="P">P</option>
         </select>
         <input
+          id="cedula-field-input"
           type="text"
           value={cedula}
           disabled={disabled}

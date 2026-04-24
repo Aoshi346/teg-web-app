@@ -27,7 +27,16 @@ import {
   FileText,
   Calendar,
 } from "lucide-react";
-import { UserData } from "@features/settings/components/UserModal";
+type UserData = {
+  id: number;
+  fullName: string;
+  email: string;
+  cedula?: string;
+  semester?: string;
+  phone?: string;
+  role: "Estudiante" | "Tutor" | "Jurado" | "Administrador";
+  status?: "active" | "pending";
+};
 import { SettingsShell } from "@features/settings";
 import Toast, { ToastType } from "@shared/ui/Toast";
 import { getSessions, revokeSession, Session } from "@features/auth/api/sessionService";
