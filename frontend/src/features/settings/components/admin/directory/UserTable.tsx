@@ -52,27 +52,33 @@ export function UserTable({ users, search, roleFilter, statusFilter, onEdit, onD
   }
 
   function headerLabel(k: SortKey, label: string) {
-    const arrow = sortKey === k ? (sortDir === "asc" ? " ↑" : " ↓") : " ↕";
-    return <button onClick={() => headerClick(k)} className="font-semibold text-gray-700">{label}{arrow}</button>;
+    const arrow = sortKey === k ? (sortDir === "asc" ? " ↑" : " ↓") : "";
+    return (
+      <button onClick={() => headerClick(k)} className="text-[11px] font-bold text-text-muted uppercase tracking-[0.06em] hover:text-text-default transition-colors">
+        {label}{arrow}
+      </button>
+    );
   }
 
+  const thClass = "px-4 py-3 text-left text-[11px] font-bold text-text-muted uppercase tracking-[0.06em] border-b border-border-subtle bg-surface-muted";
+
   return (
-    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-      <table className="w-full border-collapse text-sm">
+    <div>
+      <table className="w-full border-collapse">
         <thead>
-          <tr className="bg-gray-50 border-b border-gray-200">
-            <th className="px-4 py-3 text-left">{headerLabel("fullName", "Usuario")}</th>
-            <th className="px-4 py-3 text-left">{headerLabel("role", "Rol")}</th>
-            <th className="px-4 py-3 text-left">Cédula</th>
-            <th className="px-4 py-3 text-left">Semestre</th>
-            <th className="px-4 py-3 text-left">{headerLabel("status", "Estado")}</th>
-            <th className="px-4 py-3 text-center">Acciones</th>
+          <tr>
+            <th className={thClass}>{headerLabel("fullName", "Usuario")}</th>
+            <th className={thClass}>{headerLabel("role", "Rol")}</th>
+            <th className={thClass}>Cédula</th>
+            <th className={thClass}>Semestre</th>
+            <th className={thClass}>{headerLabel("status", "Estado")}</th>
+            <th className={`${thClass} text-right`}></th>
           </tr>
         </thead>
         <tbody>
           {view.length === 0 ? (
             <tr>
-              <td colSpan={6} className="px-4 py-8 text-center text-gray-500">
+              <td colSpan={6} className="px-4 py-10 text-center text-sm text-text-muted">
                 No se encontraron usuarios con los filtros aplicados.
               </td>
             </tr>
@@ -84,12 +90,40 @@ export function UserTable({ users, search, roleFilter, statusFilter, onEdit, onD
         </tbody>
       </table>
       {total > 0 && (
-        <div className="px-4 py-2 flex justify-between items-center border-t border-gray-100 bg-gray-50">
-          <div className="text-xs text-gray-500">Mostrando {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, total)} de {total} usuarios</div>
-          <div className="flex gap-1">
-            <button onClick={() => setPage(Math.max(1, page - 1))} disabled={page === 1} className="px-3 py-1 border border-gray-300 rounded text-xs bg-white disabled:opacity-40">← Anterior</button>
-            <span className="px-3 py-1 text-xs">{page} / {pageCount}</span>
-            <button onClick={() => setPage(Math.min(pageCount, page + 1))} disabled={page === pageCount} className="px-3 py-1 border border-gray-300 rounded text-xs bg-white disabled:opacity-40">Siguiente →</button>
+        <div className="px-5 py-3 flex justify-between items-center border-t border-border-subtle bg-surface-muted flex-wrap gap-2">
+          <div className="text-xs text-text-muted">
+            Mostrando {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, total)} de <b className="text-text-strong font-semibold">{total} usuarios</b>
+          </div>
+          <div className="flex gap-1 items-center">
+            <button
+              onClick={() => setPage(Math.max(1, page - 1))}
+              disabled={page === 1}
+              className="min-w-[30px] h-[30px] px-2 border border-border-subtle bg-surface rounded-[7px] text-xs font-semibold text-text-default hover:bg-surface-sunken disabled:opacity-40 disabled:cursor-not-allowed"
+              aria-label="Anterior"
+            >
+              ←
+            </button>
+            {Array.from({ length: pageCount }, (_, i) => i + 1).slice(0, 6).map((n) => (
+              <button
+                key={n}
+                onClick={() => setPage(n)}
+                className={`min-w-[30px] h-[30px] px-2 rounded-[7px] text-xs font-semibold border ${
+                  page === n
+                    ? "bg-primary border-primary text-white"
+                    : "bg-surface border-border-subtle text-text-default hover:bg-surface-sunken"
+                }`}
+              >
+                {n}
+              </button>
+            ))}
+            <button
+              onClick={() => setPage(Math.min(pageCount, page + 1))}
+              disabled={page === pageCount}
+              className="min-w-[30px] h-[30px] px-2 border border-border-subtle bg-surface rounded-[7px] text-xs font-semibold text-text-default hover:bg-surface-sunken disabled:opacity-40 disabled:cursor-not-allowed"
+              aria-label="Siguiente"
+            >
+              →
+            </button>
           </div>
         </div>
       )}

@@ -59,7 +59,7 @@ export function ProfileTab() {
     load();
   }, []);
 
-  if (!initial || !metadata) return <div className="text-gray-500 text-sm">Cargando perfil...</div>;
+  if (!initial || !metadata) return <div className="text-text-muted text-sm">Cargando perfil...</div>;
 
   async function handleSubmit(values: ProfileInput) {
     try {
@@ -78,7 +78,7 @@ export function ProfileTab() {
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-5">
+    <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-5 items-start">
       <ProfileForm initialValues={initial} onSubmit={handleSubmit} />
       <AccountMetadataCard metadata={metadata} />
       <Toast

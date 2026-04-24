@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import { Clock } from "lucide-react";
 import { getAllUsers, updateStatusById, type User as AuthUser } from "@features/auth/api/clientAuth";
 import { PendingUserRow, type PendingUser } from "./PendingUserRow";
 import { RejectConfirmModal } from "./RejectConfirmModal";
@@ -44,26 +45,40 @@ export function PendingUsersPanel() {
   }
 
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex items-center gap-2 px-4 py-3 bg-amber-50 border border-amber-200 rounded-lg">
-        <div className="flex-1">
-          <div className="text-sm font-semibold text-amber-900">
+    <div className="flex flex-col">
+      <div className="mb-4">
+        <h2 className="text-xl font-bold text-text-strong tracking-tight leading-tight">Usuarios pendientes</h2>
+        <p className="text-[13.5px] text-text-muted mt-1 max-w-[70ch]">
+          Revisa y aprueba a los usuarios recién registrados antes de que puedan acceder al sistema.
+        </p>
+      </div>
+
+      <div className="px-[18px] py-3.5 bg-gradient-to-r from-pending-soft to-transparent border border-[rgba(184,121,0,0.22)] rounded-xl mb-[18px] flex items-center gap-3.5">
+        <div className="w-9 h-9 rounded-[10px] bg-[rgba(184,121,0,0.15)] text-pending flex items-center justify-center flex-shrink-0">
+          <Clock className="w-[18px] h-[18px]" />
+        </div>
+        <div>
+          <strong className="block text-[13.5px] font-bold text-[#92580a] mb-0.5">
             {list.length} usuario{list.length === 1 ? "" : "s"} esperan aprobación
-          </div>
-          <div className="text-xs text-amber-800">
-            Revise los datos antes de aprobar o rechazar. Los usuarios rechazados no podrán iniciar sesión.
+          </strong>
+          <div className="text-[12.5px] text-[#6e4308]">
+            Revisa los datos antes de aprobar o rechazar. Los usuarios rechazados no podrán iniciar sesión.
           </div>
         </div>
       </div>
+
       {list.length === 0 ? (
-        <div className="p-8 bg-blue-50 border border-dashed border-blue-300 rounded-lg text-center">
-          <div className="text-sm text-blue-900 font-semibold">No hay usuarios pendientes de aprobación.</div>
+        <div className="p-8 bg-surface border border-dashed border-border-default rounded-[14px] text-center">
+          <div className="text-sm text-text-default font-semibold">No hay usuarios pendientes de aprobación.</div>
         </div>
       ) : (
-        list.map((u) => (
-          <PendingUserRow key={u.id} user={u} onApprove={handleApprove} onReject={() => setRejecting(u)} />
-        ))
+        <div className="flex flex-col gap-3">
+          {list.map((u) => (
+            <PendingUserRow key={u.id} user={u} onApprove={handleApprove} onReject={() => setRejecting(u)} />
+          ))}
+        </div>
       )}
+
       {rejecting && (
         <RejectConfirmModal
           isOpen={true}

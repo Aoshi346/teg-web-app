@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useMemo } from "react";
+import { Plus } from "lucide-react";
 import type { Semester } from "@features/semesters/api/semesters";
 import { MONTH_NAMES, defaultMonthsForPeriod, previewLabel } from "../../../lib/semesterPeriods";
 import { semesterSchema } from "../../../lib/schemas";
@@ -8,6 +9,16 @@ interface SemesterCreateFormProps {
   existing: Semester[];
   onCreate: (data: { period: string; start_month: number; end_month: number }) => Promise<void>;
 }
+
+const INPUT_CLASS =
+  "w-full h-10 px-3 bg-surface border border-border-default rounded-lg text-[13.5px] font-medium text-text-strong transition-colors hover:border-[#b8bccb] focus:outline-none focus:border-primary focus:ring-[3px] focus:ring-[rgba(0,102,255,0.16)]";
+const LABEL_CLASS = "block text-[13px] font-semibold text-text-default mb-1.5";
+const SELECT_STYLE = {
+  backgroundImage:
+    "url(\"data:image/svg+xml,%3Csvg width='10' height='6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236b7589' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E\")",
+  backgroundRepeat: "no-repeat" as const,
+  backgroundPosition: "right 12px center",
+};
 
 export function SemesterCreateForm({ existing, onCreate }: SemesterCreateFormProps) {
   const [year, setYear] = useState(new Date().getFullYear());
@@ -49,40 +60,93 @@ export function SemesterCreateForm({ existing, onCreate }: SemesterCreateFormPro
   }
 
   return (
-    <form onSubmit={handleSubmit} className="p-5 bg-white border border-gray-200 rounded-lg">
-      <h3 className="text-base font-semibold mb-3">Crear nuevo semestre</h3>
-      <div className="grid grid-cols-[1fr_1fr_2fr_auto] gap-3 items-end">
+    <form
+      onSubmit={handleSubmit}
+      className="bg-surface border border-border-subtle rounded-[14px] shadow-[0_1px_2px_rgba(15,23,42,0.03)] overflow-hidden"
+    >
+      <div className="px-5 py-3.5 border-b border-border-subtle flex items-center gap-2">
+        <Plus className="w-4 h-4 text-primary" strokeWidth={2} />
         <div>
-          <label htmlFor="semester-year" className="block text-xs font-semibold mb-1">Año *</label>
-          <select id="semester-year" value={year} onChange={(e) => setYear(Number(e.target.value))} className="w-full px-2 py-2 border border-gray-300 rounded-md text-sm bg-white">
-            {Array.from({ length: 30 }, (_, i) => 2020 + i).map((y) => <option key={y} value={y}>{y}</option>)}
-          </select>
+          <div className="text-[14.5px] font-bold text-text-strong leading-tight">Crear nuevo semestre</div>
         </div>
-        <div>
-          <label htmlFor="semester-period" className="block text-xs font-semibold mb-1">Período *</label>
-          <select id="semester-period" value={period} onChange={handlePeriodChange} className="w-full px-2 py-2 border border-gray-300 rounded-md text-sm bg-white">
-            <option value="01">01 (primer semestre)</option>
-            <option value="02">02 (segundo semestre)</option>
-          </select>
-        </div>
-        <div>
-          <label className="block text-xs font-semibold mb-1">Rango de meses *</label>
-          <div className="flex gap-2 items-center">
-            <select aria-label="Mes inicial" value={startMonth} onChange={(e) => setStartMonth(Number(e.target.value))} className="flex-1 px-2 py-2 border border-gray-300 rounded-md text-sm bg-white">
-              {MONTH_NAMES.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
-            </select>
-            <span className="text-gray-400">→</span>
-            <select aria-label="Mes final" value={endMonth} onChange={(e) => setEndMonth(Number(e.target.value))} className="flex-1 px-2 py-2 border border-gray-300 rounded-md text-sm bg-white">
-              {MONTH_NAMES.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
+      </div>
+      <div className="p-5">
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_1.4fr_2fr_auto] gap-3.5 items-end">
+          <div>
+            <label htmlFor="semester-year" className={LABEL_CLASS}>
+              Año <span className="text-destructive ml-0.5">*</span>
+            </label>
+            <select
+              id="semester-year"
+              value={year}
+              onChange={(e) => setYear(Number(e.target.value))}
+              className={`${INPUT_CLASS} appearance-none pr-8`}
+              style={SELECT_STYLE}
+            >
+              {Array.from({ length: 30 }, (_, i) => 2020 + i).map((y) => <option key={y} value={y}>{y}</option>)}
             </select>
           </div>
+          <div>
+            <label htmlFor="semester-period" className={LABEL_CLASS}>
+              Período <span className="text-destructive ml-0.5">*</span>
+            </label>
+            <select
+              id="semester-period"
+              value={period}
+              onChange={handlePeriodChange}
+              className={`${INPUT_CLASS} appearance-none pr-8`}
+              style={SELECT_STYLE}
+            >
+              <option value="01">01 — Primer semestre</option>
+              <option value="02">02 — Segundo semestre</option>
+            </select>
+          </div>
+          <div>
+            <label className={LABEL_CLASS}>
+              Rango de meses <span className="text-destructive ml-0.5">*</span>
+            </label>
+            <div className="grid grid-cols-[1fr_auto_1fr] gap-1.5 items-center">
+              <select
+                aria-label="Mes inicial"
+                value={startMonth}
+                onChange={(e) => setStartMonth(Number(e.target.value))}
+                className={`${INPUT_CLASS} appearance-none pr-8`}
+                style={SELECT_STYLE}
+              >
+                {MONTH_NAMES.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
+              </select>
+              <span className="text-text-muted font-semibold">→</span>
+              <select
+                aria-label="Mes final"
+                value={endMonth}
+                onChange={(e) => setEndMonth(Number(e.target.value))}
+                className={`${INPUT_CLASS} appearance-none pr-8`}
+                style={SELECT_STYLE}
+              >
+                {MONTH_NAMES.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
+              </select>
+            </div>
+          </div>
+          <button
+            type="submit"
+            disabled={submitting}
+            className="h-10 px-4 bg-primary text-white rounded-lg text-[13.5px] font-semibold inline-flex items-center gap-1.5 shadow-[0_1px_2px_rgba(0,102,255,0.25),inset_0_1px_0_rgba(255,255,255,0.12)] hover:bg-[#0052cc] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            <Plus className="w-3.5 h-3.5" strokeWidth={2.5} />
+            Crear
+          </button>
         </div>
-        <button type="submit" disabled={submitting} className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-semibold disabled:opacity-50 h-9">
-          + Crear
-        </button>
+
+        <div className="mt-4 px-3.5 py-2.5 bg-surface-sunken border border-border-subtle rounded-[9px] flex items-center gap-2.5 text-[13px] flex-wrap">
+          <span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
+          <span className="text-text-muted font-medium">Vista previa:</span>
+          <code className="bg-[rgba(0,102,255,0.08)] text-primary px-1.5 py-px rounded-[5px] font-mono text-xs font-semibold">
+            {`${year}-${period}`}
+          </code>
+          <span className="text-text-strong font-semibold">{preview}</span>
+        </div>
+        {error && <p className="mt-2 text-xs text-destructive">{error}</p>}
       </div>
-      <div className="mt-2 px-3 py-2 bg-blue-50 rounded-md text-xs text-blue-900">Vista previa: {preview}</div>
-      {error && <p className="mt-2 text-xs text-red-600">{error}</p>}
     </form>
   );
 }

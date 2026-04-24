@@ -11,17 +11,28 @@ interface CedulaFieldProps {
   disabled?: boolean;
 }
 
+const INPUT_BASE =
+  "h-10 px-3 bg-surface border border-border-default rounded-lg text-[13.5px] font-medium text-text-strong transition-colors hover:border-[#b8bccb] focus:outline-none focus:border-primary focus:ring-[3px] focus:ring-[rgba(0,102,255,0.16)] disabled:opacity-60";
+
 export function CedulaField({ nationality, cedula, onChange, error, disabled }: CedulaFieldProps) {
   return (
     <div>
-      <label htmlFor="cedula-field-input" className="block text-xs font-semibold text-gray-700 mb-1">Cédula *</label>
-      <div className="flex gap-2">
+      <label htmlFor="cedula-field-input" className="block text-[13px] font-semibold text-text-default mb-1.5">
+        Cédula <span className="text-destructive ml-0.5">*</span>
+      </label>
+      <div className="grid grid-cols-[84px_1fr] gap-1.5">
         <select
           aria-label="Nacionalidad"
           value={nationality}
           disabled={disabled}
           onChange={(e) => onChange({ nationality: e.target.value as Nationality, cedula })}
-          className="w-20 px-2 py-2 border border-gray-300 rounded-md text-sm bg-white"
+          className={`${INPUT_BASE} appearance-none pr-7`}
+          style={{
+            backgroundImage:
+              "url(\"data:image/svg+xml,%3Csvg width='10' height='6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236b7589' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E\")",
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "right 10px center",
+          }}
         >
           <option value="V">V</option>
           <option value="E">E</option>
@@ -34,11 +45,11 @@ export function CedulaField({ nationality, cedula, onChange, error, disabled }: 
           disabled={disabled}
           onChange={(e) => onChange({ nationality, cedula: e.target.value })}
           placeholder="30243721"
-          className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm"
+          className={INPUT_BASE}
         />
       </div>
-      {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
-      <p className="mt-1 text-xs text-gray-500">V = Venezolano, E = Extranjero, P = Pasaporte</p>
+      {error && <p className="mt-1.5 text-[11.5px] text-destructive">{error}</p>}
+      <p className="mt-1.5 text-[11.5px] text-text-muted">V = Venezolano, E = Extranjero, P = Pasaporte</p>
     </div>
   );
 }

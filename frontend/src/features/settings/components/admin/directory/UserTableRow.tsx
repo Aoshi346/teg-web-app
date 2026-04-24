@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import { Pencil, Trash2 } from "lucide-react";
 
 export interface DirectoryUser {
   id: number;
@@ -19,52 +20,90 @@ interface UserTableRowProps {
   onToggleStatus: (u: DirectoryUser, next: "active" | "rejected") => void;
 }
 
-const ROLE_STYLES: Record<DirectoryUser["role"], string> = {
-  Administrador: "bg-purple-50 text-purple-700 border-purple-200",
-  Tutor: "bg-blue-50 text-blue-700 border-blue-200",
-  Jurado: "bg-amber-50 text-amber-700 border-amber-200",
-  Estudiante: "bg-emerald-50 text-emerald-700 border-emerald-200",
+const ROLE_PILL_STYLES: Record<DirectoryUser["role"], string> = {
+  Administrador: "bg-[#f5f0fc] text-[#6e35d1] border-[#d9c8f1]",
+  Tutor: "bg-[rgba(0,102,255,0.08)] text-primary border-[rgba(0,102,255,0.18)]",
+  Jurado: "bg-pending-soft text-pending border-[rgba(184,121,0,0.22)]",
+  Estudiante: "bg-success-soft text-success border-[rgba(26,135,84,0.2)]",
 };
+
+const AVATAR_GRADIENTS = [
+  "bg-gradient-to-br from-primary to-[#1d4ed8]",
+  "bg-gradient-to-br from-[#8b5cf6] to-[#6d28d9]",
+  "bg-gradient-to-br from-[#10b981] to-[#047857]",
+  "bg-gradient-to-br from-[#ff6b35] to-[#c2410c]",
+];
+
+function avatarGradient(name: string): string {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = (hash + name.charCodeAt(i)) % 7919;
+  return AVATAR_GRADIENTS[hash % AVATAR_GRADIENTS.length];
+}
+
+function initials(name: string): string {
+  return name.split(" ").filter(Boolean).map((p) => p[0] || "").join("").slice(0, 2).toUpperCase() || "?";
+}
 
 export function UserTableRow({ user, onEdit, onDelete, onToggleStatus }: UserTableRowProps) {
   const isActive = user.status === "active";
+  const statusLabel = isActive ? "Activo" : user.status === "pending" ? "Pendiente" : "Inactivo";
+
   return (
-    <tr className="border-b border-gray-100">
-      <td className="px-4 py-3">
-        <div className="font-semibold text-gray-900 text-sm">{user.fullName}</div>
-        <div className="text-xs text-gray-500">{user.email}</div>
+    <tr className="border-b border-border-subtle transition-colors hover:bg-[rgba(0,102,255,0.025)]">
+      <td className="px-4 py-3.5 align-middle">
+        <div className="flex items-center gap-[11px]">
+          <div className={`w-8 h-8 rounded-lg text-white flex items-center justify-center text-[11px] font-bold flex-shrink-0 ${avatarGradient(user.fullName)}`}>
+            {initials(user.fullName)}
+          </div>
+          <div className="min-w-0">
+            <div className="text-[13.5px] font-bold text-text-strong">{user.fullName}</div>
+            <div className="text-xs text-text-muted mt-px truncate">{user.email}</div>
+          </div>
+        </div>
       </td>
-      <td className="px-4 py-3">
-        <span className={`px-2 py-0.5 rounded-full text-xs font-semibold border ${ROLE_STYLES[user.role]}`}>
+      <td className="px-4 py-3.5 align-middle">
+        <span className={`inline-flex px-2 py-0.5 rounded-full text-[11px] font-bold border tracking-[0.02em] ${ROLE_PILL_STYLES[user.role]}`}>
           {user.role}
         </span>
       </td>
-      <td className="px-4 py-3 text-sm text-gray-700">
+      <td className="px-4 py-3.5 align-middle font-mono text-[12.5px] text-text-default font-medium">
         {user.cedula ? `${user.nationality || "V"}-${user.cedula}` : "—"}
       </td>
-      <td className="px-4 py-3 text-sm text-gray-700">{user.semester || "—"}</td>
-      <td className="px-4 py-3">
-        <label className="inline-flex items-center gap-2 cursor-pointer">
+      <td className="px-4 py-3.5 align-middle text-[13px] text-text-default font-medium">
+        {user.semester || "—"}
+      </td>
+      <td className="px-4 py-3.5 align-middle">
+        <label className="relative inline-flex items-center gap-2 cursor-pointer">
           <input
             type="checkbox"
             className="sr-only peer"
             checked={isActive}
             onChange={(e) => onToggleStatus(user, e.target.checked ? "active" : "rejected")}
           />
-          <span className="relative inline-block w-8 h-4 rounded-full bg-gray-300 peer-checked:bg-emerald-500 transition">
-            <span className={`absolute top-0.5 w-3 h-3 bg-white rounded-full transition ${isActive ? "left-4" : "left-0.5"}`} />
+          <span className="relative w-[30px] h-[17px] rounded-full bg-[#cbd2dc] peer-checked:bg-success transition-colors">
+            <span className={`absolute top-[2px] w-[13px] h-[13px] rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,0.2)] transition-transform ${isActive ? "left-[15px]" : "left-[2px]"}`} />
           </span>
-          <span className={`text-xs font-medium ${isActive ? "text-emerald-700" : "text-gray-500"}`}>
-            {isActive ? "Activo" : user.status === "pending" ? "Pendiente" : "Inactivo"}
+          <span className={`text-xs font-semibold ${isActive ? "text-success" : "text-text-muted"}`}>
+            {statusLabel}
           </span>
         </label>
       </td>
-      <td className="px-4 py-3 text-center">
-        <button onClick={() => onEdit(user)} className="px-2 py-1 bg-transparent border border-gray-300 rounded text-xs text-gray-700 mr-1">
-          Editar
+      <td className="px-4 py-3.5 align-middle text-right whitespace-nowrap">
+        <button
+          onClick={() => onEdit(user)}
+          aria-label="Editar"
+          title="Editar"
+          className="w-[30px] h-[30px] border border-border-subtle bg-surface rounded-md text-text-muted inline-flex items-center justify-center ml-1 hover:bg-surface-sunken hover:text-text-default hover:border-border-default transition-colors"
+        >
+          <Pencil className="w-3.5 h-3.5" />
         </button>
-        <button onClick={() => onDelete(user)} className="px-2 py-1 bg-transparent border border-red-200 rounded text-xs text-red-700">
-          Eliminar
+        <button
+          onClick={() => onDelete(user)}
+          aria-label="Eliminar"
+          title="Eliminar"
+          className="w-[30px] h-[30px] border border-border-subtle bg-surface rounded-md text-text-muted inline-flex items-center justify-center ml-1 hover:bg-destructive-soft hover:text-destructive hover:border-[rgba(209,56,56,0.3)] transition-colors"
+        >
+          <Trash2 className="w-3.5 h-3.5" />
         </button>
       </td>
     </tr>

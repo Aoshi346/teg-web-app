@@ -2,6 +2,7 @@
 import React, { useState, useMemo } from "react";
 import { User, Lock, Bell, UserCog } from "lucide-react";
 import { getUserRole } from "@features/auth/api/clientAuth";
+import { cn } from "@shared/lib/utils";
 import type { SettingsTabId } from "../types/settings";
 import { SecurityTab } from "./security/SecurityTab";
 import { NotificationsTab } from "./notifications/NotificationsTab";
@@ -11,7 +12,8 @@ import { AdminTab } from "./admin/AdminTab";
 interface TabDef {
   id: SettingsTabId;
   label: string;
-  icon: React.ComponentType<{ size?: number }>;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+  count?: number;
 }
 
 export function SettingsShell() {
@@ -31,29 +33,61 @@ export function SettingsShell() {
   }, [role]);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[240px_1fr] gap-6">
-      <nav role="tablist" aria-label="Secciones de configuración" className="flex flex-col gap-1">
-        {tabs.map((t) => (
-          <button
-            key={t.id}
-            role="tab"
-            aria-selected={active === t.id}
-            onClick={() => setActive(t.id)}
-            className={`flex items-center gap-2 px-3 py-2 rounded-md text-left text-sm ${
-              active === t.id ? "bg-blue-50 text-blue-700 font-semibold" : "text-gray-700 hover:bg-gray-50"
-            }`}
-          >
-            <t.icon size={16} />
-            {t.label}
-          </button>
-        ))}
-      </nav>
-      <main role="tabpanel">
+    <main className="w-full px-8 lg:px-10 py-7 pb-16">
+      <div className="mb-6">
+        <h1 className="text-[28px] font-extrabold tracking-tight text-text-strong leading-tight mb-1.5">
+          Configuración
+        </h1>
+        <p className="text-sm text-text-muted max-w-[70ch]">
+          Administra tu perfil, gestiona usuarios pendientes y semestres académicos del programa.
+        </p>
+      </div>
+
+      <div
+        role="tablist"
+        aria-label="Secciones de configuración"
+        className="inline-flex items-center gap-0.5 p-1 bg-surface border border-border-subtle rounded-[10px] shadow-[0_1px_2px_rgba(15,23,42,0.03)] mb-6"
+      >
+        {tabs.map((t) => {
+          const isActive = active === t.id;
+          return (
+            <button
+              key={t.id}
+              role="tab"
+              aria-selected={isActive}
+              onClick={() => setActive(t.id)}
+              className={cn(
+                "inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-[7px] text-[13px] font-medium leading-none transition-colors border border-transparent",
+                isActive
+                  ? "bg-[rgba(0,102,255,0.08)] text-primary font-semibold border-[rgba(0,102,255,0.18)]"
+                  : "text-text-muted hover:text-text-strong hover:bg-surface-sunken"
+              )}
+            >
+              <t.icon className="w-3.5 h-3.5" />
+              <span>{t.label}</span>
+              {t.count !== undefined && (
+                <span
+                  className={cn(
+                    "ml-0.5 text-[11px] font-semibold px-1.5 py-px rounded-full",
+                    isActive
+                      ? "bg-[rgba(0,102,255,0.14)] text-primary"
+                      : "bg-surface-sunken text-text-default"
+                  )}
+                >
+                  {t.count}
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      <div role="tabpanel">
         {active === "profile" && <ProfileTab />}
         {active === "security" && <SecurityTab />}
         {active === "notifications" && <NotificationsTab />}
         {active === "admin" && <AdminTab />}
-      </main>
-    </div>
+      </div>
+    </main>
   );
 }
