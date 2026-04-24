@@ -132,8 +132,6 @@ class Project(models.Model):
     period = models.CharField(max_length=20, blank=True)
     project_type = models.CharField(max_length=10, choices=TYPE_CHOICES, default='proyecto')
 
-    failed_attempts = models.IntegerField(default=0)
-
     state = models.CharField(
         max_length=20,
         choices=STATE_CHOICES,

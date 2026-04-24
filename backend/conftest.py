@@ -108,7 +108,6 @@ def project_factory(db):
         defaults = {
             "title": "Test Project",
             "project_type": "proyecto",
-            "failed_attempts": 0,
             "status": "pending",
             "period": "",
         }

@@ -93,20 +93,20 @@ class TestCreatePermissions:
 
 class TestFailedAttemptsLimit:
     @pytest.mark.django_db
-    def test_proyecto_with_zero_failed_attempts_allows_creation(
+    def test_proyecto_in_initial_state_allows_creation(
         self, admin_user, student_user, project_factory
     ):
-        project = project_factory(student=student_user, project_type="proyecto", failed_attempts=0)
+        project = project_factory(student=student_user, project_type="proyecto", state="pending_review_1")
         client = APIClient()
         client.force_authenticate(user=admin_user)
         response = client.post(EVALUATIONS_URL, _minimal_payload(project.id), format="json")
         assert response.status_code == 201
 
     @pytest.mark.django_db
-    def test_proyecto_with_one_failed_attempt_allows_creation(
+    def test_proyecto_in_pending_review_2_allows_creation(
         self, admin_user, student_user, project_factory
     ):
-        project = project_factory(student=student_user, project_type="proyecto", failed_attempts=1)
+        project = project_factory(student=student_user, project_type="proyecto", state="pending_review_2")
         client = APIClient()
         client.force_authenticate(user=admin_user)
         response = client.post(EVALUATIONS_URL, _minimal_payload(project.id), format="json")
@@ -142,21 +142,11 @@ class TestFailedAttemptsLimit:
         assert "state" in response.json()  # Error must surface on the 'state' field, not generically.
 
     @pytest.mark.django_db
-    def test_tesis_with_two_failed_attempts_allows_creation(
+    def test_tesis_allows_creation_regardless_of_state(
         self, admin_user, student_user, project_factory
     ):
-        """The guard is project_type-specific: tesis is never blocked by failed_attempts."""
-        project = project_factory(student=student_user, project_type="tesis", failed_attempts=2)
-        client = APIClient()
-        client.force_authenticate(user=admin_user)
-        response = client.post(EVALUATIONS_URL, _minimal_payload(project.id), format="json")
-        assert response.status_code == 201
-
-    @pytest.mark.django_db
-    def test_tesis_with_many_failed_attempts_allows_creation(
-        self, admin_user, student_user, project_factory
-    ):
-        project = project_factory(student=student_user, project_type="tesis", failed_attempts=99)
+        """The guard is project_type-specific: tesis creation is never blocked by project state."""
+        project = project_factory(student=student_user, project_type="tesis")
         client = APIClient()
         client.force_authenticate(user=admin_user)
         response = client.post(EVALUATIONS_URL, _minimal_payload(project.id), format="json")

@@ -24,7 +24,7 @@ def student(db):
 
 
 def _mk(student, **kwargs):
-    defaults = {"title": "T", "project_type": "proyecto", "status": "pending", "failed_attempts": 0}
+    defaults = {"title": "T", "project_type": "proyecto", "status": "pending"}
     defaults.update(kwargs)
     return Project.objects.create(student=student, **defaults)
 
@@ -57,14 +57,6 @@ class TestDeriveState:
         ]
         assert derive_state(p, evaluations=evals) == 'failed_final'
 
-    def test_failed_attempts_counter_without_evals_still_classifies(self, student):
-        p = _mk(student, failed_attempts=2)
-        assert derive_state(p, evaluations=[]) == 'failed_final'
-
-    def test_failed_attempts_one_without_evals_is_pending_review_2(self, student):
-        p = _mk(student, failed_attempts=1)
-        assert derive_state(p, evaluations=[]) == 'pending_review_2'
-
     def test_derive_state_has_no_tesis_guard(self, student):
         """
         Regla: `derive_state` no tiene guardia para TEG — devolverá un estado
@@ -76,16 +68,24 @@ class TestDeriveState:
         p = _mk(student, project_type='tesis', status='checked')
         assert derive_state(p, evaluations=[]) == 'approved'
 
-    def test_checked_status_wins_over_failed_attempts(self, student):
-        """Contradiction: status='checked' + failed_attempts=2 → approved (status wins)."""
-        p = _mk(student, status='checked', failed_attempts=2)
-        assert derive_state(p, evaluations=[]) == 'approved'
+    def test_checked_status_wins_over_fail_evals(self, student):
+        """Contradiction: status='checked' + 2 Fail evals → approved (status wins)."""
+        p = _mk(student, status='checked')
+        evals = [
+            Evaluation(project=p, pass_status='Fail', score=5, kind='review'),
+            Evaluation(project=p, pass_status='Fail', score=4, kind='review'),
+        ]
+        assert derive_state(p, evaluations=evals) == 'approved'
 
-    def test_pass_eval_wins_over_failed_attempts_counter(self, student):
+    def test_pass_eval_wins_over_fail_evals(self, student):
         """
-        Tie-breaker: a Pass eval overrides failed_attempts>=2. Rule order is
-        checked → has_pass → fails, so has_pass evaluated before fails.
+        Tie-breaker: a Pass eval overrides 2 Fail evals. Rule order is
+        checked → has_pass → fails, so has_pass is evaluated before fails.
         """
-        p = _mk(student, status='pending', failed_attempts=2)
-        evals = [Evaluation(project=p, pass_status='Pass', score=15, kind='review')]
+        p = _mk(student, status='pending')
+        evals = [
+            Evaluation(project=p, pass_status='Pass', score=15, kind='review'),
+            Evaluation(project=p, pass_status='Fail', score=5, kind='review'),
+            Evaluation(project=p, pass_status='Fail', score=4, kind='review'),
+        ]
         assert derive_state(p, evaluations=evals) == 'pending_defense'
