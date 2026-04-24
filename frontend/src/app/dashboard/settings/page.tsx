@@ -11,21 +11,14 @@ import {
   updateUser as updateUserApi,
   deleteUser as deleteUserApi,
   User as AuthUser,
-  updateProfile,
-  getUser,
 } from "@features/auth/api/clientAuth";
 import {
   User,
   Lock,
   Bell,
-  Save,
-  Shield,
   Trash2,
   Edit,
-  Mail,
   UserCog,
-  Phone,
-  BookOpen,
   Check,
   Calendar,
   Plus,
@@ -38,7 +31,6 @@ import {
   CheckCircle,
   Users,
   Monitor,
-  Smartphone,
   Globe,
   ShieldCheck,
   Activity,
@@ -48,13 +40,13 @@ import {
   FileText,
 } from "lucide-react";
 import UserModal, { UserData } from "@features/settings/components/UserModal";
+import { SettingsShell } from "@features/settings";
 import Toast, { ToastType } from "@shared/ui/Toast";
 import DeleteModal from "@shared/ui/DeleteModal";
 import {
   createSemester,
   deleteSemester,
   formatSemesterFull,
-  getAvailableSemesterPeriods,
   getSemesters,
   setActiveSemester,
   MONTH_NAMES,
@@ -397,14 +389,6 @@ export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<"profile" | "security" | "notifications" | "users">("profile");
   const [isDataLoaded, setIsDataLoaded] = useState(true);
 
-  // Profile
-  const [profileName, setProfileName] = useState("");
-  const [profileEmail, setProfileEmail] = useState("");
-  const [profileCedula, setProfileCedula] = useState("");
-  const [profilePhone, setProfilePhone] = useState("");
-  const [profileSemester, setProfileSemester] = useState("");
-  const [isEditingProfile, setIsEditingProfile] = useState(false);
-
   // Security
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -481,8 +465,6 @@ export default function SettingsPage() {
   useEffect(() => {
     const r = getUserRole(); const e = getUserEmail();
     setRole(r); setEmail(e);
-    const u = getUser();
-    if (u) { setProfileEmail(u.email || ""); setProfileName(u.fullName || u.email.split("@")[0] || ""); setProfileCedula(u.cedula || ""); setProfilePhone(u.phone || ""); setProfileSemester(u.semester || ""); }
   }, []);
 
   useEffect(() => {
@@ -495,14 +477,6 @@ export default function SettingsPage() {
   useEffect(() => { setCurrentPage(1); }, [adminSubTab, roleFilter, userSearch]);
 
   // Handlers
-  const handleSaveProfile = async () => {
-    try {
-      await updateProfile({ fullName: profileName, cedula: profileCedula, phone: profilePhone, ...(role !== "Estudiante" ? { semester: profileSemester } : {}) });
-      setIsEditingProfile(false);
-      showToast("Perfil actualizado.", "success");
-    } catch { showToast("Error al actualizar perfil.", "error"); }
-  };
-
   const handleStatusUpdate = async (id: number | undefined, status: "active" | "pending") => {
     if (!id) return;
     try { await updateStatusById(id, status); await loadUsers(); showToast(`Usuario ${status === "active" ? "aprobado" : "desactivado"}.`, "success"); }
@@ -634,94 +608,7 @@ export default function SettingsPage() {
             <div className="min-w-0 space-y-6">
 
               {/* ════════ PROFILE ════════ */}
-              {activeTab === "profile" && (
-                <SectionCard>
-                  <SectionHeader title="Información Personal" description="Tu información de perfil público."
-                    actions={!isEditingProfile ? (
-                      <button onClick={() => setIsEditingProfile(true)} className="px-4 py-2 text-sm font-semibold text-usm-blue bg-usm-blue/10 hover:bg-usm-blue/15 rounded-xl transition-colors flex items-center gap-2">
-                        <Edit className="w-4 h-4" /> Editar
-                      </button>
-                    ) : undefined}
-                  />
-                  <div className="p-5 sm:p-6 space-y-6">
-                    {/* Avatar row */}
-                    <div className="flex items-center gap-4">
-                      <div className="relative">
-                        <div className={`w-16 h-16 rounded-2xl flex items-center justify-center text-lg font-bold ${getAvatarColor(email || "")} shadow-lg`}>
-                          {getInitials(profileName, email || "")}
-                        </div>
-                        <div className={`absolute -bottom-1 -right-1 px-1.5 py-0.5 text-[9px] font-bold rounded-lg ring-2 ring-white ${
-                          role === "Administrador" ? "bg-purple-600 text-white" : role === "Tutor" ? "bg-blue-600 text-white" : role === "Jurado" ? "bg-amber-600 text-white" : "bg-emerald-600 text-white"
-                        }`}>
-                          {role?.substring(0, 3)}
-                        </div>
-                      </div>
-                      <div>
-                        <p className="text-lg font-bold text-slate-900">{profileName || "Usuario"}</p>
-                        <p className="text-sm text-slate-500">{profileEmail}</p>
-                      </div>
-                    </div>
-
-                    {isEditingProfile ? (
-                      <>
-                        <div className="grid gap-4 md:grid-cols-2">
-                          <InputField label="Nombre Completo" icon={User}>
-                            <input type="text" value={profileName} onChange={(e) => setProfileName(e.target.value)} className={inputBase} />
-                          </InputField>
-                          <InputField label="Correo Electrónico" icon={Mail}>
-                            <input type="email" value={profileEmail} onChange={(e) => setProfileEmail(e.target.value)} className={inputBase} />
-                          </InputField>
-                          <InputField label="Cédula" icon={Shield}>
-                            <input type="text" value={profileCedula} onChange={(e) => setProfileCedula(e.target.value)} placeholder="V-12345678" className={inputBase} />
-                          </InputField>
-                          <InputField label="Teléfono" icon={Phone}>
-                            <input type="tel" value={profilePhone} onChange={(e) => setProfilePhone(e.target.value)} className={inputBase} />
-                          </InputField>
-                          <InputField label="Semestre" icon={BookOpen}>
-                            <select value={profileSemester} onChange={(e) => setProfileSemester(e.target.value)} disabled={role === "Estudiante"}
-                              className={`${inputBase} appearance-none ${role === "Estudiante" ? "bg-slate-50 text-slate-400 cursor-not-allowed" : "cursor-pointer"}`}>
-                              <option value="9no">9no Semestre</option>
-                              <option value="10mo">10mo Semestre</option>
-                              <option value="N/A">N/A</option>
-                            </select>
-                          </InputField>
-                          <div className="md:col-span-2">
-                            <InputField label="Rol del Sistema" icon={Shield}>
-                              <input type="text" value={role || ""} disabled className={`${inputBase} bg-slate-50 text-slate-400 cursor-not-allowed`} />
-                            </InputField>
-                          </div>
-                        </div>
-                        <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
-                          <button onClick={() => setIsEditingProfile(false)} className="px-4 py-2 text-sm font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors">Cancelar</button>
-                          <button onClick={handleSaveProfile} className="px-5 py-2 bg-usm-blue text-white text-sm font-semibold rounded-xl hover:bg-blue-700 active:scale-95 transition-all flex items-center gap-2 shadow-sm">
-                            <Save className="w-4 h-4" /> Guardar
-                          </button>
-                        </div>
-                      </>
-                    ) : (
-                      <div className="grid gap-3 md:grid-cols-2">
-                        {[
-                          { label: "Correo", value: profileEmail, icon: Mail },
-                          { label: "Cédula", value: profileCedula || "—", icon: Shield },
-                          { label: "Teléfono", value: profilePhone || "—", icon: Phone },
-                          { label: "Semestre", value: profileSemester ? `${profileSemester} Semestre` : "—", icon: BookOpen },
-                          { label: "Rol", value: role || "—", icon: Shield },
-                        ].map((f) => (
-                          <div key={f.label} className="flex items-center gap-3 p-3.5 bg-slate-50/80 rounded-xl border border-slate-100">
-                            <div className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center flex-shrink-0">
-                              <f.icon className="w-4 h-4 text-slate-400" />
-                            </div>
-                            <div className="min-w-0">
-                              <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">{f.label}</p>
-                              <p className="text-sm font-medium text-slate-800 truncate">{f.value}</p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </SectionCard>
-              )}
+              {activeTab === "profile" && <SettingsShell />}
 
               {/* ════════ SECURITY ════════ */}
               {activeTab === "security" && (

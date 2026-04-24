@@ -27,10 +27,12 @@ export interface User {
   lastName?: string;
   fullName?: string;
   cedula?: string;
+  nationality?: 'V' | 'E' | 'P';
   status: 'active' | 'pending';
   semester?: string;
   phone?: string;
   dateJoined?: string;
+  lastLogin?: string;
 }
 
 export type ApiUser = {
@@ -42,9 +44,11 @@ export type ApiUser = {
   last_name?: string;
   full_name?: string;
   cedula?: string;
+  nationality?: 'V' | 'E' | 'P';
   semester?: string;
   phone?: string;
   date_joined?: string;
+  last_login?: string;
 };
 
 function mapApiUser(u: ApiUser | User): User {
@@ -59,9 +63,11 @@ function mapApiUser(u: ApiUser | User): User {
     lastName: api.last_name ?? local.lastName ?? "",
     fullName: api.full_name ?? local.fullName ?? "",
     cedula: api.cedula ?? local.cedula ?? "",
+    nationality: api.nationality ?? local.nationality ?? undefined,
     semester: api.semester ?? local.semester ?? "",
     phone: api.phone ?? local.phone ?? "",
     dateJoined: api.date_joined ?? local.dateJoined ?? "",
+    lastLogin: api.last_login ?? local.lastLogin ?? undefined,
   };
 }
 
@@ -154,6 +160,7 @@ export async function updateProfile(payload: {
   lastName?: string;
   phone?: string;
   cedula?: string;
+  nationality?: 'V' | 'E' | 'P';
   semester?: string;
 }): Promise<User> {
   const body: Record<string, string> = {};
@@ -162,6 +169,7 @@ export async function updateProfile(payload: {
   if (payload.lastName !== undefined) body.last_name = payload.lastName;
   if (payload.phone !== undefined) body.phone = payload.phone;
   if (payload.cedula !== undefined) body.cedula = payload.cedula;
+  if (payload.nationality !== undefined) body.nationality = payload.nationality;
   if (payload.semester !== undefined) body.semester = payload.semester;
 
   const apiUser = await api.patch<ApiUser>("/auth/me/", body);

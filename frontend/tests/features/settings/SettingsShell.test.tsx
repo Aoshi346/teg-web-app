@@ -4,6 +4,12 @@ import { SettingsShell } from "@features/settings/components/SettingsShell";
 
 vi.mock("@features/auth/api/clientAuth", () => ({
   getUserRole: vi.fn(),
+  getUser: vi.fn(() => null),
+  updateProfile: vi.fn(),
+}));
+
+vi.mock("@features/semesters/api/semesters", () => ({
+  getSemesters: vi.fn().mockResolvedValue([]),
 }));
 
 import { getUserRole } from "@features/auth/api/clientAuth";

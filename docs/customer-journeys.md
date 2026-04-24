@@ -186,6 +186,8 @@ journey
       Asigna tutor + jurados: 3: Admin
       Monitorea SessionLog: 3: Admin
       Responde reclamos: 2: Admin
+      Fuerza estado de PTEG (con razón + auditoría): 4: Admin
+      Revisa dashboard por estado (chips): 5: Admin
     section Cierre
       Verifica evaluaciones completas: 4: Admin
       Cierra y archiva el semestre: 5: Admin
@@ -281,7 +283,7 @@ flowchart TB
     D4 --> C4["🤔 Consideración<br/>🙂 Verifica cobertura<br/>😄 Decide adoptar"]
     C4 --> A4["📝 Adquisición<br/>😐 Despliega stack<br/>🙂 Crea superuser"]
     A4 --> O4["🚀 Onboarding<br/>🙂 Configura meses<br/>😄 Activa Semester<br/>😐 Valida con usuarios prueba"]
-    O4 --> U4["⚙️ Uso<br/>😐 Aprueba pending<br/>🙂 Asigna roles<br/>😕 Reasigna estudiantes<br/>🙂 Crea PresentationDay<br/>😐 Asigna jurados<br/>😐 Monitorea sesiones<br/>😕 Responde reclamos"]
+    O4 --> U4["⚙️ Uso<br/>😐 Aprueba pending<br/>🙂 Asigna roles<br/>😕 Reasigna estudiantes<br/>🙂 Crea PresentationDay<br/>😐 Asigna jurados<br/>😐 Monitorea sesiones<br/>😕 Responde reclamos<br/>🙂 Fuerza estado PTEG<br/>😄 Dashboard por estado"]
     U4 --> Cl4["🎯 Cierre<br/>🙂 Verifica evaluaciones<br/>😄 Cierra el semestre"]
     Cl4 --> F4["💚 Fidelización<br/>😄 Activa siguiente semestre<br/>😄 Propone a otras carreras<br/>🙂 Solicita mejoras"]
 

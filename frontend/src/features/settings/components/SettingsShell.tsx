@@ -5,6 +5,7 @@ import { getUserRole } from "@features/auth/api/clientAuth";
 import type { SettingsTabId } from "../types/settings";
 import { SecurityTab } from "./security/SecurityTab";
 import { NotificationsTab } from "./notifications/NotificationsTab";
+import { ProfileTab } from "./profile/ProfileTab";
 
 interface TabDef {
   id: SettingsTabId;
@@ -47,7 +48,7 @@ export function SettingsShell() {
         ))}
       </nav>
       <main role="tabpanel">
-        {active === "profile" && <div data-testid="profile-placeholder">Perfil (placeholder)</div>}
+        {active === "profile" && <ProfileTab />}
         {active === "security" && <SecurityTab />}
         {active === "notifications" && <NotificationsTab />}
         {active === "admin" && <div data-testid="admin-placeholder">Administración (placeholder)</div>}
