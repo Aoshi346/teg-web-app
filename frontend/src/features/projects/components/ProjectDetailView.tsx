@@ -160,6 +160,12 @@ export default function ProjectDetailView({
   const router = useRouter();
   const isProyecto = variant === "proyecto";
   const TypeIcon = isProyecto ? GraduationCap : BookOpen;
+  const ptegStateConfig: { label: string; pillClass: string } | null = isProyecto
+    ? (PTEG_STATE_CONFIG[project.state] ?? {
+        label: project.state,
+        pillClass: "text-gray-600 bg-gray-100 border border-gray-200",
+      })
+    : null;
 
   return (
     <div className="max-w-6xl mx-auto space-y-4">
@@ -194,11 +200,11 @@ export default function ProjectDetailView({
                 </h1>
                 <div className="flex flex-wrap items-center gap-2">
                   <StatusBadge status={project.status} />
-                  {isProyecto && (
+                  {ptegStateConfig && (
                     <span
-                      className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${PTEG_STATE_CONFIG[project.state].pillClass}`}
+                      className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${ptegStateConfig.pillClass}`}
                     >
-                      {PTEG_STATE_CONFIG[project.state].label}
+                      {ptegStateConfig.label}
                     </span>
                   )}
                   {!isProyecto && project.stage1Passed !== undefined && (
