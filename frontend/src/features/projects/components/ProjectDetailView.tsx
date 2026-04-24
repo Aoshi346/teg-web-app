@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
@@ -22,6 +23,8 @@ import Combobox from "@/app/dashboard/agregar/components/Combobox";
 import type { Project } from "@features/projects/types/project";
 import type { ApiEvaluation } from "@features/projects/api/projectService";
 import { PTEG_STATE_CONFIG, PTEG_STATE_FALLBACK } from "@features/projects/lib/ptegStateConfig";
+import StateOverrideModal from "@features/projects/components/StateOverrideModal";
+import { overrideProjectState } from "@features/projects/api/projectService";
 
 /* ─── Types ─── */
 interface ProjectDetailViewProps {
@@ -135,8 +138,14 @@ export default function ProjectDetailView({
   const router = useRouter();
   const isProyecto = variant === "proyecto";
   const TypeIcon = isProyecto ? GraduationCap : BookOpen;
-  const ptegStateConfig: { label: string; pillClass: string } | null = isProyecto
-    ? (PTEG_STATE_CONFIG[project.state] ?? PTEG_STATE_FALLBACK)
+
+  const [overrideOpen, setOverrideOpen] = useState(false);
+  const [localProject, setLocalProject] = useState(project);
+
+  const canOverride = userRole === "Administrador" && variant === "proyecto";
+
+  const currentStateConfig: { label: string; pillClass: string } | null = isProyecto
+    ? (PTEG_STATE_CONFIG[localProject.state] ?? PTEG_STATE_FALLBACK)
     : null;
 
   return (
@@ -172,12 +181,21 @@ export default function ProjectDetailView({
                 </h1>
                 <div className="flex flex-wrap items-center gap-2">
                   <StatusBadge status={project.status} />
-                  {ptegStateConfig && (
+                  {currentStateConfig && (
                     <span
-                      className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${ptegStateConfig.pillClass}`}
+                      className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${currentStateConfig.pillClass}`}
                     >
-                      {ptegStateConfig.label}
+                      {currentStateConfig.label}
                     </span>
+                  )}
+                  {canOverride && currentStateConfig && (
+                    <button
+                      type="button"
+                      onClick={() => setOverrideOpen(true)}
+                      className="text-[10px] font-semibold px-2 py-0.5 rounded-full border border-slate-300 text-slate-700 hover:bg-slate-50"
+                    >
+                      Forzar estado
+                    </button>
                   )}
                   {!isProyecto && project.stage1Passed !== undefined && (
                     <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full flex items-center gap-1 ${project.stage1Passed ? "text-emerald-700 bg-emerald-50 border border-emerald-200" : "text-amber-700 bg-amber-50 border border-amber-200"}`}>
@@ -417,6 +435,19 @@ export default function ProjectDetailView({
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
         <CommentsSection projectId={project.id} />
       </div>
+
+      {/* ─── State override modal (admin only) ─── */}
+      {canOverride && (
+        <StateOverrideModal
+          open={overrideOpen}
+          currentState={localProject.state}
+          onClose={() => setOverrideOpen(false)}
+          onSubmit={async ({ state, reason }) => {
+            const updated = await overrideProjectState(localProject.id, { state, reason });
+            setLocalProject(updated);
+          }}
+        />
+      )}
 
       {/* ─── Jurado assignment modal (admin only) ─── */}
       {showJuradoModal && setShowJuradoModal && (
