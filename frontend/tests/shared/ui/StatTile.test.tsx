@@ -1,44 +1,45 @@
-import * as React from "react";
-import { render, screen } from "@testing-library/react";
 import { describe, it, expect } from "vitest";
-
+import { render, screen } from "@testing-library/react";
 import { StatTile } from "@shared/ui/StatTile";
 
 describe("StatTile", () => {
-  it("renders label, value, and breakdown", () => {
+  it("renders hero tone with chips", () => {
     render(
-      <StatTile tone="primary" label="PTEG" value="12" breakdown="8 aprobados · 3 en revisión" />
+      <StatTile
+        tone="hero"
+        label="Proyectos PTEG"
+        value="12"
+        chips={[
+          { label: "Rev 1", count: 5, href: "/dashboard/proyectos?state=pending_review_1" },
+          { label: "Defensa", count: 3, href: "/dashboard/proyectos?state=pending_defense" },
+        ]}
+      />,
     );
-    expect(screen.getByText("PTEG")).toBeDefined();
-    expect(screen.getByText("12")).toBeDefined();
-    expect(screen.getByText(/8 aprobados/)).toBeDefined();
-  });
-
-  it("renders as an anchor when href is provided", () => {
-    render(
-      <StatTile tone="primary" label="PTEG" value="12" href="/dashboard/proyectos" />
+    expect(screen.getByText("Proyectos PTEG")).toBeInTheDocument();
+    expect(screen.getByText("12")).toBeInTheDocument();
+    expect(screen.getByText("Rev 1")).toBeInTheDocument();
+    expect(screen.getByText("5")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Rev 1/i })).toHaveAttribute(
+      "href",
+      "/dashboard/proyectos?state=pending_review_1",
     );
-    const el = screen.getByRole("link", { name: /PTEG/i });
-    expect(el).toBeDefined();
-    expect((el as HTMLAnchorElement).getAttribute("href")).toBe("/dashboard/proyectos");
   });
 
-  it("renders as a div when no href", () => {
-    render(<StatTile tone="primary" label="PTEG" value="12" />);
-    expect(screen.queryByRole("link")).toBeNull();
+  it("renders secondary tone with urgent pulse dot", () => {
+    const { container } = render(
+      <StatTile tone="amber" label="Tu acción" value="5" urgent />,
+    );
+    expect(screen.getByText("Tu acción")).toBeInTheDocument();
+    expect(container.querySelector(".pulse-soft")).not.toBeNull();
   });
 
-  it("applies primary-tinted gradient for tone=primary", () => {
-    const { container } = render(<StatTile tone="primary" label="X" value="1" />);
-    const el = container.firstChild as HTMLElement;
-    expect(el.className).toContain("via-primary/5");
-    expect(el.className).toContain("to-primary/10");
+  it("renders secondary tone without urgent dot when flag absent", () => {
+    const { container } = render(<StatTile tone="green" label="Aprobados" value="3" />);
+    expect(container.querySelector(".pulse-soft")).toBeNull();
   });
 
-  it("applies orange-tinted gradient for tone=accent", () => {
-    const { container } = render(<StatTile tone="accent" label="X" value="1" />);
-    const el = container.firstChild as HTMLElement;
-    expect(el.className).toContain("via-[var(--brand-orange)]/5");
-    expect(el.className).toContain("to-[var(--brand-orange)]/10");
+  it("wraps in Link when href provided and no chips", () => {
+    render(<StatTile tone="blue" label="Tesis" value="7" href="/dashboard/tesis" />);
+    expect(screen.getByRole("link")).toHaveAttribute("href", "/dashboard/tesis");
   });
 });
