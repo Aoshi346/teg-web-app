@@ -19,34 +19,9 @@ import {
 } from "lucide-react";
 import CommentsSection from "./CommentsSection";
 import Combobox from "@/app/dashboard/agregar/components/Combobox";
-import type { Project, ProjectState } from "@features/projects/types/project";
+import type { Project } from "@features/projects/types/project";
 import type { ApiEvaluation } from "@features/projects/api/projectService";
-
-const PTEG_STATE_CONFIG: Record<
-  ProjectState,
-  { label: string; pillClass: string }
-> = {
-  pending_review_1: {
-    label: "Pendiente 1ra revisión",
-    pillClass: "text-slate-700 bg-slate-50 border border-slate-200",
-  },
-  pending_review_2: {
-    label: "Intento 2 de 2 — Pendiente revisión",
-    pillClass: "text-amber-700 bg-amber-50 border border-amber-200",
-  },
-  pending_defense: {
-    label: "Pendiente defensa oral",
-    pillClass: "text-blue-700 bg-blue-50 border border-blue-200",
-  },
-  approved: {
-    label: "Aprobado",
-    pillClass: "text-emerald-700 bg-emerald-50 border border-emerald-200",
-  },
-  failed_final: {
-    label: "Reprobado (sin más intentos)",
-    pillClass: "text-red-700 bg-red-50 border border-red-200",
-  },
-};
+import { PTEG_STATE_CONFIG, PTEG_STATE_FALLBACK } from "@features/projects/lib/ptegStateConfig";
 
 /* ─── Types ─── */
 interface ProjectDetailViewProps {
@@ -161,10 +136,7 @@ export default function ProjectDetailView({
   const isProyecto = variant === "proyecto";
   const TypeIcon = isProyecto ? GraduationCap : BookOpen;
   const ptegStateConfig: { label: string; pillClass: string } | null = isProyecto
-    ? (PTEG_STATE_CONFIG[project.state] ?? {
-        label: project.state,
-        pillClass: "text-gray-600 bg-gray-100 border border-gray-200",
-      })
+    ? (PTEG_STATE_CONFIG[project.state] ?? PTEG_STATE_FALLBACK)
     : null;
 
   return (
