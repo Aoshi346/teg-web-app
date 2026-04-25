@@ -229,3 +229,71 @@ class TestOverrideSideEffects:
         assert res.status_code == 200
         project.refresh_from_db()
         assert project.state == "approved"
+
+
+@pytest.mark.django_db
+class TestOverrideStateForTeg:
+    def _setup(self, initial_state="pending_articulo"):
+        admin = User.objects.create_user(email="adt@x.com", password="x", role="Administrador")
+        student = User.objects.create_user(email="stt@x.com", password="x", role="Estudiante")
+        project = Project.objects.create(
+            title="TT", student=student, project_type="tesis", state=initial_state
+        )
+        client = APIClient()
+        client.force_authenticate(user=admin)
+        return client, project
+
+    def test_admin_can_override_teg_to_teg_state(self):
+        client, project = self._setup(initial_state="pending_articulo")
+        res = client.post(
+            f"/api/projects/{project.id}/override_state/",
+            {"state": "pending_defensa", "reason": "razón válida con más de diez caracteres"},
+            format="json",
+        )
+        assert res.status_code == 200
+        project.refresh_from_db()
+        assert project.state == "pending_defensa"
+        assert StateOverride.objects.filter(project=project).count() == 1
+
+    def test_admin_cannot_override_teg_to_pteg_state(self):
+        client, project = self._setup(initial_state="pending_articulo")
+        res = client.post(
+            f"/api/projects/{project.id}/override_state/",
+            {"state": "pending_review_1", "reason": "razón válida con más de diez caracteres"},
+            format="json",
+        )
+        assert res.status_code == 400
+        assert "state" in res.data
+        assert StateOverride.objects.filter(project=project).count() == 0
+        project.refresh_from_db()
+        assert project.state == "pending_articulo"
+
+    def test_admin_cannot_override_pteg_to_teg_state(self, db):
+        admin = User.objects.create_user(email="adp@x.com", password="x", role="Administrador")
+        student = User.objects.create_user(email="stp@x.com", password="x", role="Estudiante")
+        project = Project.objects.create(
+            title="PP", student=student, project_type="proyecto", state="pending_review_1"
+        )
+        client = APIClient()
+        client.force_authenticate(user=admin)
+        res = client.post(
+            f"/api/projects/{project.id}/override_state/",
+            {"state": "pending_articulo", "reason": "razón válida con más de diez caracteres"},
+            format="json",
+        )
+        assert res.status_code == 400
+        assert "state" in res.data
+        assert StateOverride.objects.filter(project=project).count() == 0
+        project.refresh_from_db()
+        assert project.state == "pending_review_1"
+
+    def test_teg_to_terminal_approved_allowed(self):
+        client, project = self._setup(initial_state="pending_entrega")
+        res = client.post(
+            f"/api/projects/{project.id}/override_state/",
+            {"state": "approved", "reason": "razón válida con más de diez caracteres"},
+            format="json",
+        )
+        assert res.status_code == 200
+        project.refresh_from_db()
+        assert project.state == "approved"
