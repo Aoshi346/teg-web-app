@@ -42,12 +42,10 @@ export interface ApiProject {
   reviewer_name?: string | null;
   submitted_date: string;
   review_date?: string;
-  status: "checked" | "pending" | "rejected";
-  state: "pending_review_1" | "pending_review_2" | "pending_defense" | "approved" | "failed_final";
+  state: ProjectState;
   score: number;
   diagramacion_score: number;
   contenido_score: number;
-  stage1_passed: boolean;
   period: string;
   project_type: "proyecto" | "tesis";
   failed_attempts: number;
@@ -110,12 +108,10 @@ function mapApiProject(p: ApiProject): Project {
     reviewerName: p.reviewer_name ?? null,
     submittedDate: p.submitted_date,
     reviewDate: p.review_date,
-    status: p.status,
     state: p.state ?? "pending_review_1",
     score: p.score,
     diagramacionScore: p.diagramacion_score,
     contenidoScore: p.contenido_score,
-    stage1Passed: p.stage1_passed,
     period: p.period,
     type: normalizedType,
     files: p.files?.map(f => ({

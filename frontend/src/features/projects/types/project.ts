@@ -5,15 +5,33 @@ export interface ProjectFile {
   date: string;
 }
 
-export type ProjectStatus = "checked" | "pending" | "rejected";
 export type ProjectType = "proyecto" | "tesis";
 
 export type ProjectState =
   | "pending_review_1"
   | "pending_review_2"
   | "pending_defense"
+  | "pending_articulo"
+  | "pending_entrega"
+  | "pending_defensa"
   | "approved"
   | "failed_final";
+
+export const PTEG_STATES = [
+  "pending_review_1",
+  "pending_review_2",
+  "pending_defense",
+  "approved",
+  "failed_final",
+] as const satisfies readonly ProjectState[];
+
+export const TEG_STATES = [
+  "pending_articulo",
+  "pending_entrega",
+  "pending_defensa",
+  "approved",
+  "failed_final",
+] as const satisfies readonly ProjectState[];
 
 export interface Comment {
   id: number;
@@ -36,7 +54,7 @@ export interface StateOverride {
 export interface Project {
   id: number;
   title: string;
-  student: string; // display name
+  student: string;
   advisorNames?: string[];
   advisors?: number[];
   reviewer?: number | null;
@@ -45,12 +63,10 @@ export interface Project {
   partnerName?: string;
   submittedDate: string;
   reviewDate?: string;
-  status: ProjectStatus;
   state: ProjectState;
   score?: number;
   diagramacionScore?: number;
   contenidoScore?: number;
-  stage1Passed?: boolean;
   period: string;
   type?: ProjectType;
   files?: ProjectFile[];
