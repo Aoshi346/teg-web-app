@@ -5,35 +5,33 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 import { cn } from "@shared/lib/utils";
+import type { ProjectState } from "@features/projects/types/project";
+import { stateBadge } from "@features/projects/lib/stateBadge";
 
-type Status = "checked" | "pending" | "rejected" | "upcoming";
+const TONE_BADGE = {
+  amber: "bg-pending/10 text-pending border-pending/22",
+  green: "bg-success/10 text-success border-success/22",
+  red:   "bg-destructive/10 text-destructive border-destructive/22",
+  blue:  "bg-primary/10 text-primary border-primary/22",
+} as const;
 
-const STATUS_LABEL: Record<Status, string> = {
-  checked: "Aprobado",
-  pending: "Pendiente",
-  rejected: "Rechazado",
-  upcoming: "Próximo",
-};
+const TONE_DOT = {
+  amber: "bg-pending ring-pending/22",
+  green: "bg-success ring-success/22",
+  red:   "bg-destructive ring-destructive/22",
+  blue:  "bg-primary ring-primary/22",
+} as const;
 
-const STATUS_BADGE: Record<Status, string> = {
-  checked: "bg-success/10 text-success border-success/22",
-  pending: "bg-pending/10 text-pending border-pending/22",
-  rejected: "bg-destructive/10 text-destructive border-destructive/22",
-  upcoming: "bg-primary/10 text-primary border-primary/22",
-};
-
-const INDICATOR_BG: Record<Status, string> = {
-  checked: "bg-success ring-success/22",
-  pending: "bg-pending ring-pending/22",
-  rejected: "bg-destructive ring-destructive/22",
-  upcoming: "bg-primary ring-primary/22",
-};
+type Tone = keyof typeof TONE_BADGE;
 
 export interface ListRowProps {
   title: string;
   subtitle?: string;
   type?: "proyecto" | "tesis";
-  status?: Status;
+  /** Lifecycle state. If provided, renders a derived pill via stateBadge(). */
+  state?: ProjectState;
+  /** Override for non-lifecycle usages (e.g. "Próximo" for upcoming presentations). */
+  badge?: { tone: Tone; label: string };
   hint?: string;
   href?: string;
   onClick?: () => void;
@@ -63,21 +61,24 @@ function renderSubtitle(subtitle: string): React.ReactNode {
 export function ListRow({
   title,
   subtitle,
-  status,
+  state,
+  badge,
   hint,
   href,
   onClick,
   onHoverHref,
 }: ListRowProps) {
+  const resolved = badge ?? (state ? stateBadge(state) : null);
+
   const inner = (
     <div className="flex flex-1 items-center gap-3 min-w-0">
-      {status && (
+      {resolved && (
         <span
           data-slot="list-row-indicator"
           aria-hidden
           className={cn(
             "h-2 w-2 flex-shrink-0 rounded-full ring-[3px]",
-            INDICATOR_BG[status],
+            TONE_DOT[resolved.tone],
           )}
         />
       )}
@@ -90,14 +91,14 @@ export function ListRow({
         )}
         {hint && <p className="mt-0.5 truncate text-[11px] text-primary">{hint}</p>}
       </div>
-      {status && (
+      {resolved && (
         <span
           className={cn(
-            "rounded-full border px-2.5 py-0.5 text-[10px] font-extrabold tracking-wide",
-            STATUS_BADGE[status],
+            "rounded-full border px-2.5 py-0.5 text-[10px] font-extrabold tracking-wide whitespace-nowrap",
+            TONE_BADGE[resolved.tone],
           )}
         >
-          {STATUS_LABEL[status]}
+          {resolved.label}
         </span>
       )}
       <ArrowRight

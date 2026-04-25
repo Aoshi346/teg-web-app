@@ -1,4 +1,4 @@
-import type { ProjectStatus, ProjectType } from "@features/projects/types/project";
+import type { ProjectState, ProjectType } from "@features/projects/types/project";
 
 export type BreakdownSegment = {
   label: string;
@@ -37,7 +37,8 @@ export interface ListRowData {
   title: string;
   subtitle?: string;
   type?: ProjectType;
-  status?: ProjectStatus | "upcoming";
+  state?: ProjectState;
+  badge?: { tone: "amber" | "green" | "red" | "blue"; label: string };
   href?: string;
   hint?: string;
 }
