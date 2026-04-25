@@ -7,10 +7,7 @@ import {
   calculateSectionScores,
   getPassStatus,
 } from "@features/evaluations/lib/questions/scoring";
-import {
-  createEvaluation,
-  updateProject,
-} from "@features/projects/api/projectService";
+import { createEvaluation } from "@features/projects/api/projectService";
 
 type Ratings = Record<string, number | string>;
 
@@ -46,10 +43,8 @@ export function useEvaluationSubmit(
           ? calculateSectionScores(ratings, questions)
           : null;
 
-      // Persist the evaluation. For PTEG the backend updates Project.state
-      // (and legacy status) automatically — see api/lifecycle.next_state().
-      // TEG keeps its two-phase stage1_passed flow: we still PATCH the
-      // project below.
+      // Persist the evaluation. The backend advances Project.state for both
+      // PTEG and TEG via api/lifecycle.next_state() — no follow-up PATCH needed.
       if (projectId) {
         const id = parseInt(projectId);
         if (Number.isNaN(id)) {
@@ -75,31 +70,6 @@ export function useEvaluationSubmit(
         } catch (err: unknown) {
           const msg =
             err instanceof Error ? err.message : "Error al guardar la evaluación.";
-          onError(msg);
-          return;
-        }
-      }
-
-      // TEG-only: PATCH stage1_passed + status. PTEG state is already
-      // updated server-side by the evaluation POST above.
-      if (projectData && projectId && documentType === "Tesis") {
-        const isStage1 = questions.some((q) => q.id === "q57");
-        const status = (
-          passStatus === "Pass" ? "checked" : "rejected"
-        ) as "checked" | "rejected";
-        const reviewDate = new Date().toISOString().split("T")[0];
-        try {
-          await updateProject(projectData.id, {
-            status,
-            review_date: reviewDate,
-            stage1_passed:
-              isStage1 && passStatus === "Pass"
-                ? true
-                : (projectData.stage1Passed ?? false),
-          });
-        } catch (err: unknown) {
-          const msg =
-            err instanceof Error ? err.message : "Error al actualizar el proyecto.";
           onError(msg);
           return;
         }

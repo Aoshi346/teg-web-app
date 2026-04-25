@@ -22,8 +22,8 @@ export default function EvaluarTesisFase2Page({
       const id = Number(projectId);
       const project = await getProject(id);
 
-      // Allow if project exists and stage1Passed is true
-      if (project && project.stage1Passed) {
+      // Phase 2 unlocked once article phase has cleared.
+      if (project && (project.state === "pending_defensa" || project.state === "approved")) {
         setIsAllowed(true);
       } else {
         setIsAllowed(false);
