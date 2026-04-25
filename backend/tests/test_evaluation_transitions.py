@@ -74,7 +74,6 @@ class TestReviewTransitions:
         assert resp.status_code == 201, resp.content
         pteg.refresh_from_db()
         assert pteg.state == "failed_final"
-        assert pteg.status == "rejected"
 
 
 class TestDefenseTransitions:
@@ -87,7 +86,6 @@ class TestDefenseTransitions:
         assert resp.status_code == 201, resp.content
         pteg.refresh_from_db()
         assert pteg.state == "approved"
-        assert pteg.status == "checked"
 
     @pytest.mark.django_db
     def test_defense_fail_on_pending_defense_stays_pending_defense(self, jurado_user, student_user, project_factory):

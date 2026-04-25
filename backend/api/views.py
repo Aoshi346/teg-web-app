@@ -11,7 +11,7 @@ from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import BasePermission
 from rest_framework.response import Response
 
-from .lifecycle import InvalidTransition, next_state, status_projection
+from .lifecycle import InvalidTransition, next_state
 from .models import (
     AttachedFile,
     Comment,
@@ -227,12 +227,12 @@ class ProjectViewSet(viewsets.ModelViewSet):
                 try:
                     target_student = User.objects.get(id=student_id)
                 except User.DoesNotExist:
-                    raise ValidationError({'student': 'User not found'})
+                    raise ValidationError({'student': 'User not found'}) from None
             elif student_email:
                 try:
                     target_student = User.objects.get(email=student_email)
                 except User.DoesNotExist:
-                    raise ValidationError({'student_email': 'User not found'})
+                    raise ValidationError({'student_email': 'User not found'}) from None
 
         period = self.request.data.get('period')
         if not period:
@@ -246,7 +246,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
             try:
                 reviewer = User.objects.get(id=reviewer_id, role='Jurado')
             except User.DoesNotExist:
-                raise ValidationError({'reviewer': 'Jurado not found'})
+                raise ValidationError({'reviewer': 'Jurado not found'}) from None
 
         serializer.save(student=target_student, period=period, reviewer=reviewer)
 
@@ -265,12 +265,12 @@ class ProjectViewSet(viewsets.ModelViewSet):
             try:
                 target_student = User.objects.get(id=student_id)
             except User.DoesNotExist:
-                raise ValidationError({'student': 'User not found'})
+                raise ValidationError({'student': 'User not found'}) from None
         elif student_email:
             try:
                 target_student = User.objects.get(email=student_email)
             except User.DoesNotExist:
-                raise ValidationError({'student_email': 'User not found'})
+                raise ValidationError({'student_email': 'User not found'}) from None
 
         if not target_student:
             raise ValidationError({'detail': 'Provide student id or student_email'})
@@ -359,8 +359,7 @@ class ProjectViewSet(viewsets.ModelViewSet):
                 reason=reason,
             )
             project.state = new_state
-            project.status = status_projection(new_state)
-            project.save(update_fields=['state', 'status'])
+            project.save(update_fields=['state'])
             dispatch_state_change(
                 project=project,
                 from_state=from_state,
@@ -445,7 +444,7 @@ class EvaluationViewSet(viewsets.ModelViewSet):
         try:
             project = Project.objects.get(pk=project_id)
         except Project.DoesNotExist:
-            raise ValidationError({'project': 'Project not found'})
+            raise ValidationError({'project': 'Project not found'}) from None
 
         user = self.request.user
         evaluation_kind = self.request.data.get('kind', 'review')
@@ -454,33 +453,27 @@ class EvaluationViewSet(viewsets.ModelViewSet):
         if getattr(user, 'role', None) == 'Jurado' and project.reviewer_id != user.id:
             raise PermissionDenied("No estás asignado como jurado de este proyecto.")
 
-        # Nota: sólo PTEG usa la máquina de estados por ahora. TEG conserva
-        # su lógica actual basada en stage1_passed.
-        new_state = None
-        if project.project_type == 'proyecto':
-            if pass_status not in ('Pass', 'Fail'):
-                raise ValidationError({'pass_status': 'This field is required and must be "Pass" or "Fail".'})
-            try:
-                new_state = next_state(project, evaluation_kind, pass_status)
-            except InvalidTransition as exc:
-                raise ValidationError({'state': str(exc)}) from exc
+        if pass_status not in ('Pass', 'Fail'):
+            raise ValidationError({'pass_status': 'This field is required and must be "Pass" or "Fail".'})
+        try:
+            new_state = next_state(project, evaluation_kind, pass_status)
+        except InvalidTransition as exc:
+            raise ValidationError({'state': str(exc)}) from exc
 
         from_state = project.state
 
         with transaction.atomic():
             evaluation = serializer.save(reviewer=user, project=project, kind=evaluation_kind)
             dispatch_evaluation_received(evaluation=evaluation, actor=user)
-            if new_state is not None:
-                dispatch_state_change(
-                    project=project,
-                    from_state=from_state,
-                    to_state=new_state,
-                    actor=user,
-                    kind_source='evaluation',
-                )
-                project.state = new_state
-                project.status = status_projection(new_state)
-                project.save(update_fields=['state', 'status'])
+            dispatch_state_change(
+                project=project,
+                from_state=from_state,
+                to_state=new_state,
+                actor=user,
+                kind_source='evaluation',
+            )
+            project.state = new_state
+            project.save(update_fields=['state'])
 
     def create(self, request, *args, **kwargs):
         try:
