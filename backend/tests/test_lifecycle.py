@@ -4,12 +4,13 @@ from dataclasses import dataclass
 
 import pytest
 
-from api.lifecycle import InvalidTransition, next_state, status_projection
+from api.lifecycle import InvalidTransition, next_state
 
 
 @dataclass
 class FakeProject:
     state: str
+    project_type: str = 'proyecto'
 
 
 class TestNextStateReview:
@@ -83,22 +84,6 @@ class TestUnknownPassStatus:
         with pytest.raises(InvalidTransition):
             next_state(FakeProject(state='pending_review_1'), 'review', 'Yes')
 
-
-class TestStatusProjection:
-    def test_approved_maps_to_checked(self):
-        assert status_projection('approved') == 'checked'
-
-    def test_failed_final_maps_to_rejected(self):
-        assert status_projection('failed_final') == 'rejected'
-
-    def test_pending_review_1_maps_to_pending(self):
-        assert status_projection('pending_review_1') == 'pending'
-
-    def test_pending_review_2_maps_to_pending(self):
-        assert status_projection('pending_review_2') == 'pending'
-
-    def test_pending_defense_maps_to_pending(self):
-        assert status_projection('pending_defense') == 'pending'
 
 
 class _FakeProject:
