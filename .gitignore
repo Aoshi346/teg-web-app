@@ -39,6 +39,9 @@ env/
 # Claude Code task state (ephemeral, local only)
 .claude/state/
 
+# Superpowers skill scratch (brainstorm artifacts, mockups — local only)
+.superpowers/
+
 # Documentation (local docs, not committed)
 docs/
 
