@@ -100,7 +100,6 @@ def a_project(db, student_user, semester):
         title="Test TEG Project",
         student=student_user,
         project_type="tesis",
-        status="pending",
         period=semester.period,
     )
 
@@ -232,7 +231,7 @@ def test_cascade_delete_removes_presentations(db, admin_client, semester, studen
     # Create two projects
     proj1 = Project.objects.create(
         title="Project Alpha", student=student_user, project_type="proyecto",
-        status="pending", period=semester.period,
+        period=semester.period,
     )
     proj2_student = User.objects.create_user(
         email="student2@test.local", password="test-pass-123",
@@ -241,7 +240,7 @@ def test_cascade_delete_removes_presentations(db, admin_client, semester, studen
     )
     proj2 = Project.objects.create(
         title="Project Beta", student=proj2_student, project_type="tesis",
-        status="pending", period=semester.period,
+        period=semester.period,
     )
 
     # Create a day

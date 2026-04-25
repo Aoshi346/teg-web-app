@@ -70,7 +70,6 @@ def _make_project(student, *, partner=None, advisors=None, reviewer=None,
         partner=partner,
         reviewer=reviewer,
         project_type=project_type,
-        status="pending",
         state=state,
         period="",
     )
@@ -191,31 +190,6 @@ class TestEvaluationCreateWiring:
         ).first()
         assert notif is not None
         assert notif.payload.get("kind_source") == "evaluation"
-
-    @pytest.mark.django_db
-    def test_no_state_change_row_when_teg_evaluation_does_not_use_lifecycle(self):
-        """TEG (project_type='tesis') evaluations do not trigger a state_change notification."""
-        jurado = _make_user(role="Jurado")
-        student = _make_user(role="Estudiante")
-        # TEG — no lifecycle state machine; pass_status not required at API level for tesis
-        project = _make_project(
-            student, reviewer=jurado,
-            project_type="tesis", state="pending_review_1"
-        )
-
-        client = _authed_client(jurado)
-        resp = client.post("/api/evaluations/", {
-            "project": project.pk,
-            "kind": "review",
-            "score": 75.0,
-            "pass_status": "Pass",
-        }, format="json")
-
-        # Only evaluation_received should appear; no state_change rows
-        assert not Notification.objects.filter(kind="state_change").exists()
-        assert Notification.objects.filter(
-            recipient=student, kind="evaluation_received"
-        ).exists()
 
     @pytest.mark.django_db
     def test_evaluation_received_payload_and_link_url_set(self):

@@ -2,7 +2,6 @@ import pytest
 from django.db.models import ProtectedError
 from rest_framework.test import APIClient
 
-from api.lifecycle import status_projection
 from api.models import Evaluation, Project, StateOverride, User
 
 
@@ -178,23 +177,6 @@ class TestOverrideEndpointValidation:
         assert res.status_code == 400
         assert "reason" in res.data
 
-    def test_tesis_rejected(self, db):
-        student = User.objects.create_user(email="tesis@x.com", password="x", role="Estudiante")
-        project = Project.objects.create(title="T", student=student, project_type="tesis")
-        admin = User.objects.create_user(email="admt@x.com", password="x", role="Administrador")
-        client = APIClient()
-        client.force_authenticate(user=admin)
-        res = client.post(
-            f"/api/projects/{project.id}/override_state/",
-            {"state": "approved", "reason": "reason with enough characters"},
-            format="json",
-        )
-        assert res.status_code == 400
-        assert "project_type" in res.data
-        assert StateOverride.objects.count() == 0
-        project.refresh_from_db()
-        assert project.state == "pending_review_1"
-
 
 @pytest.mark.django_db
 class TestOverrideSideEffects:
@@ -208,7 +190,7 @@ class TestOverrideSideEffects:
         client.force_authenticate(user=admin)
         return client, project, admin
 
-    def test_writes_state_status_and_override_atomically(self, db):
+    def test_writes_state_and_override_atomically(self, db):
         client, project, admin = self._setup("pending_review_1")
         res = client.post(
             f"/api/projects/{project.id}/override_state/",
@@ -218,7 +200,6 @@ class TestOverrideSideEffects:
         assert res.status_code == 200
         project.refresh_from_db()
         assert project.state == "pending_defense"
-        assert project.status == status_projection("pending_defense")
 
         overrides = list(project.state_overrides.all())
         assert len(overrides) == 1

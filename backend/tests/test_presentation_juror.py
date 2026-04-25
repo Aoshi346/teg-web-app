@@ -91,7 +91,6 @@ def project(db, student, semester):
         title="PJ Test Project",
         student=student,
         project_type="tesis",
-        status="pending",
         period=semester.period,
     )
 

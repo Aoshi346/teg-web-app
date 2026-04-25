@@ -72,7 +72,6 @@ def _make_project(student, *, partner=None, advisors=None, reviewer=None,
         partner=partner,
         reviewer=reviewer,
         project_type=project_type,
-        status="pending",
         state=state,
         period="",
     )
