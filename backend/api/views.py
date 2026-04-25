@@ -318,21 +318,26 @@ class ProjectViewSet(viewsets.ModelViewSet):
     def override_state(self, request, pk=None):
         """
         Forzar Project.state a cualquier valor, registrando un StateOverride
-        de auditoría. Sólo aplica a PTEG. Bypassea lifecycle.next_state() —
-        por diseño es el mecanismo de escape cuando el ciclo normal no puede
-        llegar al estado deseado.
+        de auditoría. Aplica a PTEG y TEG; el estado destino se valida contra
+        el conjunto de estados legales para el `project_type` del proyecto.
+        Bypassea lifecycle.next_state() — por diseño es el mecanismo de escape
+        cuando el ciclo normal no puede llegar al estado deseado.
         """
         project = self.get_object()
 
-        if project.project_type != 'proyecto':
-            raise ValidationError(
-                {'project_type': 'El override de estado sólo aplica a PTEG.'}
-            )
+        PTEG_STATES = {
+            'pending_review_1', 'pending_review_2', 'pending_defense',
+            'approved', 'failed_final',
+        }
+        TEG_STATES = {
+            'pending_articulo', 'pending_entrega', 'pending_defensa',
+            'approved', 'failed_final',
+        }
 
         new_state = request.data.get('state')
-        valid_states = [choice[0] for choice in Project.STATE_CHOICES]
-        if new_state not in valid_states:
-            raise ValidationError({'state': 'Estado inválido.'})
+        allowed = PTEG_STATES if project.project_type == 'proyecto' else TEG_STATES
+        if new_state not in allowed:
+            raise ValidationError({'state': 'Estado inválido para este tipo de proyecto.'})
         if new_state == project.state:
             raise ValidationError({'state': 'El proyecto ya está en ese estado.'})
 
