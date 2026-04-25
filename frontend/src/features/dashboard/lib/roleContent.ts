@@ -1,4 +1,5 @@
-import type { Project, ProjectState, ProjectStatus } from "@features/projects/types/project";
+import type { Project, ProjectState } from "@features/projects/types/project";
+import { STATE_CONFIG, STATE_FALLBACK } from "@features/projects/lib/stateConfig";
 import type {
   BreakdownSegment,
   ChipSegment,
@@ -24,64 +25,65 @@ export interface BuildContentInput {
   todaysDeliveries?: number;
 }
 
-const STATUS_LABEL: Record<ProjectStatus, string> = {
-  checked: "aprobados",
+const BUCKET_LABEL = {
+  approved: "aprobados",
   pending: "en revisión",
   rejected: "rechazados",
-};
+} as const;
 
-const PTEG_STATE_CONFIG: Record<
-  ProjectState,
-  { statusLabel: string; breakdown: string; hint: string }
-> = {
-  pending_review_1: {
-    statusLabel: "En revisión",
-    breakdown: "Intento 1 de 2",
-    hint: "Espera el resultado de la revisión.",
-  },
-  pending_review_2: {
-    statusLabel: "En revisión",
-    breakdown: "Intento 2 de 2",
-    hint: "Corrige los comentarios y reenvía.",
-  },
-  pending_defense: {
-    statusLabel: "Defensa pendiente",
-    breakdown: "Revisión aprobada",
-    hint: "Prepárate para la defensa oral.",
-  },
-  approved: {
-    statusLabel: "Aprobado",
-    breakdown: "Defensa aprobada",
-    hint: "Todo listo.",
-  },
-  failed_final: {
-    statusLabel: "Reprobado",
-    breakdown: "Sin más intentos",
-    hint: "No hay más intentos disponibles.",
-  },
-};
+function bucket(p: Project): "approved" | "rejected" | "pending" {
+  if (p.state === "approved") return "approved";
+  if (p.state === "failed_final") return "rejected";
+  return "pending";
+}
 
-const PTEG_STATE_SEGMENT_LABELS: Record<ProjectState, string> = {
+const STATE_SEGMENT_LABEL: Record<ProjectState, string> = {
   pending_review_1: "Rev 1",
   pending_review_2: "Rev 2",
   pending_defense: "Defensa",
+  pending_articulo: "Artículo",
+  pending_entrega: "Entrega",
+  pending_defensa: "Defensa",
   approved: "Aprobados",
   failed_final: "Reprobados",
 };
 
-function ptegStateChips(pteg: Project[]): ChipSegment[] {
-  const counts: Record<ProjectState, number> = {
+const PTEG_STATES_FOR_CHIPS: ProjectState[] = [
+  "pending_review_1",
+  "pending_review_2",
+  "pending_defense",
+  "approved",
+  "failed_final",
+];
+
+const TEG_STATES_FOR_CHIPS: ProjectState[] = [
+  "pending_articulo",
+  "pending_entrega",
+  "pending_defensa",
+  "approved",
+  "failed_final",
+];
+
+function emptyCounts(): Record<ProjectState, number> {
+  return {
     pending_review_1: 0,
     pending_review_2: 0,
     pending_defense: 0,
+    pending_articulo: 0,
+    pending_entrega: 0,
+    pending_defensa: 0,
     approved: 0,
     failed_final: 0,
   };
+}
+
+function ptegStateChips(pteg: Project[]): ChipSegment[] {
+  const counts = emptyCounts();
   for (const p of pteg) counts[p.state]++;
-  return (Object.keys(counts) as ProjectState[])
+  return PTEG_STATES_FOR_CHIPS
     .filter((s) => counts[s] > 0)
     .map((s) => ({
-      label: PTEG_STATE_SEGMENT_LABELS[s],
+      label: STATE_SEGMENT_LABEL[s],
       count: counts[s],
       href: `/dashboard/proyectos?state=${s}`,
     }));
@@ -95,11 +97,31 @@ function ptegStateSegments(pteg: Project[]): BreakdownSegment[] {
   }));
 }
 
+function tegStateChips(teg: Project[]): ChipSegment[] {
+  const counts = emptyCounts();
+  for (const p of teg) counts[p.state]++;
+  return TEG_STATES_FOR_CHIPS
+    .filter((s) => counts[s] > 0)
+    .map((s) => ({
+      label: STATE_SEGMENT_LABEL[s],
+      count: counts[s],
+      href: `/dashboard/tesis?state=${s}`,
+    }));
+}
+
+function tegStateSegments(teg: Project[]): BreakdownSegment[] {
+  return tegStateChips(teg).map((c) => ({
+    label: c.label,
+    count: c.count,
+    href: c.href ?? "",
+  }));
+}
+
 function buildBreakdown(list: Project[]): string {
-  const checked = list.filter((p) => p.status === "checked").length;
-  const pending = list.filter((p) => p.status === "pending").length;
-  const rejected = list.filter((p) => p.status === "rejected").length;
-  return `${checked} ${STATUS_LABEL.checked} · ${pending} ${STATUS_LABEL.pending} · ${rejected} ${STATUS_LABEL.rejected}`;
+  const approved = list.filter((p) => bucket(p) === "approved").length;
+  const pending = list.filter((p) => bucket(p) === "pending").length;
+  const rejected = list.filter((p) => bucket(p) === "rejected").length;
+  return `${approved} ${BUCKET_LABEL.approved} · ${pending} ${BUCKET_LABEL.pending} · ${rejected} ${BUCKET_LABEL.rejected}`;
 }
 
 function pendingDefenseCount(list: Project[]): number {
@@ -121,7 +143,7 @@ function toListRow(p: Project): ListRowData {
     title: p.title,
     subtitle: `${p.student} · ${p.submittedDate}`,
     type: p.type,
-    status: p.status,
+    state: p.state,
     href: p.type === "tesis" ? `/dashboard/tesis/${p.id}` : `/dashboard/proyectos/${p.id}`,
   };
 }
@@ -139,7 +161,7 @@ function toFeedItems(projects: Project[], now: Date, limit = 6): FeedItemData[] 
     }
     if (p.reviewDate) {
       const kind: FeedItemData["kind"] =
-        p.status === "checked" ? "reviewed" : p.status === "rejected" ? "rejected" : "commented";
+        p.state === "approved" ? "reviewed" : p.state === "failed_final" ? "rejected" : "commented";
       const text =
         kind === "reviewed"
           ? `Proyecto de ${p.student} aprobado`
@@ -159,7 +181,7 @@ function adminContent(input: BuildContentInput, now: Date): DashboardContent {
   const defensas = pendingDefenseCount(inSem);
   const action =
     pteg.filter((p) => p.state !== "approved" && p.state !== "failed_final").length +
-    teg.filter((p) => p.status === "pending").length;
+    teg.filter((p) => p.state !== "approved" && p.state !== "failed_final").length;
 
   const stats: StatTileData[] = [
     {
@@ -174,7 +196,8 @@ function adminContent(input: BuildContentInput, now: Date): DashboardContent {
       tone: "orange",
       label: "Tesis TEG",
       value: String(teg.length),
-      breakdown: buildBreakdown(teg),
+      chips: tegStateChips(teg),
+      segments: tegStateSegments(teg),
       href: "/dashboard/tesis",
     },
     {
@@ -194,7 +217,7 @@ function adminContent(input: BuildContentInput, now: Date): DashboardContent {
   ];
 
   const pending = inSem
-    .filter((p) => p.status === "pending")
+    .filter((p) => bucket(p) === "pending")
     .sort((a, b) => new Date(b.submittedDate).getTime() - new Date(a.submittedDate).getTime())
     .slice(0, 5)
     .map(toListRow);
@@ -248,22 +271,14 @@ function studentContent(input: BuildContentInput, now: Date): DashboardContent {
     };
   }
 
-  const isPTEG = mine.type === "proyecto";
-  const pteg = isPTEG ? PTEG_STATE_CONFIG[mine.state] : null;
-
-  const heroValue = pteg
-    ? pteg.statusLabel
-    : mine.status === "checked"
-      ? "Aprobado"
-      : mine.status === "rejected"
-        ? "Requiere correcciones"
-        : "En revisión";
-
-  const heroBreakdown = pteg
-    ? pteg.breakdown
-    : mine.stage1Passed
-      ? "Fase 1 aprobada"
-      : "Fase 1 en curso";
+  const cfg = STATE_CONFIG[mine.state] ?? STATE_FALLBACK;
+  const heroValue = cfg.label;
+  const heroBreakdown =
+    mine.state === "approved"
+      ? "Todo listo."
+      : mine.state === "failed_final"
+        ? "No hay más intentos disponibles."
+        : "Espera el resultado de la siguiente fase.";
 
   const entregas = mine.files?.length ?? (mine.submittedDate ? 1 : 0);
 
@@ -288,7 +303,7 @@ function studentContent(input: BuildContentInput, now: Date): DashboardContent {
   return {
     stats,
     listTitle: "Mi proyecto",
-    listItems: [{ ...toListRow(mine), hint: pteg?.hint ?? "" }],
+    listItems: [{ ...toListRow(mine), hint: heroBreakdown }],
     listEmpty: { text: "Sin proyectos registrados" },
     feedItems: toFeedItems([mine], now),
     semesterStats: [
@@ -308,15 +323,15 @@ function tutorContent(input: BuildContentInput, now: Date): DashboardContent {
   );
   const pteg = mine.filter((p) => p.type === "proyecto");
   const teg = mine.filter((p) => p.type === "tesis");
-  const attention = mine.filter((p) => p.status === "pending" || p.status === "rejected").length;
-  const approved = mine.filter((p) => p.status === "checked").length;
+  const attention = mine.filter((p) => bucket(p) === "pending" || bucket(p) === "rejected").length;
+  const approved = mine.filter((p) => bucket(p) === "approved").length;
+  const rejected = mine.filter((p) => bucket(p) === "rejected").length;
   const defensas = pendingDefenseCount(mine);
 
   const chips: ChipSegment[] = [];
   if (pteg.length > 0) chips.push({ label: "PTEG", count: pteg.length });
   if (teg.length > 0) chips.push({ label: "TEG", count: teg.length });
   if (approved > 0) chips.push({ label: "Aprobados", count: approved });
-  const rejected = mine.filter((p) => p.status === "rejected").length;
   if (rejected > 0) chips.push({ label: "Rechazados", count: rejected });
 
   const stats: StatTileData[] = [
@@ -354,7 +369,7 @@ function tutorContent(input: BuildContentInput, now: Date): DashboardContent {
     stats,
     listTitle: "Requieren atención",
     listItems: mine
-      .filter((p) => p.status === "pending" || p.status === "rejected")
+      .filter((p) => bucket(p) === "pending" || bucket(p) === "rejected")
       .sort((a, b) => new Date(b.submittedDate).getTime() - new Date(a.submittedDate).getTime())
       .slice(0, 5)
       .map(toListRow),
@@ -370,21 +385,15 @@ function tutorContent(input: BuildContentInput, now: Date): DashboardContent {
 
 function juradoContent(input: BuildContentInput, now: Date): DashboardContent {
   const inSem = input.projects.filter((p) => p.period === input.semester);
-  const pending = inSem.filter((p) => p.status === "pending");
-  const evaluated = inSem.filter((p) => p.status !== "pending");
+  const pending = inSem.filter((p) => bucket(p) === "pending");
+  const evaluated = inSem.filter((p) => bucket(p) !== "pending");
   const defensas = pendingDefenseCount(inSem);
 
-  const counts: Record<ProjectState, number> = {
-    pending_review_1: 0,
-    pending_review_2: 0,
-    pending_defense: 0,
-    approved: 0,
-    failed_final: 0,
-  };
+  const counts = emptyCounts();
   for (const p of inSem.filter((x) => x.type === "proyecto")) counts[p.state]++;
-  const chips: ChipSegment[] = (Object.keys(counts) as ProjectState[])
+  const chips: ChipSegment[] = PTEG_STATES_FOR_CHIPS
     .filter((s) => counts[s] > 0)
-    .map((s) => ({ label: PTEG_STATE_SEGMENT_LABELS[s], count: counts[s] }));
+    .map((s) => ({ label: STATE_SEGMENT_LABEL[s], count: counts[s] }));
 
   const evaluatedPct = inSem.length === 0 ? 0 : Math.round((evaluated.length / inSem.length) * 100);
 
