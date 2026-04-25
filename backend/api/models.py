@@ -116,6 +116,9 @@ class Project(models.Model):
         ('pending_review_1', 'Pendiente 1ra revisión'),
         ('pending_review_2', 'Pendiente 2da revisión'),
         ('pending_defense', 'Pendiente defensa oral'),
+        ('pending_articulo', 'Pendiente Artículo'),
+        ('pending_entrega', 'Pendiente Entrega Ejemplar'),
+        ('pending_defensa', 'Pendiente Defensa Oral'),
         ('approved', 'Aprobado'),
         ('failed_final', 'Reprobado (sin más intentos)'),
     )
