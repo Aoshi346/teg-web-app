@@ -43,7 +43,6 @@ class TestReviewTransitions:
         assert resp.status_code == 201, resp.content
         pteg.refresh_from_db()
         assert pteg.state == "pending_defense"
-        assert pteg.status == "pending"
 
     @pytest.mark.django_db
     def test_review_fail_on_pending_review_1_moves_to_pending_review_2(self, pteg, jurado_user):
@@ -53,7 +52,6 @@ class TestReviewTransitions:
         assert resp.status_code == 201, resp.content
         pteg.refresh_from_db()
         assert pteg.state == "pending_review_2"
-        assert pteg.status == "pending"
 
     @pytest.mark.django_db
     def test_review_pass_on_pending_review_2_moves_to_pending_defense(self, jurado_user, student_user, project_factory):
@@ -96,7 +94,6 @@ class TestDefenseTransitions:
         assert resp.status_code == 201, resp.content
         pteg.refresh_from_db()
         assert pteg.state == "pending_defense"
-        assert pteg.status == "pending"
 
     @pytest.mark.django_db
     def test_admin_can_record_defense(self, admin_user, jurado_user, student_user, project_factory):

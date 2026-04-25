@@ -108,7 +108,6 @@ def project_factory(db):
         defaults = {
             "title": "Test Project",
             "project_type": "proyecto",
-            "status": "pending",
             "period": "",
         }
         defaults.update(kwargs)

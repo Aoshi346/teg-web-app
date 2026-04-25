@@ -107,11 +107,6 @@ class Project(models.Model):
         ('proyecto', 'Proyecto (PTEG)'),
         ('tesis', 'Tesis (TEG)'),
     )
-    STATUS_CHOICES = (
-        ('checked', 'Aprobado'),
-        ('pending', 'Pendiente'),
-        ('rejected', 'Rechazado'),
-    )
     STATE_CHOICES = (
         ('pending_review_1', 'Pendiente 1ra revisión'),
         ('pending_review_2', 'Pendiente 2da revisión'),
@@ -131,8 +126,6 @@ class Project(models.Model):
     submitted_date = models.DateField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     review_date = models.DateField(null=True, blank=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
-    stage1_passed = models.BooleanField(default=False, help_text="For Tesis only")
     period = models.CharField(max_length=20, blank=True)
     project_type = models.CharField(max_length=10, choices=TYPE_CHOICES, default='proyecto')
 
