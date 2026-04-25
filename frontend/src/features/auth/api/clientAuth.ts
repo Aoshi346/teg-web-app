@@ -222,6 +222,38 @@ export async function deleteUser(id: number): Promise<void> {
   await api.delete<void>(`/users/${id}/`);
 }
 
+export async function changePassword({
+  currentPassword,
+  newPassword,
+}: {
+  currentPassword: string;
+  newPassword: string;
+}): Promise<void> {
+  await api.post<void>("/auth/change_password/", {
+    current_password: currentPassword,
+    new_password: newPassword,
+  });
+}
+
+// ─── Notification Preferences ───
+
+export type UserPreferences = {
+  notify_evaluation_received: boolean;
+  notify_state_change: boolean;
+  notify_assignment: boolean;
+  notify_comment_added: boolean;
+  notify_semester_changes: boolean;
+  email_enabled: boolean;
+};
+
+export async function getPreferences(): Promise<UserPreferences> {
+  return api.get<UserPreferences>("/auth/preferences/");
+}
+
+export async function updatePreferences(patch: Partial<UserPreferences>): Promise<UserPreferences> {
+  return api.patch<UserPreferences>("/auth/preferences/", patch);
+}
+
 export async function getStudents(): Promise<User[]> {
   const cached = getCachedUsers("students");
   if (cached) return cached;

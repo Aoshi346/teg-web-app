@@ -430,3 +430,21 @@ class StateOverride(models.Model):
     def clean(self):
         if self.from_state == self.to_state:
             raise ValidationError("from_state y to_state no pueden ser iguales.")
+
+
+class UserPreference(models.Model):
+    """Per-user notification preferences. Persistence only — no delivery wired yet."""
+
+    user = models.OneToOneField(
+        User, on_delete=models.CASCADE, related_name='preferences',
+    )
+    notify_evaluation_received = models.BooleanField(default=True)
+    notify_state_change = models.BooleanField(default=True)
+    notify_assignment = models.BooleanField(default=True)
+    notify_comment_added = models.BooleanField(default=True)
+    notify_semester_changes = models.BooleanField(default=True)
+    email_enabled = models.BooleanField(default=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Preferences for {self.user.email}"

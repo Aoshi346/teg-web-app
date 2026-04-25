@@ -1,4 +1,4 @@
-from django.contrib.auth import login, logout
+from django.contrib.auth import login, logout, update_session_auth_hash
 from django.db import IntegrityError, transaction
 from django.db.models import Q
 from django.middleware.csrf import get_token
@@ -21,12 +21,15 @@ from .models import (
     SessionLog,
     StateOverride,
     User,
+    UserPreference,
 )
 from .serializers import (
     AttachedFileSerializer,
     CommentSerializer,
     EvaluationSerializer,
     LoginSerializer,
+    PasswordChangeSerializer,
+    PreferenceSerializer,
     PresentationDaySerializer,
     PresentationSerializer,
     ProjectSerializer,
@@ -105,6 +108,32 @@ class AuthViewSet(viewsets.GenericViewSet):
             return Response(serializer.data)
 
         return Response(UserSerializer(user).data)
+
+    @action(
+        detail=False, methods=['post'], url_path='change_password',
+        permission_classes=[permissions.IsAuthenticated],
+    )
+    def change_password(self, request):
+        serializer = PasswordChangeSerializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        user = request.user
+        user.set_password(serializer.validated_data['new_password'])
+        user.save(update_fields=['password'])
+        update_session_auth_hash(request, user)
+        return Response({"detail": "Contraseña actualizada."}, status=status.HTTP_200_OK)
+
+    @action(
+        detail=False, methods=['get', 'patch'], url_path='preferences',
+        permission_classes=[permissions.IsAuthenticated],
+    )
+    def preferences(self, request):
+        prefs, _ = UserPreference.objects.get_or_create(user=request.user)
+        if request.method == 'GET':
+            return Response(PreferenceSerializer(prefs).data)
+        serializer = PreferenceSerializer(prefs, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
 
     def _get_client_ip(self, request):
         x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')

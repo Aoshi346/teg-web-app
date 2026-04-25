@@ -38,3 +38,16 @@ export const semesterSchema = z.object({
 export type ProfileInput = z.infer<typeof profileSchema>;
 export type UserInput = z.infer<typeof userCreateSchema>;
 export type SemesterInput = z.infer<typeof semesterSchema>;
+
+export const passwordChangeSchema = z
+  .object({
+    currentPassword: z.string().min(1, "Ingresa tu contraseña actual"),
+    newPassword: z.string().min(8, "Mínimo 8 caracteres"),
+    confirmPassword: z.string(),
+  })
+  .refine((d) => d.newPassword === d.confirmPassword, {
+    path: ["confirmPassword"],
+    message: "Las contraseñas no coinciden",
+  });
+
+export type PasswordChangeInput = z.infer<typeof passwordChangeSchema>;

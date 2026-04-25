@@ -15,6 +15,7 @@ from .models import (
     Semester,
     SessionLog,
     StateOverride,
+    UserPreference,
 )
 
 User = get_user_model()
@@ -65,6 +66,24 @@ class UserSerializer(serializers.ModelSerializer):
                 internal.setdefault('first_name', parts[0])
                 internal.setdefault('last_name', parts[1] if len(parts) > 1 else "")
         return super().to_internal_value(internal)
+
+
+class PasswordChangeSerializer(serializers.Serializer):
+    current_password = serializers.CharField(write_only=True, required=True)
+    new_password = serializers.CharField(write_only=True, required=True, min_length=8)
+
+    def validate_current_password(self, value):
+        user = self.context['request'].user
+        if not user.check_password(value):
+            raise serializers.ValidationError("Contraseña actual incorrecta.")
+        return value
+
+    def validate(self, attrs):
+        if attrs.get('new_password') == attrs.get('current_password'):
+            raise serializers.ValidationError(
+                {"new_password": "La nueva contraseña debe ser distinta a la actual."}
+            )
+        return attrs
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -451,3 +470,16 @@ class PresentationDaySerializer(serializers.ModelSerializer):
             'presentations',
         ]
         read_only_fields = ['created_at', 'created_by']
+
+
+class PreferenceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserPreference
+        fields = [
+            'notify_evaluation_received',
+            'notify_state_change',
+            'notify_assignment',
+            'notify_comment_added',
+            'notify_semester_changes',
+            'email_enabled',
+        ]
