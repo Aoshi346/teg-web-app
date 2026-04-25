@@ -10,7 +10,6 @@ const proj = (id: number, state: ProjectState, type: Project["type"] = "proyecto
   title: `P${id}`,
   student: "S",
   submittedDate: "2026-01-01",
-  status: "pending",
   state,
   period: "2026-01",
   type,

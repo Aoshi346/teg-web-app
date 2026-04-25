@@ -7,12 +7,10 @@ const baseProject = (over: Partial<Project>): Project => ({
   title: "P",
   student: "S",
   submittedDate: "2026-01-01",
-  status: "pending",
   state: "pending_review_1",
   score: 0,
   diagramacionScore: 0,
   contenidoScore: 0,
-  stage1Passed: false,
   period: "2026-01",
   type: "proyecto",
   files: [],
@@ -23,10 +21,10 @@ const baseProject = (over: Partial<Project>): Project => ({
 describe("Sub-D role tiles — Administrador", () => {
   it("emits 4 tiles: hero PTEG with chips + TEG + defensas + tu acción", () => {
     const projects = [
-      baseProject({ id: 1, type: "proyecto", state: "pending_review_1", status: "pending" }),
-      baseProject({ id: 2, type: "proyecto", state: "pending_defense", status: "pending" }),
-      baseProject({ id: 3, type: "proyecto", state: "approved", status: "checked" }),
-      baseProject({ id: 4, type: "tesis", status: "checked" }),
+      baseProject({ id: 1, type: "proyecto", state: "pending_review_1" }),
+      baseProject({ id: 2, type: "proyecto", state: "pending_defense" }),
+      baseProject({ id: 3, type: "proyecto", state: "approved" }),
+      baseProject({ id: 4, type: "tesis", state: "approved" }),
     ];
     const c = buildDashboardContent({
       role: "Administrador",
@@ -84,9 +82,9 @@ describe("Sub-D role tiles — Administrador", () => {
 describe("Sub-D role tiles — Tutor", () => {
   it("emits 4 tiles with hero chips + atención (urgent) + aprobados + defensas", () => {
     const projects = [
-      baseProject({ id: 1, type: "proyecto", advisors: [10], status: "pending" }),
-      baseProject({ id: 2, type: "tesis", advisors: [10], status: "checked" }),
-      baseProject({ id: 3, type: "proyecto", advisors: [10], status: "rejected" }),
+      baseProject({ id: 1, type: "proyecto", advisors: [10], state: "pending_review_1" }),
+      baseProject({ id: 2, type: "tesis", advisors: [10], state: "approved" }),
+      baseProject({ id: 3, type: "proyecto", advisors: [10], state: "failed_final" }),
     ];
     const c = buildDashboardContent({
       role: "Tutor",
@@ -106,8 +104,8 @@ describe("Sub-D role tiles — Tutor", () => {
 
   it("only counts advisor's own projects", () => {
     const projects = [
-      baseProject({ id: 1, type: "proyecto", advisors: [10], status: "pending" }),
-      baseProject({ id: 2, type: "proyecto", advisors: [99], status: "pending" }),
+      baseProject({ id: 1, type: "proyecto", advisors: [10], state: "pending_review_1" }),
+      baseProject({ id: 2, type: "proyecto", advisors: [99], state: "pending_review_1" }),
     ];
     const c = buildDashboardContent({
       role: "Tutor",
@@ -122,10 +120,10 @@ describe("Sub-D role tiles — Tutor", () => {
 describe("Sub-D role tiles — Jurado", () => {
   it("emits hero asignados + por evaluar (urgent) + evaluadas + defensas", () => {
     const projects = [
-      baseProject({ id: 1, status: "pending", state: "pending_review_1" }),
-      baseProject({ id: 2, status: "pending", state: "pending_review_2" }),
-      baseProject({ id: 3, status: "pending", state: "pending_defense" }),
-      baseProject({ id: 4, status: "checked", state: "approved" }),
+      baseProject({ id: 1, state: "pending_review_1" }),
+      baseProject({ id: 2, state: "pending_review_2" }),
+      baseProject({ id: 3, state: "pending_defense" }),
+      baseProject({ id: 4, state: "approved" }),
     ];
     const c = buildDashboardContent({
       role: "Jurado",
@@ -162,7 +160,6 @@ describe("Sub-D role tiles — Estudiante", () => {
         id: 1,
         type: "proyecto",
         state: "pending_review_1",
-        status: "pending",
         student: "Yo",
       }),
     ];
@@ -193,13 +190,12 @@ describe("Sub-D role tiles — Estudiante", () => {
 });
 
 describe("Sub-D — PTEG student hint from state", () => {
-  const basePTEG = (state: Project["state"], status: Project["status"] = "pending") =>
+  const basePTEG = (state: Project["state"]) =>
     baseProject({
       id: 42,
       title: "Mi proyecto",
       student: "Alice",
       type: "proyecto",
-      status,
       period: "2026-01",
       submittedDate: "2026-01-15",
       state,
@@ -240,7 +236,7 @@ describe("Sub-D — PTEG student hint from state", () => {
       role: "Estudiante",
       user: { role: "Estudiante", id: 1, semester: "9no" },
       semester: "2026-01",
-      projects: [basePTEG("approved", "checked")],
+      projects: [basePTEG("approved")],
     });
     expect(c.listItems[0].hint).toMatch(/aprobad|listo/i);
   });
@@ -250,7 +246,7 @@ describe("Sub-D — PTEG student hint from state", () => {
       role: "Estudiante",
       user: { role: "Estudiante", id: 1, semester: "9no" },
       semester: "2026-01",
-      projects: [basePTEG("failed_final", "rejected")],
+      projects: [basePTEG("failed_final")],
     });
     expect(c.listItems[0].hint).toMatch(/sin más|no hay más|reprobado/i);
   });

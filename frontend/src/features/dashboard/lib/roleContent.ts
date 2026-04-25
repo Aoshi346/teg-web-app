@@ -277,8 +277,14 @@ function studentContent(input: BuildContentInput, now: Date): DashboardContent {
     mine.state === "approved"
       ? "Todo listo."
       : mine.state === "failed_final"
-        ? "No hay más intentos disponibles."
-        : "Espera el resultado de la siguiente fase.";
+        ? "Sin más intentos disponibles."
+        : mine.state === "pending_review_2"
+          ? "Intento 2 — corrige y vuelve a entregar."
+          : mine.state === "pending_defense"
+            ? "Prepárate para la defensa oral."
+            : mine.state === "pending_defensa"
+              ? "Prepárate para la defensa de tesis."
+              : "Espera el resultado de la siguiente fase.";
 
   const entregas = mine.files?.length ?? (mine.submittedDate ? 1 : 0);
 

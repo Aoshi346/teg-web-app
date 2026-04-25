@@ -8,7 +8,7 @@ describe("ListRow (restyled)", () => {
       <ListRow
         title="Sistema de gestión hospitalaria"
         subtitle="María Pérez · 22 abr · PTEG"
-        status="pending"
+        state="pending_review_1"
         href="/dashboard/proyectos/1"
       />,
     );
@@ -20,7 +20,7 @@ describe("ListRow (restyled)", () => {
 
   it("renders ring indicator for status", () => {
     const { container } = render(
-      <ListRow title="X" subtitle="y" status="rejected" href="/x" />,
+      <ListRow title="X" subtitle="y" state="failed_final" href="/x" />,
     );
     expect(container.querySelector("[data-slot='list-row-indicator']")).not.toBeNull();
   });
