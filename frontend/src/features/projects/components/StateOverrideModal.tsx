@@ -1,14 +1,18 @@
 "use client";
 
 import React, { useState } from "react";
-import type { ProjectState } from "@features/projects/types/project";
-import { PTEG_STATE_CONFIG } from "@features/projects/lib/ptegStateConfig";
-
-const ALL_STATES = Object.keys(PTEG_STATE_CONFIG) as ProjectState[];
+import {
+  PTEG_STATES,
+  TEG_STATES,
+  type ProjectState,
+  type ProjectType,
+} from "@features/projects/types/project";
+import { STATE_CONFIG } from "@features/projects/lib/stateConfig";
 
 interface Props {
   open: boolean;
   currentState: ProjectState;
+  projectType: ProjectType;
   onClose: () => void;
   onSubmit: (payload: { state: ProjectState; reason: string }) => Promise<void>;
 }
@@ -16,6 +20,7 @@ interface Props {
 export default function StateOverrideModal({
   open,
   currentState,
+  projectType,
   onClose,
   onSubmit,
 }: Props) {
@@ -28,7 +33,7 @@ export default function StateOverrideModal({
 
   const trimmed = reason.trim();
   const canSubmit = target !== "" && trimmed.length >= 10 && !submitting;
-  const targetLabel = target ? PTEG_STATE_CONFIG[target].label : "";
+  const targetLabel = target ? STATE_CONFIG[target].label : "";
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -49,7 +54,8 @@ export default function StateOverrideModal({
     }
   }
 
-  const availableStates = ALL_STATES.filter((s) => s !== currentState);
+  const allowedStates = projectType === "tesis" ? TEG_STATES : PTEG_STATES;
+  const availableStates = allowedStates.filter((s) => s !== currentState);
 
   return (
     <div
@@ -79,7 +85,7 @@ export default function StateOverrideModal({
               <option value="">— Selecciona —</option>
               {availableStates.map((s) => (
                 <option key={s} value={s}>
-                  {PTEG_STATE_CONFIG[s].label}
+                  {STATE_CONFIG[s].label}
                 </option>
               ))}
             </select>

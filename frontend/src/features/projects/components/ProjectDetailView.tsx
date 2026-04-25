@@ -22,7 +22,7 @@ import CommentsSection from "./CommentsSection";
 import Combobox from "@/app/dashboard/agregar/components/Combobox";
 import type { Project, ProjectState } from "@features/projects/types/project";
 import type { ApiEvaluation } from "@features/projects/api/projectService";
-import { PTEG_STATE_CONFIG, PTEG_STATE_FALLBACK } from "@features/projects/lib/ptegStateConfig";
+import { STATE_CONFIG, STATE_FALLBACK } from "@features/projects/lib/stateConfig";
 import StateOverrideModal from "@features/projects/components/StateOverrideModal";
 import StateOverrideHistory from "@features/projects/components/StateOverrideHistory";
 import { overrideProjectState } from "@features/projects/api/projectService";
@@ -154,7 +154,7 @@ export default function ProjectDetailView({
   const canOverride = userRole === "Administrador" && variant === "proyecto";
 
   const currentStateConfig: { label: string; pillClass: string } | null = isProyecto
-    ? (PTEG_STATE_CONFIG[localProject.state] ?? PTEG_STATE_FALLBACK)
+    ? (STATE_CONFIG[localProject.state] ?? STATE_FALLBACK)
     : null;
 
   return (
@@ -458,6 +458,7 @@ export default function ProjectDetailView({
         <StateOverrideModal
           open={overrideOpen}
           currentState={localProject.state}
+          projectType={localProject.type ?? "proyecto"}
           onClose={() => setOverrideOpen(false)}
           onSubmit={async ({ state, reason }) => {
             const updated = await overrideProjectState(localProject.id, { state, reason });

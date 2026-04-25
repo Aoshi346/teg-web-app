@@ -7,7 +7,7 @@ import {
   applyStateFilter,
   readStateFromSearchParams,
 } from "@features/projects/lib/applyStateFilter";
-import { PTEG_STATE_CONFIG } from "@features/projects/lib/ptegStateConfig";
+import { STATE_CONFIG } from "@features/projects/lib/stateConfig";
 import DashboardHeader from "@widgets/header/DashboardHeader";
 import SemesterSelector from "@features/semesters/components/SemesterSelector";
 import { Project } from "@features/projects/types/project";
@@ -255,7 +255,7 @@ export default function ProyectosPage() {
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-sm text-gray-500">Filtrado por:</span>
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs">
-                  {PTEG_STATE_CONFIG[activeStateFilter].label}
+                  {STATE_CONFIG[activeStateFilter].label}
                   <button
                     type="button"
                     onClick={() => router.push("/dashboard/proyectos")}

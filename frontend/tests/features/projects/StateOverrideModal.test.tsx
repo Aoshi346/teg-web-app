@@ -5,6 +5,7 @@ import StateOverrideModal from "@features/projects/components/StateOverrideModal
 const baseProps = {
   open: true,
   currentState: "pending_review_1" as const,
+  projectType: "proyecto" as const,
   onClose: () => {},
   onSubmit: vi.fn(async () => {}),
 };

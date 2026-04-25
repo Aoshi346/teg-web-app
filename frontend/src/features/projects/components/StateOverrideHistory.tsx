@@ -2,7 +2,7 @@
 
 import React from "react";
 import type { StateOverride } from "@features/projects/types/project";
-import { PTEG_STATE_CONFIG } from "@features/projects/lib/ptegStateConfig";
+import { STATE_CONFIG } from "@features/projects/lib/stateConfig";
 
 interface Props {
   overrides?: StateOverride[];
@@ -32,8 +32,8 @@ export default function StateOverrideHistory({ overrides }: Props) {
       ) : (
         <ul className="flex flex-col gap-3">
           {overrides.map((o) => {
-            const from = PTEG_STATE_CONFIG[o.fromState];
-            const to = PTEG_STATE_CONFIG[o.toState];
+            const from = STATE_CONFIG[o.fromState];
+            const to = STATE_CONFIG[o.toState];
             return (
               <li
                 key={o.id}
