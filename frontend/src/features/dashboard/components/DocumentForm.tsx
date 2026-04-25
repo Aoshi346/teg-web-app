@@ -267,7 +267,6 @@ export default function DocumentForm({
           period: payload.period || "",
           partner: payload.partner,
           project_type: documentType,
-          status: "pending",
           ...(userRole === "Administrador" && selectedStudentId
             ? { student: selectedStudentId }
             : {}),
@@ -288,7 +287,6 @@ export default function DocumentForm({
           period: updatedDoc.period,
           partner: payload.partner,
           project_type: documentType,
-          status: updatedDoc.status,
         });
         // If Admin selected a different student, reassign
         if (userRole === "Administrador" && selectedStudentId) {

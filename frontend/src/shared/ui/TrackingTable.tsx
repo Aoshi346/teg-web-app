@@ -1,5 +1,7 @@
 import React from "react";
 import { Project } from "@features/projects/types/project";
+import { stateBadge } from "@features/projects/lib/stateBadge";
+import { STATE_CONFIG, STATE_FALLBACK } from "@features/projects/lib/stateConfig";
 import { FileText, BookOpen, Calendar, CheckCircle, ChevronLeft, ChevronRight, User, Eye, PencilLine } from "lucide-react";
 
 interface TrackingTableProps {
@@ -50,19 +52,10 @@ const Avatar: React.FC<{ name: string }> = ({ name }) => {
     );
 };
 
-const statusStyles: Record<Project["status"], { label: string; classes: string }> = {
-    pending: {
-        label: "Pendiente",
-        classes: "bg-amber-50 text-amber-700 ring-1 ring-amber-600/20",
-    },
-    checked: {
-        label: "Revisado",
-        classes: "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/20",
-    },
-    rejected: {
-        label: "Rechazado",
-        classes: "bg-red-50 text-red-700 ring-1 ring-red-600/20",
-    },
+const TONE_PILL: Record<"amber" | "green" | "red", string> = {
+    amber: "bg-amber-50 text-amber-700 ring-1 ring-amber-600/20",
+    green: "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/20",
+    red: "bg-red-50 text-red-700 ring-1 ring-red-600/20",
 };
 
 const TrackingTable: React.FC<TrackingTableProps> = ({ items, onReview, onView, pagination, userRole }) => {
@@ -98,7 +91,7 @@ const TrackingTable: React.FC<TrackingTableProps> = ({ items, onReview, onView, 
                     </thead>
                     <tbody className="divide-y divide-gray-100 bg-white">
                         {items.map((item) => {
-                            const isTesis = "stage1Passed" in item;
+                            const isTesis = item.type === "tesis";
                             const typeLabel = isTesis ? "TEG" : "PTEG";
                             const typeColor = isTesis
                                 ? "bg-purple-50 text-purple-700 ring-1 ring-purple-600/20"
@@ -150,19 +143,23 @@ const TrackingTable: React.FC<TrackingTableProps> = ({ items, onReview, onView, 
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        {item.status === "pending" ? (
-                                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${statusStyles.pending.classes}`}>
-                                                <span className="relative flex h-2 w-2">
-                                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                                        {(() => {
+                                            const { tone, label } = stateBadge(item.state);
+                                            const isPending = item.state !== "approved" && item.state !== "failed_final";
+                                            return isPending ? (
+                                                <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${TONE_PILL[tone]}`}>
+                                                    <span className="relative flex h-2 w-2">
+                                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                                                    </span>
+                                                    {STATE_CONFIG[item.state]?.label ?? STATE_FALLBACK.label}
                                                 </span>
-                                                {statusStyles.pending.label}
-                                            </span>
-                                        ) : (
-                                            <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${statusStyles[item.status].classes}`}>
-                                                {statusStyles[item.status].label}
-                                            </span>
-                                        )}
+                                            ) : (
+                                                <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${TONE_PILL[tone]}`}>
+                                                    {label}
+                                                </span>
+                                            );
+                                        })()}
                                     </td>
                                     <td className="px-6 py-4 text-right pr-8">
                                         <div className="flex items-center justify-end gap-2">

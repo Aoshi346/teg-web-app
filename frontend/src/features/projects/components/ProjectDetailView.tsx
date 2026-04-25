@@ -20,12 +20,13 @@ import {
 } from "lucide-react";
 import CommentsSection from "./CommentsSection";
 import Combobox from "@/app/dashboard/agregar/components/Combobox";
-import type { Project } from "@features/projects/types/project";
+import type { Project, ProjectState } from "@features/projects/types/project";
 import type { ApiEvaluation } from "@features/projects/api/projectService";
 import { PTEG_STATE_CONFIG, PTEG_STATE_FALLBACK } from "@features/projects/lib/ptegStateConfig";
 import StateOverrideModal from "@features/projects/components/StateOverrideModal";
 import StateOverrideHistory from "@features/projects/components/StateOverrideHistory";
 import { overrideProjectState } from "@features/projects/api/projectService";
+import { stateBadge, type BadgeTone } from "@features/projects/lib/stateBadge";
 
 /* ─── Types ─── */
 interface ProjectDetailViewProps {
@@ -62,18 +63,25 @@ interface ProjectDetailViewProps {
 }
 
 /* ─── Helpers ─── */
-const STATUS_MAP = {
-  checked: { bg: "bg-emerald-500", label: "Aprobado", Icon: CheckCircle },
-  pending: { bg: "bg-amber-500", label: "Pendiente", Icon: Clock },
-  rejected: { bg: "bg-rose-500", label: "Rechazado", Icon: XCircle },
-} as const;
+const TONE_BG: Record<BadgeTone, string> = {
+  amber: "bg-amber-500",
+  green: "bg-emerald-500",
+  red: "bg-rose-500",
+};
 
-function StatusBadge({ status }: { status: string }) {
-  const cfg = STATUS_MAP[status as keyof typeof STATUS_MAP] || STATUS_MAP.pending;
+const TONE_ICON: Record<BadgeTone, React.ElementType> = {
+  amber: Clock,
+  green: CheckCircle,
+  red: XCircle,
+};
+
+function StateBadge({ state }: { state: ProjectState }) {
+  const { tone, label } = stateBadge(state);
+  const Icon = TONE_ICON[tone];
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold text-white ${cfg.bg}`}>
-      <cfg.Icon className="w-3 h-3" />
-      {cfg.label}
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold text-white ${TONE_BG[tone]}`}>
+      <Icon className="w-3 h-3" />
+      {label}
     </span>
   );
 }
@@ -181,8 +189,8 @@ export default function ProjectDetailView({
                   {project.title}
                 </h1>
                 <div className="flex flex-wrap items-center gap-2">
-                  <StatusBadge status={project.status} />
-                  {currentStateConfig && (
+                  <StateBadge state={project.state} />
+                  {currentStateConfig && isProyecto && (
                     <span
                       className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${currentStateConfig.pillClass}`}
                     >
@@ -198,12 +206,17 @@ export default function ProjectDetailView({
                       Forzar estado
                     </button>
                   )}
-                  {!isProyecto && project.stage1Passed !== undefined && (
-                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full flex items-center gap-1 ${project.stage1Passed ? "text-emerald-700 bg-emerald-50 border border-emerald-200" : "text-amber-700 bg-amber-50 border border-amber-200"}`}>
-                      {project.stage1Passed ? <CheckCircle className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
-                      Fase 1: {project.stage1Passed ? "Aprobada" : "Pendiente"}
-                    </span>
-                  )}
+                  {!isProyecto && (() => {
+                    const phase1Cleared = project.state === "pending_defensa" || project.state === "approved";
+                    const phase1InProgress = project.state === "pending_articulo" || project.state === "pending_entrega";
+                    if (!phase1Cleared && !phase1InProgress) return null;
+                    return (
+                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full flex items-center gap-1 ${phase1Cleared ? "text-emerald-700 bg-emerald-50 border border-emerald-200" : "text-amber-700 bg-amber-50 border border-amber-200"}`}>
+                        {phase1Cleared ? <CheckCircle className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
+                        Fase 1: {phase1Cleared ? "Aprobada" : "Pendiente"}
+                      </span>
+                    );
+                  })()}
                 </div>
               </div>
             </div>

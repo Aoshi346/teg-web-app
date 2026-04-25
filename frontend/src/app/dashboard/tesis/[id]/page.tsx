@@ -138,7 +138,7 @@ export default function TesisDetailsPage() {
             juradoError={juradoError}
             actions={
               <>
-                {project.status === "pending" && (
+                {project.state !== "approved" && project.state !== "failed_final" && (
                   <button
                     onClick={() => router.push(`/dashboard/tesis/${project.id}/evaluar`)}
                     className="w-full sm:w-auto px-6 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-lg font-semibold text-sm hover:shadow-lg transition-all"
@@ -146,7 +146,7 @@ export default function TesisDetailsPage() {
                     Evaluar Tesis
                   </button>
                 )}
-                {project.stage1Passed && (
+                {(project.state === "pending_defensa" || project.state === "approved") && (
                   <button
                     onClick={() => router.push(`/dashboard/tesis/${project.id}/evaluar/fase2`)}
                     className="w-full sm:w-auto px-6 py-2.5 bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-lg font-semibold text-sm hover:shadow-lg transition-all flex items-center gap-1.5"

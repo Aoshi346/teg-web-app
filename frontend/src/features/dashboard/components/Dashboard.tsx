@@ -212,7 +212,8 @@ const Dashboard: React.FC = () => {
                       title={row.title}
                       subtitle={row.subtitle}
                       type={row.type}
-                      status={row.status as "checked" | "pending" | "rejected" | "upcoming" | undefined}
+                      state={row.state}
+                      badge={row.badge}
                       hint={row.hint}
                       href={row.href}
                       onHoverHref={row.href ? () => router.prefetch(row.href!) : undefined}

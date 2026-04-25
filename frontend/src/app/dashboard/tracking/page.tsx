@@ -91,7 +91,7 @@ export default function TrackingPage({
   const filteredItems = useMemo(() => {
     const base = isStudent
       ? semesterProjects
-      : semesterProjects.filter((p) => p.status === "pending");
+      : semesterProjects.filter((p) => p.state !== "approved" && p.state !== "failed_final");
 
     if (filter === "all") return base;
     return base.filter((item) =>

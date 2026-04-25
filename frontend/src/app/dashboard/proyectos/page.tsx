@@ -29,7 +29,7 @@ export default function ProyectosPage() {
   const isStudent = userRole === "Estudiante";
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState<
-    "all" | "checked" | "pending" | "rejected"
+    "all" | "approved" | "pending" | "rejected"
   >("all");
 
   // Load proyectos including user-added ones
@@ -96,24 +96,27 @@ export default function ProyectosPage() {
         (project.advisorNames || []).some(n => n.toLowerCase().includes(searchQuery.toLowerCase()));
 
       const matchesFilter =
-        filterStatus === "all" || project.status === filterStatus;
+        filterStatus === "all" ||
+        (filterStatus === "approved" && project.state === "approved") ||
+        (filterStatus === "pending" && project.state !== "approved" && project.state !== "failed_final") ||
+        (filterStatus === "rejected" && project.state === "failed_final");
       return matchesSearch && matchesFilter;
     });
     return applyStateFilter(afterStatusSearch, activeStateFilter);
   }, [semesterProjects, searchQuery, filterStatus, activeStateFilter]);
 
   const checkedProjects = useMemo(
-    () => filteredProjects.filter((p) => p.status === "checked"),
+    () => filteredProjects.filter((p) => p.state === "approved"),
     [filteredProjects],
   );
 
   const pendingProjects = useMemo(
-    () => filteredProjects.filter((p) => p.status === "pending"),
+    () => filteredProjects.filter((p) => p.state !== "approved" && p.state !== "failed_final"),
     [filteredProjects],
   );
 
   const rejectedProjects = useMemo(
-    () => filteredProjects.filter((p) => p.status === "rejected"),
+    () => filteredProjects.filter((p) => p.state === "failed_final"),
     [filteredProjects],
   );
 
@@ -210,14 +213,14 @@ export default function ProyectosPage() {
                   <div className="w-px h-6 bg-gray-200 mx-1" />
 
                   <button
-                    onClick={() => setFilterStatus("checked")}
+                    onClick={() => setFilterStatus("approved")}
                     className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 flex items-center gap-2 ${
-                      filterStatus === "checked"
+                      filterStatus === "approved"
                         ? "bg-[#ecfdf5] text-[#059669] shadow-sm ring-1 ring-[#10b981]/20"
                         : "text-gray-500 hover:text-[#059669] hover:bg-[#ecfdf5]/50"
                     }`}
                   >
-                    <div className={`w-2 h-2 rounded-full ${filterStatus === "checked" ? "bg-[#059669]" : "bg-gray-300"}`} />
+                    <div className={`w-2 h-2 rounded-full ${filterStatus === "approved" ? "bg-[#059669]" : "bg-gray-300"}`} />
                     Revisados
                   </button>
 
@@ -271,7 +274,7 @@ export default function ProyectosPage() {
               </div>
             )}
 
-            {isDataLoaded && (filterStatus === "all" || filterStatus === "checked") &&
+            {isDataLoaded && (filterStatus === "all" || filterStatus === "approved") &&
               checkedProjects.length > 0 && (
                 <div className="section-container mb-12">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">

@@ -151,8 +151,8 @@ export default function ProyectoDetailsPage() {
   }
 
   const failedAttempts = project.failedAttempts || 0;
-  const canRetry = project.status === "rejected" && failedAttempts < 2;
-  const isFinalRejection = project.status === "rejected" && failedAttempts >= 2;
+  const canRetry = project.state === "failed_final" && failedAttempts < 2;
+  const isFinalRejection = project.state === "failed_final" && failedAttempts >= 2;
 
   return (
     <>
@@ -187,7 +187,7 @@ export default function ProyectoDetailsPage() {
             juradoError={juradoError}
             actions={
               <>
-                {project.status === "pending" && (
+                {project.state !== "approved" && project.state !== "failed_final" && (
                   <button
                     onClick={() => router.push(`/dashboard/proyectos/${project.id}/evaluar`)}
                     className="w-full sm:w-auto px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg font-semibold text-sm hover:shadow-lg transition-all"

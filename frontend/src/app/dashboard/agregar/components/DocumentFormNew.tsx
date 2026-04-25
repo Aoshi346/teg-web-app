@@ -173,7 +173,6 @@ export default function DocumentFormNew({
         advisors: validAdvisors,
         period: data.semesterPeriod,
         project_type: data.documentType,
-        status: "pending",
         ...(userRole === "Administrador" && data.studentId
           ? { student: data.studentId as number }
           : {}),

@@ -12,7 +12,7 @@ import {
   GraduationCap,
   ArrowRight,
 } from "lucide-react";
-import { Project } from "@features/projects/types/project";
+import { Project, type ProjectState } from "@features/projects/types/project";
 import { cn } from "@shared/lib/utils";
 
 interface ProjectCardProps {
@@ -24,15 +24,21 @@ interface ProjectCardProps {
   canEdit?: boolean;
 }
 
+function bucket(s: ProjectState): "approved" | "pending" | "rejected" {
+  if (s === "approved") return "approved";
+  if (s === "failed_final") return "rejected";
+  return "pending";
+}
+
 const STATUS_LABELS: Record<string, string> = {
-  checked: "Aprobado",
+  approved: "Aprobado",
   pending: "Pendiente",
   rejected: "Rechazado",
   default: "En curso",
 };
 
 const STATUS_COLORS = {
-  checked: {
+  approved: {
     bg: "bg-emerald-50",
     text: "text-emerald-700",
     scoreRing: "text-emerald-500",
@@ -96,12 +102,10 @@ export default function ProjectCard({
     router.push(`${base}/${project.id}/editar`);
   };
 
-  const statusKey =
-    project.status === "checked" ||
-    project.status === "pending" ||
-    project.status === "rejected"
-      ? project.status
-      : "default";
+  const b = bucket(project.state);
+  const statusKey = b === "approved" || b === "pending" || b === "rejected"
+    ? b
+    : "default";
 
   const colors = STATUS_COLORS[statusKey];
 
@@ -143,7 +147,7 @@ export default function ProjectCard({
               colors.text
             )}
           >
-            {statusKey === "checked" && <CheckCircle className="w-2.5 h-2.5" />}
+            {statusKey === "approved" && <CheckCircle className="w-2.5 h-2.5" />}
             {statusKey === "rejected" && <XCircle className="w-2.5 h-2.5" />}
             {STATUS_LABELS[statusKey]}
           </span>
@@ -315,7 +319,7 @@ export default function ProjectCard({
           >
             <span>
               {primaryLabel ??
-                (statusKey === "checked"
+                (statusKey === "approved"
                   ? "Ver detalles"
                   : statusKey === "pending"
                   ? "Revisar ahora"
