@@ -99,3 +99,60 @@ class TestStatusProjection:
 
     def test_pending_defense_maps_to_pending(self):
         assert status_projection('pending_defense') == 'pending'
+
+
+class _FakeProject:
+    def __init__(self, project_type, state):
+        self.project_type = project_type
+        self.state = state
+
+
+def teg(state):
+    return _FakeProject('tesis', state)
+
+
+def pteg(state):
+    return _FakeProject('proyecto', state)
+
+
+class TestTegTransitions:
+    def test_articulo_pass_advances_to_entrega(self):
+        assert next_state(teg('pending_articulo'), 'review', 'Pass') == 'pending_entrega'
+
+    def test_articulo_fail_terminal(self):
+        assert next_state(teg('pending_articulo'), 'review', 'Fail') == 'failed_final'
+
+    def test_entrega_pass_advances_to_defensa(self):
+        assert next_state(teg('pending_entrega'), 'review', 'Pass') == 'pending_defensa'
+
+    def test_entrega_fail_terminal(self):
+        assert next_state(teg('pending_entrega'), 'review', 'Fail') == 'failed_final'
+
+    def test_defensa_pass_approved(self):
+        assert next_state(teg('pending_defensa'), 'defense', 'Pass') == 'approved'
+
+    def test_defensa_fail_terminal(self):
+        assert next_state(teg('pending_defensa'), 'defense', 'Fail') == 'failed_final'
+
+    def test_defense_kind_on_articulo_is_invalid(self):
+        with pytest.raises(InvalidTransition):
+            next_state(teg('pending_articulo'), 'defense', 'Pass')
+
+    def test_review_kind_on_defensa_is_invalid(self):
+        with pytest.raises(InvalidTransition):
+            next_state(teg('pending_defensa'), 'review', 'Pass')
+
+    def test_terminal_state_rejects_further_evaluations(self):
+        with pytest.raises(InvalidTransition):
+            next_state(teg('approved'), 'defense', 'Pass')
+        with pytest.raises(InvalidTransition):
+            next_state(teg('failed_final'), 'review', 'Fail')
+
+    def test_pteg_transitions_unchanged(self):
+        # Regression guard for the PTEG dispatch
+        assert next_state(pteg('pending_review_1'), 'review', 'Pass') == 'pending_defense'
+        assert next_state(pteg('pending_review_1'), 'review', 'Fail') == 'pending_review_2'
+        assert next_state(pteg('pending_review_2'), 'review', 'Fail') == 'failed_final'
+        assert next_state(pteg('pending_defense'), 'defense', 'Pass') == 'approved'
+        # Existing behaviour: defense Fail keeps the project at pending_defense
+        assert next_state(pteg('pending_defense'), 'defense', 'Fail') == 'pending_defense'
