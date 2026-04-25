@@ -127,7 +127,7 @@ Jurados only see projects assigned to them (where the project's `reviewer` is th
 - Draft persistence via localStorage (`teg_eval_draft:{type}:{projectId}`)
 - Evaluator comments stored in `Evaluation.comments` as `{ general: "..." }` and displayed to students on project/thesis detail pages
 - Questions/scoring defined in `src/features/evaluations/lib/questions/`
-- PTEG evaluation page (`/dashboard/proyectos/[id]/evaluar`) shows a Revisión / Defensa oral segmented control gated by `Project.state`. Terminal states hide the form entirely. The TEG evaluation page (`/dashboard/tesis/[id]/evaluar`) is unchanged — it retains the `stage1_passed` toggle.
+- PTEG evaluation page (`/dashboard/proyectos/[id]/evaluar`) shows a Revisión / Defensa oral segmented control gated by `Project.state`. Terminal states hide the form entirely. The TEG evaluation page (`/dashboard/tesis/[id]/evaluar`) shows a 3-card phase picker (Artículo / Entrega / Defensa) gated by `Project.state` — each completed gate unlocks the next; any failure terminates.
 - **Admin state override (PTEG):** `ProjectDetailView` shows a "Forzar estado" pill for `Administrador` on PTEG projects, next to the state badge. Opens `StateOverrideModal` (target state + reason ≥10 chars), calls `overrideProjectState(id, {state, reason})`. Past overrides render in `StateOverrideHistory` below the evaluations list. The history section is hidden entirely when `project.stateOverrides` is undefined (non-admin response — backend omits the field for non-admins).
 - **Admin dashboard PTEG tile** shows clickable state-count chips via `StatTileData.segments` that deep-link to `/dashboard/proyectos?state=<value>`. The projects list page reads `?state=` via `applyStateFilter` helper and shows a "Filtrado por: {label} ✕" clear pill. Non-admin tiles keep the existing `breakdown` string shape.
 
@@ -185,7 +185,8 @@ Jurados only see projects assigned to them (where the project's `reviewer` is th
 | `src/features/evaluations/lib/questions/scoring.ts` | Score calculation |
 | `src/features/projects/types/project.ts` | TypeScript interfaces (`Project` includes `reviewer?: number \| null`, `reviewerName?: string \| null`, and `state: ProjectState` for PTEG lifecycle) |
 | `src/features/projects/api/projectService.ts` (ApiProject) | Extended to include `state` and `Evaluation.kind`. `createEvaluation` accepts `kind: 'review' \| 'defense'`. `overrideProjectState(id, {state, reason})` calls the admin-only override endpoint and returns the refreshed `Project`. |
-| `src/features/projects/lib/ptegStateConfig.ts` | Shared `PTEG_STATE_CONFIG` (label + pill class) + `PTEG_STATE_FALLBACK`. Consumed by `ProjectDetailView`, `StateOverrideModal`, `StateOverrideHistory`, and the projects list filter pill. |
+| `src/features/projects/lib/stateConfig.ts` | Shared `STATE_CONFIG` (label + pill class) + `STATE_FALLBACK`, covering PTEG and TEG states. Consumed by `ProjectDetailView`, `StateOverrideModal`, `StateOverrideHistory`, and the projects list filter pill. |
+| `src/features/projects/lib/stateBadge.ts` | Hybrid pill helper — maps `ProjectState` to `{tone, label}` (amber/green/red). Consumed by `ListRow`, `ProjectDetailView`'s `StateBadge`, and `TrackingTable`. |
 | `src/features/projects/lib/applyStateFilter.ts` | Pure helpers `applyStateFilter` and `readStateFromSearchParams` driving the `?state=<value>` filter on `/dashboard/proyectos`. |
 | `src/features/projects/components/StateOverrideModal.tsx` | Admin-only modal that POSTs to `/api/projects/{id}/override_state/`. |
 | `src/features/projects/components/StateOverrideHistory.tsx` | Read-only audit list for admins; returns `null` when `overrides === undefined` (non-admin response). |

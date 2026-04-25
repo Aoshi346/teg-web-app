@@ -12,7 +12,7 @@
 | `views.py` | DRF ViewSets with role-based queryset filtering and custom actions |
 | `serializers.py` | Serializers/deserializers for all models |
 | `urls.py` | DRF router registering all ViewSets under `/api/` |
-| `lifecycle.py` | Pure state-machine functions (`next_state`, `status_projection`, `InvalidTransition`). No DB access. Consumed by `EvaluationViewSet.perform_create` to drive `Project.state` transitions. |
+| `lifecycle.py` | Pure state-machine functions (`next_state`, `InvalidTransition`) plus module-level `PTEG_TRANSITIONS` and `TEG_TRANSITIONS` tables. No DB access. `next_state` dispatches on `project.project_type`; consumed by `EvaluationViewSet.perform_create` to drive `Project.state` transitions for both PTEG and TEG. |
 | `apps.py` | Django app configuration |
 | `tests.py` | (empty — no automated tests) |
 | `management/commands/set_semester.py` | Admin command to activate a semester |
@@ -22,7 +22,7 @@
 | Model | Description |
 |-------|-------------|
 | **User** | Custom user with email auth, roles (Administrador/Estudiante/Tutor/Jurado), phone, `nationality` (V/E/P), `cedula` (PositiveIntegerField, nullable), semester (program year). `UniqueConstraint(nationality, cedula)`. Serializer exposes read-only `cedula_display` = `"V-30243721"`. |
-| **Project** | Title, student (FK), partner (optional FK), advisors (M2M to Tutor), reviewer (FK to User with role=Jurado, nullable, `related_name=assigned_projects`), status, period, project_type (proyecto/tesis), stage1_passed, `state` (PTEG lifecycle). `failed_attempts` is derived from Evaluation rows by the serializer. |
+| **Project** | Title, student (FK), partner (optional FK), advisors (M2M to Tutor), reviewer (FK to User with role=Jurado, nullable, `related_name=assigned_projects`), period, project_type (proyecto/tesis), `state` (PTEG: pending_review_1 / pending_review_2 / pending_defense; TEG: pending_articulo / pending_entrega / pending_defensa; shared terminals: approved / failed_final). `failed_attempts` is derived from Evaluation rows by the serializer. |
 | **Evaluation** | Project evaluation with `kind` (review/defense), JSON ratings/comments/section_scores, score, pass_status (Pass/Fail). Creating a review/defense evaluation transitions the project's `state` via `api/lifecycle.next_state()`. |
 | **AttachedFile** | File upload (pdf/doc/docx) attached to a project |
 | **Semester** | Academic period (YYYY-SS format, e.g. 2026-01), active flag, start/end months |
@@ -40,7 +40,7 @@
 | `/api/auth/` | AuthViewSet | login, logout, register, me |
 | `/api/csrf/` | CsrfTokenView | GET token |
 | `/api/users/` | UserViewSet | CRUD, filtered by role |
-| `/api/projects/` | ProjectViewSet | CRUD + reassign_student, upload_file, assign_reviewer (POST, admin-only, body `{"reviewer": <user_id \| null>}`, rejects non-Jurado users) + override_state (POST, admin-only, PTEG-only; body `{state, reason}`; writes StateOverride + updates Project.state & status atomically; bypasses `lifecycle.next_state()`) |
+| `/api/projects/` | ProjectViewSet | CRUD + reassign_student, upload_file, assign_reviewer (POST, admin-only, body `{"reviewer": <user_id \| null>}`, rejects non-Jurado users) + override_state (POST, admin-only, applies to PTEG and TEG; body `{state, reason}`; validates the target state belongs to the project's `project_type`; writes StateOverride + updates Project.state atomically; bypasses `lifecycle.next_state()`) |
 | `/api/evaluations/` | EvaluationViewSet | CRUD. `POST` accepts `kind: 'review' | 'defense'` (defaults to review). PTEG transitions: creating an eval advances `Project.state` via `api/lifecycle.next_state()`. Create restricted to Administrador and Jurado; Jurado only on projects where they are the `reviewer`. Returns 400 if the transition is illegal for the current state. |
 | `/api/semesters/` | SemesterViewSet | CRUD + current, set_active |
 | `/api/comments/` | CommentViewSet | CRUD (requires project param) |
@@ -48,7 +48,7 @@
 
 ## Role-Based Access
 
-- **Administrador**: Full access to all models and endpoints; can assign a Jurado as project `reviewer` via `/api/projects/{id}/assign_reviewer/`; can force PTEG `Project.state` via `POST /api/projects/{id}/override_state/` (logged in `StateOverride`). The `stateOverrides` nested field on `ProjectSerializer` is exposed only to Administradores — non-admin responses omit it entirely.
+- **Administrador**: Full access to all models and endpoints; can assign a Jurado as project `reviewer` via `/api/projects/{id}/assign_reviewer/`; can force `Project.state` (PTEG or TEG) via `POST /api/projects/{id}/override_state/` (logged in `StateOverride`; target state validated per `project_type`). The `stateOverrides` nested field on `ProjectSerializer` is exposed only to Administradores — non-admin responses omit it entirely.
 - **Tutor**: Sees only projects where they are assigned as advisor; can read evaluations of their advisees but cannot create evaluations
 - **Jurado**: Sees only projects where `reviewer` is set to them, and only evaluations on those projects; can create `review` and `defense` evaluations on assigned projects. The state of a project governs whether a given `kind` is accepted (a review on `pending_defense` is rejected with 400).
 - **Estudiante**: Sees own projects only (as student or partner)

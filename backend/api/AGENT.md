@@ -59,7 +59,7 @@ def upload_file(self, request, pk=None):
 
 - Only Administrador, Tutor, and Jurado can create evaluations
 - proyecto type projects have max 2 failed attempts
-- tesis projects support `stage1_passed` flag for two-phase evaluation
+- tesis projects flow through a 3-gate state machine (`pending_articulo` → `pending_entrega` → `pending_defensa` → `approved`) driven by `Project.state`
 
 ## Do Not
 
