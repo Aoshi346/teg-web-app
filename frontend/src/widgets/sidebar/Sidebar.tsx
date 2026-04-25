@@ -203,6 +203,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             style={{ transform: "translateX(-100%)" }}
             role="dialog"
             aria-modal="true"
+            aria-hidden={!mobileOpen}
             aria-label="Menú de navegación"
             onTouchStart={handleTouchStart}
             onTouchEnd={handleTouchEnd}

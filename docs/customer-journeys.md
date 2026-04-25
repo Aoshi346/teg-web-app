@@ -305,7 +305,7 @@ flowchart TB
 |--------------|--------------------------------------------------|-------|----------------------------------------------|
 | Estudiante   | Espera activación (`status=pending`)             | 1     | Auto-activación por dominio institucional    |
 | Estudiante   | Leer comentarios y corregir                      | 2     | Ratings detallados visibles + historial      |
-| Estudiante   | Esperar resultado post-defensa                   | 1     | Notificación push / email automático         |
+| Estudiante   | Esperar resultado post-defensa                   | 2     | ✅ Notificación in-app + email automática (task `20260425-003`) — campana en header, bandeja en Configuración → Notificaciones |
 | Tutor        | Evaluar carga al aceptar                         | 2     | Vista previa de asesorados antes de aceptar  |
 | Jurado       | Llenar ratings y section_scores                  | 2     | Plantilla por tipo de proyecto (no JSON)     |
 | Admin        | Reasignar estudiantes entre tutores              | 2     | Drag-and-drop bulk en planificación          |

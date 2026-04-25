@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { User, Lock, Bell, UserCog } from "lucide-react";
 import { getUserRole } from "@features/auth/api/clientAuth";
 import { cn } from "@shared/lib/utils";
@@ -16,9 +16,26 @@ interface TabDef {
   count?: number;
 }
 
+const HASH_TO_TAB: Record<string, SettingsTabId> = {
+  "#profile": "profile",
+  "#security": "security",
+  "#notifications": "notifications",
+  "#admin": "admin",
+};
+
 export function SettingsShell() {
   const role = getUserRole();
   const [active, setActive] = useState<SettingsTabId>("profile");
+
+  useEffect(() => {
+    const applyHash = () => {
+      const next = HASH_TO_TAB[window.location.hash];
+      if (next) setActive(next);
+    };
+    applyHash();
+    window.addEventListener("hashchange", applyHash);
+    return () => window.removeEventListener("hashchange", applyHash);
+  }, []);
 
   const tabs: TabDef[] = useMemo(() => {
     const base: TabDef[] = [

@@ -2,9 +2,11 @@ from django.contrib.auth import login, logout, update_session_auth_hash
 from django.db import IntegrityError, transaction
 from django.db.models import Q
 from django.middleware.csrf import get_token
-from rest_framework import permissions, status, views, viewsets
+from django.utils import timezone
+from rest_framework import mixins, permissions, status, views, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied, ValidationError
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import BasePermission
 from rest_framework.response import Response
@@ -14,6 +16,7 @@ from .models import (
     AttachedFile,
     Comment,
     Evaluation,
+    Notification,
     Presentation,
     PresentationDay,
     Project,
@@ -23,11 +26,19 @@ from .models import (
     User,
     UserPreference,
 )
+from .notifications import (
+    dispatch_assignment,
+    dispatch_comment_added,
+    dispatch_evaluation_received,
+    dispatch_semester_activated,
+    dispatch_state_change,
+)
 from .serializers import (
     AttachedFileSerializer,
     CommentSerializer,
     EvaluationSerializer,
     LoginSerializer,
+    NotificationSerializer,
     PasswordChangeSerializer,
     PreferenceSerializer,
     PresentationDaySerializer,
@@ -278,16 +289,25 @@ class ProjectViewSet(viewsets.ModelViewSet):
             return Response({'detail': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
 
         project = self.get_object()
+        # Note: capture previous_reviewer before mutation so dispatch_assignment can notify them
+        previous_reviewer = project.reviewer
         reviewer_id = request.data.get('reviewer')
         if reviewer_id in (None, '', 0):
+            new_reviewer = None
             project.reviewer = None
         else:
             try:
-                reviewer = User.objects.get(id=reviewer_id, role='Jurado')
+                new_reviewer = User.objects.get(id=reviewer_id, role='Jurado')
             except User.DoesNotExist:
                 return Response({'reviewer': 'Jurado not found'}, status=status.HTTP_400_BAD_REQUEST)
-            project.reviewer = reviewer
+            project.reviewer = new_reviewer
         project.save()
+        dispatch_assignment(
+            project=project,
+            new_reviewer=new_reviewer,
+            previous_reviewer=previous_reviewer,
+            actor=request.user,
+        )
         return Response(
             ProjectSerializer(project, context={'request': request}).data,
             status=status.HTTP_200_OK,
@@ -341,6 +361,13 @@ class ProjectViewSet(viewsets.ModelViewSet):
             project.state = new_state
             project.status = status_projection(new_state)
             project.save(update_fields=['state', 'status'])
+            dispatch_state_change(
+                project=project,
+                from_state=from_state,
+                to_state=new_state,
+                actor=request.user,
+                kind_source='override',
+            )
 
         return Response(
             ProjectSerializer(project, context={'request': request}).data,
@@ -438,9 +465,19 @@ class EvaluationViewSet(viewsets.ModelViewSet):
             except InvalidTransition as exc:
                 raise ValidationError({'state': str(exc)}) from exc
 
+        from_state = project.state
+
         with transaction.atomic():
-            serializer.save(reviewer=user, project=project, kind=evaluation_kind)
+            evaluation = serializer.save(reviewer=user, project=project, kind=evaluation_kind)
+            dispatch_evaluation_received(evaluation=evaluation, actor=user)
             if new_state is not None:
+                dispatch_state_change(
+                    project=project,
+                    from_state=from_state,
+                    to_state=new_state,
+                    actor=user,
+                    kind_source='evaluation',
+                )
                 project.state = new_state
                 project.status = status_projection(new_state)
                 project.save(update_fields=['state', 'status'])
@@ -476,6 +513,7 @@ class SemesterViewSet(viewsets.ModelViewSet):
         Semester.objects.exclude(pk=semester.pk).update(is_active=False)
         semester.is_active = True
         semester.save()
+        dispatch_semester_activated(semester=semester, actor=request.user)
         return Response(self.get_serializer(semester).data)
 
     def perform_create(self, serializer):
@@ -514,7 +552,8 @@ class CommentViewSet(viewsets.ModelViewSet):
         return Comment.objects.none()
 
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
+        comment = serializer.save(author=self.request.user)
+        dispatch_comment_added(comment=comment)
 
 
 class SessionViewSet(viewsets.GenericViewSet):
@@ -683,3 +722,40 @@ class PresentationViewSet(viewsets.ModelViewSet):
         if self.action in ["create", "update", "partial_update", "destroy"]:
             return [permissions.IsAuthenticated(), IsAdminUserRole()]
         return [permissions.IsAuthenticated()]
+
+
+class NotificationPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 25
+
+
+class NotificationViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+    serializer_class = NotificationSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    pagination_class = NotificationPagination
+
+    def get_queryset(self):
+        return Notification.objects.filter(recipient=self.request.user).order_by('-created_at')
+
+    def _unread_count(self):
+        return Notification.objects.filter(recipient=self.request.user, read_at__isnull=True).count()
+
+    @action(detail=False, methods=['get'], url_path='unread_count')
+    def unread_count(self, request):
+        return Response({'count': self._unread_count()})
+
+    @action(detail=True, methods=['post'], url_path='mark_read')
+    def mark_read(self, request, pk=None):
+        notification = self.get_object()
+        if notification.read_at is None:
+            notification.read_at = timezone.now()
+            notification.save(update_fields=['read_at'])
+        return Response({'count': self._unread_count()})
+
+    @action(detail=False, methods=['post'], url_path='mark_all_read')
+    def mark_all_read(self, request):
+        Notification.objects.filter(recipient=request.user, read_at__isnull=True).update(
+            read_at=timezone.now()
+        )
+        return Response({'count': 0})

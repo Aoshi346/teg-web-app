@@ -8,6 +8,7 @@ from .models import (
     AttachedFile,
     Comment,
     Evaluation,
+    Notification,
     Presentation,
     PresentationDay,
     PresentationJuror,
@@ -483,3 +484,20 @@ class PreferenceSerializer(serializers.ModelSerializer):
             'notify_semester_changes',
             'email_enabled',
         ]
+
+
+class NotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notification
+        fields = [
+            'id',
+            'recipient',
+            'kind',
+            'title',
+            'body',
+            'payload',
+            'link_url',
+            'read_at',
+            'created_at',
+        ]
+        read_only_fields = fields

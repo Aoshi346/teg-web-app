@@ -3,13 +3,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useSidebar } from "@widgets/sidebar/SidebarContext";
 import {
-  Bell,
   ChevronDown,
   Menu,
   ChevronsLeft,
   LogOut,
   User,
 } from "lucide-react";
+import { NotificationBell } from "@features/notifications";
 import { getUserRole, getUserEmail, logout } from "@features/auth/api/clientAuth";
 import { useRouter } from "next/navigation";
 import { Surface } from "@shared/ui/Surface";
@@ -90,13 +90,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ pageTitle }) => {
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-          <button className="relative p-2 sm:p-2.5 rounded-lg hover:bg-slate-100 active:scale-95 transition-all duration-200 touch-manipulation">
-            <Bell className="w-4 h-4 sm:w-5 sm:h-5 text-slate-500" />
-            <span className="absolute top-1 right-1 flex h-2.5 w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500 border border-white" />
-            </span>
-          </button>
+          <NotificationBell />
 
           <div className="h-7 w-px bg-slate-200/60 hidden sm:block" />
 

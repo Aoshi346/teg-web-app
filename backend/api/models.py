@@ -448,3 +448,29 @@ class UserPreference(models.Model):
 
     def __str__(self):
         return f"Preferences for {self.user.email}"
+
+
+class Notification(models.Model):
+    recipient = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='notifications',
+    )
+    kind = models.CharField(max_length=32, db_index=True)
+    title = models.CharField(max_length=200)
+    body = models.TextField(blank=True, default='')
+    payload = models.JSONField(default=dict, blank=True)
+    link_url = models.CharField(max_length=500, blank=True, default='')
+    read_at = models.DateTimeField(null=True, blank=True, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            # Note: a partial index WHERE read_at IS NULL would be more efficient in Postgres;
+            # SQLite does not support partial indexes via Django's Index class.
+            models.Index(fields=['recipient', 'read_at'], name='notif_recipient_read_at_idx'),
+        ]
+
+    def __str__(self):
+        return f"Notification({self.kind}) for {self.recipient_id}"
