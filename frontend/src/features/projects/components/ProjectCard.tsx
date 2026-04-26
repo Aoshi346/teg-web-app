@@ -1,341 +1,182 @@
 "use client";
 
-import React from "react";
+import * as React from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-  Calendar,
-  Clock,
-  CheckCircle,
-  XCircle,
-  Pencil,
-  FileText,
-  GraduationCap,
-  ArrowRight,
-} from "lucide-react";
-import { Project, type ProjectState } from "@features/projects/types/project";
+import { ArrowRight } from "lucide-react";
+
 import { cn } from "@shared/lib/utils";
+import type { Project, ProjectState, ProjectType } from "@features/projects/types/project";
+import { StatePill } from "@features/projects/components/StatePill";
+import { ScoreGauge } from "@shared/ui/ScoreGauge";
+import { cardAction, type Role } from "@features/projects/lib/cardAction";
 
-interface ProjectCardProps {
+const STATE_TO_EDGE: Record<ProjectState, string> = {
+  pending_review_1: "pcard-slate",
+  pending_review_2: "pcard-amber",
+  pending_defense:  "pcard-blue",
+  pending_articulo: "pcard-slate",
+  pending_entrega:  "pcard-amber",
+  pending_defensa:  "pcard-blue",
+  approved:         "pcard-green",
+  failed_final:     "pcard-red",
+};
+
+const TEG_PHASE_INDEX: Partial<Record<ProjectState, 0 | 1 | 2>> = {
+  pending_articulo: 0,
+  pending_entrega:  1,
+  pending_defensa:  2,
+};
+
+const INTENT_TO_PACT: Record<"primary" | "muted" | "danger", string> = {
+  primary: "pact-primary",
+  muted:   "pact-muted",
+  danger:  "pact-danger",
+};
+
+function fctxFor(project: Project): { label: string; tone: "muted" | "pending" | "primary" | "success" | "danger" } | null {
+  if (project.state === "approved") {
+    return { label: "Defendido", tone: "success" };
+  }
+  if (project.state === "failed_final") {
+    return { label: "Sin más intentos", tone: "danger" };
+  }
+  if (project.state === "pending_review_2") {
+    return { label: "Último intento", tone: "pending" };
+  }
+  if (project.state === "pending_defense" || project.state === "pending_defensa") {
+    return { label: "En defensa", tone: "primary" };
+  }
+  if (project.type === "tesis") {
+    const idx = TEG_PHASE_INDEX[project.state];
+    if (idx != null) return { label: `Fase ${idx + 1} de 3`, tone: "muted" };
+  }
+  if (project.submittedDate) {
+    const d = new Date(project.submittedDate);
+    return { label: d.toLocaleDateString("es-VE", { day: "2-digit", month: "short" }), tone: "muted" };
+  }
+  return null;
+}
+
+function avatarInitials(name: string): string {
+  const parts = name.trim().split(/\s+/);
+  return ((parts[0]?.[0] ?? "") + (parts[1]?.[0] ?? "")).toUpperCase().slice(0, 2) || "?";
+}
+
+export interface ProjectCardProps {
   project: Project;
-  primaryHref?: string;
+  role?: Role;
+  viewerId?: number;
   primaryLabel?: string;
-  className?: string;
-  type?: "proyecto" | "tesis";
+  primaryHref?: string;
+  /** Legacy prop. Retained for backwards compatibility; no longer rendered. */
   canEdit?: boolean;
+  /** Legacy prop. Retained for backwards compatibility; project type comes from `project.type`. */
+  type?: ProjectType;
+  className?: string;
 }
-
-function bucket(s: ProjectState): "approved" | "pending" | "rejected" {
-  if (s === "approved") return "approved";
-  if (s === "failed_final") return "rejected";
-  return "pending";
-}
-
-const STATUS_LABELS: Record<string, string> = {
-  approved: "Aprobado",
-  pending: "Pendiente",
-  rejected: "Rechazado",
-  default: "En curso",
-};
-
-const STATUS_COLORS = {
-  approved: {
-    bg: "bg-emerald-50",
-    text: "text-emerald-700",
-    scoreRing: "text-emerald-500",
-    scoreTrack: "text-gray-100",
-    scoreText: "text-emerald-600",
-    divider: "border-emerald-100",
-    cta: "text-emerald-600 hover:text-emerald-700",
-    ctaArrow: "group-hover:translate-x-0.5",
-  },
-  pending: {
-    bg: "bg-amber-50",
-    text: "text-amber-700",
-    scoreRing: "text-amber-500",
-    scoreTrack: "text-gray-100",
-    scoreText: "text-amber-600",
-    divider: "border-amber-100",
-    cta: "text-amber-600 hover:text-amber-700",
-    ctaArrow: "group-hover:translate-x-0.5",
-  },
-  rejected: {
-    bg: "bg-red-50",
-    text: "text-red-700",
-    scoreRing: "text-red-500",
-    scoreTrack: "text-gray-100",
-    scoreText: "text-red-600",
-    divider: "border-red-100",
-    cta: "text-red-600 hover:text-red-700",
-    ctaArrow: "group-hover:translate-x-0.5",
-  },
-  default: {
-    bg: "bg-blue-50",
-    text: "text-blue-700",
-    scoreRing: "text-blue-500",
-    scoreTrack: "text-gray-100",
-    scoreText: "text-blue-600",
-    divider: "border-blue-100",
-    cta: "text-blue-600 hover:text-blue-700",
-    ctaArrow: "group-hover:translate-x-0.5",
-  },
-};
 
 export default function ProjectCard({
   project,
-  primaryHref,
+  role,
+  viewerId,
   primaryLabel,
+  primaryHref,
   className,
-  type = "proyecto",
-  canEdit = true,
 }: ProjectCardProps) {
   const router = useRouter();
+  const action = role
+    ? cardAction(role, project, viewerId)
+    : {
+        label: primaryLabel ?? "Ver detalles",
+        intent: "muted" as const,
+        href: primaryHref ?? `/dashboard/proyectos/${project.id}`,
+      };
 
-  const navigate = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (primaryHref) router.push(primaryHref);
-  };
+  const phaseIdx = project.type === "tesis" ? TEG_PHASE_INDEX[project.state] : undefined;
+  const ctx = fctxFor(project);
+  const tutor = project.advisorNames?.[0] ?? null;
 
-  const edit = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    const base =
-      type === "tesis" ? "/dashboard/tesis" : "/dashboard/proyectos";
-    router.push(`${base}/${project.id}/editar`);
-  };
-
-  const b = bucket(project.state);
-  const statusKey = b === "approved" || b === "pending" || b === "rejected"
-    ? b
-    : "default";
-
-  const colors = STATUS_COLORS[statusKey];
-
-  const gradientId = `grad-${project.id}`;
-
-  const dateLabel =
-    statusKey === "rejected"
-      ? "Rechazado"
-      : project.reviewDate
-      ? "Revisado"
-      : "Entregado";
-
-  const dateValue = project.reviewDate ?? project.submittedDate;
+  const detailHref =
+    project.type === "tesis"
+      ? `/dashboard/tesis/${project.id}`
+      : `/dashboard/proyectos/${project.id}`;
+  const actionIsDetail = action.href === detailHref;
 
   return (
-    <div
-      onClick={navigate}
-      role="article"
-      aria-label={`${project.title} — ${STATUS_LABELS[statusKey]}`}
-      className={cn(
-        "group relative h-full flex flex-col bg-white rounded-xl",
-        "border border-gray-200 shadow-sm",
-        "hover:border-gray-300 hover:shadow-md",
-        "transition-all duration-200 cursor-pointer",
-        className
-      )}
+    <Link
+      href={detailHref}
+      aria-label={`Ver detalles: ${project.title}`}
+      className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-[16px]"
     >
-      <div className="flex flex-col h-full p-5 gap-0">
+      <article
+        className={cn("pcard", STATE_TO_EDGE[project.state], className)}
+        data-state={project.state}
+        data-project-id={project.id}
+      >
+        <div className="flex items-start justify-between gap-2">
+          <StatePill state={project.state} projectType={project.type} />
+          {project.state === "approved" && project.score != null && (
+            <ScoreGauge score={project.score} tone="success" />
+          )}
+        </div>
 
-        {/* ── Header row: status badge + edit icon ── */}
-        <div className="flex items-center justify-between gap-3 mb-4">
+        <h3 className="mt-3 text-[15px] font-extrabold leading-snug tracking-[-0.012em] text-text-strong line-clamp-2">
+          {project.title}
+        </h3>
 
-          {/* Status badge — flat pill, no border */}
-          <span
-            className={cn(
-              "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full",
-              "text-[10px] font-semibold uppercase tracking-wider",
-              colors.bg,
-              colors.text
+        {project.type === "tesis" && phaseIdx != null && (
+          <div className="tegbar mt-3" aria-hidden>
+            {[0, 1, 2].map((i) => (
+              <span
+                key={i}
+                className={cn(i < phaseIdx ? "is-passed" : i === phaseIdx ? "is-active" : "")}
+              />
+            ))}
+          </div>
+        )}
+
+        <div className="mt-3 flex items-center gap-2.5 text-[12px]">
+          <div className="av" aria-hidden>{avatarInitials(project.student)}</div>
+          <div className="flex-1 min-w-0">
+            <span className="font-bold text-text-strong">{project.student}</span>
+            {tutor && (
+              <>
+                <span className="text-text-faint mx-1">·</span>
+                <span className="text-text-muted font-semibold">{tutor}</span>
+              </>
             )}
-          >
-            {statusKey === "approved" && <CheckCircle className="w-2.5 h-2.5" />}
-            {statusKey === "rejected" && <XCircle className="w-2.5 h-2.5" />}
-            {STATUS_LABELS[statusKey]}
-          </span>
+          </div>
+        </div>
 
-          {/* Edit icon — always visible, muted but present */}
-          {canEdit && (
+        <div className="pcard-foot">
+          {ctx ? (
+            <span className={cn("fctx", `fctx-${ctx.tone}`)}>{ctx.label}</span>
+          ) : (
+            <span />
+          )}
+          {actionIsDetail ? (
+            <span className={cn("pact", INTENT_TO_PACT[action.intent])}>
+              {action.label}
+              <ArrowRight className="w-3 h-3" strokeWidth={2.6} />
+            </span>
+          ) : (
             <button
-              onClick={edit}
-              aria-label="Editar proyecto"
-              className={cn(
-                "flex items-center justify-center w-7 h-7 rounded-md",
-                "text-gray-400 hover:text-gray-700 hover:bg-gray-100",
-                "transition-all duration-150"
-              )}
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                router.push(action.href);
+              }}
+              aria-label={`${action.label}: ${project.title}`}
+              className={cn("pact", INTENT_TO_PACT[action.intent], "focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-md")}
             >
-              <Pencil className="w-3.5 h-3.5" />
+              {action.label}
+              <ArrowRight className="w-3 h-3" strokeWidth={2.6} />
             </button>
           )}
         </div>
-
-        {/* ── Title row + score ring ── */}
-        <div className="flex items-start justify-between gap-3 mb-5">
-          <h4
-            className="text-[15px] font-bold text-gray-900 leading-snug line-clamp-2 flex-1 pr-2"
-            title={project.title}
-          >
-            {project.title}
-          </h4>
-
-          {/* Score ring — always colored, status-matched */}
-          {typeof project.score === "number" ? (
-            <div className="relative w-11 h-11 flex-shrink-0 mt-0.5">
-              <svg
-                className="absolute inset-0 w-full h-full -rotate-90"
-                viewBox="0 0 36 36"
-              >
-                <defs>
-                  <linearGradient
-                    id={gradientId}
-                    x1="0%"
-                    y1="0%"
-                    x2="100%"
-                    y2="100%"
-                  >
-                    <stop offset="0%" stopColor={colors.scoreRing} />
-                    <stop
-                      offset="100%"
-                      stopColor={colors.scoreRing.replace("500", "300")}
-                    />
-                  </linearGradient>
-                </defs>
-                <path
-                  className={colors.scoreTrack}
-                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                />
-                <path
-                  stroke={`url(#${gradientId})`}
-                  strokeDasharray={`${(project.score / 20) * 100}, 100`}
-                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                  fill="none"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                />
-              </svg>
-              <div className="flex flex-col items-center justify-center absolute inset-0 leading-none">
-                <span
-                  className={cn("text-sm font-bold leading-none", colors.scoreText)}
-                >
-                  {project.score.toFixed(1)}
-                </span>
-                <span className="text-[7px] font-medium text-gray-300 leading-none mt-[2px]">
-                  /20
-                </span>
-              </div>
-            </div>
-          ) : (
-            /* Station icon chip — neutral gray */
-            <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-gray-50 flex-shrink-0 mt-0.5">
-              {statusKey === "pending" && (
-                <Clock className="w-4 h-4 text-gray-300" />
-              )}
-              {statusKey === "rejected" && (
-                <XCircle className="w-4 h-4 text-gray-300" />
-              )}
-              {statusKey === "default" && (
-                <Calendar className="w-4 h-4 text-gray-300" />
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* ── Metadata 2×2 grid — neutral icons, micro labels ── */}
-        <div className="grid grid-cols-2 gap-x-4 gap-y-3 mb-5 flex-1">
-
-          {/* Estudiante */}
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-md flex items-center justify-center bg-gray-50 flex-shrink-0">
-              <GraduationCap className="w-3.5 h-3.5 text-gray-400" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-[9px] font-bold uppercase tracking-widest text-gray-400 leading-none mb-0.5">
-                Estudiante
-              </p>
-              <p className="text-sm font-medium text-gray-800 leading-tight truncate">
-                {project.student}
-              </p>
-            </div>
-          </div>
-
-          {/* Tutor */}
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-md flex items-center justify-center bg-gray-50 flex-shrink-0">
-              <FileText className="w-3.5 h-3.5 text-gray-400" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-[9px] font-bold uppercase tracking-widest text-gray-400 leading-none mb-0.5">
-                Tutor
-              </p>
-              <p className="text-sm font-medium text-gray-800 leading-tight truncate">
-                {project.advisorNames?.[0] || "—"}
-              </p>
-            </div>
-          </div>
-
-          {/* Período */}
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-md flex items-center justify-center bg-gray-50 flex-shrink-0">
-              <Clock className="w-3.5 h-3.5 text-gray-400" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-[9px] font-bold uppercase tracking-widest text-gray-400 leading-none mb-0.5">
-                Período
-              </p>
-              <p className="text-sm font-medium text-gray-800 leading-tight">
-                {project.period || "—"}
-              </p>
-            </div>
-          </div>
-
-          {/* Date */}
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-md flex items-center justify-center bg-gray-50 flex-shrink-0">
-              <Calendar className="w-3.5 h-3.5 text-gray-400" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-[9px] font-bold uppercase tracking-widest text-gray-400 leading-none mb-0.5">
-                {dateLabel}
-              </p>
-              <p className="text-sm font-medium text-gray-800 leading-tight">
-                {dateValue}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* ── Subtle CTA footer — card-level click target ── */}
-        <div className={cn("mt-auto pt-4 border-t border-gray-100", colors.divider)}>
-          <button
-            onClick={navigate}
-            aria-label={primaryLabel ?? "Ver detalles del proyecto"}
-            className={cn(
-              "flex items-center gap-1 text-[12px] font-semibold",
-              "transition-all duration-150",
-              colors.cta
-            )}
-          >
-            <span>
-              {primaryLabel ??
-                (statusKey === "approved"
-                  ? "Ver detalles"
-                  : statusKey === "pending"
-                  ? "Revisar ahora"
-                  : "Ver detalles")}
-            </span>
-            <span
-              className={cn(
-                "transition-transform duration-150",
-                colors.ctaArrow
-              )}
-            >
-              <ArrowRight className="w-3.5 h-3.5" />
-            </span>
-          </button>
-        </div>
-      </div>
-    </div>
+      </article>
+    </Link>
   );
 }
