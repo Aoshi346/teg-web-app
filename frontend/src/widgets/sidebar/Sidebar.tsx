@@ -128,6 +128,10 @@ const Sidebar: React.FC<SidebarProps> = ({
       { icon: Settings, label: "Configuración", href: "/dashboard/settings" },
     ];
 
+    if (userRole === "Tutor" || userRole === "Jurado") {
+      return baseItems.filter(item => item.label !== "Agregar");
+    }
+
     return baseItems;
   }, [userRole, user]);
 

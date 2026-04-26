@@ -1,30 +1,17 @@
 "use client";
 
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useRef, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  FileText,
-  BookOpen,
-  PenTool,
-  ArrowRight,
-  Users,
-  User as UserIcon,
-  Upload,
-  X,
-  AlertCircle,
-  File,
-  Calendar,
-  GraduationCap,
-  Scale,
-} from "lucide-react";
 import { documentFormSchema, type DocumentFormData } from "../schema";
 import type { UserOption } from "../hooks/useDocumentData";
 import DocumentTypeSelector from "./DocumentTypeSelector";
-import AdvisorsFieldArray from "./AdvisorsFieldArray";
+import AdvisorsChips from "./AdvisorsChips";
 import Combobox from "./Combobox";
 import Banner from "@shared/ui/Banner";
+import { cn } from "@shared/lib/utils";
+import { PenLine, User as UserIcon, Users, GraduationCap, Scale } from "lucide-react";
 import {
   createProject,
   uploadProjectFile,
@@ -117,7 +104,6 @@ export default function DocumentFormNew({
   const semesterPeriod = watch("semesterPeriod");
   const isProyecto = documentType === "proyecto";
 
-  // File handling
   const handleFiles = useCallback(
     (fileList: FileList | File[]) => {
       const files = Array.from(fileList);
@@ -233,6 +219,16 @@ export default function DocumentFormNew({
     (p) => p.id !== (Number(studentId) || currentUser?.id),
   );
 
+  const submitLabel = isStudent
+    ? isProyecto
+      ? "Subir proyecto"
+      : "Subir tesis"
+    : "Registrar trabajo";
+
+  const formSubtitle = isStudent
+    ? "2 secciones para completar."
+    : "Completa las 3 secciones a continuación.";
+
   return (
     <>
       {banner.visible && (
@@ -250,9 +246,9 @@ export default function DocumentFormNew({
       )}
 
       <FormProvider {...methods}>
-        <div className="grid lg:grid-cols-[280px_1fr] gap-5">
-          {/* ── Left: Type + Period ── */}
-          <div className="space-y-4">
+        <div className="agg-stack">
+          {/* ── Left: Type selector + Period ── */}
+          <div className="space-y-3">
             <DocumentTypeSelector
               value={documentType}
               onChange={(type) => setValue("documentType", type)}
@@ -260,359 +256,301 @@ export default function DocumentFormNew({
               disabled={isStudent && allowedDocumentTypes.length === 1}
             />
 
-            {/* Active period — read only */}
-            <div className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm">
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
-                Período activo
+            <div className="agg-period-card">
+              <p className="agg-period-lbl">Período</p>
+              <p className="agg-period-val">
+                {semesterPeriod || defaultSemester || "—"}
               </p>
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-lg bg-blue-50 text-blue-600">
-                  <Calendar className="w-4 h-4" />
-                </div>
-                <div>
-                  <p className="text-sm font-bold text-gray-900">
-                    {semesterPeriod || defaultSemester || "—"}
-                  </p>
-                  <p className="text-[11px] text-gray-400">
-                    Definido por el administrador
-                  </p>
-                </div>
-              </div>
+              <p className="agg-period-sub">
+                {isStudent ? "Asignado automáticamente" : "Definido por administración"}
+              </p>
             </div>
           </div>
 
-          {/* ── Right: Form ── */}
-          <form
-            onSubmit={handleSubmit(onSubmit)}
-            className="bg-white rounded-2xl shadow-sm border border-gray-100"
-          >
-            <div className="p-5 sm:p-6 space-y-5">
-              {/* Header */}
-              <div className="flex items-center gap-3 pb-4 border-b border-gray-100">
-                <div
-                  className={`p-2.5 rounded-xl ${
-                    isProyecto
-                      ? "bg-blue-50 text-blue-600"
-                      : "bg-emerald-50 text-emerald-600"
-                  }`}
-                >
-                  {isProyecto ? (
-                    <FileText className="w-5 h-5" />
-                  ) : (
-                    <BookOpen className="w-5 h-5" />
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-lg font-bold text-gray-900">
-                    Información del Documento
-                  </h3>
-                  <p className="text-xs text-gray-500">
-                    Complete los detalles básicos
-                  </p>
-                </div>
-                <div
-                  className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-bold border ${
-                    isProyecto
-                      ? "bg-blue-50 text-blue-700 border-blue-100"
-                      : "bg-emerald-50 text-emerald-700 border-emerald-100"
-                  }`}
-                >
-                  <span
-                    className={`w-1.5 h-1.5 rounded-full ${
-                      isProyecto ? "bg-blue-500" : "bg-emerald-500"
-                    }`}
-                  />
-                  {isProyecto ? "Proyecto TEG" : "Tesis TEG"}
-                </div>
+          {/* ── Right: Sectioned form ── */}
+          <form onSubmit={handleSubmit(onSubmit)} className="agg-form-card">
+            <div className="agg-form-head">
+              <div>
+                <h3 className="agg-form-h">
+                  {isStudent
+                    ? isProyecto
+                      ? "Tu proyecto"
+                      : "Tu tesis"
+                    : "Registro del trabajo"}
+                </h3>
+                <p className="agg-form-sub">{formSubtitle}</p>
               </div>
+              <span className={`ts-pill ${isProyecto ? "pteg" : "teg"}`}>
+                <span className="dt" />
+                {isProyecto ? "PTEG" : "TEG"} · {isProyecto ? "9°" : "10°"} semestre
+              </span>
+            </div>
 
-              {/* Title */}
-              <div className="space-y-1.5 group">
-                <label
-                  htmlFor="title"
-                  className="text-xs font-semibold text-gray-600"
-                >
-                  Título del {isProyecto ? "Proyecto" : "Trabajo"}
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <PenTool className="w-4 h-4 text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
-                  </div>
-                  <input
-                    type="text"
-                    id="title"
-                    {...register("title")}
-                    placeholder="Ingrese el título completo..."
-                    className={`w-full pl-10 pr-4 py-2.5 bg-white border rounded-lg shadow-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all text-sm ${
-                      errors.title
-                        ? "border-red-300 ring-2 ring-red-50"
-                        : "border-gray-200 hover:border-indigo-300"
-                    }`}
-                  />
-                  {errors.title && (
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-red-500 text-[11px] font-bold">
-                      <AlertCircle className="w-3.5 h-3.5" />
-                      <span>{errors.title.message}</span>
+            <div className="agg-form-body">
+              {/* ── Admin layout: 3 sections ── */}
+              {!isStudent && (
+                <>
+                  {/* Section 01: Identificación */}
+                  <section className="agg-form-section">
+                    <div className="agg-sec-head">
+                      <span className="agg-sec-num font-display">01</span>
+                      <span className="agg-sec-title">Identificación</span>
+                      <span className="agg-sec-hint">Título y modalidad</span>
                     </div>
-                  )}
-                </div>
-              </div>
+                    <div className="agg-section-body">
+                      <div className="agg-field">
+                        <label htmlFor="title" className="agg-field-label">
+                          <PenLine className="agg-field-ic" aria-hidden />
+                          Título del {isProyecto ? "proyecto" : "trabajo"}{" "}
+                          <span className="agg-req">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          id="title"
+                          {...register("title")}
+                          placeholder="Ingresa el título completo..."
+                          className={cn(
+                            "agg-field-input",
+                            errors.title && "agg-field-error",
+                          )}
+                        />
+                        {errors.title && (
+                          <span className="agg-field-help" style={{ color: "var(--destructive)" }}>
+                            {errors.title.message}
+                          </span>
+                        )}
+                        {!errors.title && (
+                          <span className="agg-field-help">
+                            Mínimo 10 caracteres. Aparecerá en la cola de seguimiento.
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </section>
 
-              {/* People row: Student + Partner side by side */}
-              <div className="grid sm:grid-cols-2 gap-4">
-                {/* Student */}
-                <div className="space-y-1.5">
-                  <div className="flex items-center gap-1.5">
-                    <Users className="w-4 h-4 text-purple-500" />
-                    <label className="text-xs font-bold text-gray-700">
-                      Estudiante
-                    </label>
-                  </div>
-                  <div
-                    className={`border rounded-lg p-3 ${
-                      errors.studentId
-                        ? "border-red-200 bg-red-50/30"
-                        : "border-purple-100 bg-purple-50/30"
-                    }`}
-                  >
-                    {userRole === "Estudiante" ? (
-                      <input
-                        type="text"
-                        disabled
-                        value={
-                          currentUser?.fullName ||
-                          currentUser?.email ||
-                          "Estudiante"
-                        }
-                        className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-600 cursor-not-allowed"
-                      />
-                    ) : (
-                      <Combobox
-                        options={students}
-                        value={studentId as number | ""}
-                        onChange={(val) =>
-                          setValue("studentId", val, {
-                            shouldValidate: true,
-                          })
-                        }
-                        placeholder="Buscar estudiante..."
-                        emptyLabel="Sin estudiantes"
-                        error={!!errors.studentId}
-                        icon={
-                          <UserIcon className="w-4 h-4" />
-                        }
-                      />
-                    )}
-                    {errors.studentId && (
-                      <p className="text-[11px] text-red-600 font-semibold mt-1">
-                        {errors.studentId.message}
-                      </p>
-                    )}
-                  </div>
-                </div>
+                  {/* Section 02: Equipo */}
+                  <section className="agg-form-section">
+                    <div className="agg-sec-head">
+                      <span className="agg-sec-num font-display">02</span>
+                      <span className="agg-sec-title">Equipo</span>
+                      <span className="agg-sec-hint">Estudiante, compañero, tutores</span>
+                    </div>
+                    <div className="agg-section-body">
+                      <div className="agg-row-2">
+                        <div className="agg-field">
+                          <label className="agg-field-label">
+                            <UserIcon className="agg-field-ic" aria-hidden />
+                            Estudiante <span className="agg-req">*</span>
+                          </label>
+                          <Combobox
+                            options={students}
+                            value={studentId as number | ""}
+                            onChange={(val) =>
+                              setValue("studentId", val, { shouldValidate: true })
+                            }
+                            placeholder="Buscar estudiante..."
+                            emptyLabel="Sin estudiantes"
+                            error={!!errors.studentId}
+                          />
+                          {errors.studentId && (
+                            <span className="agg-field-help" style={{ color: "var(--destructive)" }}>
+                              {errors.studentId.message}
+                            </span>
+                          )}
+                        </div>
 
-                {/* Partner */}
-                <div className="space-y-1.5">
-                  <div className="flex items-center gap-1.5">
-                    <Users className="w-4 h-4 text-indigo-500" />
-                    <label className="text-xs font-bold text-gray-700">
-                      Compañero
-                    </label>
-                    <span className="text-[10px] text-gray-400">
-                      (Opcional)
-                    </span>
-                  </div>
-                  <div className="border border-indigo-100 bg-indigo-50/30 rounded-lg p-3">
-                    <Combobox
-                      options={filteredPartners}
-                      value={watch("partnerId") as number | "" | null}
-                      onChange={(val) => setValue("partnerId", val)}
-                      placeholder="Buscar compañero..."
-                      emptyLabel="Sin compañeros"
-                      allowClear
-                      icon={<UserIcon className="w-4 h-4" />}
-                    />
-                  </div>
-                </div>
-              </div>
+                        <div className="agg-field">
+                          <label className="agg-field-label">
+                            <Users className="agg-field-ic" aria-hidden />
+                            Compañero{" "}
+                            <span style={{ color: "var(--text-faint)", fontWeight: 600 }}>
+                              (opcional)
+                            </span>
+                          </label>
+                          <Combobox
+                            options={filteredPartners}
+                            value={watch("partnerId") as number | "" | null}
+                            onChange={(val) => setValue("partnerId", val)}
+                            placeholder="Buscar compañero..."
+                            emptyLabel="Sin compañeros"
+                            allowClear
+                          />
+                        </div>
+                      </div>
 
-              {/* Advisors — compact */}
-              <AdvisorsFieldArray tutors={tutors} />
+                      <div className="agg-field">
+                        <label className="agg-field-label">
+                          <GraduationCap className="agg-field-ic" aria-hidden />
+                          Tutores académicos <span className="agg-req">*</span>
+                        </label>
+                        <AdvisorsChips tutors={tutors} />
+                        <span className="agg-field-help">
+                          Mínimo un tutor. Sin duplicados.
+                        </span>
+                      </div>
 
-              {/* Jurado asignado — admin only */}
-              {userRole === "Administrador" && (
-                <div className="space-y-1.5">
-                  <div className="flex items-center gap-1.5">
-                    <Scale className="w-4 h-4 text-amber-500" />
-                    <label className="text-xs font-bold text-gray-700">
-                      Jurado asignado
-                    </label>
-                    <span className="text-[10px] text-gray-400">
-                      (Opcional)
-                    </span>
-                  </div>
-                  <div className="border border-amber-100 bg-amber-50/30 rounded-lg p-3">
-                    <Combobox
-                      options={jurados}
-                      value={watch("reviewer") as number | null}
-                      onChange={(val) =>
-                        setValue("reviewer", val === "" ? null : (val as number), {
-                          shouldValidate: true,
-                        })
-                      }
-                      placeholder="Buscar jurado..."
-                      emptyLabel="Sin jurados"
-                      allowClear
-                      icon={<GraduationCap className="w-4 h-4" />}
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* File Upload (students only) — compact */}
-              {userRole === "Estudiante" && (
-                <div className="space-y-2">
-                  <div className="flex items-center gap-1.5">
-                    <Upload className="w-4 h-4 text-indigo-500" />
-                    <label className="text-xs font-bold text-gray-700">
-                      Documento
-                    </label>
-                    <span className="text-[10px] text-gray-400">
-                      PDF/Word, máx. 10 MB
-                    </span>
-                  </div>
-
-                  <div
-                    onDragOver={handleDragOver}
-                    onDragLeave={handleDragLeave}
-                    onDrop={handleDrop}
-                    onClick={() => fileInputRef.current?.click()}
-                    className={`border-2 border-dashed rounded-lg p-4 cursor-pointer transition-all text-center ${
-                      errors.files
-                        ? "border-red-300 bg-red-50/40"
-                        : isDragOver
-                          ? "border-indigo-400 bg-indigo-50/60"
-                          : "border-gray-200 bg-gray-50/30 hover:border-indigo-300 hover:bg-indigo-50/30"
-                    }`}
-                  >
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept=".pdf,.doc,.docx"
-                      multiple
-                      className="hidden"
-                      onChange={(e) => {
-                        if (e.target.files) handleFiles(e.target.files);
-                        e.target.value = "";
-                      }}
-                    />
-                    <Upload
-                      className={`w-6 h-6 mx-auto mb-1 ${
-                        isDragOver ? "text-indigo-500" : "text-gray-300"
-                      }`}
-                    />
-                    <p className="text-xs font-semibold text-gray-500">
-                      {isDragOver
-                        ? "Suelta aquí"
-                        : "Arrastra o haz clic para seleccionar"}
-                    </p>
-                  </div>
-
-                  {isUploading && (
-                    <div className="flex items-center gap-2">
-                      <div className="h-1.5 flex-1 bg-gray-100 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-indigo-500 rounded-full transition-all duration-300"
-                          style={{ width: `${uploadProgress}%` }}
+                      <div className="agg-field">
+                        <label className="agg-field-label">
+                          <Scale className="agg-field-ic" aria-hidden />
+                          Jurado{" "}
+                          <span style={{ color: "var(--text-faint)", fontWeight: 600 }}>
+                            (opcional · admin)
+                          </span>
+                        </label>
+                        <Combobox
+                          options={jurados}
+                          value={watch("reviewer") as number | null}
+                          onChange={(val) =>
+                            setValue("reviewer", val === "" ? null : (val as number), {
+                              shouldValidate: true,
+                            })
+                          }
+                          placeholder="Asignar luego desde Seguimiento..."
+                          emptyLabel="Sin jurados"
+                          allowClear
                         />
                       </div>
-                      <span className="text-[11px] text-gray-500 font-semibold">
-                        {uploadProgress}%
-                      </span>
                     </div>
-                  )}
+                  </section>
 
-                  {selectedFiles.length > 0 && (
-                    <div className="space-y-1">
-                      {selectedFiles.map((file, i) => {
-                        const sizeMb = file.size > 1024 * 1024;
-                        const sizeStr = sizeMb
-                          ? `${(file.size / (1024 * 1024)).toFixed(1)} MB`
-                          : `${(file.size / 1024).toFixed(0)} KB`;
-                        const overLimit = file.size > 10 * 1024 * 1024;
-                        return (
-                          <div
-                            key={i}
-                            className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg border text-xs ${
-                              overLimit
-                                ? "border-red-200 bg-red-50"
-                                : "border-gray-100 bg-white"
-                            }`}
-                          >
-                            <File
-                              className={`w-3.5 h-3.5 flex-shrink-0 ${
-                                overLimit ? "text-red-500" : "text-indigo-500"
-                              }`}
-                            />
-                            <span className="flex-1 truncate text-gray-700 font-medium">
-                              {file.name}
-                            </span>
-                            <span
-                              className={`flex-shrink-0 ${
-                                overLimit ? "text-red-500 font-bold" : "text-gray-400"
-                              }`}
-                            >
-                              {sizeStr}
-                            </span>
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                removeFile(i);
-                              }}
-                              className="p-0.5 rounded hover:bg-gray-100 text-gray-400 hover:text-red-500"
-                            >
-                              <X className="w-3 h-3" />
-                            </button>
-                          </div>
-                        );
-                      })}
+                  {/* Section 03: Archivos */}
+                  <section className="agg-form-section">
+                    <div className="agg-sec-head">
+                      <span className="agg-sec-num font-display">03</span>
+                      <span className="agg-sec-title">Archivos</span>
+                      <span className="agg-sec-hint">PDF, DOC, DOCX · 10 MB c/u</span>
                     </div>
-                  )}
-
-                  {errors.files && (
-                    <p className="text-[11px] text-red-600 font-semibold flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" />
-                      {errors.files.message}
-                    </p>
-                  )}
-                </div>
+                    <div className="agg-section-body">
+                      {renderDropzone()}
+                    </div>
+                  </section>
+                </>
               )}
 
-              {/* Actions */}
-              <div className="pt-4 border-t border-gray-100 flex flex-col sm:flex-row items-center gap-2">
+              {/* ── Estudiante layout: 2 sections ── */}
+              {isStudent && (
+                <>
+                  {/* Section 01: Información */}
+                  <section className="agg-form-section">
+                    <div className="agg-sec-head">
+                      <span className="agg-sec-num font-display">01</span>
+                      <span className="agg-sec-title">Información</span>
+                    </div>
+                    <div className="agg-section-body">
+                      <div className="agg-field">
+                        <label htmlFor="title-est" className="agg-field-label">
+                          <PenLine className="agg-field-ic" aria-hidden />
+                          Título del {isProyecto ? "proyecto" : "trabajo"}{" "}
+                          <span className="agg-req">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          id="title-est"
+                          {...register("title")}
+                          placeholder="Ingresa el título completo..."
+                          className={cn(
+                            "agg-field-input",
+                            errors.title && "agg-field-error",
+                          )}
+                        />
+                        {errors.title && (
+                          <span className="agg-field-help" style={{ color: "var(--destructive)" }}>
+                            {errors.title.message}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="agg-row-2">
+                        <div className="agg-field">
+                          <label className="agg-field-label">
+                            <UserIcon className="agg-field-ic" aria-hidden />
+                            Estudiante
+                          </label>
+                          <input
+                            type="text"
+                            disabled
+                            value={
+                              currentUser?.fullName ||
+                              currentUser?.email ||
+                              "Estudiante"
+                            }
+                            className="agg-field-input agg-field-disabled"
+                          />
+                        </div>
+
+                        <div className="agg-field">
+                          <label className="agg-field-label">
+                            <Users className="agg-field-ic" aria-hidden />
+                            Compañero{" "}
+                            <span style={{ color: "var(--text-faint)", fontWeight: 600 }}>
+                              (opcional)
+                            </span>
+                          </label>
+                          <Combobox
+                            options={filteredPartners}
+                            value={watch("partnerId") as number | "" | null}
+                            onChange={(val) => setValue("partnerId", val)}
+                            placeholder="Buscar compañero..."
+                            emptyLabel="Sin compañeros"
+                            allowClear
+                          />
+                        </div>
+                      </div>
+
+                      <div className="agg-field">
+                        <label className="agg-field-label">
+                          <GraduationCap className="agg-field-ic" aria-hidden />
+                          Tutores académicos <span className="agg-req">*</span>
+                        </label>
+                        <AdvisorsChips tutors={tutors} />
+                        <span className="agg-field-help">
+                          Mínimo un tutor.
+                        </span>
+                      </div>
+                    </div>
+                  </section>
+
+                  {/* Section 02: Archivo */}
+                  <section className="agg-form-section">
+                    <div className="agg-sec-head">
+                      <span className="agg-sec-num font-display">02</span>
+                      <span className="agg-sec-title">Archivo</span>
+                      <span className="agg-sec-hint">PDF, DOC, DOCX · 10 MB</span>
+                    </div>
+                    <div className="agg-section-body">
+                      {renderDropzone()}
+                    </div>
+                  </section>
+                </>
+              )}
+            </div>
+
+            <div className="agg-form-actions">
+              <span className="agg-form-meta">
+                Los campos marcados con{" "}
+                <span style={{ color: "var(--brand-orange)", fontWeight: 800 }}>*</span>{" "}
+                son obligatorios.
+              </span>
+              <div className="agg-btnset">
                 <button
                   type="button"
+                  className="agg-btn agg-btn-ghost"
                   onClick={() => router.back()}
-                  className="w-full sm:w-auto px-5 py-2.5 rounded-xl font-semibold text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-all order-2 sm:order-1"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting || isUploading}
-                  className={`w-full sm:flex-1 flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl font-bold text-sm text-white shadow-lg transition-all hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none order-1 sm:order-2 ${
-                    isProyecto
-                      ? "bg-gradient-to-r from-blue-600 to-indigo-600 hover:shadow-blue-500/30"
-                      : "bg-gradient-to-r from-emerald-600 to-teal-600 hover:shadow-emerald-500/30"
-                  }`}
+                  className={cn(
+                    "agg-btn",
+                    isStudent ? "agg-btn-warn" : "agg-btn-primary",
+                    (isSubmitting || isUploading) && "agg-btn-disabled",
+                  )}
                 >
                   {isSubmitting ? (
                     <>
-                      <svg
-                        className="animate-spin h-4 w-4"
-                        viewBox="0 0 24 24"
-                      >
+                      <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
                         <circle
                           className="opacity-25"
                           cx="12"
@@ -631,10 +569,7 @@ export default function DocumentFormNew({
                       Guardando...
                     </>
                   ) : (
-                    <>
-                      Agregar Documento
-                      <ArrowRight className="w-4 h-4" />
-                    </>
+                    submitLabel
                   )}
                 </button>
               </div>
@@ -644,4 +579,80 @@ export default function DocumentFormNew({
       </FormProvider>
     </>
   );
+
+  function renderDropzone() {
+    return (
+      <>
+        <div
+          className={cn("agg-dropzone", isDragOver && "is-over")}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          onClick={() => fileInputRef.current?.click()}
+          role="button"
+          tabIndex={0}
+        >
+          <div className="agg-dropzone-ic">↑</div>
+          <p className="agg-dropzone-h">
+            Arrastra documentos o <b>haz clic para seleccionar</b>
+          </p>
+          <p className="agg-dropzone-p">
+            Acepta PDF, DOC, DOCX · máximo 10 MB cada uno.
+          </p>
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            accept=".pdf,.doc,.docx"
+            style={{ display: "none" }}
+            onChange={(e) => {
+              if (e.target.files) handleFiles(e.target.files);
+              e.currentTarget.value = "";
+            }}
+          />
+        </div>
+
+        {isUploading && (
+          <div className="agg-upload-progress">
+            <div
+              className="agg-upload-bar"
+              style={{ width: `${uploadProgress}%` }}
+            />
+            <span className="agg-upload-pct">{uploadProgress}%</span>
+          </div>
+        )}
+
+        {errors.files && (
+          <span className="agg-field-help" style={{ color: "var(--destructive)" }}>
+            {errors.files.message}
+          </span>
+        )}
+
+        {selectedFiles.length > 0 && (
+          <div className="agg-file-list">
+            {selectedFiles.map((file, i) => (
+              <div key={i} className="filecard">
+                <div className="agg-fc-ic">
+                  {file.name.toLowerCase().endsWith(".pdf") ? "PDF" : "DOC"}
+                </div>
+                <span className="agg-fc-nm">{file.name}</span>
+                <span className="agg-fc-sz">{Math.round(file.size / 1024)} KB</span>
+                <button
+                  type="button"
+                  className="agg-fc-x"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeFile(i);
+                  }}
+                  aria-label="Quitar archivo"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </>
+    );
+  }
 }
