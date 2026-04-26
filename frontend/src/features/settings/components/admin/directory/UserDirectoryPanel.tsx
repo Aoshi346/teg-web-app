@@ -11,6 +11,7 @@ import {
 } from "@features/auth/api/clientAuth";
 import { UserModal, type UserModalData } from "./UserModal";
 import { PasswordRevealModal } from "./PasswordRevealModal";
+import ResetPasswordModal from "./ResetPasswordModal";
 import { UserTable } from "./UserTable";
 import type { DirectoryUser } from "./UserTableRow";
 import type { UserInput } from "../../../lib/schemas";
@@ -36,6 +37,7 @@ export function UserDirectoryPanel() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<UserModalData | null>(null);
   const [passwordModal, setPasswordModal] = useState<string | null>(null);
+  const [resetTarget, setResetTarget] = useState<DirectoryUser | null>(null);
 
   async function refresh() {
     const list = await getAllUsers();
@@ -221,6 +223,7 @@ export function UserDirectoryPanel() {
           onEdit={(u) => { setEditing(u as unknown as UserModalData); setModalOpen(true); }}
           onDelete={handleDelete}
           onToggleStatus={handleToggleStatus}
+          onResetPassword={(u) => setResetTarget(u)}
         />
       </div>
 
@@ -232,6 +235,14 @@ export function UserDirectoryPanel() {
       />
       {passwordModal && (
         <PasswordRevealModal isOpen={true} password={passwordModal} onClose={() => setPasswordModal(null)} />
+      )}
+      {resetTarget && (
+        <ResetPasswordModal
+          open={true}
+          userId={resetTarget.id}
+          userLabel={`${resetTarget.fullName} (${resetTarget.email})`}
+          onClose={() => setResetTarget(null)}
+        />
       )}
     </div>
   );

@@ -238,13 +238,14 @@ class TestDerivedFailedAttempts:
     @pytest.mark.django_db
     def test_patch_to_failed_attempts_is_noop(self, pteg, jurado_user):
         """
-        failed_attempts es SerializerMethodField (read-only). PATCH con un valor
-        arbitrario no debe mutarlo — DRF silenciosamente ignora la escritura.
-        Protege contra regresiones cuando Task 7 retira el PATCH del frontend.
+        failed_attempts es SerializerMethodField (read-only). Tras el endurecimiento
+        de ProjectViewSet.update (Sub-G), el rol Jurado queda fuera de la compuerta
+        de edición y recibe 403. El campo computado sigue siendo 0 porque nada lo
+        muta. Esto es una protección más fuerte que el "no-op silencioso" original.
         """
         client = APIClient()
         client.force_authenticate(user=jurado_user)
         resp = client.patch(f"/api/projects/{pteg.id}/", {"failed_attempts": 5}, format="json")
-        assert resp.status_code in (200, 202)
+        assert resp.status_code == 403
         resp = client.get(f"/api/projects/{pteg.id}/")
         assert resp.json()["failed_attempts"] == 0

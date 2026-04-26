@@ -34,6 +34,7 @@ from .notifications import (
     dispatch_state_change,
 )
 from .serializers import (
+    AdminPasswordResetSerializer,
     AttachedFileSerializer,
     CommentSerializer,
     EvaluationSerializer,
@@ -184,6 +185,18 @@ class UserViewSet(viewsets.ModelViewSet):
 
         return User.objects.filter(id=user.id)
 
+    @action(
+        detail=True, methods=['post'], url_path='reset_password',
+        permission_classes=[permissions.IsAuthenticated, IsAdminUserRole],
+    )
+    def reset_password(self, request, pk=None):
+        target = self.get_object()
+        serializer = AdminPasswordResetSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        target.set_password(serializer.validated_data['new_password'])
+        target.save(update_fields=['password'])
+        return Response({"detail": "Contraseña actualizada."}, status=status.HTTP_200_OK)
+
 
 _project_qs_opts = {
     'select': ('student', 'partner'),
@@ -215,6 +228,46 @@ class ProjectViewSet(viewsets.ModelViewSet):
         return _optimized_projects(
             Project.objects.filter(Q(student=user) | Q(partner=user)).distinct()
         )
+
+    def update(self, request, *args, **kwargs):
+        """
+        Compuerta de roles centralizada para PUT y PATCH:
+          - Administrador: cualquier campo escribible (los read-only del
+            serializer siguen siendo read-only).
+          - Estudiante: solo su propio proyecto, solo el campo `title`, y
+            nunca si el proyecto está en un estado terminal
+            (approved / failed_final).
+          - Tutor / Jurado: prohibido.
+        Forzamos partial=True para evitar reemplazo total del objeto en PUT;
+        el gate aplica antes de invocar al super().
+        """
+        kwargs['partial'] = True
+        user = request.user
+        role = getattr(user, 'role', None)
+        instance = self.get_object()
+
+        if role == 'Estudiante':
+            if instance.student_id != user.id:
+                return Response(
+                    {'detail': 'Solo puedes editar tus propios proyectos.'},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
+            if instance.state in ('approved', 'failed_final'):
+                return Response(
+                    {'detail': 'No se puede editar un proyecto en estado terminal.'},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            allowed = {'title'}
+            bad = set(request.data.keys()) - allowed
+            if bad:
+                return Response(
+                    {'detail': f"Solo puedes editar: {', '.join(sorted(allowed))}. Campo no permitido: {', '.join(sorted(bad))}"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+        elif role != 'Administrador':
+            return Response({'detail': 'Forbidden'}, status=status.HTTP_403_FORBIDDEN)
+
+        return super().update(request, *args, **kwargs)
 
     def perform_create(self, serializer):
         user = self.request.user

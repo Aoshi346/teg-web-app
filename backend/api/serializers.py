@@ -69,6 +69,10 @@ class UserSerializer(serializers.ModelSerializer):
         return super().to_internal_value(internal)
 
 
+class AdminPasswordResetSerializer(serializers.Serializer):
+    new_password = serializers.CharField(write_only=True, required=True, min_length=8)
+
+
 class PasswordChangeSerializer(serializers.Serializer):
     current_password = serializers.CharField(write_only=True, required=True)
     new_password = serializers.CharField(write_only=True, required=True, min_length=8)
@@ -237,6 +241,10 @@ class ProjectSerializer(serializers.ModelSerializer):
             'student': {'read_only': True},
             'submitted_date': {'read_only': True},
             'review_date': {'required': False},
+            'state': {'read_only': True},
+            'reviewer': {'read_only': True},
+            'project_type': {'read_only': True},
+            'period': {'read_only': True},
         }
 
     def validate_period(self, value):

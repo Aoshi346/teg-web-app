@@ -10,13 +10,14 @@ interface UserTableProps {
   onEdit: (u: DirectoryUser) => void;
   onDelete: (u: DirectoryUser) => void;
   onToggleStatus: (u: DirectoryUser, next: "active" | "rejected") => void;
+  onResetPassword: (u: DirectoryUser) => void;
   pageSize?: number;
 }
 
 type SortKey = "fullName" | "role" | "status";
 type SortDir = "asc" | "desc";
 
-export function UserTable({ users, search, roleFilter, statusFilter, onEdit, onDelete, onToggleStatus, pageSize = 8 }: UserTableProps) {
+export function UserTable({ users, search, roleFilter, statusFilter, onEdit, onDelete, onToggleStatus, onResetPassword, pageSize = 8 }: UserTableProps) {
   const [sortKey, setSortKey] = useState<SortKey>("fullName");
   const [sortDir, setSortDir] = useState<SortDir>("asc");
   const [page, setPage] = useState(1);
@@ -85,7 +86,7 @@ export function UserTable({ users, search, roleFilter, statusFilter, onEdit, onD
             </tr>
           ) : (
             view.map((u) => (
-              <UserTableRow key={u.id} user={u} onEdit={onEdit} onDelete={onDelete} onToggleStatus={onToggleStatus} />
+              <UserTableRow key={u.id} user={u} onEdit={onEdit} onDelete={onDelete} onToggleStatus={onToggleStatus} onResetPassword={onResetPassword} />
             ))
           )}
         </tbody>

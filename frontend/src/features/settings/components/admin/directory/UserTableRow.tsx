@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, KeyRound } from "lucide-react";
 
 export interface DirectoryUser {
   id: number;
@@ -18,6 +18,7 @@ interface UserTableRowProps {
   onEdit: (u: DirectoryUser) => void;
   onDelete: (u: DirectoryUser) => void;
   onToggleStatus: (u: DirectoryUser, next: "active" | "rejected") => void;
+  onResetPassword: (u: DirectoryUser) => void;
 }
 
 const ROLE_PILL_STYLES: Record<DirectoryUser["role"], string> = {
@@ -44,7 +45,7 @@ function initials(name: string): string {
   return name.split(" ").filter(Boolean).map((p) => p[0] || "").join("").slice(0, 2).toUpperCase() || "?";
 }
 
-export function UserTableRow({ user, onEdit, onDelete, onToggleStatus }: UserTableRowProps) {
+export function UserTableRow({ user, onEdit, onDelete, onToggleStatus, onResetPassword }: UserTableRowProps) {
   const isActive = user.status === "active";
   const statusLabel = isActive ? "Activo" : user.status === "pending" ? "Pendiente" : "Inactivo";
 
@@ -96,6 +97,14 @@ export function UserTableRow({ user, onEdit, onDelete, onToggleStatus }: UserTab
           className="w-[30px] h-[30px] border border-border-subtle bg-surface rounded-md text-text-muted inline-flex items-center justify-center ml-1 hover:bg-surface-sunken hover:text-text-default hover:border-border-default transition-colors"
         >
           <Pencil className="w-3.5 h-3.5" />
+        </button>
+        <button
+          onClick={() => onResetPassword(user)}
+          aria-label="Restablecer contraseña"
+          title="Restablecer contraseña"
+          className="w-[30px] h-[30px] border border-border-subtle bg-surface rounded-md text-text-muted inline-flex items-center justify-center ml-1 hover:bg-surface-sunken hover:text-text-default hover:border-border-default transition-colors"
+        >
+          <KeyRound className="w-3.5 h-3.5" />
         </button>
         <button
           onClick={() => onDelete(user)}

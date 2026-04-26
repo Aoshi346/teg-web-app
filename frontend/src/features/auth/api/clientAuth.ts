@@ -222,6 +222,10 @@ export async function deleteUser(id: number): Promise<void> {
   await api.delete<void>(`/users/${id}/`);
 }
 
+export async function adminResetPassword(userId: number, newPassword: string): Promise<void> {
+  await api.post<void>(`/users/${userId}/reset_password/`, { new_password: newPassword });
+}
+
 export async function changePassword({
   currentPassword,
   newPassword,
