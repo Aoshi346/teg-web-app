@@ -5,10 +5,10 @@ import { cn } from "@shared/lib/utils";
 type Variant = "slate" | "amber" | "blue" | "green" | "red";
 
 const STATE_TO_VARIANT: Record<ProjectState, Variant> = {
-  pending_review_1: "slate",
+  pending_review_1: "amber",
   pending_review_2: "amber",
   pending_defense:  "blue",
-  pending_articulo: "slate",
+  pending_articulo: "amber",
   pending_entrega:  "amber",
   pending_defensa:  "blue",
   approved:         "green",

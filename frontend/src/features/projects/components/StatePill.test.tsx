@@ -5,10 +5,10 @@ import type { ProjectState } from "@features/projects/types/project";
 
 describe("StatePill", () => {
   const cases: Array<[ProjectState, string, string]> = [
-    ["pending_review_1", "Rev 1", "spill-slate"],
+    ["pending_review_1", "Rev 1", "spill-amber"],
     ["pending_review_2", "Rev 2", "spill-amber"],
     ["pending_defense",  "Defensa", "spill-blue"],
-    ["pending_articulo", "Artículo", "spill-slate"],
+    ["pending_articulo", "Artículo", "spill-amber"],
     ["pending_entrega",  "Entrega", "spill-amber"],
     ["pending_defensa",  "Defensa", "spill-blue"],
     ["approved",         "Aprobado", "spill-green"],
