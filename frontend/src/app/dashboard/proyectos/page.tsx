@@ -1,16 +1,16 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
-import { Search, CheckCircle, Clock, XCircle, FileText } from "lucide-react";
+import { Search, FileText, AlertCircle } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
+
 import {
   applyStateFilter,
   readStateFromSearchParams,
 } from "@features/projects/lib/applyStateFilter";
-import { STATE_CONFIG } from "@features/projects/lib/stateConfig";
 import DashboardHeader from "@widgets/header/DashboardHeader";
 import SemesterSelector from "@features/semesters/components/SemesterSelector";
-import { Project } from "@features/projects/types/project";
+import { Project, ProjectState } from "@features/projects/types/project";
 import { getAllProjects } from "@features/projects/api/projectService";
 import {
   getAvailableSemesters,
@@ -19,20 +19,53 @@ import {
   setStoredSemester,
 } from "@features/semesters/api/semesters";
 import ProjectCard from "@features/projects/components/ProjectCard";
-import { getUserRole } from "@features/auth/api/clientAuth";
+import { StateFilter, type StateFilterOption } from "@features/projects/components/StateFilter";
+import { getUser, getUserRole } from "@features/auth/api/clientAuth";
+import type { Role } from "@features/projects/lib/cardAction";
+
+const PTEG_STATES: ProjectState[] = [
+  "pending_review_1",
+  "pending_review_2",
+  "pending_defense",
+  "approved",
+  "failed_final",
+];
+
+const STATE_LABEL: Record<ProjectState, string> = {
+  pending_review_1: "Rev 1",
+  pending_review_2: "Rev 2",
+  pending_defense:  "Defensa",
+  pending_articulo: "Artículo",
+  pending_entrega:  "Entrega",
+  pending_defensa:  "Defensa",
+  approved:         "Aprob.",
+  failed_final:     "Reprob.",
+};
+
+const STATE_DOT_COLOR: Record<ProjectState, string> = {
+  pending_review_1: "var(--text-muted)",
+  pending_review_2: "var(--pending)",
+  pending_defense:  "var(--primary)",
+  pending_articulo: "var(--text-muted)",
+  pending_entrega:  "var(--pending)",
+  pending_defensa:  "var(--primary)",
+  approved:         "var(--success)",
+  failed_final:     "var(--destructive)",
+};
 
 export default function ProyectosPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const activeStateFilter = readStateFromSearchParams(searchParams ?? null);
-  const userRole = useMemo(() => getUserRole(), []);
+  const userRole = useMemo<Role | null>(() => getUserRole() as Role | null, []);
+  const viewerId = useMemo<number | undefined>(() => {
+    const u = getUser();
+    return typeof u?.id === "number" ? u.id : undefined;
+  }, []);
   const isStudent = userRole === "Estudiante";
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filterStatus, setFilterStatus] = useState<
-    "all" | "approved" | "pending" | "rejected"
-  >("all");
 
-  // Load proyectos including user-added ones
+  const [searchQuery, setSearchQuery] = useState("");
+
   const [allProjects, setAllProjects] = useState<Project[]>([]);
   const [semesterOptions, setSemesterOptions] = useState<string[]>([]);
   const [isDataLoaded, setIsDataLoaded] = useState(false);
@@ -51,16 +84,14 @@ export default function ProyectosPage() {
         setIsDataLoaded(true);
       }
     })();
-    return () => {
-      mounted = false;
-    };
-  }, [isStudent]);
+    return () => { mounted = false; };
+  }, []);
 
-  // Semester state - persisted in localStorage
   const availableSemesters = useMemo(
     () => getAvailableSemesters(allProjects, semesterOptions),
     [allProjects, semesterOptions],
   );
+
   const [selectedSemester, setSelectedSemester] = useState(() => {
     const stored = getStoredSemester();
     return availableSemesters.includes(stored)
@@ -82,328 +113,182 @@ export default function ProyectosPage() {
     setStoredSemester(semester);
   };
 
-  // Filter by semester first, then by search/status
   const semesterProjects = useMemo<Project[]>(
     () => allProjects.filter((p) => p.period === selectedSemester),
     [selectedSemester, allProjects],
   );
 
+  const counts = useMemo(() => {
+    const c: Record<ProjectState, number> = {
+      pending_review_1: 0, pending_review_2: 0, pending_defense: 0,
+      pending_articulo: 0, pending_entrega: 0, pending_defensa: 0,
+      approved: 0, failed_final: 0,
+    };
+    for (const p of semesterProjects) c[p.state]++;
+    return c;
+  }, [semesterProjects]);
+
   const filteredProjects = useMemo(() => {
-    const afterStatusSearch = semesterProjects.filter((project) => {
-      const matchesSearch =
-        project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        project.student.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (project.advisorNames || []).some(n => n.toLowerCase().includes(searchQuery.toLowerCase()));
-
-      const matchesFilter =
-        filterStatus === "all" ||
-        (filterStatus === "approved" && project.state === "approved") ||
-        (filterStatus === "pending" && project.state !== "approved" && project.state !== "failed_final") ||
-        (filterStatus === "rejected" && project.state === "failed_final");
-      return matchesSearch && matchesFilter;
+    const afterSearch = semesterProjects.filter((project) => {
+      const q = searchQuery.toLowerCase();
+      return (
+        project.title.toLowerCase().includes(q) ||
+        project.student.toLowerCase().includes(q) ||
+        (project.advisorNames || []).some((n) => n.toLowerCase().includes(q))
+      );
     });
-    return applyStateFilter(afterStatusSearch, activeStateFilter);
-  }, [semesterProjects, searchQuery, filterStatus, activeStateFilter]);
+    return applyStateFilter(afterSearch, activeStateFilter);
+  }, [semesterProjects, searchQuery, activeStateFilter]);
 
-  const checkedProjects = useMemo(
-    () => filteredProjects.filter((p) => p.state === "approved"),
-    [filteredProjects],
+  const total = semesterProjects.length;
+  const tuAccion = counts.pending_review_1 + counts.pending_review_2;
+  const defensas = counts.pending_defense;
+
+  const ptegOptions = useMemo<StateFilterOption[]>(
+    () =>
+      PTEG_STATES.map((s) => ({
+        state: s,
+        label: STATE_LABEL[s],
+        count: counts[s],
+        dotColor: STATE_DOT_COLOR[s],
+      })),
+    [counts],
   );
 
-  const pendingProjects = useMemo(
-    () => filteredProjects.filter((p) => p.state !== "approved" && p.state !== "failed_final"),
-    [filteredProjects],
-  );
-
-  const rejectedProjects = useMemo(
-    () => filteredProjects.filter((p) => p.state === "failed_final"),
-    [filteredProjects],
-  );
-
-  // Entrance animations removed in favor of instantaneous module rendering
-  // Data still fetches gracefully via the useEffect below.
-  useEffect(() => {
-    // Component mounts instantly without visual fade block.
-  }, []); // Only run once on mount
+  const setStateFilter = (next: ProjectState | null) => {
+    if (next == null) {
+      router.push("/dashboard/proyectos");
+    } else {
+      router.push(`/dashboard/proyectos?state=${next}`);
+    }
+  };
 
   return (
     <>
       <DashboardHeader pageTitle="Proyectos" />
 
-        <main className="flex-1 p-3 sm:p-4 md:p-6 lg:p-8 overflow-y-auto bg-gray-50">
-          <div className="max-w-7xl mx-auto">
-            {/* Premium Header Layout */}
-            <div className="mb-10">
-              <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
-                <div className="space-y-1">
-                  <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">Explorar Proyectos</h2>
-                  <p className="text-gray-500 font-medium">Gestiona y revisa los proyectos académicos del período.</p>
-                </div>
-                
-                <div className="flex flex-wrap items-center gap-4">
-                  <div className="relative z-50">
-                    <SemesterSelector
-                      selectedSemester={selectedSemester}
-                      availableSemesters={availableSemesters}
-                      onSemesterChange={handleSemesterChange}
-                    />
-                  </div>
-
-                  <div className="h-10 w-px bg-gray-200 hidden sm:block mx-1" />
-
-                  <div className="flex items-center gap-3">
-                    {userRole === "Estudiante" && (
-                      <button
-                        onClick={() => router.push("/dashboard/agregar")}
-                        className="group relative px-5 py-2.5 rounded-xl text-sm font-bold bg-[#0f172a] text-white hover:bg-[#1e293b] transition-all shadow-lg shadow-slate-900/10 flex items-center gap-2 overflow-hidden"
-                      >
-                        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                        <FileText className="w-4 h-4 text-blue-400" />
-                        <span>Subir Proyecto</span>
-                      </button>
-                    )}
-                    <div className="flex items-center gap-2.5 px-4 py-2.5 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-100/50 shadow-sm">
-                      <div className="relative">
-                        <div className="w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse" />
-                        <div className="absolute inset-0 w-2.5 h-2.5 rounded-full bg-blue-500/50 animate-ping" />
-                      </div>
-                      <span className="text-sm font-bold text-blue-700">
-                        {semesterProjects.length} {semesterProjects.length === 1 ? 'Proyecto' : 'Proyectos'}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Modernized Search and Filters */}
-            <div className="bg-white/60 backdrop-blur-xl rounded-[2rem] border border-gray-200/60 shadow-xl shadow-slate-200/40 p-5 sm:p-6 mb-12">
-              <div className="flex flex-col xl:flex-row gap-6">
-                {/* Visualistic Search Bar */}
-                <div className="relative flex-1 group">
-                  <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-                    <Search className="w-5 h-5 text-gray-400 group-focus-within:text-blue-500 transition-colors duration-300" />
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="Buscar por título, estudiante o tutor..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-13 pr-6 py-4 bg-white/50 border border-gray-200 rounded-2xl focus:bg-white focus:border-blue-400 focus:ring-4 focus:ring-blue-100/50 transition-all duration-300 text-sm font-medium placeholder:text-gray-400 shadow-inner"
-                    style={{ paddingLeft: '3.25rem' }}
-                  />
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2 px-2 py-1 bg-gray-100 rounded-md text-[10px] font-bold text-gray-400 uppercase tracking-widest border border-gray-200 opacity-0 group-focus-within:opacity-100 transition-opacity">
-                    ESC
-                  </div>
-                </div>
-
-                {/* Refined Filter Pills with unique Hues */}
-                <div className="flex items-center gap-2 p-1.5 bg-gray-100/50 rounded-2xl border border-gray-100 self-start">
-                  <button
-                    onClick={() => setFilterStatus("all")}
-                    className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${
-                      filterStatus === "all"
-                        ? "bg-white text-blue-600 shadow-md ring-1 ring-black/5 scale-[1.02]"
-                        : "text-gray-500 hover:text-gray-900 hover:bg-white/50"
-                    }`}
-                  >
-                    Todos
-                  </button>
-                  
-                  <div className="w-px h-6 bg-gray-200 mx-1" />
-
-                  <button
-                    onClick={() => setFilterStatus("approved")}
-                    className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 flex items-center gap-2 ${
-                      filterStatus === "approved"
-                        ? "bg-[#ecfdf5] text-[#059669] shadow-sm ring-1 ring-[#10b981]/20"
-                        : "text-gray-500 hover:text-[#059669] hover:bg-[#ecfdf5]/50"
-                    }`}
-                  >
-                    <div className={`w-2 h-2 rounded-full ${filterStatus === "approved" ? "bg-[#059669]" : "bg-gray-300"}`} />
-                    Revisados
-                  </button>
-
-                  <button
-                    onClick={() => setFilterStatus("pending")}
-                    className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 flex items-center gap-2 ${
-                      filterStatus === "pending"
-                        ? "bg-[#fffbeb] text-[#d97706] shadow-sm ring-1 ring-[#f59e0b]/20"
-                        : "text-gray-500 hover:text-[#d97706] hover:bg-[#fffbeb]/50"
-                    }`}
-                  >
-                    <div className={`w-2 h-2 rounded-full ${filterStatus === "pending" ? "bg-[#d97706]" : "bg-gray-300"}`} />
-                    Pendientes
-                  </button>
-
-                  <button
-                    onClick={() => setFilterStatus("rejected")}
-                    className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 flex items-center gap-2 ${
-                      filterStatus === "rejected"
-                        ? "bg-[#fef2f2] text-[#dc2626] shadow-sm ring-1 ring-[#ef4444]/20"
-                        : "text-gray-500 hover:text-[#dc2626] hover:bg-[#fef2f2]/50"
-                    }`}
-                  >
-                    <div className={`w-2 h-2 rounded-full ${filterStatus === "rejected" ? "bg-[#dc2626]" : "bg-gray-300"}`} />
-                    Rechazados
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {activeStateFilter && (
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-sm text-gray-500">Filtrado por:</span>
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs">
-                  {STATE_CONFIG[activeStateFilter].label}
-                  <button
-                    type="button"
-                    onClick={() => router.push("/dashboard/proyectos")}
-                    aria-label="Quitar filtro"
-                    className="ml-1 hover:underline"
-                  >
-                    ✕
-                  </button>
-                </span>
-              </div>
-            )}
-
-            {!isDataLoaded && (
-              <div className="flex justify-center items-center py-20">
-                <div className="w-8 h-8 rounded-full border-4 border-slate-200 border-t-blue-600 animate-spin" />
-              </div>
-            )}
-
-            {isDataLoaded && (filterStatus === "all" || filterStatus === "approved") &&
-              checkedProjects.length > 0 && (
-                <div className="section-container mb-12">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600 shadow-sm border border-emerald-100">
-                        <CheckCircle className="w-6 h-6" />
-                      </div>
-                      <div>
-                        <h3 className="text-2xl font-bold text-gray-900 tracking-tight">Proyectos Revisados</h3>
-                        <p className="text-sm text-gray-500 font-medium">Proyectos que ya cuentan con una calificación.</p>
-                      </div>
-                    </div>
-                    <div className="px-4 py-1.5 bg-emerald-50 rounded-full border border-emerald-100/50 self-start sm:self-center">
-                      <span className="text-sm font-bold text-emerald-700">
-                        {checkedProjects.length} {checkedProjects.length === 1 ? 'proyecto' : 'proyectos'}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-                    {checkedProjects.map((project) => (
-                      <ProjectCard
-                        key={project.id}
-                        project={project}
-                        type="proyecto"
-                        primaryLabel="Ver Detalles"
-                        primaryHref={`/dashboard/proyectos/${project.id}`}
-                        canEdit={!isStudent}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
-
-            {isDataLoaded && (filterStatus === "all" || filterStatus === "pending") &&
-              pendingProjects.length > 0 && (
-                <div className="section-container mb-12">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-600 shadow-sm border border-amber-100">
-                        <Clock className="w-6 h-6" />
-                      </div>
-                      <div>
-                        <h3 className="text-2xl font-bold text-gray-900 tracking-tight">Proyectos Pendientes</h3>
-                        <p className="text-sm text-gray-500 font-medium">Proyectos que requieren revisión por parte de un tutor.</p>
-                      </div>
-                    </div>
-                    <div className="px-4 py-1.5 bg-amber-50 rounded-full border border-amber-100/50 self-start sm:self-center">
-                      <span className="text-sm font-bold text-amber-700">
-                        {pendingProjects.length} {pendingProjects.length === 1 ? 'proyecto' : 'proyectos'}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-                    {pendingProjects.map((project) => (
-                      <ProjectCard
-                        key={project.id}
-                        project={project}
-                        type="proyecto"
-                        primaryHref={
-                          isStudent
-                            ? `/dashboard/proyectos/${project.id}`
-                            : `/dashboard/proyectos/${project.id}/evaluar`
-                        }
-                        primaryLabel={
-                          isStudent ? "Ver Detalles" : "Revisar Ahora"
-                        }
-                        canEdit={!isStudent}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
-
-            {isDataLoaded && (filterStatus === "all" || filterStatus === "rejected") &&
-              rejectedProjects.length > 0 && (
-                <div className="section-container mb-12">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-2xl bg-red-50 flex items-center justify-center text-red-600 shadow-sm border border-red-100">
-                        <XCircle className="w-6 h-6" />
-                      </div>
-                      <div>
-                        <h3 className="text-2xl font-bold text-gray-900 tracking-tight">Proyectos Rechazados</h3>
-                        <p className="text-sm text-gray-500 font-medium">Proyectos que no cumplen con los requisitos mínimos.</p>
-                      </div>
-                    </div>
-                    <div className="px-4 py-1.5 bg-red-50 rounded-full border border-red-100/50 self-start sm:self-center">
-                      <span className="text-sm font-bold text-red-700">
-                        {rejectedProjects.length} {rejectedProjects.length === 1 ? 'proyecto' : 'proyectos'}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-                    {rejectedProjects.map((project) => (
-                      <ProjectCard
-                        key={project.id}
-                        project={project}
-                        type="proyecto"
-                        primaryLabel="Ver Motivo"
-                        primaryHref={`/dashboard/proyectos/${project.id}`}
-                        canEdit={!isStudent}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
-
-            {isDataLoaded && filteredProjects.length === 0 && (
-              <div className="bg-white/40 backdrop-blur-sm rounded-[2.5rem] border border-dashed border-gray-300 py-20 text-center relative overflow-hidden">
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-blue-50/50 rounded-full blur-3xl -z-10" />
-                <div className="w-20 h-20 bg-gray-50 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-inner border border-gray-100">
-                  <FileText className="w-10 h-10 text-gray-300" />
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                  No se encontraron proyectos
-                </h3>
-                <p className="text-gray-500 font-medium max-w-sm mx-auto">
-                  Parece que no hay resultados que coincidan con tus criterios de búsqueda o filtros actuales.
+      <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto bg-surface-muted">
+        <div className="max-w-screen-2xl mx-auto">
+          {/* HERO */}
+          <section className="dashboard-hero-bg relative overflow-hidden rounded-2xl border border-border-subtle px-7 py-6 mb-6">
+            <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
+              <div className="flex flex-col gap-1.5">
+                <p className="flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-[0.14em] text-primary">
+                  <span aria-hidden className="inline-block h-[2px] w-6 rounded-full bg-gradient-to-r from-primary to-[var(--brand-orange)]" />
+                  PTEG · Período {selectedSemester}
                 </p>
-                <button 
-                  onClick={() => { setSearchQuery(""); setFilterStatus("all"); }}
-                  className="mt-8 px-6 py-2.5 bg-white text-gray-700 font-bold text-sm rounded-xl border border-gray-200 hover:bg-gray-50 transition-all shadow-sm"
-                >
-                  Restablecer filtros
-                </button>
+                <h1 className="text-3xl font-extrabold leading-tight tracking-[-0.03em] text-text-strong md:text-[34px]">
+                  Proyectos{" "}
+                  <span className="bg-gradient-to-br from-primary to-[var(--brand-orange)] bg-clip-text font-black text-transparent">
+                    Trabajos Especiales de Grado
+                  </span>
+                </h1>
+                <p className="max-w-[480px] text-sm font-medium leading-relaxed text-text-muted mt-1">
+                  Registro y seguimiento de los proyectos del período. {total} en evaluación, distribuidos entre las fases de revisión y defensa.
+                </p>
               </div>
-            )}
+
+              <div className="flex items-start gap-3 flex-wrap">
+                <SemesterSelector
+                  selectedSemester={selectedSemester}
+                  availableSemesters={availableSemesters}
+                  onSemesterChange={handleSemesterChange}
+                />
+                {isStudent && (
+                  <button
+                    onClick={() => router.push("/dashboard/agregar")}
+                    className="rounded-xl px-5 py-2.5 text-sm font-bold bg-text-strong text-white shadow-md hover:bg-[#0a1424] transition-colors flex items-center gap-2"
+                  >
+                    <FileText className="w-4 h-4" />
+                    Subir Proyecto
+                  </button>
+                )}
+              </div>
+            </div>
+          </section>
+
+          {/* STAT TILES */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div className="stile stile-hero lg:col-span-2 sm:col-span-2">
+              <span className="stile-hero-glow" aria-hidden />
+              <p className="relative z-10 flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-[0.12em] text-[var(--brand-yellow)] before:block before:h-[1.5px] before:w-3.5 before:rounded-full before:bg-[var(--brand-yellow)]">
+                Total PTEG · período
+              </p>
+              <p className="relative z-10 text-[60px] leading-none tracking-[-0.045em] font-black text-white">{total}</p>
+              <p className="relative z-10 text-[13px] text-white/70 font-medium leading-snug">
+                <span className="text-white font-bold">{tuAccion}</span> esperando revisión &middot;{" "}
+                <span className="text-white font-bold">{defensas}</span> en defensa
+              </p>
+            </div>
+
+            <div className="stile">
+              <p className="flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-[0.12em] text-pending">
+                <span className="h-1.5 w-1.5 rounded-full ring-[3px] bg-pending ring-pending/22" aria-hidden />
+                Tu acción
+                {tuAccion > 0 && <span className="ml-1 inline-block w-2 h-2 rounded-full bg-pending pulse-soft" />}
+              </p>
+              <p className="text-[46px] leading-none tracking-[-0.035em] font-black text-text-strong">{tuAccion}</p>
+              <p className="text-[13px] text-text-muted font-medium leading-snug">por evaluar</p>
+            </div>
+
+            <div className="stile">
+              <p className="flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-[0.12em] text-[var(--brand-orange)]">
+                <span className="h-1.5 w-1.5 rounded-full ring-[3px] bg-[var(--brand-orange)] ring-[var(--brand-orange)]/22" aria-hidden />
+                Defensas próx.
+              </p>
+              <p className="text-[46px] leading-none tracking-[-0.035em] font-black text-text-strong">{defensas}</p>
+              <p className="text-[13px] text-text-muted font-medium">esta semana</p>
+            </div>
           </div>
-        </main>
+
+          {/* SEARCH + FILTER ROW */}
+          <div className="flex flex-col xl:flex-row items-stretch xl:items-center gap-3 mb-6">
+            <div className="relative flex-1">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted w-4 h-4" />
+              <input
+                type="text"
+                placeholder="Buscar por título, estudiante o tutor…"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-11 pr-4 h-11 bg-surface border border-border-subtle rounded-xl text-[13px] font-medium text-text-strong placeholder:text-text-muted focus:outline-none focus:border-primary transition-colors"
+              />
+            </div>
+
+            <StateFilter
+              value={activeStateFilter}
+              onChange={setStateFilter}
+              options={ptegOptions}
+              totalCount={total}
+              allLabel="Todos los estados"
+            />
+          </div>
+
+          {/* GRID */}
+          {!isDataLoaded ? (
+            <div className="flex justify-center items-center py-20">
+              <div className="w-8 h-8 rounded-full border-4 border-border-subtle border-t-primary animate-spin" />
+            </div>
+          ) : filteredProjects.length === 0 ? (
+            <div className="bg-surface border border-dashed border-border-default rounded-2xl py-16 text-center">
+              <AlertCircle className="w-10 h-10 text-text-muted mx-auto mb-4" />
+              <h3 className="text-lg font-extrabold text-text-strong mb-1">No se encontraron proyectos</h3>
+              <p className="text-sm text-text-muted">Ajusta tu búsqueda o filtros.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {filteredProjects.map((project) => (
+                <ProjectCard
+                  key={project.id}
+                  project={project}
+                  role={userRole ?? undefined}
+                  viewerId={viewerId}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      </main>
     </>
   );
 }
+
