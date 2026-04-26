@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import DashboardHeader from "@widgets/header/DashboardHeader";
-import { FileText, Package, Mic, Lock, ArrowLeft } from "lucide-react";
+import { FileText, Package, Mic, ArrowLeft, ArrowRight } from "lucide-react";
 import { getProject } from "@features/projects/api/projectService";
 import type { ProjectState } from "@features/projects/types/project";
 
@@ -75,67 +75,102 @@ export default function EvaluarTesisPage() {
   return (
     <>
       <DashboardHeader pageTitle="Evaluar Tesis - Selección de fase" />
-      <main className="flex-1 p-4 sm:p-6 lg:p-8 bg-gray-50">
-        <div className="max-w-7xl mx-auto">
+      <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto bg-surface-muted">
+        <div className="max-w-screen-2xl mx-auto">
           <button
             onClick={() => router.back()}
-            className="flex items-center text-gray-600 hover:text-gray-900 transition-colors mb-6"
+            className="flex items-center text-text-muted hover:text-text-strong transition-colors mb-6 text-[12.5px] font-bold"
           >
-            <ArrowLeft className="w-5 h-5 mr-2" />
+            <ArrowLeft className="w-4 h-4 mr-2" />
             Volver
           </button>
 
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-gray-900">Seleccione la fase a evaluar</h2>
-            <p className="text-gray-600 mt-2">
-              El proceso TEG consta de tres fases secuenciales: Artículo, Entrega Ejemplar y Defensa Oral.
-              Cada fase se desbloquea cuando se aprueba la anterior.
+          <section className="dashboard-hero-bg relative overflow-hidden rounded-2xl border border-border-subtle px-7 py-6 mb-8">
+            <p className="flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-[0.14em] mb-3 text-[var(--brand-orange)]">
+              <span aria-hidden className="inline-block h-[2px] w-6 rounded-full bg-gradient-to-r from-primary to-[var(--brand-orange)]" />
+              Evaluar tesis
             </p>
+            <h2 className="text-[34px] leading-tight tracking-[-0.03em] font-extrabold text-text-strong">
+              Tres fases.{" "}
+              <span className="bg-gradient-to-br from-[var(--brand-orange)] to-primary bg-clip-text font-black text-transparent">
+                Una a la vez.
+              </span>
+            </h2>
+            <p className="mt-3 max-w-[60ch] text-[13.5px] font-medium leading-relaxed text-text-muted">
+              El proceso TEG consta de tres fases secuenciales. Cada fase aprobada desbloquea la siguiente.
+            </p>
+          </section>
 
-            <div className="grid md:grid-cols-3 gap-6 mt-6">
-              {GATES.map((g) => {
-                const unlocked = state ? g.unlocked(state) : false;
-                const active = state ? g.active(state) : false;
-                const Icon = g.icon;
-                return (
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr_auto_1fr] gap-0 items-stretch">
+            {GATES.map((g, i) => {
+              const unlocked = state ? g.unlocked(state) : false;
+              const active = state ? g.active(state) : false;
+              const phaseState =
+                active ? "active"
+                : state === "failed_final" ? "failed"
+                : unlocked ? "passed"
+                : "locked";
+
+              return (
+                <React.Fragment key={g.key}>
                   <button
-                    key={g.key}
                     type="button"
                     disabled={!unlocked}
                     onClick={() => projectId && router.push(g.href(projectId))}
-                    className={`text-left bg-white p-6 rounded-xl shadow-sm border transition-all relative overflow-hidden
-                      ${
-                        unlocked
-                          ? "border-gray-200 hover:shadow-md hover:border-blue-300 cursor-pointer"
-                          : "border-gray-200 opacity-60 bg-gray-50 cursor-not-allowed"
-                      }
-                      ${active ? "ring-2 ring-blue-500" : ""}`}
+                    data-state={phaseState}
+                    className="phase text-left disabled:cursor-not-allowed"
                   >
-                    {!unlocked && (
-                      <div className="absolute top-4 right-4">
-                        <Lock className="w-5 h-5 text-gray-400" />
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <div className="text-[10px] uppercase tracking-[0.12em] font-extrabold"
+                             style={{
+                               color:
+                                 phaseState === "active"  ? "var(--primary)" :
+                                 phaseState === "passed"  ? "var(--success)" :
+                                 phaseState === "failed"  ? "var(--destructive)" :
+                                                            "var(--text-muted)",
+                             }}>
+                          Fase {i + 1}{phaseState === "active" ? " · Activa" : phaseState === "locked" ? " · Bloqueada" : ""}
+                        </div>
+                        <div className="mt-2 text-[22px] font-extrabold tracking-tight text-text-strong">
+                          {g.title.replace(/^Fase \d+:\s*/, "")}
+                        </div>
                       </div>
-                    )}
-                    <div
-                      className={`w-12 h-12 rounded-lg flex items-center justify-center mb-4 ${
-                        unlocked ? "bg-blue-100" : "bg-gray-200"
-                      }`}
-                    >
-                      <Icon className={`w-6 h-6 ${unlocked ? "text-blue-600" : "text-gray-400"}`} />
+                      <div className="phase-numeral font-display">
+                        {String(i + 1).padStart(2, "0")}
+                      </div>
                     </div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">{g.title}</h3>
-                    <p className="text-gray-600 text-sm mb-4">{g.blurb}</p>
-                    <div
-                      className={`flex items-center text-sm font-medium ${
-                        unlocked ? "text-blue-600" : "text-gray-400"
-                      }`}
-                    >
-                      {active ? "Evaluar ahora →" : unlocked ? "Ver fase" : "Bloqueado"}
+                    <p className="text-[13px] text-text-muted font-medium mt-3 leading-relaxed">
+                      {g.blurb}
+                    </p>
+                    <div className="mt-5">
+                      {phaseState === "active" && (
+                        <div className="flex items-center gap-3">
+                          <span className="bg-text-strong text-white rounded-xl px-4 py-2 font-bold text-[13px] inline-flex items-center gap-2">
+                            Evaluar ahora
+                            <ArrowRight className="w-3 h-3" strokeWidth={2.6} />
+                          </span>
+                        </div>
+                      )}
+                      {phaseState === "passed" && (
+                        <span className="spill spill-green">Aprobada</span>
+                      )}
+                      {phaseState === "failed" && (
+                        <span className="spill spill-red">Reprobada</span>
+                      )}
+                      {phaseState === "locked" && (
+                        <span className="spill spill-slate">Bloqueada</span>
+                      )}
                     </div>
                   </button>
-                );
-              })}
-            </div>
+                  {i < GATES.length - 1 && (
+                    <div className="hidden lg:flex items-center justify-center">
+                      <div className="phase-link w-12" aria-hidden />
+                    </div>
+                  )}
+                </React.Fragment>
+              );
+            })}
           </div>
         </div>
       </main>
