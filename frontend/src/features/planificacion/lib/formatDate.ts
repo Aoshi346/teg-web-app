@@ -28,6 +28,28 @@ export function formatDayNumeral(dateStr: string): string {
 }
 
 /**
+ * Retorna solo el nombre del mes en español para una fecha YYYY-MM-DD.
+ */
+export function formatMonth(dateStr: string): string {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  const date = new Date(y, m - 1, d);
+  return date.toLocaleDateString(LOCALE, { month: "long" });
+}
+
+/**
+ * Retorna una abreviatura de 3 chars del mes en español para una fecha YYYY-MM-DD.
+ * Ej: "Mar", "Abr", "Sep"
+ */
+export function formatMonthAbbr(dateStr: string): string {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  const date = new Date(y, m - 1, d);
+  const full = date.toLocaleDateString(LOCALE, { month: "short" });
+  // Spanish locales include dot, e.g. "mar." — strip and capitalize
+  const stripped = full.replace(".", "").trim();
+  return stripped.charAt(0).toUpperCase() + stripped.slice(1);
+}
+
+/**
  * Retorna el nombre del mes y el año en español con capitalización correcta.
  */
 export function formatMonthName(year: number, month: number): string {

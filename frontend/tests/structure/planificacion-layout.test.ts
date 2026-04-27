@@ -21,16 +21,35 @@ describe("Planificacion module layout", () => {
       "features/planificacion/api/planificacionService.ts",
       "features/planificacion/types/planificacion.ts",
       "features/planificacion/components/PlanificacionView.tsx",
-      "features/planificacion/components/WeekCalendar.tsx",
+      // Sub-I new components (replace legacy WeekCalendar, PresentationCard, EmptyDayState)
+      "features/planificacion/components/UnifiedCalendar.tsx",
       "features/planificacion/components/DayCard.tsx",
-      "features/planificacion/components/PresentationCard.tsx",
+      "features/planificacion/components/DayDetailModal.tsx",
+      "features/planificacion/components/PresentationRow.tsx",
+      "features/planificacion/components/PlanAdminView.tsx",
+      "features/planificacion/components/PlanReviewerView.tsx",
+      "features/planificacion/components/PlanStudentView.tsx",
+      // PresentationFormModal is unchanged — deferred to Sub-J
       "features/planificacion/components/PresentationFormModal.tsx",
-      "features/planificacion/components/EmptyDayState.tsx",
       "features/planificacion/hooks/usePlanificacion.ts",
       "features/planificacion/hooks/useDateSelection.ts",
     ];
     for (const f of files) {
       expect(existsSync(src(f)), f).toBe(true);
+    }
+  });
+
+  it("legacy components removed in Sub-I", () => {
+    const deleted = [
+      "features/planificacion/components/WeekCalendar.tsx",
+      "features/planificacion/components/PresentationCard.tsx",
+      "features/planificacion/components/CompactDayCard.tsx",
+      "features/planificacion/components/ScheduleOverviewCalendar.tsx",
+      "features/planificacion/components/DateSelectionCalendar.tsx",
+      "features/planificacion/components/EmptyDayState.tsx",
+    ];
+    for (const f of deleted) {
+      expect(existsSync(src(f)), `${f} should be deleted`).toBe(false);
     }
   });
 
