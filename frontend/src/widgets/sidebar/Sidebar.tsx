@@ -1,33 +1,88 @@
 "use client";
 
-import React, {
-  useEffect,
-  useRef,
-  useState,
-  useCallback,
-  useMemo,
-} from "react";
-import Image from "next/image";
+import React, { useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { createPortal } from "react-dom";
 import {
   LayoutDashboard,
-  BookOpen,
   FileText,
-  PlusCircle,
-  Settings,
+  BookOpen,
   CalendarDays,
   TrendingUp,
-  X,
+  PlusCircle,
+  Settings,
 } from "lucide-react";
 import { getUser, getUserRole } from "@features/auth/api/clientAuth";
 
-interface SidebarProps {
+export interface SidebarProps {
   isCollapsed: boolean;
   setIsCollapsed: (isCollapsed: boolean) => void;
   mobileOpen: boolean;
   setMobileOpen: (open: boolean) => void;
+}
+
+// Estructura completa del menú antes de filtrar por rol
+const ALL_MENU_ITEMS = [
+  {
+    label: "Dashboard",
+    href: "/dashboard",
+    icon: LayoutDashboard,
+    index: 1,
+    group: "Workspace",
+  },
+  {
+    label: "PTEG",
+    href: "/dashboard/proyectos",
+    icon: FileText,
+    index: 2,
+    group: "Workspace",
+  },
+  {
+    label: "TEG",
+    href: "/dashboard/tesis",
+    icon: BookOpen,
+    index: 3,
+    group: "Workspace",
+  },
+  {
+    label: "Planificación",
+    href: "/dashboard/planificacion",
+    icon: CalendarDays,
+    index: 4,
+    group: "Workspace",
+  },
+  {
+    label: "Seguimiento",
+    href: "/dashboard/tracking",
+    icon: TrendingUp,
+    index: 5,
+    group: "Operación",
+  },
+  {
+    label: "Agregar",
+    href: "/dashboard/agregar",
+    icon: PlusCircle,
+    index: 6,
+    group: "Operación",
+  },
+  {
+    label: "Configuración",
+    href: "/dashboard/settings",
+    icon: Settings,
+    index: 7,
+    group: "Operación",
+  },
+];
+
+// Grupos y su orden de renderizado
+const GROUPS = [
+  { title: "Workspace", items: ["Dashboard", "PTEG", "TEG", "Planificación"] },
+  { title: "Operación", items: ["Seguimiento", "Agregar", "Configuración"] },
+];
+
+function deriveName(email: string): string {
+  const local = email.split("@")[0] ?? "";
+  return local.charAt(0).toUpperCase() + local.slice(1);
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -37,226 +92,230 @@ const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const pathname = usePathname();
   const router = useRouter();
-  const closeBtnRef = useRef<HTMLButtonElement>(null);
-  const drawerRef = useRef<HTMLDivElement>(null);
-  const backdropRef = useRef<HTMLDivElement>(null);
-  const touchStartX = useRef(0);
-  const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
+  const drawerRef = useRef<HTMLElement>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
+  const touchStartX = useRef<number>(0);
   const linkRefs = useRef<Map<string, HTMLAnchorElement>>(new Map());
 
+  const user = getUser();
+  const role = getUserRole() ?? "Estudiante";
+  const email = user?.email ?? "";
+  const displayName = email ? deriveName(email) : "Usuario";
+
+  // Filtra ítems de menú según el rol del usuario
+  const menuItems = ALL_MENU_ITEMS.filter((item) => {
+    if (item.label === "Agregar") {
+      return role === "Administrador";
+    }
+    if (item.label === "Planificación") {
+      return role !== "Estudiante";
+    }
+    return true;
+  });
+
+  // Obtiene los ítems de un grupo específico, respetando el filtrado por rol
+  function getGroupItems(groupName: string) {
+    const groupDef = GROUPS.find((g) => g.title === groupName);
+    if (!groupDef) return [];
+    return menuItems.filter((item) => groupDef.items.includes(item.label));
+  }
+
+  // Prefetch al hacer hover sobre un enlace
+  const handleLinkHover = useCallback(
+    (href: string) => {
+      router.prefetch(href);
+    },
+    [router]
+  );
+
+  // Cierra el drawer móvil al presionar ESC
   useEffect(() => {
-    if (typeof window !== "undefined") setPortalTarget(document.body);
-  }, []);
+    if (!mobileOpen) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMobileOpen(false);
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [mobileOpen, setMobileOpen]);
 
-  // GSAP-driven mobile drawer animation — lazy-loaded so gsap never enters
-  // the dashboard shell critical path on desktop.
+  // Bloquea el scroll del body cuando el drawer móvil está abierto
   useEffect(() => {
-    const drawer = drawerRef.current;
-    const backdrop = backdropRef.current;
-    if (!drawer || !backdrop) return;
-
-    let cancelled = false;
-
     if (mobileOpen) {
       document.body.style.overflow = "hidden";
-      setTimeout(() => closeBtnRef.current?.focus(), 100);
-
-      import("gsap").then(({ gsap }) => {
-        if (cancelled) return;
-        gsap.to(backdrop, { opacity: 1, pointerEvents: "auto", duration: 0.25, ease: "power2.out" });
-        gsap.fromTo(drawer,
-          { x: "-100%" },
-          { x: "0%", duration: 0.4, ease: "power3.out" }
-        );
-        const items = drawer.querySelectorAll(".sidebar-menu-item");
-        gsap.fromTo(items,
-          { opacity: 0, x: -16 },
-          { opacity: 1, x: 0, duration: 0.3, stagger: 0.04, delay: 0.15, ease: "power2.out" }
-        );
-      });
     } else {
       document.body.style.overflow = "";
-      import("gsap").then(({ gsap }) => {
-        if (cancelled) return;
-        gsap.to(drawer, { x: "-100%", duration: 0.3, ease: "power2.in" });
-        gsap.to(backdrop, { opacity: 0, duration: 0.25, ease: "power2.in", onComplete: () => { backdrop.style.pointerEvents = "none"; } });
-      });
     }
-
-    return () => { cancelled = true; document.body.style.overflow = ""; };
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [mobileOpen]);
 
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
-  }, []);
-
-  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
-    const diff = touchStartX.current - e.changedTouches[0].clientX;
-    if (diff > 60) {
-      setMobileOpen(false);
-    }
-  }, [setMobileOpen]);
-
-  const [userRole, setUserRole] = useState<string | null>(null);
-  const user = useMemo(() => getUser(), []);
-
+  // Animación GSAP del drawer móvil
   useEffect(() => {
-    setUserRole(getUserRole());
-  }, []);
-
-  const menuItems = useMemo(() => {
-    if (userRole === "Estudiante") {
-      const semester = user?.semester?.toLowerCase() || "";
-      const isTesis = semester.includes("10");
-      return [
-        { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
-        isTesis
-          ? { icon: BookOpen, label: "TEG", href: "/dashboard/tesis" }
-          : { icon: FileText, label: "PTEG", href: "/dashboard/proyectos" },
-        { icon: TrendingUp, label: "Seguimiento", href: "/dashboard/tracking" },
-        { icon: Settings, label: "Configuración", href: "/dashboard/settings" },
-      ];
-    }
-
-    const baseItems = [
-      { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
-      { icon: FileText, label: "PTEG", href: "/dashboard/proyectos" },
-      { icon: BookOpen, label: "TEG", href: "/dashboard/tesis" },
-      { icon: CalendarDays, label: "Planificación", href: "/dashboard/planificacion" },
-      { icon: TrendingUp, label: "Seguimiento", href: "/dashboard/tracking" },
-      { icon: PlusCircle, label: "Agregar", href: "/dashboard/agregar" },
-      { icon: Settings, label: "Configuración", href: "/dashboard/settings" },
-    ];
-
-    if (userRole === "Tutor" || userRole === "Jurado") {
-      return baseItems.filter(item => item.label !== "Agregar");
-    }
-
-    return baseItems;
-  }, [userRole, user]);
-
-  const handleLinkHover = useCallback((href: string) => {
-    router.prefetch(href);
-  }, [router]);
-
-  useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-      if ((e.altKey || e.metaKey) && e.key >= "1" && e.key <= "7") {
-        e.preventDefault();
-        const idx = parseInt(e.key) - 1;
-        if (menuItems[idx]) { router.push(menuItems[idx].href); setMobileOpen(false); }
+    if (!drawerRef.current) return;
+    import("gsap").then(({ gsap }) => {
+      if (mobileOpen) {
+        gsap.fromTo(
+          drawerRef.current,
+          { x: "-100%" },
+          { x: "0%", duration: 0.28, ease: "power2.out" }
+        );
+      } else {
+        gsap.to(drawerRef.current, {
+          x: "-100%",
+          duration: 0.22,
+          ease: "power2.in",
+        });
       }
-      if (e.key === "Escape" && mobileOpen) setMobileOpen(false);
-    };
-    window.addEventListener("keydown", handleKey);
-    return () => window.removeEventListener("keydown", handleKey);
-  }, [router, mobileOpen, setMobileOpen, menuItems]);
+    });
+  }, [mobileOpen]);
 
-  const renderLink = (item: typeof menuItems[0], index: number, opts: { collapsed?: boolean; mobile?: boolean } = {}) => {
-    const isActive = pathname
-      ? item.href === "/dashboard" ? pathname === item.href : pathname.startsWith(item.href)
-      : false;
-
-    return (
-      <li key={index} className="sidebar-menu-item">
-        <Link
-          ref={(el) => { if (el) linkRefs.current.set(item.href, el); }}
-          href={item.href}
-          onClick={opts.mobile ? () => setMobileOpen(false) : undefined}
-          onMouseEnter={() => handleLinkHover(item.href)}
-          aria-current={isActive ? "page" : undefined}
-          className={`w-full flex items-center ${opts.collapsed ? "justify-center gap-0 px-3" : "gap-3 px-4"} py-3 rounded-xl transition-all duration-200 relative group overflow-hidden border border-transparent ${
-            isActive
-              ? "text-primary bg-primary/10 border-primary/30"
-              : "text-slate-600 hover:bg-primary/5 hover:text-primary hover:border-primary/20"
-          }`}
-          title={opts.collapsed ? `${item.label} (Alt+${index + 1})` : `Alt+${index + 1}`}
-        >
-          <div className={`absolute left-0 top-0 bottom-0 w-[3px] rounded-r-full transition-opacity duration-200 ${isActive ? "opacity-100 bg-primary shadow-[0_0_8px_rgb(0_102_255_/_0.35)]" : "opacity-0"}`} />
-          <item.icon className={`w-5 h-5 flex-shrink-0 transition-transform duration-200 relative z-10 ${isActive ? "scale-110 text-primary" : "text-slate-500 group-hover:text-primary group-hover:scale-110"}`} />
-          <span className={`font-bold tracking-wide whitespace-nowrap overflow-hidden transition-all duration-200 relative z-10 ${opts.collapsed ? "w-0 opacity-0" : "w-auto opacity-100"}`}>
-            {item.label}
-          </span>
-        </Link>
-      </li>
-    );
+  // Swipe-to-close para el drawer móvil
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0]?.clientX ?? 0;
+  };
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const delta = touchStartX.current - (e.changedTouches[0]?.clientX ?? 0);
+    if (delta > 60) setMobileOpen(false);
   };
 
-  const LogoBlock = ({ compact = false }: { compact?: boolean }) => (
-    <div className={`flex items-center gap-3 min-w-0 ${compact ? "gap-0 justify-center" : ""}`}>
-      <div className="w-10 h-10 rounded-xl flex items-center justify-center">
-        <Image src="/tesisfar_logo.svg" alt="Tesisfar logo" width={32} height={32} className="w-8 h-8 object-contain drop-shadow-sm" draggable={false} />
+  // Atajos de teclado Alt+1..7
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (!e.altKey) return;
+      const n = parseInt(e.key, 10);
+      if (isNaN(n) || n < 1 || n > 7) return;
+      const item = ALL_MENU_ITEMS.find((m) => m.index === n);
+      if (item) {
+        e.preventDefault();
+        router.push(item.href);
+      }
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [router]);
+
+  function isActive(href: string): boolean {
+    if (href === "/dashboard") {
+      return pathname === "/dashboard" || pathname === "/";
+    }
+    return pathname.startsWith(href);
+  }
+
+  function renderNavItem(item: (typeof ALL_MENU_ITEMS)[0]) {
+    const active = isActive(item.href);
+    const Icon = item.icon;
+    return (
+      <Link
+        key={item.href}
+        href={item.href}
+        ref={(el) => {
+          if (el) linkRefs.current.set(item.href, el);
+          else linkRefs.current.delete(item.href);
+        }}
+        className={`sb-item${active ? " active" : ""}`}
+        data-label={item.label}
+        aria-current={active ? "page" : undefined}
+        onMouseEnter={() => handleLinkHover(item.href)}
+      >
+        <Icon className="sb-item-icon" />
+        {!isCollapsed && (
+          <span className="sb-item-label">{item.label}</span>
+        )}
+      </Link>
+    );
+  }
+
+  const sidebarContent = (
+    <>
+      {/* Logo */}
+      <div className="sb-logo">
+        <div className="sb-logo-mark">T</div>
+        {!isCollapsed && (
+          <div className="sb-logo-word">
+            <span className="sb-logo-name">Tesisfar</span>
+            <span className="sb-logo-tag">Gestión TEG</span>
+          </div>
+        )}
       </div>
-      {!compact && (
-        <div className="overflow-hidden flex flex-col justify-center">
-          <h1 className="text-xl font-bold text-slate-900 tracking-tight leading-none mb-1">Tesisfar</h1>
-          <p className="text-[11px] uppercase tracking-wider text-slate-500">Gestión de TEG</p>
+
+      {/* Navegación agrupada */}
+      <nav className="sb-nav">
+        {GROUPS.map((group) => {
+          const groupItems = getGroupItems(group.title);
+          if (groupItems.length === 0) return null;
+          return (
+            <div
+              key={group.title}
+              data-testid={`sb-group-${group.title}`}
+            >
+              <span className="sb-group-title">
+                {isCollapsed
+                  ? group.title === "Workspace"
+                    ? "WS"
+                    : "OP"
+                  : group.title}
+              </span>
+              {groupItems.map(renderNavItem)}
+            </div>
+          );
+        })}
+      </nav>
+
+      {/* Foot card */}
+      <div className="sb-foot">
+        <div className="sb-foot-ava">
+          {email.charAt(0).toUpperCase()}
         </div>
-      )}
-    </div>
+        {!isCollapsed && (
+          <>
+            <div className="sb-foot-who">
+              <span className="sb-foot-name">{displayName}</span>
+              <span className="sb-foot-role">{role}</span>
+            </div>
+            <button className="sb-foot-more" type="button" aria-label="Más opciones">
+              ⋯
+            </button>
+          </>
+        )}
+      </div>
+    </>
   );
 
   return (
-    <div className="sidebar-container">
-      {portalTarget && createPortal(
-        <>
-          <div
+    <>
+      {/* Sidebar de escritorio */}
+      <aside className={`sb${isCollapsed ? " is-collapsed" : ""}`}>
+        {sidebarContent}
+      </aside>
+
+      {/* Overlay y drawer móvil */}
+      {mobileOpen && (
+        <div
+          ref={overlayRef}
+          className="fixed inset-0 z-40"
+          style={{
+            background: "rgba(1,22,56,.45)",
+            backdropFilter: "blur(4px)",
+          }}
+          onClick={() => setMobileOpen(false)}
+        >
+          <aside
             ref={drawerRef}
-            className="lg:hidden fixed inset-y-0 left-0 z-[100] w-[85vw] max-w-xs sm:max-w-sm bg-white border-r border-slate-200 shadow-xl"
-            style={{ transform: "translateX(-100%)" }}
             role="dialog"
             aria-modal="true"
-            aria-hidden={!mobileOpen}
             aria-label="Menú de navegación"
+            className="sb"
+            style={{ width: "84%", maxWidth: 300, height: "100%", position: "relative" }}
+            onClick={(e) => e.stopPropagation()}
             onTouchStart={handleTouchStart}
             onTouchEnd={handleTouchEnd}
           >
-            <div className="flex flex-col h-full pt-[env(safe-area-inset-top)]">
-              <div className="p-4 flex items-center justify-between border-b border-slate-100">
-                <LogoBlock />
-                <button
-                  ref={closeBtnRef}
-                  onClick={() => setMobileOpen(false)}
-                  className="p-2 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors touch-manipulation"
-                  aria-label="Cerrar menú"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-              <nav className="flex-1 p-4 overflow-y-auto" aria-label="Main navigation">
-                <ul className="space-y-1">
-                  {menuItems.map((item, i) => renderLink(item, i, { mobile: true }))}
-                </ul>
-              </nav>
-            </div>
-          </div>
-
-          <div
-            ref={backdropRef}
-            className="lg:hidden fixed inset-0 z-[90] bg-black/50"
-            style={{ opacity: 0, pointerEvents: "none" }}
-            onClick={() => setMobileOpen(false)}
-            aria-hidden="true"
-          />
-        </>,
-        portalTarget,
-      )}
-
-      <aside
-        className={`hidden lg:flex lg:flex-col h-screen bg-white border-r border-slate-200 shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-50 transition-[width] duration-300 ${isCollapsed ? "w-20" : "w-64"}`}
-        style={{ position: "relative" }}
-      >
-        <div className={`p-4 h-[89px] flex items-center flex-shrink-0 border-b border-slate-100 ${isCollapsed ? "px-3 justify-center" : "px-6 justify-start"}`}>
-          <LogoBlock compact={isCollapsed} />
+            {sidebarContent}
+          </aside>
         </div>
-        <nav className="flex-1 p-4 overflow-y-auto min-h-0" aria-label="Main navigation">
-          <ul className="space-y-1">
-            {menuItems.map((item, i) => renderLink(item, i, { collapsed: isCollapsed }))}
-          </ul>
-        </nav>
-      </aside>
-    </div>
+      )}
+    </>
   );
 };
 
