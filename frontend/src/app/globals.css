@@ -1654,12 +1654,77 @@ main {
   display: grid;
   grid-template-columns: 280px minmax(0, 1fr);
   gap: 18px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* Solo variant (students): no left rail, wider centered card */
+.agg-stack.is-solo {
+  grid-template-columns: minmax(0, 1080px);
+  justify-content: center;
+}
+
+/* Student form body: lay out the two sections side-by-side on wide screens
+   so the form fills the canvas instead of stacking vertically with empty space. */
+@media (min-width: 880px) {
+  .agg-stack.is-solo .agg-form-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    gap: 0 28px;
+    padding-bottom: 0;
+  }
+  .agg-stack.is-solo .agg-form-section {
+    border-bottom: none;
+    padding: 18px 0;
+  }
+  .agg-stack.is-solo .agg-form-section + .agg-form-section {
+    border-left: 1px solid var(--border-subtle);
+    padding-left: 28px;
+  }
 }
 
 @media (max-width: 980px) {
   .agg-stack {
     grid-template-columns: 1fr;
   }
+  .agg-stack.is-solo {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Inline period chip in form head (student variant) */
+.agg-head-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.agg-head-period {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text-muted);
+}
+
+.agg-head-period b {
+  color: var(--text-strong);
+  font-weight: 800;
+  margin-left: 4px;
+}
+
+/* Read-only callout used for fields the role can't edit (e.g. student tutor list) */
+.agg-readonly-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--surface-muted, var(--accent-pteg-soft-bg));
+  border: 1px dashed var(--border-default);
+  border-radius: 9px;
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.4;
 }
 
 /* Period card in left column */
@@ -1768,19 +1833,19 @@ main {
 
 /* Form body */
 .agg-form-body {
-  padding: 8px 22px 22px;
+  padding: 4px 22px 18px;
   flex: 1;
 }
 
 @media (max-width: 520px) {
   .agg-form-body {
-    padding: 8px 16px 18px;
+    padding: 4px 16px 16px;
   }
 }
 
 /* Individual form sections */
 .agg-form-section {
-  padding: 18px 0;
+  padding: 14px 0;
   border-bottom: 1px solid var(--border-subtle);
 }
 
@@ -5096,6 +5161,16 @@ textarea.agg-field-input {
   border: 1px solid var(--border-hairline);
   border-radius: 11px;
   flex-shrink: 0;
+  position: relative;
+}
+
+/* Profile menu anclado al foot del sidebar abre hacia arriba (no hay espacio abajo) */
+.sb-foot .prof-pop {
+  top: auto;
+  bottom: calc(100% + 10px);
+  left: 0;
+  right: 0;
+  width: auto;
 }
 
 .sb-foot-ava {
@@ -5360,6 +5435,52 @@ textarea.agg-field-input {
 
 @media (min-width: 1024px) {
   .hd-menu-btn { display: none; }
+}
+
+@media (max-width: 1023px) {
+  .sb-desktop { display: none; }
+  .hd-collapse-btn { display: none !important; }
+}
+
+/* Drawer móvil: nunca exceder la altura visible — el .sb-nav scrollea internamente */
+.sb-drawer {
+  min-height: 0 !important;
+  height: 100% !important;
+}
+
+/* Header — mobile compaction so chrome no se solapa en pantallas estrechas */
+@media (max-width: 767px) {
+  .hd { padding: 10px 12px; gap: 8px; min-height: 60px; }
+  .hd-left { gap: 8px; }
+  .hd-actions { gap: 6px; }
+  .hd-bell { width: 32px; height: 32px; }
+  .hd-prof { padding: 4px 6px 4px 4px; }
+  .hd-prof-name { display: none; }
+  .hd-prof svg { display: none; }
+  .hd-prof-ava { width: 26px; height: 26px; }
+  .hd-crumb { font-size: 12px; gap: 6px; overflow: hidden; min-width: 0; flex: 1; }
+  .hd-crumb-home { display: none; }
+  .hd-crumb-sep { display: none; }
+  .hd-crumb-now {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+    max-width: 100%;
+    flex: 1;
+  }
+  .hd-crumb-now .num { display: none; }
+  /* Profile dropdown del header no debe rebasar el viewport */
+  .hd-actions .prof-pop {
+    right: 0;
+    left: auto;
+    width: min(288px, calc(100vw - 24px));
+  }
+  /* Sidebar drawer: foot card más compacto en móvil */
+  .sb-foot { margin: 0 8px 10px; padding: 8px; }
+  .sb-item { padding: 9px 10px; }
+  .sb-group-title { padding: 10px 10px 4px; }
 }
 
 .hd-menu-btn svg {
@@ -5947,11 +6068,16 @@ textarea.agg-field-input {
 .ev-hero-title {
   font-family: var(--font-display, 'Fraunces', Georgia, serif);
   font-weight: 600;
-  font-size: 34px;
+  font-size: clamp(22px, 3.2vw, 34px);
   margin: 8px 0 6px;
   color: var(--text-strong, #0c1424);
   line-height: 1.15;
   letter-spacing: -.01em;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  hyphens: auto;
+  max-width: 32ch;
 }
 .ev-hero-lede {
   font-size: 14px;
@@ -6783,3 +6909,1212 @@ textarea.agg-field-input {
   background: var(--pending-soft-bg, #fff7e0);
   color: var(--pending-soft-fg, #92400e);
 }
+
+/* === Phase 3: Detail mobile (start) === */
+
+/* 1. Hero section — compact padding + smaller title on mobile */
+@media (max-width: 979px) {
+  .detail-hero-section { padding-left: 20px; padding-right: 20px; padding-top: 20px; padding-bottom: 20px; }
+  .detail-right-rail { position: static; }
+}
+@media (max-width: 639px) {
+  .detail-hero-section { padding-left: 16px; padding-right: 16px; padding-top: 16px; padding-bottom: 16px; border-radius: 14px; }
+  /* Title size reduced from 44px at narrow widths */
+  .detail-hero-section h1 { font-size: 26px; line-height: 1.1; }
+  /* 3-col meta grid collapses to 2 + 1 on very small screens */
+  .detail-hero-section .grid.grid-cols-3 { grid-template-columns: 1fr 1fr; }
+  /* Hero grid gap reduction */
+  .detail-hero-section > div { gap: 20px; }
+}
+@media (max-width: 400px) {
+  .detail-hero-section h1 { font-size: 22px; }
+  .detail-hero-section .grid.grid-cols-3 { grid-template-columns: 1fr; }
+}
+
+/* 2. Lifecycle ladder — horizontal scroll on mobile, no wrapping */
+@media (max-width: 639px) {
+  .detail-ladder {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+    /* hide scrollbar visually but keep scrollable */
+    scrollbar-width: none;
+  }
+  .detail-ladder::-webkit-scrollbar { display: none; }
+}
+
+/* 3. Tab strip — horizontal scroll on mobile with fade indicator */
+.detail-tab-strip {
+  position: relative;
+  flex-wrap: nowrap;
+}
+@media (max-width: 639px) {
+  .detail-tab-strip {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .detail-tab-strip::-webkit-scrollbar { display: none; }
+  /* Fade indicator on the right edge */
+  .detail-tab-strip::after {
+    content: '';
+    position: absolute;
+    right: 0; top: 0; bottom: 0;
+    width: 32px;
+    background: linear-gradient(to right, transparent, var(--surface, #fff));
+    pointer-events: none;
+  }
+}
+
+/* 4. Tab content 2-column grids → single column at ≤ 768px
+   (already handled by lg:grid-cols-* in JSX, but reinforce for 768px edge) */
+@media (max-width: 768px) {
+  .dsec + .dsec { margin-top: 0; }
+}
+
+/* 5. ScoreGauge — smaller on mobile */
+@media (max-width: 480px) {
+  .gauge-lg {
+    width: 52px;
+    height: 52px;
+  }
+  .gauge-lg::before { inset: 4px; }
+  .gauge-lg > span { font-size: 12px; }
+}
+
+/* 6. Modals — full-width minus 16px gutters at ≤ 480px */
+@media (max-width: 480px) {
+  .detail-modal {
+    max-width: calc(100vw - 16px) !important;
+    border-radius: 14px !important;
+  }
+}
+
+/* === Phase 3: Detail mobile (end) === */
+
+/* === Phase 4: Agregar mobile (start) === */
+
+/* 1. Two-column field row — collapse at 640 px so phones never see side-by-side */
+@media (max-width: 640px) {
+  .agg-row-2 {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}
+
+/* 2. DocumentTypeSelector — stack cards vertically + reduce Fraunces numeral on mobile */
+@media (max-width: 560px) {
+  .agg-tcards {
+    grid-template-columns: 1fr;
+  }
+
+  .agg-tcard .agg-tcard-num {
+    font-size: 26px;
+  }
+
+  .agg-tcard {
+    min-height: 90px;
+    padding: 12px 14px;
+  }
+}
+
+/* 3. AdvisorsChips — stack Combobox + "Añadir" button vertically at ≤ 520 px */
+@media (max-width: 520px) {
+  .a-input-wrap {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .a-input-wrap .add {
+    width: 100%;
+  }
+
+  .advisors-chips {
+    flex-wrap: wrap;
+  }
+}
+
+/* 4. Dropzone — compact on mobile: less padding, smaller illustration */
+@media (max-width: 520px) {
+  .agg-dropzone {
+    padding: 16px 12px;
+  }
+
+  .agg-dropzone-ic {
+    width: 28px;
+    height: 28px;
+    font-size: 13px;
+    margin-bottom: 6px;
+  }
+
+  .agg-dropzone-h {
+    font-size: 12px;
+  }
+
+  .agg-dropzone-p {
+    font-size: 10.5px;
+  }
+}
+
+/* 5. Form footer actions — stack vertically at ≤ 480 px, primary action full-width */
+@media (max-width: 480px) {
+  .agg-form-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 12px 14px;
+  }
+
+  .agg-form-meta {
+    flex-basis: auto;
+    order: 2;
+  }
+
+  .agg-btnset {
+    width: 100%;
+    flex-direction: column-reverse;
+    order: 1;
+  }
+
+  .agg-btnset .agg-btn {
+    flex: none;
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* 6. Form heading + section number/title — reduce font sizes on mobile */
+@media (max-width: 520px) {
+  .agg-form-h {
+    font-size: 15px;
+  }
+
+  .agg-sec-num {
+    font-size: 11px;
+  }
+
+  .agg-sec-title {
+    font-size: 10.5px;
+  }
+}
+
+@media (max-width: 480px) {
+  .agg-form-h {
+    font-size: 14px;
+  }
+}
+
+/* 7. AccessDenied — prevent heading overflow at 360 px */
+@media (max-width: 400px) {
+  .agg-denied {
+    padding: 36px 14px;
+  }
+
+  .agg-denied-h {
+    font-size: 17px;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .agg-denied-p {
+    font-size: 12px;
+  }
+
+  .agg-denied-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .agg-denied-actions .agg-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* === Phase 4: Agregar mobile (end) === */
+
+/* === Phase 5: Lists/grids mobile (start) === */
+
+/* ─────────────────────────────────────────────────────────────────
+   1. Dashboard StatTile strip — padding reduction + early 2-col breakpoint
+   ───────────────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  /* Reduce p-6 (24px) on stat tiles to 14px at ≤480px so content
+     fits within a 360px viewport without overflow */
+  .group.relative.flex.flex-col.gap-3.overflow-hidden.rounded-2xl.border {
+    padding: 14px;
+  }
+}
+
+/* Tailwind sm=640px, but brief requires 2 cols from 481px.
+   Target the 4-tile dashboard strip by its unique lg:grid-cols-4 combo. */
+@media (min-width: 481px) and (max-width: 639px) {
+  .grid.grid-cols-1.gap-3.sm\:grid-cols-2.lg\:grid-cols-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   2. SemesterStrip — remove min-width on small phones
+   ───────────────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  /* The component hardcodes min-w-[280px]; override so it doesn't
+     force horizontal scroll on a 360px viewport */
+  .relative.min-w-\[280px\].overflow-hidden.rounded-2xl {
+    min-width: 0;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   3. ListRow & ActivityFeed — overflow guard at 360px
+   ───────────────────────────────────────────────────────────────── */
+@media (max-width: 400px) {
+  /* Badge pill: allow wrap instead of forcing overflow */
+  .whitespace-nowrap {
+    white-space: normal;
+  }
+  /* ActivityFeed list: prevent icon shrink eating text space */
+  [data-slot="activity-icon"] {
+    flex-shrink: 0;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   4. ProjectCard grid breakpoints override
+   The Tailwind sm (640px) breakpoint is too wide for the brief's
+   481px target. Add CSS overrides so the grid tightens earlier.
+   grid-cols-1 ≤480px / 2cols 481–768px / 3cols 769–1199px / 4cols ≥1200px
+   ───────────────────────────────────────────────────────────────── */
+
+/* Force 2-column from 481px (earlier than Tailwind sm=640px) */
+@media (min-width: 481px) and (max-width: 639px) {
+  .grid.grid-cols-1.sm\:grid-cols-2.lg\:grid-cols-3.xl\:grid-cols-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Force 3-column at 769–1023px (earlier than Tailwind lg=1024px) */
+@media (min-width: 769px) and (max-width: 1023px) {
+  .grid.grid-cols-1.sm\:grid-cols-2.lg\:grid-cols-3.xl\:grid-cols-4 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* Force 4-column at 1200–1279px (earlier than Tailwind xl=1280px) */
+@media (min-width: 1200px) and (max-width: 1279px) {
+  .grid.grid-cols-1.sm\:grid-cols-2.lg\:grid-cols-3.xl\:grid-cols-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   5. SeguimientoTable — sticky first column on mobile
+   The scroll container (.seg-table-scroll) already has overflow-x:auto.
+   Stick the title column so the user knows which row they are on.
+   ───────────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  /* Make the card respect overflow properly for sticky to work */
+  .seg-table-card {
+    overflow: hidden;
+  }
+
+  .seg-table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Sticky first th and td: project title column */
+  .seg-table thead tr th:first-child,
+  .seg-table tbody tr td:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    background: var(--surface);
+  }
+
+  /* Keep sticky column visible over scrolled content */
+  .seg-table thead tr th:first-child {
+    z-index: 3;
+  }
+
+  /* Tighter table padding on mobile */
+  .seg-th {
+    padding: 9px 12px;
+  }
+
+  .seg-td {
+    padding: 11px 12px;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   6. MyProjectCard — phase gates stack + numeral shrink + next-step
+   ───────────────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  /* Card itself: reduce padding */
+  .my-card {
+    padding: 16px;
+  }
+
+  /* Stack the 3 phase gates vertically */
+  .progress-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  /* Horizontal layout inside each gate: numeral left, text right */
+  .pgate {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+  }
+
+  /* Shrink Fraunces numeral */
+  .pgate .num {
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+
+  /* Label + desc stack vertically on the right side */
+  .pgate .lbl,
+  .pgate .desc {
+    margin-top: 0;
+  }
+
+  /* Dashed meta row in my-card-head wraps */
+  .my-card-head {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* next-step: reduce padding + ensure CTA is full-width */
+  .next-step {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .next-step .btn {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   7. UnifiedCalendar — cal-toolbar wrapping + day-cell shrink
+   ───────────────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  /* Toolbar: wrap mode-toggle and nav so they fit on 360px */
+  .cal-toolbar-top {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .cal-toolbar-top .cal-nav {
+    justify-content: center;
+  }
+
+  /* Keep mode-pill centred when toolbar stacks */
+  .cal-toolbar-top .mode-pill {
+    align-self: center;
+  }
+
+  /* Legend bar: smaller gap so items fit on one or two rows */
+  .legend-bar {
+    gap: 8px;
+    padding: 8px 10px;
+    font-size: 10px;
+  }
+
+  /* Calendar max-width already 360px — ensure it never exceeds
+     the available width minus card padding */
+  .cal-grid {
+    max-width: 100%;
+    gap: 1px;
+  }
+
+  /* Day cells: compact padding and smaller text to fit in 360px */
+  .cal-dow {
+    font-size: 8.5px;
+    padding: 4px 0;
+  }
+
+  .cal-day {
+    font-size: 10px;
+    border-radius: 6px;
+  }
+
+  /* Count chip: tighter on small cells */
+  .cal-count {
+    font-size: 7.5px;
+    min-width: 12px;
+    height: 12px;
+  }
+
+  /* Footer: stack zones on very small screens */
+  .c4-foot .c4-zones {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .c4-divider {
+    display: none;
+  }
+
+  .c4-actions {
+    justify-content: stretch;
+  }
+
+  .c4-cta {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   8. PresentationFilter — vertical stacking at ≤768px
+   Convert the 4-zone horizontal bar to stacked zones.
+   ───────────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  /* Stack all zones vertically */
+  .pf-filter {
+    flex-direction: column;
+  }
+
+  /* Each zone: full-width, no right border, bottom border instead */
+  .pf-zone {
+    flex: 0 0 auto;
+    width: 100%;
+    border-right: 0;
+    border-bottom: 1px solid color-mix(in oklch, var(--brand-blue) 14%, transparent);
+    min-width: 0;
+  }
+
+  .pf-zone:last-of-type {
+    border-bottom: 0;
+  }
+
+  /* Search zone: full width is implicit */
+  .pf-zone-search {
+    flex: 0 0 auto;
+    min-width: 0;
+  }
+
+  /* Modality chips: allow wrapping */
+  .pf-modality-row {
+    flex-wrap: wrap;
+  }
+
+  /* Period trigger: full-width button */
+  .pf-period-trigger {
+    width: 100%;
+    align-self: stretch;
+    margin-left: 0;
+  }
+
+  /* Period popover: full-width */
+  .pf-period-popover {
+    left: 0;
+    right: 0;
+    min-width: 0;
+    width: 100%;
+  }
+
+  /* Result zone: horizontal row (already handled at 980px — re-confirm) */
+  .pf-zone-result {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .pf-zone-result .pf-zone-eyebrow {
+    margin: 0;
+  }
+
+  .pf-result-lbl {
+    margin-top: 0;
+    margin-left: auto;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   9. PresentationTimeline + PresentationRow — padding trim
+   ───────────────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  /* Timeline card: tighter head and body */
+  .pt-head {
+    padding: 12px 14px 10px;
+  }
+
+  .pt-body {
+    padding: 14px;
+  }
+
+  /* Vertical rail: reposition to match new body padding */
+  .pt-body::before {
+    left: 42px;
+    top: 14px;
+    bottom: 14px;
+  }
+
+  /* Day row: tighter gap and smaller marker column */
+  .pt-day {
+    grid-template-columns: 40px 1fr;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  /* Date marker: smaller numeral */
+  .pt-marker .d {
+    font-size: 18px;
+  }
+
+  .pt-marker .dow {
+    font-size: 7.5px;
+  }
+
+  /* Day header: wrap month name to a second line */
+  .pt-day-h {
+    flex-wrap: wrap;
+    gap: 4px;
+    font-size: 11.5px;
+  }
+
+  .pt-day-count {
+    margin-left: 0;
+  }
+
+  /* Presentation rows: tighter padding and smaller ptime column */
+  .prow {
+    grid-template-columns: 48px 1fr auto;
+    gap: 8px;
+    padding: 9px 10px;
+  }
+
+  .ptime .h {
+    font-size: 11px;
+  }
+
+  .ptime .d {
+    font-size: 8px;
+  }
+}
+
+/* === Phase 5: Lists/grids mobile (end) === */
+
+/* === Phase 6: Polish — PresentationRow + Seguimiento filters (start) === */
+
+/* PresentationRow — wrapper para columna media (.ptitle + .pmeta) */
+.prow-mid {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+/* Título debe truncar cuando no cabe — usa span dedicado para ellipsis */
+.ptitle {
+  flex-wrap: nowrap;
+  min-width: 0;
+}
+.ptitle-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* En móvil, .pmeta apila los segmentos en columna para mejor lectura */
+@media (max-width: 640px) {
+  .pmeta {
+    gap: 4px 10px;
+  }
+  .pmeta span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+  /* Pills ocupan el ancho mínimo necesario */
+  .ptitle .spill {
+    flex-shrink: 0;
+  }
+  /* Reduce gap entre pills cuando hay poco espacio */
+  .ptitle { gap: 5px; }
+}
+
+/* Seguimiento filtros — móvil: stack vertical, controles full-width, touch ≥ 44 px */
+@media (max-width: 768px) {
+  .seg-filter-selects {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  .seg-filter-selects label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    width: 100%;
+    padding: 8px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 11px;
+    font-size: 11px;
+  }
+  .seg-filter-selects label select {
+    height: 36px;
+    margin-left: 0 !important;
+    flex: 0 1 auto;
+    min-width: 140px;
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    background: var(--surface-muted);
+  }
+}
+
+/* Seguimiento — refinos visuales en la tabla móvil sobre lo que ya hizo Phase 5 */
+@media (max-width: 768px) {
+  /* Columna title sticky: borde-derecho sutil para separarla del scroll */
+  .seg-table tbody tr td:first-child,
+  .seg-table thead tr th:first-child {
+    box-shadow: 1px 0 0 0 var(--border-subtle);
+  }
+  /* Título en celda sticky: limita el ancho y trunca títulos largos */
+  .seg-table tbody tr td:first-child {
+    max-width: 200px;
+  }
+  .seg-table tbody tr td:first-child .seg-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: block;
+    max-width: 100%;
+  }
+  /* Hint visual del scroll horizontal en el borde derecho */
+  .seg-table-card {
+    position: relative;
+  }
+  .seg-table-card::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 16px;
+    pointer-events: none;
+    background: linear-gradient(
+      to left,
+      var(--surface) 0%,
+      transparent 100%
+    );
+    z-index: 1;
+  }
+}
+
+/* === Phase 6: Polish — PresentationRow + Seguimiento filters (end) === */
+
+/* === Phase 7: Seguimiento mobile card stack (start) === */
+
+/* Default (desktop): cards ocultos, tabla visible */
+.seg-cards { display: none; }
+
+@media (max-width: 768px) {
+  /* Móvil: oculta la tabla, muestra el card stack */
+  .seg-table-scroll { display: none; }
+  .seg-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px;
+  }
+  /* Anula el hint visual del scroll horizontal porque ya no aplica */
+  .seg-table-card::after { display: none; }
+}
+
+.seg-card {
+  background: var(--surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.seg-card:hover {
+  border-color: color-mix(in oklch, var(--primary) 25%, var(--border-subtle));
+  box-shadow: 0 2px 6px -2px rgba(15, 23, 42, 0.08);
+}
+
+.seg-card-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.seg-card-head .tdot {
+  flex-shrink: 0;
+}
+
+.seg-card-title {
+  font-weight: 800;
+  font-size: 14px;
+  color: var(--text-strong);
+  letter-spacing: -0.01em;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.3;
+}
+
+.seg-card-head .spill {
+  flex-shrink: 0;
+}
+
+.seg-card-meta {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 4px;
+  margin: 2px 0 0;
+  padding: 10px 0 0;
+  border-top: 1px dashed var(--border-hairline, var(--border-subtle));
+}
+
+.seg-card-row {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  gap: 10px;
+  align-items: baseline;
+  font-size: 12.5px;
+  line-height: 1.4;
+}
+
+.seg-card-row dt {
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.seg-card-row dd {
+  margin: 0;
+  font-weight: 600;
+  color: var(--text-strong);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.seg-card-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--border-hairline, var(--border-subtle));
+  flex-wrap: wrap;
+}
+
+.seg-card-state {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.seg-card-foot .seg-btn {
+  flex-shrink: 0;
+}
+
+/* Pantallas muy estrechas — apila la fila inferior */
+@media (max-width: 380px) {
+  .seg-card-row {
+    grid-template-columns: 1fr;
+    gap: 1px;
+  }
+  .seg-card-foot {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .seg-card-foot .seg-btn {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* === Phase 7: Seguimiento mobile card stack (end) === */
+
+/* === Phase 8: Notifications dropdown — mobile redesign (start) === */
+
+/* Default desktop: el botón "abreviado" no se ve, el completo sí; backdrop oculto */
+.notif-head-action-short { display: none; }
+.notif-backdrop { display: none; }
+
+/* Mobile: dropdown ocupa todo el ancho con gutters, backdrop dim, header/foot
+   pegajosos. Botón "abreviado" reemplaza al completo. */
+@media (max-width: 640px) {
+  .notif-pop {
+    position: fixed !important;
+    top: 64px !important;
+    left: 12px !important;
+    right: 12px !important;
+    width: auto !important;
+    max-width: none !important;
+    margin: 0 !important;
+    border-radius: 14px !important;
+    z-index: 70 !important;
+    max-height: calc(100vh - 80px);
+    display: flex;
+    flex-direction: column;
+  }
+  .notif-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(1, 22, 56, 0.45);
+    backdrop-filter: blur(2px);
+    z-index: 69;
+    animation: notif-fade-in 0.18s ease-out;
+  }
+  @keyframes notif-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  .notif-head {
+    flex-shrink: 0;
+    padding: 14px 16px !important;
+  }
+  .notif-head-title {
+    font-size: 15px !important;
+  }
+  .notif-head-action-full { display: none; }
+  .notif-head-action-short {
+    display: inline;
+    font-size: 12px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    background: var(--accent-pteg-soft-bg, #eff5ff);
+    color: var(--accent-pteg-soft-fg, #0066ff);
+  }
+  .notif-head-action-short:hover {
+    text-decoration: none;
+    background: color-mix(in oklch, var(--accent-pteg-soft-bg, #eff5ff) 80%, var(--primary));
+  }
+  /* Lista ocupa el espacio restante */
+  .notif-list {
+    flex: 1 1 auto;
+    max-height: none !important;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  /* Items con más respiración en móvil */
+  .notif-list a > div,
+  .notif-list > div > div {
+    padding: 14px 16px !important;
+    gap: 12px !important;
+  }
+  .notif-foot {
+    flex-shrink: 0;
+    padding: 12px 16px !important;
+    text-align: center;
+  }
+  .notif-foot a {
+    display: inline-block;
+    width: 100%;
+    padding: 10px;
+    border-radius: 9px;
+    background: var(--surface-muted);
+    text-align: center;
+  }
+  /* La campana en .hd-actions ya está reducida (32px) — refuerza el hit-target */
+  .hd-bell {
+    min-width: 36px;
+    min-height: 36px;
+  }
+}
+
+/* === Phase 8: Notifications dropdown — mobile redesign (end) === */
+
+/* === Defensa ternary input (start) === */
+.inp-seg.v-defense button.danger {
+  background: var(--danger, #dc2626);
+  border-color: var(--danger, #dc2626);
+  color: #fff;
+  box-shadow: 0 4px 12px -4px rgba(220,38,38,.4);
+}
+.inp-seg.v-defense button.warning {
+  background: var(--pending, oklch(0.78 0.14 75));
+  border-color: var(--pending, oklch(0.78 0.14 75));
+  color: #fff;
+  box-shadow: 0 4px 12px -4px rgba(180,130,0,.3);
+}
+.inp-seg.v-defense button.success {
+  background: var(--success, #16a34a);
+  border-color: var(--success, #16a34a);
+  color: #fff;
+  box-shadow: 0 4px 12px -4px rgba(22,163,74,.4);
+}
+/* === Defensa ternary input (end) === */
+
+/* === Quintary (5-button) input === */
+.inp-seg.v-quintary {
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.inp-seg.v-quintary button {
+  flex: 1 1 calc(50% - 6px);
+  min-width: 100px;
+}
+.inp-seg.v-quintary button.active.danger {
+  background: var(--danger, #dc2626);
+  border-color: var(--danger, #dc2626);
+  color: #fff;
+  box-shadow: 0 4px 12px -4px rgba(220,38,38,.35);
+}
+.inp-seg.v-quintary button.active.warning {
+  background: var(--warning, #d97706);
+  border-color: var(--warning, #d97706);
+  color: #fff;
+  box-shadow: 0 4px 12px -4px rgba(217,119,6,.3);
+}
+.inp-seg.v-quintary button.active.neutral {
+  background: var(--color-navy, #011638);
+  border-color: var(--color-navy, #011638);
+  color: #fff;
+  box-shadow: 0 4px 12px -4px rgba(1,22,56,.25);
+}
+.inp-seg.v-quintary button.active.info {
+  background: var(--color-blue, #0066ff);
+  border-color: var(--color-blue, #0066ff);
+  color: #fff;
+  box-shadow: 0 4px 12px -4px rgba(0,102,255,.3);
+}
+.inp-seg.v-quintary button.active.success {
+  background: var(--success, #16a34a);
+  border-color: var(--success, #16a34a);
+  color: #fff;
+  box-shadow: 0 4px 12px -4px rgba(22,163,74,.4);
+}
+/* === Quintary input (end) === */
+
+/* === Combobox (Sub-H aligned) === */
+
+.agg-cb-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  height: 42px;
+  background: var(--surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-strong);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  outline: none;
+}
+
+.agg-cb-trigger:hover {
+  border-color: var(--border-default);
+}
+
+.agg-cb-trigger.is-open {
+  border-color: var(--brand-blue);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--brand-blue) 12%, transparent);
+}
+
+.agg-cb-trigger.is-error {
+  border-color: var(--destructive);
+  box-shadow: 0 0 0 2px color-mix(in oklch, var(--destructive) 10%, transparent);
+}
+
+.agg-cb-trigger.is-disabled,
+.agg-cb-trigger:disabled {
+  background: var(--surface-muted);
+  color: var(--text-muted);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.agg-cb-trigger .is-placeholder {
+  color: var(--text-faint);
+}
+
+.agg-cb-trigger svg {
+  color: var(--text-faint);
+}
+
+/* Popover shell */
+.agg-cb-pop {
+  z-index: 9999;
+  background: var(--surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 11px;
+  box-shadow: 0 12px 32px -8px rgba(15, 23, 42, 0.18), 0 4px 12px -4px rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+}
+
+/* Search row */
+.agg-cb-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-faint);
+}
+
+.agg-cb-search-input {
+  flex: 1;
+  font-size: 13px;
+  outline: none;
+  background: transparent;
+  color: var(--text-strong);
+  font-family: inherit;
+}
+
+.agg-cb-search-input::placeholder {
+  color: var(--text-faint);
+}
+
+.agg-cb-search-clear {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-faint);
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+.agg-cb-search-clear:hover {
+  color: var(--text-muted);
+}
+
+/* Option buttons */
+.agg-cb-opt {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  color: var(--text-strong);
+  transition: background 0.12s;
+}
+
+.agg-cb-opt:hover {
+  background: var(--surface-muted);
+}
+
+.agg-cb-opt.is-selected {
+  background: var(--accent-pteg-soft-bg);
+  color: var(--accent-pteg-soft-fg);
+  font-weight: 600;
+}
+
+.agg-cb-opt.is-selected svg {
+  color: var(--accent-pteg-soft-fg);
+}
+
+/* Empty state */
+.agg-cb-empty {
+  padding: 16px 12px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* === Combobox (Sub-H aligned) end === */
+
+/* === Project title responsive utilities ===
+   Two patterns, applied across the codebase:
+   - .title-clamp / .title-clamp-2 / .title-clamp-1: list/row contexts. Two-line
+     ellipsis on desktop, one-line on mobile. Always pair with title="..." on the
+     element so the full string surfaces via native tooltip + screen readers.
+   - .title-hero: hero/detail contexts. Fluid font-size, balanced wrapping,
+     long-string overflow handling. No clamp — the canonical full title.
+*/
+.title-clamp,
+.title-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  hyphens: auto;
+}
+
+.title-clamp-1 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+@media (max-width: 640px) {
+  .title-clamp,
+  .title-clamp-2 {
+    -webkit-line-clamp: 1;
+  }
+}
+
+.title-hero {
+  font-size: clamp(22px, 2.6vw, 34px);
+  line-height: 1.12;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  hyphens: auto;
+  max-width: 38ch;
+  margin: 0;
+}
+
+/* When titles are very long (≥120 chars), drop another size step so they
+   can't dominate the hero. The cap targets ~3 lines of body text. */
+.title-hero.is-long {
+  font-size: clamp(20px, 2.1vw, 28px);
+  line-height: 1.18;
+  max-width: 46ch;
+}
+
+/* Improve existing title cells so a single very-long word still breaks
+   instead of forcing horizontal scroll. */
+.seg-title-name { white-space: normal; overflow-wrap: anywhere; word-break: break-word; max-width: 38ch; -webkit-line-clamp: 2; display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; }
+.seg-card-title { white-space: normal; overflow-wrap: anywhere; word-break: break-word; -webkit-line-clamp: 2; display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; }
+.ptitle-text   { white-space: normal; overflow-wrap: anywhere; word-break: break-word; -webkit-line-clamp: 2; display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; text-overflow: clip; }
+@media (max-width: 640px) {
+  .seg-title-name,
+  .seg-card-title,
+  .ptitle-text { -webkit-line-clamp: 1; }
+}
+/* === Project title utilities end === */

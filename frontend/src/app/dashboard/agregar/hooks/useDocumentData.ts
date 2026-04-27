@@ -48,8 +48,10 @@ export function useDocumentData() {
   const allowedDocumentTypes = useMemo(() => {
     if (!isStudent) return ["proyecto", "tesis"] as const;
     const sem = (currentUser?.semester || "").toLowerCase();
-    if (sem.includes("9")) return ["proyecto"] as const;
-    if (sem.includes("10")) return ["tesis"] as const;
+    // Note: regex with word-boundaries para evitar que "10" matchee "9" y
+    // viceversa; acepta tanto "9no"/"10mo" como ordinales españoles ("noveno"/"décimo").
+    if (/(?:^|\D)10(?:\D|$)|d[eé]cimo/i.test(sem)) return ["tesis"] as const;
+    if (/(?:^|\D)9(?:\D|$)|noveno/i.test(sem)) return ["proyecto"] as const;
     // Fallback: allow both if semester is unknown
     return ["proyecto", "tesis"] as const;
   }, [isStudent, currentUser?.semester]);

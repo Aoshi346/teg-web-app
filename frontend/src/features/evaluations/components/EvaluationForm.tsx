@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm, FormProvider } from "react-hook-form";
 import type { Question } from "@features/evaluations/lib/questions/questions";
 import { getProject } from "@features/projects/api/projectService";
-import type { Project } from "@features/projects/types/project";
+import type { Project, ProjectState } from "@features/projects/types/project";
 import Banner from "@shared/ui/Banner";
 import { useValidation } from "@shared/hooks/useValidation";
 import { useEvaluationDraft } from "../hooks/useEvaluationDraft";
@@ -17,12 +17,14 @@ import MobileCategoryJumper from "./MobileCategoryJumper";
 import QuestionCard from "./QuestionCard";
 import StickyActionBar from "./StickyActionBar";
 import ResultsSummary from "./ResultsSummary";
+import FactibilidadToggle from "./FactibilidadToggle";
 
 interface EvaluationFormProps {
   projectId?: string | null;
   typeParam?: string;
   questions: Question[];
   kind?: "review" | "defense";
+  projectState?: ProjectState;
 }
 
 type Ratings = Record<string, number | string>;
@@ -43,13 +45,23 @@ export default function EvaluationForm({
   typeParam = "proyecto",
   questions,
   kind = "review",
+  projectState,
 }: EvaluationFormProps) {
   const router = useRouter();
   const documentType = typeParam.toLowerCase() === "tesis" ? "Tesis" : "Proyecto";
 
-  const filteredQuestions = questions.filter(
-    (q) => !q.documentType || q.documentType === "Both" || q.documentType === documentType,
-  );
+  const filteredQuestions = questions.filter((q) => {
+    const matchesDocType =
+      !q.documentType || q.documentType === "Both" || q.documentType === documentType;
+    // Note: preguntas sin `kind` se asumen `review` (legacy untagged) — así la vista
+    // Defensa oral excluye estrictamente las preguntas de revisión.
+    const effectiveKind = q.kind ?? "review";
+    const matchesKind = effectiveKind === "both" || effectiveKind === kind;
+    return matchesDocType && matchesKind;
+  });
+
+  const isTegEntrega =
+    documentType === "Tesis" && kind === "review" && projectState === "pending_entrega";
 
   const sections = [...new Set(filteredQuestions.map((q) => q.section || "Sección"))];
 
@@ -64,6 +76,7 @@ export default function EvaluationForm({
     typeParam,
     projectId,
     filteredQuestions,
+    kind,
   );
   const { activeId: activeSubsection, scrollTo: scrollToSub } = useScrollSpy("subsection-");
   const { submit } = useEvaluationSubmit(
@@ -73,6 +86,7 @@ export default function EvaluationForm({
     filteredQuestions,
     projectData,
     kind,
+    projectState,
   );
   const { showBanner, bannerProps } = useValidation();
 
@@ -110,11 +124,17 @@ export default function EvaluationForm({
   const isQuestionMissing = useCallback(
     (q: Question) => {
       if (q.answerType === "text") return false;
+      // En TEG Entrega, la Sección 6 se gestiona vía FactibilidadToggle:
+      // 6.2 sólo es obligatoria si 6.1 = Sí. Si 6.1 = No, 6.2 se ignora.
+      if (isTegEntrega && q.id === "te-s6-2") {
+        const six1 = Number(ratings["te-s6-1"]) || 0;
+        if (six1 !== 2) return false;
+      }
       const v = ratings[q.id];
       const n = typeof v === "number" ? v : Number(v) || 0;
       return n <= 0;
     },
-    [ratings],
+    [ratings, isTegEntrega],
   );
 
   const totalRequired = filteredQuestions.filter((q) => q.answerType !== "text").length;
@@ -316,8 +336,9 @@ export default function EvaluationForm({
 
       {/* Mobile category jumper */}
       <MobileCategoryJumper
-        sections={railSections.map((s) => ({
+        sections={railSections.map((s, i) => ({
           label: s.label,
+          shortLabel: `§${i + 1}`,
           answered: s.answered,
           total: s.total,
           isTeg: s.isTeg,
@@ -377,26 +398,65 @@ export default function EvaluationForm({
                   {/* Questions by subsection */}
                   {subsectionNames.map((sub) => {
                     const subId = `subsection-${slugify(sub)}`;
-                    const qs = sectionQs.filter((q) => (q.subsection || "General") === sub);
+                    const qs = sectionQs
+                      .filter((q) => (q.subsection || "General") === sub)
+                      .filter((q) => !(isTegEntrega && q.id.startsWith("te-s6")));
+                    const isEntregaSec6 =
+                      isTegEntrega && section === "Sección 6 (Capítulo 6)";
                     return (
                       <div key={sub} id={subId} className="ev-subsection">
                         <h4 className="ev-sub-title">{sub}</h4>
-                        <div className="ev-questions">
-                          {qs.map((q) => (
-                            <QuestionCard
-                              key={q.id}
-                              question={q}
-                              value={ratings[q.id]}
-                              onChange={(v) => {
-                                setValue(`ratings.${q.id}`, v, { shouldDirty: true });
-                              }}
-                              onAdvance={() => advanceToNext(q.id)}
-                              hasError={errorQId === q.id}
-                              isFocused={focusedQId === q.id}
-                              numeral={questionNumerals[q.id] || "01"}
-                            />
-                          ))}
-                        </div>
+                        {isEntregaSec6 ? (
+                          <FactibilidadToggle
+                            isFactible={
+                              ratings["te-s6-1"] === 2
+                                ? true
+                                : ratings["te-s6-1"] === 1
+                                  ? false
+                                  : null
+                            }
+                            includesModelo={
+                              ratings["te-s6-2"] === 2
+                                ? true
+                                : ratings["te-s6-2"] === 1
+                                  ? false
+                                  : null
+                            }
+                            onChange={(next) => {
+                              setValue(
+                                "ratings.te-s6-1",
+                                next.isFactible === true ? 2 : next.isFactible === false ? 1 : 0,
+                                { shouldDirty: true },
+                              );
+                              setValue(
+                                "ratings.te-s6-2",
+                                next.includesModelo === true
+                                  ? 2
+                                  : next.includesModelo === false
+                                    ? 1
+                                    : 0,
+                                { shouldDirty: true },
+                              );
+                            }}
+                          />
+                        ) : (
+                          <div className="ev-questions">
+                            {qs.map((q) => (
+                              <QuestionCard
+                                key={q.id}
+                                question={q}
+                                value={ratings[q.id]}
+                                onChange={(v) => {
+                                  setValue(`ratings.${q.id}`, v, { shouldDirty: true });
+                                }}
+                                onAdvance={() => advanceToNext(q.id)}
+                                hasError={errorQId === q.id}
+                                isFocused={focusedQId === q.id}
+                                numeral={questionNumerals[q.id] || "01"}
+                              />
+                            ))}
+                          </div>
+                        )}
                       </div>
                     );
                   })}

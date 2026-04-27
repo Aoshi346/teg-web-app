@@ -1,8 +1,8 @@
 import { describe, it, expect } from "vitest";
-import { buildStateTimeline } from "./buildStateTimeline";
+import { buildStateTimeline, type ProjectEvaluation } from "./buildStateTimeline";
 import type { Project } from "@features/projects/types/project";
 
-function mkProject(overrides: Partial<Project> & { evaluations?: unknown[] } = {}): Project {
+function mkProject(overrides: Partial<Project> & { evaluations?: ProjectEvaluation[] } = {}): Project {
   return {
     id: 1,
     title: "T",
@@ -26,7 +26,7 @@ describe("buildStateTimeline", () => {
       evaluations: [
         { id: 1, kind: "review", pass_status: "Pass", score: 17.2, graded_at: "2026-03-28T11:02:00Z", reviewer_name: "L" },
         { id: 2, kind: "review", pass_status: "Pass", score: 18.0, graded_at: "2026-04-10T14:18:00Z", reviewer_name: "L" },
-      ] as any,
+      ],
     });
     const events = buildStateTimeline(project);
     const evals = events.filter((e) => e.kind === "evaluation");
@@ -48,7 +48,7 @@ describe("buildStateTimeline", () => {
   it("orders events newest first across all kinds", () => {
     const project = mkProject({
       evaluations: [
-        { id: 1, kind: "review", pass_status: "Pass", score: 15, graded_at: "2026-03-20T00:00:00Z", reviewer_name: "L" } as any,
+        { id: 1, kind: "review", pass_status: "Pass", score: 15, graded_at: "2026-03-20T00:00:00Z", reviewer_name: "L" },
       ],
       stateOverrides: [
         { id: 9, fromState: "pending_review_1", toState: "pending_review_2", reason: "x", adminName: "M", createdAt: "2026-03-25T00:00:00Z" },
@@ -64,7 +64,7 @@ describe("buildStateTimeline", () => {
     const project = mkProject({
       state: "pending_defense",
       evaluations: [
-        { id: 1, kind: "review", pass_status: "Pass", score: 18, graded_at: "2026-04-10T00:00:00Z", reviewer_name: "L" } as any,
+        { id: 1, kind: "review", pass_status: "Pass", score: 18, graded_at: "2026-04-10T00:00:00Z", reviewer_name: "L" },
       ],
     });
     const events = buildStateTimeline(project);
@@ -75,7 +75,7 @@ describe("buildStateTimeline", () => {
     const project = mkProject({
       state: "approved",
       evaluations: [
-        { id: 1, kind: "defense", pass_status: "Pass", score: 18, graded_at: "2026-04-10T00:00:00Z", reviewer_name: "L" } as any,
+        { id: 1, kind: "defense", pass_status: "Pass", score: 18, graded_at: "2026-04-10T00:00:00Z", reviewer_name: "L" },
       ],
     });
     const events = buildStateTimeline(project);

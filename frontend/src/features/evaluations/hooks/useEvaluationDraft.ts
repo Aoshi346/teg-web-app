@@ -13,10 +13,11 @@ export function useEvaluationDraft(
   typeParam: string,
   projectId: string | null | undefined,
   questions: Question[],
+  kind: string = "review",
 ) {
   const key = useMemo(
-    () => `teg_eval_draft:${typeParam}:${projectId ?? "new"}`,
-    [typeParam, projectId],
+    () => `teg_eval_draft:${typeParam}:${projectId ?? "new"}:${kind}`,
+    [typeParam, projectId, kind],
   );
 
   const loadDraft = useCallback((): Partial<DraftPayload> => {

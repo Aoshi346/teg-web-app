@@ -121,7 +121,10 @@ export default function ProjectCard({
           )}
         </div>
 
-        <h3 className="mt-3 text-[15px] font-extrabold leading-snug tracking-[-0.012em] text-text-strong line-clamp-2">
+        <h3
+          className="mt-3 text-[15px] font-extrabold leading-snug tracking-[-0.012em] text-text-strong title-clamp-2"
+          title={project.title}
+        >
           {project.title}
         </h3>
 

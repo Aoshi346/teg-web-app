@@ -1,4 +1,4 @@
-export type AnswerType = 'yesno' | 'frequency' | 'stars' | 'text' | 'ternary' | 'ternary_na' | 'ternary_info';
+export type AnswerType = 'yesno' | 'frequency' | 'stars' | 'text' | 'ternary' | 'ternary_na' | 'ternary_info' | 'ternary_defense' | 'quintary';
 
 export type Question = {
   id: string;
@@ -7,6 +7,8 @@ export type Question = {
   section?: string; // top-level section (e.g., Diagramacion, Contenido)
   subsection?: string; // grouped subsection under the top-level section
   documentType?: 'Proyecto' | 'Tesis' | 'Both';
+  kind?: 'review' | 'defense' | 'both';
+  phase?: 'articulo' | 'entrega' | 'defensa';
   answerType: AnswerType;
   relatedImage?: string; // Optional URL/path to a visual aid for this specific question
   weight?: number; // Points awarded for this question (100% answer)
@@ -307,14 +309,6 @@ const _TESIS_STAGE1_QUESTIONS: Question[] = [
   { id: "q99", label: "Feedback", helper: "Espacio para observaciones, recomendaciones o comentarios para mejorar el documento. Responda con texto libre.", section: "Consideraciones Finales", subsection: "Feedback", documentType: 'Tesis', answerType: 'text' },
 ];
 
-const _TESIS_STAGE2_QUESTIONS: Question[] = [
-  // Placeholder for Stage 2 (Content)
-  { id: "q61", label: "C.1 - Planteamiento del Problema", helper: "¿El planteamiento del problema es claro, preciso y está bien delimitado?", section: "Contenido", subsection: "Capítulo I", documentType: 'Tesis', answerType: 'yesno' },
-  { id: "q62", label: "C.2 - Objetivos", helper: "¿Los objetivos son medibles, alcanzables y coherentes con el problema planteado?", section: "Contenido", subsection: "Capítulo I", documentType: 'Tesis', answerType: 'yesno' },
-  { id: "q63", label: "C.3 - Marco Teórico", helper: "¿El marco teórico sustenta adecuadamente la investigación con fuentes actuales y relevantes?", section: "Contenido", subsection: "Capítulo II", documentType: 'Tesis', answerType: 'yesno' },
-  { id: "q64", label: "C.4 - Metodología", helper: "¿La metodología descrita es adecuada para alcanzar los objetivos propuestos?", section: "Contenido", subsection: "Capítulo III", documentType: 'Tesis', answerType: 'yesno' },
-];
-
 /**
  * Applies placeholder images to all questions that don't already have a relatedImage.
  * This ensures every question has a reference image for the hover popup.
@@ -329,12 +323,116 @@ function applyPlaceholderImages(questions: Question[]): Question[] {
 // Apply placeholder images to all question arrays
 const PROJECT_QUESTIONS_WITH_IMAGES = applyPlaceholderImages(_PROJECT_QUESTIONS);
 const TESIS_STAGE1_QUESTIONS_WITH_IMAGES = applyPlaceholderImages(_TESIS_STAGE1_QUESTIONS);
-const TESIS_STAGE2_QUESTIONS_WITH_IMAGES = applyPlaceholderImages(_TESIS_STAGE2_QUESTIONS);
 
 // Export with images applied
 export const PROJECT_QUESTIONS = PROJECT_QUESTIONS_WITH_IMAGES;
 export const TESIS_STAGE1_QUESTIONS = TESIS_STAGE1_QUESTIONS_WITH_IMAGES;
-export const TESIS_STAGE2_QUESTIONS = TESIS_STAGE2_QUESTIONS_WITH_IMAGES;
 
 // Alias for backward compatibility (points to Stage 1 with images)
 export const TESIS_QUESTIONS = TESIS_STAGE1_QUESTIONS;
+
+export const TERNARY_DEFENSE_OPTIONS = [
+  { value: 1, label: 'Deficiente' },
+  { value: 2, label: 'Satisfactorio' },
+  { value: 3, label: 'Excelente' },
+];
+
+export const QUINTARY_OPTIONS = [
+  { value: 1, label: 'Deficiente' },
+  { value: 2, label: 'Medio-bajo' },
+  { value: 3, label: 'Intermedio' },
+  { value: 4, label: 'Medio-alto' },
+  { value: 5, label: 'Excelente' },
+];
+
+export const TEG_ENTREGA_QUESTIONS: Question[] = [
+  // Diagramación (4 questions, ids te-d1..te-d4)
+  { id: 'te-d1', label: '¿El documento cuenta con portada, página de presentación, acta de aprobación del tutor (firmada), declaración de derecho de autor, índice general, índices específicos (si aplica), lista de símbolos y abreviaturas (si aplica) y glosario de términos (si aplica)?', section: 'Diagramación', documentType: 'Tesis', kind: 'review', phase: 'entrega', answerType: 'quintary' },
+  { id: 'te-d2', label: '¿El documento en su totalidad cumple con el formato establecido para márgenes, títulos, subtítulos, interlineado, tipo, estilo y tamaño de letra, así como la identificación de la portada, página preliminar, tablas, cuadros y figuras?', section: 'Diagramación', documentType: 'Tesis', kind: 'review', phase: 'entrega', answerType: 'quintary' },
+  { id: 'te-d3', label: '¿En la totalidad del documento se cumple con cada una de las reglas ortográficas?', section: 'Diagramación', documentType: 'Tesis', kind: 'review', phase: 'entrega', answerType: 'quintary' },
+  { id: 'te-d4', label: '¿La redacción del documento presenta un lenguaje coherente, claro, técnicamente adecuado y organizado, y hay transiciones claras entre los párrafos y las secciones del texto?', section: 'Diagramación', documentType: 'Tesis', kind: 'review', phase: 'entrega', answerType: 'quintary' },
+
+  // Sección 1 (Capítulo 1) (10 questions, ids te-s1-1..te-s1-10)
+  { id: 'te-s1-1', label: '¿El planteamiento del problema está formulado de manera clara y estructurada, y se proporcionan evidencias del mismo?', section: 'Sección 1 (Capítulo 1)', documentType: 'Tesis', kind: 'review', phase: 'entrega', answerType: 'quintary' },
+  { id: 'te-s1-2', label: '¿El planteamiento del problema se realiza desde lo general a lo particular, y se identifican y/o describen las causas que lo originan?', section: 'Sección 1 (Capítulo 1)', documentType: 'Tesis', kind: 'review', phase: 'entrega', answerType: 'quintary' },
+  { id: 'te-s1-3', label: '¿Se explican las razones por las cuales es importante llevar a cabo la investigación?', section: 'Sección 1 (Capítulo 1)', documentType: 'Tesis', kind: 'review', phase: 'entrega', answerType: 'quintary' },
+  { id: 'te-s1-4', label: '¿Se argumenta sobre el aporte de la investigación al campo de conocimiento, y a la sociedad?', section: 'Sección 1 (Capítulo 1)', documentType: 'Tesis', kind: 'review', phase: 'entrega', answerType: 'quintary' },
+  { id: 'te-s1-5', label: '¿El objetivo general es único, describe de manera clara y coherente lo que se pretende lograr en la investigación a modo general, delimitándola adecuadamente?', section: 'Sección 1 (Capítulo 1)', documentType: 'Tesis', kind: 'review', phase: 'entrega', answerType: 'quintary' },
+  { id: 'te-s1-6', label: '¿El verbo empleado en el objetivo general está en infinitivo, acorde con el nivel de la investigación, y pertenece a un nivel de aplicación adecuado (al menos tercero de la taxonomía de Bloom) para una investigación universitaria?', section: 'Sección 1 (Capítulo 1)', documentType: 'Tesis', kind: 'review', phase: 'entrega', answerType: 'quintary' },
+  { id: 'te-s1-7', label: '¿Se documentan entre tres y cinco objetivos específicos, los verbos empleados están en infinitivo, y acordes con el nivel de aplicación del objetivo general?', section: 'Sección 1 (Capítulo 1)', documentType: 'Tesis', kind: 'review', phase: 'entrega', answerType: 'quintary' },
+  { id: 'te-s1-8', label: '¿Los objetivos específicos describen de manera clara, coherente y en orden lógico los logros intermedios medibles y observables que permiten la consecución del objetivo general?', section: 'Sección 1 (Capítulo 1)', documentType: 'Tesis', kind: 'review', phase: 'entrega', answerType: 'quintary' },
+  { id: 'te-s1-9', label: 'Cada una de las variables de la investigación indicada en su operacionalización, cuenta con una definición clara y precisa del concepto que se está estudiando en el contexto del trabajo.', section: 'Sección 1 (Capítulo 1)', documentType: 'Tesis', kind: 'review', phase: 'entrega', answerType: 'quintary' },
+  { id: 'te-s1-10', label: 'En la operacionalización de variables, las dimensiones asociadas con cada variable corresponden a características de las mismas, y los indícadores y subindicadores planteados proporcionan datos concretos sobre las dimensiones y son coherentes, adecuados, observables y cuantificables, de tal forma que se describe adecuadamente cómo se midió el concepto', section: 'Sección 1 (Capítulo 1)', documentType: 'Tesis', kind: 'review', phase: 'entrega', answerType: 'quintary' },
+
+  // Sección 2 (Capítulo 2) (3 questions, ids te-s2-1..te-s2-3)
+  { id: 'te-s2-1', label: '¿Los antecedentes son actuales (máximo de 10 años de haber sido publicados) y están descritos de una manera clara y precisa?', section: 'Sección 2 (Capítulo 2)', documentType: 'Tesis', kind: 'review', phase: 'entrega', answerType: 'quintary' },
+  { id: 'te-s2-2', label: '¿Los fundamentos teóricos documentados son suficientes, están descritos de una manera clara y precisa, organizados de manera coherente y aportan información relevante a la investigación?', section: 'Sección 2 (Capítulo 2)', documentType: 'Tesis', kind: 'review', phase: 'entrega', answerType: 'quintary' },
+  { id: 'te-s2-3', label: '¿Las bases legales documentadas son suficientes, están descritas de una manera clara y precisa, organizadas de manera coherente y aportan información sustento legal relevante a la investigación?', section: 'Sección 2 (Capítulo 2)', documentType: 'Tesis', kind: 'review', phase: 'entrega', answerType: 'quintary' },
+
+  // Sección 3 (Capítulo 3) (12 questions, ids te-s3-1..te-s3-12)
+  { id: 'te-s3-1', label: '¿Se clasificó adecuadamente la investigación indicando el modo, tipo, diseño y nivel de la misma?', section: 'Sección 3 (Capítulo 3)', documentType: 'Tesis', kind: 'review', phase: 'entrega', answerType: 'quintary' },
+  { id: 'te-s3-2', label: '¿Se especificó adecuadamente la población empleada en la investigación, constituyéndose la misma en el subconjunto del universo cuyos elementos presentan una misma característica, que es posible estudiar y sobre los cuales es posible inferir los resultados?', section: 'Sección 3 (Capítulo 3)', documentType: 'Tesis', kind: 'review', phase: 'entrega', answerType: 'quintary' },
+  { id: 'te-s3-3', label: '¿Se especificó adecuadamente la muestra empleada en la investigación, entendiendo a la misma como un subconjunto representativo de la población y sobre los cuales es posible realizar los estudios?', section: 'Sección 3 (Capítulo 3)', documentType: 'Tesis', kind: 'review', phase: 'entrega', answerType: 'quintary' },
+  { id: 'te-s3-4', label: '¿Se especificó el cálculo realizado para determinar el tamaño de la muestra para que la misma sea representativa, en acuerdo con el tipo de muestreo y las características de la población (conocimiento del tamaño y de su varianza)?', section: 'Sección 3 (Capítulo 3)', documentType: 'Tesis', kind: 'review', phase: 'entrega', answerType: 'quintary' },
+  { id: 'te-s3-5', label: '¿Se especificó adecuadamente si el tipo de muestreo empleado en la investigación fue probabilístico (aleatorio simple, estratificado, sistemático o por conglomerado), o no probabilístico (por cuotas, incidental o en cadena)?', section: 'Sección 3 (Capítulo 3)', documentType: 'Tesis', kind: 'review', phase: 'entrega', answerType: 'quintary' },
+  { id: 'te-s3-6', label: '¿Las técnicas, métodos y procedimientos experimentales empleados están descritos de una manera clara y precisa?', section: 'Sección 3 (Capítulo 3)', documentType: 'Tesis', kind: 'review', phase: 'entrega', answerType: 'quintary' },
+  { id: 'te-s3-7', label: '¿Las técnicas, métodos y procedimientos experimentales empleados son coherentes y adecuados para el logro de los objetivos planteados?', section: 'Sección 3 (Capítulo 3)', documentType: 'Tesis', kind: 'review', phase: 'entrega', answerType: 'quintary' },
+  { id: 'te-s3-8', label: '¿Las técnicas e Instrumentos de Recolección de Datos empleadas están descritos de una manera clara y precisa?', section: 'Sección 3 (Capítulo 3)', documentType: 'Tesis', kind: 'review', phase: 'entrega', answerType: 'quintary' },
+  { id: 'te-s3-9', label: '¿Las técnicas e Instrumentos de Recolección de Datos empleadas son coherentes y adecuados para la recolección integral de los datos?', section: 'Sección 3 (Capítulo 3)', documentType: 'Tesis', kind: 'review', phase: 'entrega', answerType: 'quintary' },
+  { id: 'te-s3-10', label: '¿La validez y confiabilidad de los Instrumentos de Recolección de Datos está demostrada de manera adecuada y coherente al tipo de instrumento empleado?', section: 'Sección 3 (Capítulo 3)', documentType: 'Tesis', kind: 'review', phase: 'entrega', answerType: 'quintary' },
+  { id: 'te-s3-11', label: '¿Las técnicas e Instrumentos de Procesamiento de Datos empleadas están descritas de una manera clara y precisa?', section: 'Sección 3 (Capítulo 3)', documentType: 'Tesis', kind: 'review', phase: 'entrega', answerType: 'quintary' },
+  { id: 'te-s3-12', label: '¿Las técnicas e Instrumentos de Procesamiento de Datos empleadas son coherentes y adecuadas para el análisis integral de los datos, considerando el nivel o profundidad de la investigación?', section: 'Sección 3 (Capítulo 3)', documentType: 'Tesis', kind: 'review', phase: 'entrega', answerType: 'quintary' },
+
+  // Sección 4 (Capítulo 4) (9 questions, ids te-s4-1..te-s4-9)
+  { id: 'te-s4-1', label: '¿Los resultados expuestos responden directamente a los objetivos planteados?', section: 'Sección 4 (Capítulo 4)', documentType: 'Tesis', kind: 'review', phase: 'entrega', answerType: 'quintary' },
+  { id: 'te-s4-2', label: '¿Los resultados expuestos están libres de juicios de valor, organizados lógicamente, y se presentan empleando tablas, cuadros, gráficos, figuras o diagramas que faciliten su comprensión?', section: 'Sección 4 (Capítulo 4)', documentType: 'Tesis', kind: 'review', phase: 'entrega', answerType: 'quintary' },
+  { id: 'te-s4-3', label: '¿Los resultados expuestos incluyen procesamientos estadísticos (como medias, porcentajes, frecuencias, incertidumbres asociadas); resultados de análisis inferenciales; descripción de patrones; o categorías o temas clave; dependiendo del tipo, diseño, nivel y modo de investigación en la cual se circunscribe el estudio?', section: 'Sección 4 (Capítulo 4)', documentType: 'Tesis', kind: 'review', phase: 'entrega', answerType: 'quintary' },
+  { id: 'te-s4-4', label: '¿En la discusión de resultados se explica el significado de los hallazgos obtenidos en el contexto del problema de investigación, con el fin de vincularlos con las teorías existentes?', section: 'Sección 4 (Capítulo 4)', documentType: 'Tesis', kind: 'review', phase: 'entrega', answerType: 'quintary' },
+  { id: 'te-s4-5', label: '¿En la discusión de resultados se consideran los posibles sesgos, errores o aspectos que pudieron influir en los resultados?', section: 'Sección 4 (Capítulo 4)', documentType: 'Tesis', kind: 'review', phase: 'entrega', answerType: 'quintary' },
+  { id: 'te-s4-6', label: '¿En la discusión de resultados se incluyen inferencias sustentadas para cualquier resultado sorprendente, inesperado o no concluyente?', section: 'Sección 4 (Capítulo 4)', documentType: 'Tesis', kind: 'review', phase: 'entrega', answerType: 'quintary' },
+  { id: 'te-s4-7', label: '¿En la discusión de resultados se consideran los resultados de estudios previos, para identificar similitudes, diferencias o avances?', section: 'Sección 4 (Capítulo 4)', documentType: 'Tesis', kind: 'review', phase: 'entrega', answerType: 'quintary' },
+  { id: 'te-s4-8', label: '¿En la discusión de resultados se hace mención sobre el impacto de los resultados en el campo de estudio y en la sociedad?', section: 'Sección 4 (Capítulo 4)', documentType: 'Tesis', kind: 'review', phase: 'entrega', answerType: 'quintary' },
+  { id: 'te-s4-9', label: '¿Se informa al lector sobre el impacto de las limitaciones encontradas durante el desarrollo de la investigación y que pudieron impactar en los resultados?', section: 'Sección 4 (Capítulo 4)', documentType: 'Tesis', kind: 'review', phase: 'entrega', answerType: 'quintary' },
+
+  // Sección 5 (Capítulo 5) (6 questions, ids te-s5-1..te-s5-6)
+  { id: 'te-s5-1', label: '¿Las conclusiones se basan en los resultados obtenidos?', section: 'Sección 5 (Capítulo 5)', documentType: 'Tesis', kind: 'review', phase: 'entrega', answerType: 'quintary' },
+  { id: 'te-s5-2', label: '¿Las conclusiones son concretas, bien organizadas y responden de manera directa a los objetivos de investigación planteados?', section: 'Sección 5 (Capítulo 5)', documentType: 'Tesis', kind: 'review', phase: 'entrega', answerType: 'quintary' },
+  { id: 'te-s5-3', label: '¿En las conclusiones se mencionan las restricciones que pudieron influir en los resultados?', section: 'Sección 5 (Capítulo 5)', documentType: 'Tesis', kind: 'review', phase: 'entrega', answerType: 'quintary' },
+  { id: 'te-s5-4', label: '¿Las recomendaciones formuladas son concretas y constituyen aspectos de interés en la investigación?', section: 'Sección 5 (Capítulo 5)', documentType: 'Tesis', kind: 'review', phase: 'entrega', answerType: 'quintary' },
+  { id: 'te-s5-5', label: '¿En las recomendaciones se sugieren formas de mejorar los procedimientos empleados en la investigación, o resolver problemas de índole metodológico?', section: 'Sección 5 (Capítulo 5)', documentType: 'Tesis', kind: 'review', phase: 'entrega', answerType: 'quintary' },
+  { id: 'te-s5-6', label: '¿En las recomendaciones se aportan sugerencias para futuras investigaciones indicando aspectos del tema de estudio que se considera importante explorar con mayor profundidad o desde otra perspectiva?', section: 'Sección 5 (Capítulo 5)', documentType: 'Tesis', kind: 'review', phase: 'entrega', answerType: 'quintary' },
+
+  // Sección 6 (Capítulo 6) (2 questions, ids te-s6-1..te-s6-2, answerType: yesno)
+  { id: 'te-s6-1', label: '¿El estudio constituye un proyecto factible?', section: 'Sección 6 (Capítulo 6)', documentType: 'Tesis', kind: 'review', phase: 'entrega', answerType: 'yesno' },
+  { id: 'te-s6-2', label: '¿Se adjunta el modelo operativo en el Capítulo 6?', section: 'Sección 6 (Capítulo 6)', documentType: 'Tesis', kind: 'review', phase: 'entrega', answerType: 'yesno' },
+
+  // Sección Final (3 questions, ids te-f1..te-f3)
+  { id: 'te-f1', label: '¿La documentación citada como referencia bibliográfica es suficiente, actualizada, acreditada, e incluye las obras mas pertinentes al campo del conocimiento en el que se encuentra circunscrita la investigación?', section: 'Sección Final', documentType: 'Tesis', kind: 'review', phase: 'entrega', answerType: 'quintary' },
+  { id: 'te-f2', label: '¿Los anexos incluidos en el documento permiten la ampliación de la información recolectada y analizada durante la investigación, apoyando la validez de la misma, facilitando su comprensión y evitando la interrupción en el flujo del texto principal?', section: 'Sección Final', documentType: 'Tesis', kind: 'review', phase: 'entrega', answerType: 'quintary' },
+  { id: 'te-f3', label: '¿El tema de investigación constituye un aporte valioso al campo del conocimiento en estudio?', section: 'Sección Final', documentType: 'Tesis', kind: 'review', phase: 'entrega', answerType: 'quintary' },
+];
+
+export const PTEG_DEFENSA_QUESTIONS: Question[] = [
+  // Criterios de Evaluación Técnica (15 questions)
+  { id: 'pd-tech1', label: 'Planteamiento y delimitación del problema', section: 'Criterios de Evaluación Técnica', documentType: 'Proyecto', kind: 'defense', answerType: 'ternary_defense' },
+  { id: 'pd-tech2', label: 'Justificación', section: 'Criterios de Evaluación Técnica', documentType: 'Proyecto', kind: 'defense', answerType: 'ternary_defense' },
+  { id: 'pd-tech3', label: 'Objetivo General', section: 'Criterios de Evaluación Técnica', documentType: 'Proyecto', kind: 'defense', answerType: 'ternary_defense' },
+  { id: 'pd-tech4', label: 'Objetivos Específicos', section: 'Criterios de Evaluación Técnica', documentType: 'Proyecto', kind: 'defense', answerType: 'ternary_defense' },
+  { id: 'pd-tech5', label: 'Definición y Operacionalización de variables', section: 'Criterios de Evaluación Técnica', documentType: 'Proyecto', kind: 'defense', answerType: 'ternary_defense' },
+  { id: 'pd-tech6', label: 'Antecedentes', section: 'Criterios de Evaluación Técnica', documentType: 'Proyecto', kind: 'defense', answerType: 'ternary_defense' },
+  { id: 'pd-tech7', label: 'Tipo, diseño, nivel y modo de la investigación', section: 'Criterios de Evaluación Técnica', documentType: 'Proyecto', kind: 'defense', answerType: 'ternary_defense' },
+  { id: 'pd-tech8', label: 'Población, muestra y muestreo', section: 'Criterios de Evaluación Técnica', documentType: 'Proyecto', kind: 'defense', answerType: 'ternary_defense' },
+  { id: 'pd-tech9', label: 'Técnica, métodos y procedimientos experimentales', section: 'Criterios de Evaluación Técnica', documentType: 'Proyecto', kind: 'defense', answerType: 'ternary_defense' },
+  { id: 'pd-tech10', label: 'Técnica e instrumentos de recolección de datos. Validez y Confiabilidad. Técnicas y Herramientas de Procesamiento de datos', section: 'Criterios de Evaluación Técnica', documentType: 'Proyecto', kind: 'defense', answerType: 'ternary_defense' },
+  { id: 'pd-tech11', label: 'Viabilidad Organizacional, Legal, de Mercado, Ambiental, Económica', section: 'Criterios de Evaluación Técnica', documentType: 'Proyecto', kind: 'defense', answerType: 'ternary_defense' },
+  { id: 'pd-tech12', label: 'Viabilidad Técnica', section: 'Criterios de Evaluación Técnica', documentType: 'Proyecto', kind: 'defense', answerType: 'ternary_defense' },
+  { id: 'pd-tech13', label: 'Viabilidad Temporal', section: 'Criterios de Evaluación Técnica', documentType: 'Proyecto', kind: 'defense', answerType: 'ternary_defense' },
+  { id: 'pd-tech14', label: 'Referencias Bibliográficas', section: 'Criterios de Evaluación Técnica', documentType: 'Proyecto', kind: 'defense', answerType: 'ternary_defense' },
+  { id: 'pd-tech15', label: 'Aporte a las Ciencias Farmacéuticas / Pertinencia', section: 'Criterios de Evaluación Técnica', documentType: 'Proyecto', kind: 'defense', answerType: 'ternary_defense' },
+  // Criterios de Evaluación Divulgativa (5 questions)
+  { id: 'pd-div1', label: 'Adecuada dicción, vocabulario, tono de voz, postura y lenguaje corporal, contacto visual', section: 'Criterios de Evaluación Divulgativa', documentType: 'Proyecto', kind: 'defense', answerType: 'ternary_defense' },
+  { id: 'pd-div2', label: 'Seguridad y dominio del tema', section: 'Criterios de Evaluación Divulgativa', documentType: 'Proyecto', kind: 'defense', answerType: 'ternary_defense' },
+  { id: 'pd-div3', label: 'Material de apoyo: Legibilidad del texto, Diseños no sobrecargados, Imágenes acordes al apartado', section: 'Criterios de Evaluación Divulgativa', documentType: 'Proyecto', kind: 'defense', answerType: 'ternary_defense' },
+  { id: 'pd-div4', label: 'Gestión del tiempo', section: 'Criterios de Evaluación Divulgativa', documentType: 'Proyecto', kind: 'defense', answerType: 'ternary_defense' },
+  { id: 'pd-div5', label: 'Precisión y claridad al responder al jurado', section: 'Criterios de Evaluación Divulgativa', documentType: 'Proyecto', kind: 'defense', answerType: 'ternary_defense' },
+];

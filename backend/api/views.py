@@ -229,6 +229,18 @@ class ProjectViewSet(viewsets.ModelViewSet):
             Project.objects.filter(Q(student=user) | Q(partner=user)).distinct()
         )
 
+    def get_permissions(self):
+        if self.action == "destroy":
+            return [permissions.IsAuthenticated(), IsAdminUserRole()]
+        return super().get_permissions()
+
+    def perform_destroy(self, instance):
+        with transaction.atomic():
+            for f in instance.files.all():
+                if f.file:
+                    f.file.delete(save=False)
+            instance.delete()
+
     def update(self, request, *args, **kwargs):
         """
         Compuerta de roles centralizada para PUT y PATCH:
@@ -301,7 +313,20 @@ class ProjectViewSet(viewsets.ModelViewSet):
             except User.DoesNotExist:
                 raise ValidationError({'reviewer': 'Jurado not found'}) from None
 
-        serializer.save(student=target_student, period=period, reviewer=reviewer)
+        # project_type/state se gestionan en el viewset porque el serializer los
+        # mantiene read-only (para impedir mutaciones vía PATCH tras la creación).
+        project_type = self.request.data.get('project_type', 'proyecto')
+        if project_type not in ('proyecto', 'tesis'):
+            raise ValidationError({'project_type': "Debe ser 'proyecto' o 'tesis'."})
+        initial_state = 'pending_review_1' if project_type == 'proyecto' else 'pending_articulo'
+
+        serializer.save(
+            student=target_student,
+            period=period,
+            reviewer=reviewer,
+            project_type=project_type,
+            state=initial_state,
+        )
 
     @action(detail=True, methods=['post'], url_path='reassign_student')
     def reassign_student(self, request, pk=None):

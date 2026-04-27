@@ -124,26 +124,7 @@ export function ProfileForm({ initialValues, onSubmit }: ProfileFormProps) {
         </div>
 
         {role === "Estudiante" && (
-          <div>
-            <label htmlFor="semester-select" className={LABEL_CLASS}>
-              Semestre <span className={REQ_CLASS}>*</span>
-            </label>
-            <select
-              id="semester-select"
-              {...register("semester")}
-              className={`${INPUT_CLASS} appearance-none pr-8`}
-              style={{
-                backgroundImage:
-                  "url(\"data:image/svg+xml,%3Csvg width='10' height='6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236b7589' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E\")",
-                backgroundRepeat: "no-repeat",
-                backgroundPosition: "right 12px center",
-              }}
-            >
-              <option value="9no">9no Semestre</option>
-              <option value="10mo">10mo Semestre</option>
-              <option value="N/A">N/A</option>
-            </select>
-          </div>
+          <input type="hidden" {...register("semester")} />
         )}
       </div>
 

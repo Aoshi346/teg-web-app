@@ -1,6 +1,6 @@
 import React from "react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 
 // ── next/image mock ───────────────────────────────────────────────────────────
 vi.mock("next/image", () => ({
@@ -405,5 +405,68 @@ describe("Sidebar — Sub-M redesign: no legacy color classes", () => {
     for (const cls of BANNED_CLASSES) {
       expect(html, `should not contain '${cls}'`).not.toContain(cls);
     }
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// NEW TESTS — 20260427-005-student-permissions: PTEG/TEG semester-based filter
+//
+// Cases 1 and 2 MUST FAIL against the current implementation (both items
+// always shown). Cases 3 and 4 should pass with current code (both shown =
+// expected in the fallback/admin paths).
+// ─────────────────────────────────────────────────────────────────────────────
+describe("Sidebar — student semester-based PTEG/TEG filter", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  // Helper: render and wait for nav to mount, then return the nav element.
+  async function renderAndGetNav(
+    role: string,
+    semester: string
+  ): Promise<HTMLElement> {
+    mockGetUserRole.mockReturnValue(role);
+    mockGetUser.mockReturnValue({ email: "user@test.com", semester });
+    render(<Sidebar {...defaultProps} />);
+    await waitFor(() => {
+      expect(screen.getByRole("navigation")).toBeDefined();
+    });
+    return screen.getByRole("navigation");
+  }
+
+  // Case 1: semester "10" → show TEG only, hide PTEG
+  it("Estudiante with semester '10' sees TEG item and NOT PTEG in nav", async () => {
+    const nav = await renderAndGetNav("Estudiante", "10");
+    const navScope = within(nav);
+    // TEG must be present as a nav link
+    expect(navScope.getByRole("link", { name: "TEG" })).toBeDefined();
+    // PTEG must be absent
+    expect(navScope.queryByRole("link", { name: "PTEG" })).toBeNull();
+  });
+
+  // Case 2: semester "9" → show PTEG only, hide TEG
+  it("Estudiante with semester '9' sees PTEG item and NOT TEG in nav", async () => {
+    const nav = await renderAndGetNav("Estudiante", "9");
+    const navScope = within(nav);
+    // PTEG must be present as a nav link
+    expect(navScope.getByRole("link", { name: "PTEG" })).toBeDefined();
+    // TEG must be absent
+    expect(navScope.queryByRole("link", { name: "TEG" })).toBeNull();
+  });
+
+  // Case 3: semester "" (unknown) → safe fallback, show both
+  it("Estudiante with unknown semester '' sees both PTEG and TEG in nav", async () => {
+    const nav = await renderAndGetNav("Estudiante", "");
+    const navScope = within(nav);
+    expect(navScope.getByRole("link", { name: "PTEG" })).toBeDefined();
+    expect(navScope.getByRole("link", { name: "TEG" })).toBeDefined();
+  });
+
+  // Case 4: Administrador → sees both regardless of semester
+  it("Administrador sees both PTEG and TEG in nav", async () => {
+    const nav = await renderAndGetNav("Administrador", "8");
+    const navScope = within(nav);
+    expect(navScope.getByRole("link", { name: "PTEG" })).toBeDefined();
+    expect(navScope.getByRole("link", { name: "TEG" })).toBeDefined();
   });
 });

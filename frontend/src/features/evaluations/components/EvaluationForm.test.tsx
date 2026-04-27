@@ -377,6 +377,104 @@ describe("EvaluationForm — validation error banner (Sub-N)", () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
+// kind=defense — defensa oral 20-question set
+// ─────────────────────────────────────────────────────────────────────────────
+describe("EvaluationForm — kind=defense", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  // Import the real questions array that will contain both review and defensa
+  // entries after implementation. Before implementation, PTEG_DEFENSA_QUESTIONS
+  // does not exist, so the import below will fail — that is the expected RED failure.
+  it("renders exactly 20 questions when kind='defense' and typeParam='proyecto'", async () => {
+    const { PTEG_DEFENSA_QUESTIONS } = await import(
+      "@features/evaluations/lib/questions/questions"
+    );
+    const { default: EvaluationFormFresh } = await import("./EvaluationForm");
+    const { container } = render(
+      <EvaluationFormFresh
+        projectId="99"
+        typeParam="proyecto"
+        kind="defense"
+        questions={PTEG_DEFENSA_QUESTIONS}
+      />
+    );
+    const cards = container.querySelectorAll(".qcard");
+    expect(cards.length).toBe(20);
+  });
+
+  it("section headings include 'Criterios de Evaluación Técnica' when kind='defense'", async () => {
+    const { PTEG_DEFENSA_QUESTIONS } = await import(
+      "@features/evaluations/lib/questions/questions"
+    );
+    const { default: EvaluationFormFresh } = await import("./EvaluationForm");
+    render(
+      <EvaluationFormFresh
+        projectId="99"
+        typeParam="proyecto"
+        kind="defense"
+        questions={PTEG_DEFENSA_QUESTIONS}
+      />
+    );
+    expect(screen.getByText(/Criterios de Evaluación Técnica/)).toBeInTheDocument();
+  });
+
+  it("section headings include 'Criterios de Evaluación Divulgativa' when kind='defense'", async () => {
+    const { PTEG_DEFENSA_QUESTIONS } = await import(
+      "@features/evaluations/lib/questions/questions"
+    );
+    const { default: EvaluationFormFresh } = await import("./EvaluationForm");
+    render(
+      <EvaluationFormFresh
+        projectId="99"
+        typeParam="proyecto"
+        kind="defense"
+        questions={PTEG_DEFENSA_QUESTIONS}
+      />
+    );
+    expect(screen.getByText(/Criterios de Evaluación Divulgativa/)).toBeInTheDocument();
+  });
+
+  it("does NOT render review-only section 'Diagramación' when kind='defense'", async () => {
+    const { PTEG_DEFENSA_QUESTIONS } = await import(
+      "@features/evaluations/lib/questions/questions"
+    );
+    const { default: EvaluationFormFresh } = await import("./EvaluationForm");
+    render(
+      <EvaluationFormFresh
+        projectId="99"
+        typeParam="proyecto"
+        kind="defense"
+        questions={PTEG_DEFENSA_QUESTIONS}
+      />
+    );
+    // Ribbon text for review-only sections must not appear
+    const ribbons = document.querySelectorAll(".ribbon");
+    const ribbonTexts = Array.from(ribbons).map((r) => r.textContent || "");
+    expect(ribbonTexts.some((t) => t.includes("Diagramación"))).toBe(false);
+  });
+
+  it("does NOT render review-only section 'Contenido' when kind='defense'", async () => {
+    const { PTEG_DEFENSA_QUESTIONS } = await import(
+      "@features/evaluations/lib/questions/questions"
+    );
+    const { default: EvaluationFormFresh } = await import("./EvaluationForm");
+    render(
+      <EvaluationFormFresh
+        projectId="99"
+        typeParam="proyecto"
+        kind="defense"
+        questions={PTEG_DEFENSA_QUESTIONS}
+      />
+    );
+    const ribbons = document.querySelectorAll(".ribbon");
+    const ribbonTexts = Array.from(ribbons).map((r) => r.textContent || "");
+    expect(ribbonTexts.some((t) => /^Contenido$/.test(t.trim()))).toBe(false);
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 // No legacy Tailwind color classes
 // ─────────────────────────────────────────────────────────────────────────────
 describe("EvaluationForm — no legacy Tailwind color classes (Sub-N)", () => {

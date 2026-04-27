@@ -7,6 +7,8 @@ import {
   YesNoInput,
   FrequencyInput,
   TernaryInput,
+  TernaryDefenseInput,
+  QuintaryInput,
   StarRatingInput,
   FreeTextInput,
 } from "./inputs";
@@ -50,6 +52,10 @@ export default function QuestionCard({
         return <TernaryInput value={numVal} onChange={onChange} variant="ternary_na" onAdvance={onAdvance} />;
       case "ternary_info":
         return <TernaryInput value={numVal} onChange={onChange} variant="ternary_info" onAdvance={onAdvance} />;
+      case "ternary_defense":
+        return <TernaryDefenseInput value={numVal} onChange={onChange} onAdvance={onAdvance} />;
+      case "quintary":
+        return <QuintaryInput value={numVal} onChange={(v) => onChange(v)} onAdvance={onAdvance} />;
       case "stars":
         return <StarRatingInput value={numVal} onChange={onChange} onAdvance={onAdvance} />;
       case "text":

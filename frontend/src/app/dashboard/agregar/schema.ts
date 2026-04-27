@@ -6,17 +6,16 @@ export const documentFormSchema = z
     documentType: z.enum(["proyecto", "tesis"]),
     studentId: z.union([z.number().int().positive(), z.literal("")]),
     partnerId: z.union([z.number().int().positive(), z.literal(""), z.null()]).optional(),
-    advisors: z
-      .array(z.union([z.number().int().positive(), z.literal("")]))
-      .min(1, "Debe asignar al menos un tutor."),
+    advisors: z.array(z.union([z.number().int().positive(), z.literal("")])),
     semesterPeriod: z.string().min(1, "Seleccione un período académico."),
     files: z.array(z.instanceof(File)).optional(),
     userRole: z.string(),
     reviewer: z.number().int().positive().optional().nullable(),
   })
   .superRefine((data, ctx) => {
-    // studentId is required
-    if (data.studentId === "" || data.studentId === undefined) {
+    const isStudent = data.userRole === "Estudiante";
+
+    if (!isStudent && (data.studentId === "" || data.studentId === undefined)) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "Debe seleccionar un estudiante.",
@@ -24,8 +23,8 @@ export const documentFormSchema = z
       });
     }
 
-    // At least one valid advisor
     const validAdvisors = data.advisors.filter((a): a is number => a !== "");
+
     if (validAdvisors.length === 0) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
@@ -34,7 +33,6 @@ export const documentFormSchema = z
       });
     }
 
-    // No duplicate advisors
     const uniqueAdvisors = new Set(validAdvisors);
     if (uniqueAdvisors.size !== validAdvisors.length) {
       ctx.addIssue({

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useCallback } from "react";
+import React, { useEffect, useRef, useCallback, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -12,7 +12,8 @@ import {
   PlusCircle,
   Settings,
 } from "lucide-react";
-import { getUser, getUserRole } from "@features/auth/api/clientAuth";
+import { getUser, getUserRole, logout } from "@features/auth/api/clientAuth";
+import ProfileMenu from "@widgets/header/ProfileMenu";
 
 export interface SidebarProps {
   isCollapsed: boolean;
@@ -85,6 +86,20 @@ function deriveName(email: string): string {
   return local.charAt(0).toUpperCase() + local.slice(1);
 }
 
+type StudentDocType = "PTEG" | "TEG" | null;
+
+/**
+ * Determina si el semestre de un estudiante corresponde a PTEG (9°) o TEG (10°).
+ * Se evalúa "10" antes que "9" para evitar que "10" sea capturado por includes("1").
+ * Retorna null si el semestre es vacío, desconocido, o si el usuario no es Estudiante.
+ */
+function studentDocType(semester: string | undefined | null): StudentDocType {
+  const s = (semester ?? "").toString();
+  if (s.includes("10")) return "TEG";
+  if (s.includes("9")) return "PTEG";
+  return null;
+}
+
 const Sidebar: React.FC<SidebarProps> = ({
   isCollapsed,
   mobileOpen,
@@ -96,20 +111,27 @@ const Sidebar: React.FC<SidebarProps> = ({
   const overlayRef = useRef<HTMLDivElement>(null);
   const touchStartX = useRef<number>(0);
   const linkRefs = useRef<Map<string, HTMLAnchorElement>>(new Map());
+  const footMoreRef = useRef<HTMLButtonElement>(null);
+  const [footMenuOpen, setFootMenuOpen] = useState(false);
+
+  const handleFootLogout = useCallback(() => {
+    setFootMenuOpen(false);
+    logout();
+    router.push("/");
+  }, [router]);
 
   const user = getUser();
   const role = getUserRole() ?? "Estudiante";
   const email = user?.email ?? "";
   const displayName = email ? deriveName(email) : "Usuario";
 
-  // Filtra ítems de menú según el rol del usuario
+  // Filtra ítems de menú según el rol del usuario y, para Estudiante, según semestre
+  const docType = role === "Estudiante" ? studentDocType(user?.semester) : null;
   const menuItems = ALL_MENU_ITEMS.filter((item) => {
-    if (item.label === "Agregar") {
-      return role === "Administrador";
-    }
-    if (item.label === "Planificación") {
-      return role !== "Estudiante";
-    }
+    if (item.label === "Agregar") return role === "Administrador";
+    if (item.label === "Planificación") return role !== "Estudiante";
+    if (item.label === "PTEG") return docType !== "TEG";
+    if (item.label === "TEG") return docType !== "PTEG";
     return true;
   });
 
@@ -273,11 +295,26 @@ const Sidebar: React.FC<SidebarProps> = ({
               <span className="sb-foot-name">{displayName}</span>
               <span className="sb-foot-role">{role}</span>
             </div>
-            <button className="sb-foot-more" type="button" aria-label="Más opciones">
+            <button
+              ref={footMoreRef}
+              className="sb-foot-more"
+              type="button"
+              aria-label="Más opciones"
+              aria-expanded={footMenuOpen}
+              onClick={() => setFootMenuOpen((v) => !v)}
+            >
               ⋯
             </button>
           </>
         )}
+        <ProfileMenu
+          isOpen={footMenuOpen}
+          email={email}
+          role={role}
+          onClose={() => setFootMenuOpen(false)}
+          onLogout={handleFootLogout}
+          anchorRef={footMoreRef}
+        />
       </div>
     </>
   );
@@ -285,7 +322,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   return (
     <>
       {/* Sidebar de escritorio */}
-      <aside className={`sb${isCollapsed ? " is-collapsed" : ""}`}>
+      <aside className={`sb sb-desktop${isCollapsed ? " is-collapsed" : ""}`}>
         {sidebarContent}
       </aside>
 
@@ -305,7 +342,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             role="dialog"
             aria-modal="true"
             aria-label="Menú de navegación"
-            className="sb"
+            className="sb sb-drawer"
             style={{ width: "84%", maxWidth: 300, height: "100%", position: "relative" }}
             onClick={(e) => e.stopPropagation()}
             onTouchStart={handleTouchStart}

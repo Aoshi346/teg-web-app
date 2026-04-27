@@ -70,7 +70,7 @@ export default function DocumentFormNew({
       studentId:
         userRole !== "Administrador" && currentUser?.id ? currentUser.id : "",
       partnerId: "",
-      advisors: [""],
+      advisors: [],
       semesterPeriod: defaultSemester,
       files: [],
       userRole: userRole || "",
@@ -191,7 +191,7 @@ export default function DocumentFormNew({
         studentId:
           userRole === "Administrador" ? "" : currentUser?.id || "",
         partnerId: "",
-        advisors: [""],
+        advisors: [],
         semesterPeriod:
           semesters[0] || defaultSemester || getCurrentSemester(),
         files: [],
@@ -246,28 +246,27 @@ export default function DocumentFormNew({
       )}
 
       <FormProvider {...methods}>
-        <div className="agg-stack">
-          {/* ── Left: Type selector + Period ── */}
-          <div className="space-y-3">
-            <DocumentTypeSelector
-              value={documentType}
-              onChange={(type) => setValue("documentType", type)}
-              allowedTypes={allowedDocumentTypes as ("proyecto" | "tesis")[]}
-              disabled={isStudent && allowedDocumentTypes.length === 1}
-            />
+        <div className={cn("agg-stack", isStudent && "is-solo")}>
+          {/* ── Left rail (admin only) ── */}
+          {!isStudent && (
+            <div className="space-y-3">
+              <DocumentTypeSelector
+                value={documentType}
+                onChange={(type) => setValue("documentType", type)}
+                allowedTypes={allowedDocumentTypes as ("proyecto" | "tesis")[]}
+              />
 
-            <div className="agg-period-card">
-              <p className="agg-period-lbl">Período</p>
-              <p className="agg-period-val">
-                {semesterPeriod || defaultSemester || "—"}
-              </p>
-              <p className="agg-period-sub">
-                {isStudent ? "Asignado automáticamente" : "Definido por administración"}
-              </p>
+              <div className="agg-period-card">
+                <p className="agg-period-lbl">Período</p>
+                <p className="agg-period-val">
+                  {semesterPeriod || defaultSemester || "—"}
+                </p>
+                <p className="agg-period-sub">Definido por administración</p>
+              </div>
             </div>
-          </div>
+          )}
 
-          {/* ── Right: Sectioned form ── */}
+          {/* ── Form card ── */}
           <form onSubmit={handleSubmit(onSubmit)} className="agg-form-card">
             <div className="agg-form-head">
               <div>
@@ -280,10 +279,17 @@ export default function DocumentFormNew({
                 </h3>
                 <p className="agg-form-sub">{formSubtitle}</p>
               </div>
-              <span className={`ts-pill ${isProyecto ? "pteg" : "teg"}`}>
-                <span className="dt" />
-                {isProyecto ? "PTEG" : "TEG"} · {isProyecto ? "9°" : "10°"} semestre
-              </span>
+              <div className="agg-head-meta">
+                <span className={`ts-pill ${isProyecto ? "pteg" : "teg"}`}>
+                  <span className="dt" />
+                  {isProyecto ? "PTEG" : "TEG"} · {isProyecto ? "9°" : "10°"} semestre
+                </span>
+                {isStudent && (
+                  <span className="agg-head-period">
+                    Período <b>{semesterPeriod || defaultSemester || "—"}</b>
+                  </span>
+                )}
+              </div>
             </div>
 
             <div className="agg-form-body">
@@ -384,9 +390,15 @@ export default function DocumentFormNew({
                           Tutores académicos <span className="agg-req">*</span>
                         </label>
                         <AdvisorsChips tutors={tutors} />
-                        <span className="agg-field-help">
-                          Mínimo un tutor. Sin duplicados.
-                        </span>
+                        {errors.advisors ? (
+                          <span className="agg-field-help" style={{ color: "var(--destructive)" }}>
+                            {errors.advisors.message}
+                          </span>
+                        ) : (
+                          <span className="agg-field-help">
+                            Mínimo un tutor. Sin duplicados.
+                          </span>
+                        )}
                       </div>
 
                       <div className="agg-field">
@@ -503,9 +515,15 @@ export default function DocumentFormNew({
                           Tutores académicos <span className="agg-req">*</span>
                         </label>
                         <AdvisorsChips tutors={tutors} />
-                        <span className="agg-field-help">
-                          Mínimo un tutor.
-                        </span>
+                        {errors.advisors ? (
+                          <span className="agg-field-help" style={{ color: "var(--destructive)" }}>
+                            {errors.advisors.message}
+                          </span>
+                        ) : (
+                          <span className="agg-field-help">
+                            Mínimo un tutor.
+                          </span>
+                        )}
                       </div>
                     </div>
                   </section>

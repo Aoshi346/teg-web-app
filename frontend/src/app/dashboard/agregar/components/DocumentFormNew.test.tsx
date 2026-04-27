@@ -1,6 +1,7 @@
 import React from "react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import type { UserOption } from "../hooks/useDocumentData";
 
 // ---------------------------------------------------------------------------
@@ -232,5 +233,38 @@ describe("DocumentFormNew — Sub-H structural smoke", () => {
     );
     expect(screen.getByText("01")).toBeTruthy();
     expect(screen.getByText("02")).toBeTruthy();
+  });
+
+  // Phase 3 RED — submit feedback bug
+  // Confirms that DocumentFormNew renders the advisors validation error message
+  // after a failed submit attempt. Today the component never renders
+  // errors.advisors?.message, so the second assertion below fails.
+  it("surfaces 'Debe asignar al menos un tutor' when admin submits without adding a tutor", async () => {
+    const user = userEvent.setup();
+    render(
+      <DocumentFormNew
+        {...buildDefaultProps({
+          userRole: "Administrador",
+          isStudent: false,
+          currentUser: null,
+        })}
+      />,
+    );
+
+    // Type a title long enough to pass the title validation (≥10 chars)
+    const titleInput = screen.getByPlaceholderText("Ingresa el título completo...");
+    await user.type(titleInput, "Título válido de prueba");
+
+    // Click submit without selecting a student or adding a tutor
+    const submitButton = screen.getByRole("button", { name: /registrar trabajo/i });
+    await user.click(submitButton);
+
+    // Sanity check: the studentId error IS rendered today (confirms validation ran)
+    await waitFor(() => {
+      expect(screen.queryByText("Debe seleccionar un estudiante.")).toBeInTheDocument();
+    });
+
+    // This assertion MUST fail today: errors.advisors is never rendered in DocumentFormNew.tsx
+    expect(screen.queryByText("Debe asignar al menos un tutor.")).toBeInTheDocument();
   });
 });

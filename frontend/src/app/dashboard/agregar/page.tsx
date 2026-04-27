@@ -41,8 +41,8 @@ export default function AgregarDocumentoPage() {
     return (
       <>
         <DashboardHeader pageTitle="Acceso restringido" />
-        <main className="flex-1 p-4 sm:p-5 lg:p-6 overflow-y-auto bg-surface-muted">
-          <div className="max-w-5xl mx-auto space-y-4">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto bg-surface-muted">
+          <div className="max-w-screen-2xl mx-auto space-y-4">
             <AccessDenied />
           </div>
         </main>
@@ -60,15 +60,19 @@ export default function AgregarDocumentoPage() {
     <>
       <DashboardHeader pageTitle={pageTitle} />
 
-      <main className="flex-1 p-4 sm:p-5 lg:p-6 overflow-y-auto bg-surface-muted">
-        <div className="max-w-5xl mx-auto space-y-4">
+      <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto bg-surface-muted">
+        <div className="max-w-screen-2xl mx-auto space-y-4">
           {!data.isLoaded ? (
             <FormSkeleton />
           ) : (
             <>
-              <section className="dashboard-hero-bg relative overflow-hidden rounded-2xl border border-border-subtle px-6 sm:px-7 py-6 mb-6">
-                <div className="relative z-10 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-                  <div className="flex flex-col gap-1.5">
+              <section
+                className={`dashboard-hero-bg relative overflow-hidden rounded-2xl border border-border-subtle ${
+                  data.isStudent ? "px-5 py-3.5" : "px-6 sm:px-7 py-5"
+                }`}
+              >
+                <div className="relative z-10 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                  <div className="flex flex-col gap-1">
                     <p className="flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-[0.14em] text-primary">
                       <span
                         aria-hidden
@@ -76,17 +80,25 @@ export default function AgregarDocumentoPage() {
                       />
                       {eyebrow}
                     </p>
-                    <h1 className="text-3xl font-extrabold leading-tight tracking-[-0.03em] text-text-strong md:text-[34px]">
+                    <h1
+                      className={`font-extrabold leading-tight tracking-[-0.03em] text-text-strong ${
+                        data.isStudent ? "text-2xl md:text-[26px]" : "text-3xl md:text-[34px]"
+                      }`}
+                    >
                       {title}
                     </h1>
-                    <p className="max-w-[520px] text-sm font-medium leading-relaxed text-text-muted mt-1">
-                      {lede}
-                    </p>
+                    {!data.isStudent && (
+                      <p className="max-w-[520px] text-sm font-medium leading-relaxed text-text-muted mt-1">
+                        {lede}
+                      </p>
+                    )}
                   </div>
-                  <span className="period-chip">
-                    <span className="period-chip-lbl">Período</span>
-                    {data.defaultSemester}
-                  </span>
+                  {!data.isStudent && (
+                    <span className="period-chip">
+                      <span className="period-chip-lbl">Período</span>
+                      {data.defaultSemester}
+                    </span>
+                  )}
                 </div>
               </section>
 

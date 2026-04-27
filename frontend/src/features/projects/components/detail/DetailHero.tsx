@@ -2,11 +2,13 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Calendar, ChevronRight, Download, Edit3 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Calendar, ChevronRight, Download, Edit3, Trash2 } from "lucide-react";
 
 import type { Project, ProjectState, ProjectType } from "@features/projects/types/project";
 import { StatePill } from "@features/projects/components/StatePill";
 import type { Role } from "@features/projects/lib/cardAction";
+import { DeleteProjectModal } from "@features/projects/components/DeleteProjectModal";
 
 const PTEG_LADDER: ProjectState[] = ["pending_review_1", "pending_review_2", "pending_defense", "approved"];
 const TEG_LADDER: ProjectState[] = ["pending_articulo", "pending_entrega", "pending_defensa", "approved"];
@@ -53,6 +55,7 @@ export interface DetailHeroProps {
   viewerId?: number;
   onOverrideClick?: () => void;
   onEditClick?: () => void;
+  onDeleteClick?: () => void;
   defenseAt?: string;
   defenseLocation?: string;
   evaluarHref?: string;
@@ -71,6 +74,8 @@ export function DetailHero({
   onAssignJuradoClick,
   onReassignStudentClick,
 }: DetailHeroProps) {
+  const router = useRouter();
+  const [deleteModalOpen, setDeleteModalOpen] = React.useState(false);
   const ladder = ladderFor(project.type);
   const currentIdx = indexInLadder(ladder, project.state);
 
@@ -83,19 +88,19 @@ export function DetailHero({
     <>
       <nav
         aria-label="Breadcrumb"
-        className="text-[11.5px] text-text-muted font-bold flex items-center gap-2 mb-6"
+        className="text-[11.5px] text-text-muted font-bold flex items-center gap-2 mb-6 min-w-0"
       >
-        <Link href={`/dashboard/${detailListBase}`} className="hover:text-text-strong uppercase tracking-wider transition-colors">
+        <Link href={`/dashboard/${detailListBase}`} className="hover:text-text-strong uppercase tracking-wider transition-colors flex-shrink-0">
           {project.type === "tesis" ? "Tesis" : "Proyectos"}
         </Link>
-        <span>/</span>
-        <span className="text-text-strong uppercase tracking-wider truncate max-w-[40ch]">{project.title}</span>
+        <span className="flex-shrink-0">/</span>
+        <span className="text-text-strong uppercase tracking-wider truncate" title={project.title}>{idCode}</span>
       </nav>
 
-      <section className="dashboard-hero-bg relative overflow-hidden rounded-2xl border border-border-subtle px-8 py-7 mb-6">
+      <section className="detail-hero-section dashboard-hero-bg relative overflow-hidden rounded-2xl border border-border-subtle px-8 py-7 mb-6">
         <div className="relative z-10 grid grid-cols-12 gap-10 items-start">
-          <div className="col-span-12 lg:col-span-8">
-            <div className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-[0.12em] mb-5 flex-wrap">
+          <div className="col-span-12 lg:col-span-8 lg:pr-4 min-w-0">
+            <div className="detail-ladder flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-[0.12em] mb-5 flex-wrap">
               {ladder.map((s, i) => {
                 const isPast = currentIdx >= 0 && i < currentIdx;
                 const isCurrent = currentIdx >= 0 && i === currentIdx;
@@ -123,34 +128,34 @@ export function DetailHero({
               <span aria-hidden className="inline-block h-[2px] w-6 rounded-full bg-gradient-to-r from-primary to-[var(--brand-orange)]" />
               {project.type === "tesis" ? "Tesis" : "Proyecto"} · {idCode}
             </p>
-            <h1 className="text-[44px] leading-[1.05] font-extrabold tracking-[-0.035em] text-text-strong max-w-[24ch]">
+            <h1 className={`font-extrabold text-text-strong title-hero ${project.title.length > 120 ? "is-long" : ""}`}>
               {project.title}
             </h1>
 
-            <div className="mt-7 grid grid-cols-3 gap-6">
-              <div>
+            <div className="mt-7 grid grid-cols-1 sm:grid-cols-3 gap-x-6 gap-y-4 min-w-0">
+              <div className="min-w-0">
                 <div className="text-[10px] uppercase tracking-[0.12em] text-text-muted font-extrabold">Estudiante</div>
-                <div className="mt-2 flex items-center gap-2.5">
-                  <div className="av" aria-hidden>{avatarInitials(project.student)}</div>
-                  <span className="text-[13px] font-extrabold text-text-strong">{project.student}</span>
+                <div className="mt-2 flex items-center gap-2.5 min-w-0">
+                  <div className="av flex-shrink-0" aria-hidden>{avatarInitials(project.student)}</div>
+                  <span className="text-[13px] font-extrabold text-text-strong truncate" title={project.student}>{project.student}</span>
                 </div>
               </div>
-              <div>
+              <div className="min-w-0">
                 <div className="text-[10px] uppercase tracking-[0.12em] text-text-muted font-extrabold">Tutor</div>
-                <div className="mt-2 text-[13px] font-extrabold text-text-strong">
+                <div className="mt-2 text-[13px] font-extrabold text-text-strong truncate" title={project.advisorNames?.[0] ?? undefined}>
                   {project.advisorNames?.[0] ?? "—"}
                 </div>
               </div>
-              <div>
+              <div className="min-w-0">
                 <div className="text-[10px] uppercase tracking-[0.12em] text-text-muted font-extrabold">Jurado</div>
-                <div className="mt-2 text-[13px] font-extrabold text-text-strong">
+                <div className="mt-2 text-[13px] font-extrabold text-text-strong truncate" title={project.reviewerName ?? undefined}>
                   {project.reviewerName ?? "—"}
                 </div>
               </div>
             </div>
           </div>
 
-          <aside className="col-span-12 lg:col-span-4">
+          <aside className="detail-right-rail col-span-12 lg:col-span-4">
             <div className="rounded-2xl border border-border-subtle bg-surface px-4 py-3 shadow-[0_1px_2px_rgba(12,21,48,0.04)] relative overflow-hidden">
               <span aria-hidden className="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-primary to-[var(--brand-orange)]" />
               <div className="mt-1 flex items-center gap-2">
@@ -232,11 +237,34 @@ export function DetailHero({
                     Forzar estado
                   </button>
                 )}
+                {isAdmin && !deleteModalOpen && (
+                  <button
+                    onClick={() => setDeleteModalOpen(true)}
+                    className="btn danger w-full justify-center mt-1"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                    Eliminar proyecto
+                  </button>
+                )}
               </div>
             </div>
           </aside>
         </div>
       </section>
+
+      {isAdmin && (
+        <DeleteProjectModal
+          isOpen={deleteModalOpen}
+          projectTitle={project.title}
+          projectId={project.id}
+          projectType={project.type as "proyecto" | "tesis"}
+          onClose={() => setDeleteModalOpen(false)}
+          onConfirmed={() => {
+            setDeleteModalOpen(false);
+            router.push(project.type === "tesis" ? "/dashboard/tesis" : "/dashboard/proyectos");
+          }}
+        />
+      )}
     </>
   );
 }

@@ -29,7 +29,7 @@ export interface DetailTabsProps {
 
 export function DetailTabs({ active, counts, onChange }: DetailTabsProps) {
   return (
-    <div role="tablist" className="flex items-center gap-2 border-b border-border-subtle">
+    <div role="tablist" className="detail-tab-strip flex items-center gap-2 border-b border-border-subtle">
       {DETAIL_TAB_KEYS.map((key) => (
         <button
           key={key}

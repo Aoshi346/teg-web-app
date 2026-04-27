@@ -65,55 +65,60 @@ export function NotificationsDropdown({
       </button>
 
       {isOpen && (
-        <div
-          role="menu"
-          className="absolute right-0 top-full mt-3 w-80 sm:w-96 bg-white border border-slate-200 rounded-xl shadow-xl z-[60] animate-in fade-in zoom-in-95 slide-in-from-top-2 duration-200 origin-top-right overflow-hidden"
-        >
-          <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100">
-            <h3 className="text-sm font-bold text-slate-800">Notificaciones</h3>
-            {notifications.length > 0 && (
-              <button
-                onClick={onMarkAllRead}
+        <>
+          <div className="notif-backdrop" onClick={() => setIsOpen(false)} aria-hidden="true" />
+          <div
+            role="menu"
+            className="notif-pop absolute right-0 top-full mt-3 w-80 sm:w-96 bg-white border border-slate-200 rounded-xl shadow-xl z-[60] animate-in fade-in zoom-in-95 slide-in-from-top-2 duration-200 origin-top-right overflow-hidden"
+          >
+            <div className="notif-head flex items-center justify-between px-4 py-3 border-b border-slate-100">
+              <h3 className="notif-head-title text-sm font-bold text-slate-800">Notificaciones</h3>
+              {notifications.length > 0 && (
+                <button
+                  onClick={onMarkAllRead}
+                  className="notif-head-action text-xs text-primary font-semibold hover:underline"
+                  aria-label="Marcar todas como leídas"
+                >
+                  <span className="notif-head-action-full">Marcar todas como leídas</span>
+                  <span className="notif-head-action-short">Marcar leídas</span>
+                </button>
+              )}
+            </div>
+
+            <div className="notif-list max-h-[360px] overflow-y-auto divide-y divide-slate-100">
+              {visible.length === 0 ? (
+                <div className="flex flex-col items-center gap-2 px-4 py-8 text-center">
+                  <BellOff className="w-8 h-8 text-slate-300" aria-hidden="true" />
+                  <p className="text-sm font-semibold text-slate-600">
+                    No tienes notificaciones
+                  </p>
+                  <p className="text-xs text-slate-400 max-w-[200px]">
+                    Te avisaremos cuando algo cambie en tus proyectos.
+                  </p>
+                </div>
+              ) : (
+                visible.map((notification) => (
+                  <NotificationItem
+                    key={notification.id}
+                    notification={notification}
+                    onMarkRead={onMarkRead}
+                  />
+                ))
+              )}
+            </div>
+
+            <div className="notif-foot border-t border-slate-100 px-4 py-2.5">
+              <Link
+                href="/dashboard/settings#notifications"
                 className="text-xs text-primary font-semibold hover:underline"
-                aria-label="Marcar todas como leídas"
+                aria-label="Ver todas las notificaciones"
+                onClick={() => setIsOpen(false)}
               >
-                Marcar todas como leídas
-              </button>
-            )}
+                Ver todas
+              </Link>
+            </div>
           </div>
-
-          <div className="max-h-[360px] overflow-y-auto divide-y divide-slate-100">
-            {visible.length === 0 ? (
-              <div className="flex flex-col items-center gap-2 px-4 py-8 text-center">
-                <BellOff className="w-8 h-8 text-slate-300" aria-hidden="true" />
-                <p className="text-sm font-semibold text-slate-600">
-                  No tienes notificaciones
-                </p>
-                <p className="text-xs text-slate-400 max-w-[200px]">
-                  Te avisaremos cuando algo cambie en tus proyectos.
-                </p>
-              </div>
-            ) : (
-              visible.map((notification) => (
-                <NotificationItem
-                  key={notification.id}
-                  notification={notification}
-                  onMarkRead={onMarkRead}
-                />
-              ))
-            )}
-          </div>
-
-          <div className="border-t border-slate-100 px-4 py-2.5">
-            <Link
-              href="/dashboard/settings#notifications"
-              className="text-xs text-primary font-semibold hover:underline"
-              aria-label="Ver todas las notificaciones"
-            >
-              Ver todas
-            </Link>
-          </div>
-        </div>
+        </>
       )}
     </div>
   );

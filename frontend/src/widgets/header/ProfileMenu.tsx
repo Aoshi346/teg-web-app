@@ -53,6 +53,10 @@ export default function ProfileMenu({
       const target = e.target as Node;
       if (menuRef.current?.contains(target)) return;
       if (anchorRef?.current?.contains(target)) return;
+      // Note: ignora si esta instancia está oculta (display:none ancestro) —
+      // sucede cuando el sidebar renderiza dos copias (escritorio + drawer móvil)
+      // y la oculta cerraría el estado compartido antes de que dispare el click.
+      if (menuRef.current && menuRef.current.offsetParent === null) return;
       onClose();
     };
     document.addEventListener("mousedown", handler);

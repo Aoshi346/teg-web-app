@@ -19,7 +19,7 @@ export interface TimelineEvent {
   active?: boolean;
 }
 
-interface ProjectEvaluation {
+export interface ProjectEvaluation {
   id: number;
   kind?: "review" | "defense";
   pass_status: "Pass" | "Fail";
@@ -28,7 +28,7 @@ interface ProjectEvaluation {
   reviewer_name?: string;
 }
 
-interface ProjectWithEvaluations extends Project {
+export interface ProjectWithEvaluations extends Project {
   evaluations?: ProjectEvaluation[];
 }
 

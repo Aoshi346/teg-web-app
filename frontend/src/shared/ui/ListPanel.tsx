@@ -25,15 +25,15 @@ export function ListPanel({
   return (
     <section
       className={cn(
-        "flex h-full min-h-0 flex-col rounded-xl border border-border-subtle bg-surface p-4 shadow-[0_1px_3px_0_rgba(15,23,42,0.04)]",
+        "flex h-full min-h-0 min-w-0 flex-col overflow-hidden rounded-xl border border-border-subtle bg-surface p-4 shadow-[0_1px_3px_0_rgba(15,23,42,0.04)]",
         className,
       )}
       {...rest}
     >
-      <header className="sticky top-0 z-10 flex items-center justify-between border-b border-border-subtle/50 bg-surface pb-3">
-        <h3 className="text-sm font-bold text-text-strong">{title}</h3>
+      <header className="sticky top-0 z-10 flex items-center justify-between gap-2 border-b border-border-subtle/50 bg-surface pb-3">
+        <h3 className="min-w-0 flex-1 truncate text-sm font-bold text-text-strong" title={title}>{title}</h3>
         {typeof count === "number" && (
-          <span className="rounded-md border border-border-subtle bg-surface-muted px-2 py-0.5 text-xs font-semibold text-text-muted">
+          <span className="flex-shrink-0 rounded-md border border-border-subtle bg-surface-muted px-2 py-0.5 text-xs font-semibold text-text-muted">
             {count} {count === 1 ? "item" : "items"}
           </span>
         )}

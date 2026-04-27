@@ -66,7 +66,7 @@ export default function StateOverrideModal({
       aria-labelledby="state-override-title"
     >
       <div
-        className="w-full max-w-md bg-white rounded-2xl p-6 shadow-xl"
+        className="detail-modal w-full max-w-md bg-white rounded-2xl p-6 shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
         <h2 id="state-override-title" className="text-lg font-bold mb-4">Forzar estado del proyecto</h2>

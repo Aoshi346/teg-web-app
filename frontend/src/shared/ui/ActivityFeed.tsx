@@ -42,7 +42,7 @@ export function ActivityFeed({
   return (
     <aside
       className={cn(
-        "flex h-full min-h-0 flex-col rounded-2xl border border-border-subtle bg-surface p-5 shadow-[0_1px_3px_0_rgba(15,23,48,0.04)]",
+        "flex h-full min-h-0 min-w-0 flex-col overflow-hidden rounded-2xl border border-border-subtle bg-surface p-5 shadow-[0_1px_3px_0_rgba(15,23,48,0.04)]",
         className,
       )}
       {...rest}
@@ -77,7 +77,7 @@ export function ActivityFeed({
                   <Icon className="h-3.5 w-3.5" />
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs font-medium leading-snug text-text-default">
+                  <p className="text-xs font-medium leading-snug text-text-default break-words [overflow-wrap:anywhere]">
                     {item.text}
                   </p>
                   <p className="mt-0.5 text-[10px] font-medium tabular-nums text-text-muted">

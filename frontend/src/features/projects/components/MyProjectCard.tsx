@@ -91,7 +91,7 @@ export default function MyProjectCard({ project }: MyProjectCardProps) {
     <div className="my-card">
       <div className="my-card-head">
         <div>
-          <h3>{project.title}</h3>
+          <h3 className="title-clamp-2" title={project.title}>{project.title}</h3>
           {(tutor || project.reviewerName) && (
             <p className="meta">
               {tutor && (

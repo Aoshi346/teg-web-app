@@ -3,7 +3,7 @@
 import React from "react";
 
 export interface MobileCategoryJumperProps {
-  sections: { label: string; answered: number; total: number; isTeg?: boolean }[];
+  sections: { label: string; shortLabel?: string; answered: number; total: number; isTeg?: boolean }[];
   onJump?: (index: number) => void;
 }
 
@@ -14,10 +14,11 @@ export default function MobileCategoryJumper({ sections, onJump }: MobileCategor
         <button
           key={sec.label}
           type="button"
+          aria-label={sec.label}
           className={`m-jumper-pill${sec.isTeg ? " is-teg" : ""}`}
           onClick={() => onJump?.(idx)}
         >
-          <span className="m-jumper-label">{sec.label}</span>
+          <span className="m-jumper-label" aria-hidden="true">{sec.shortLabel ?? sec.label}</span>
           <span className="m-jumper-count">{sec.answered}/{sec.total}</span>
         </button>
       ))}

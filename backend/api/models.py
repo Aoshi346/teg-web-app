@@ -54,6 +54,11 @@ class User(AbstractUser):
         ('E', 'Extranjero'),
         ('P', 'Pasaporte'),
     )
+    SEMESTER_CHOICES = (
+        ('9no', '9no'),
+        ('10mo', '10mo'),
+        ('N/A', 'N/A'),
+    )
 
     email = models.EmailField(unique=True)
     first_name = models.CharField(max_length=150, blank=True)
@@ -66,7 +71,13 @@ class User(AbstractUser):
     )
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='Estudiante')
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
-    semester = models.CharField(max_length=10, blank=True, default='', help_text="e.g. 9no, 10mo, N/A")
+    semester = models.CharField(
+        max_length=10,
+        choices=SEMESTER_CHOICES,
+        blank=True,
+        default='',
+        help_text="9no, 10mo, N/A; vacío para roles no-estudiante.",
+    )
     phone = models.CharField(max_length=20, blank=True, default='', help_text="e.g. +58-414-1234567")
 
     username = None

@@ -4,7 +4,7 @@ import * as React from "react";
 import { AlertTriangle } from "lucide-react";
 import type { Project } from "@features/projects/types/project";
 import { StateTimeline } from "@shared/ui/StateTimeline";
-import { buildStateTimeline } from "@features/projects/lib/buildStateTimeline";
+import { buildStateTimeline, type ProjectWithEvaluations } from "@features/projects/lib/buildStateTimeline";
 import type { DetailEvaluation } from "./EvaluationsTab";
 import type { Role } from "@features/projects/lib/cardAction";
 
@@ -16,7 +16,7 @@ export interface HistoryTabProps {
 
 export function HistoryTab({ project, evaluations, role }: HistoryTabProps) {
   const events = React.useMemo(
-    () => buildStateTimeline({ ...project, evaluations } as any),
+    () => buildStateTimeline({ ...project, evaluations } as ProjectWithEvaluations),
     [project, evaluations],
   );
   const overrides = role === "Administrador" ? project.stateOverrides ?? [] : [];

@@ -1,7 +1,6 @@
 "use client";
 
 import { useFormContext } from "react-hook-form";
-import { useState } from "react";
 import Combobox from "./Combobox";
 import type { UserOption } from "../hooks/useDocumentData";
 import type { DocumentFormData } from "../schema";
@@ -12,20 +11,16 @@ interface AdvisorsChipsProps {
 
 export default function AdvisorsChips({ tutors }: AdvisorsChipsProps) {
   const { watch, setValue } = useFormContext<DocumentFormData>();
-  const [pending, setPending] = useState<number | "">("");
 
   const advisors = watch("advisors") ?? [];
-  const chips = (advisors).filter((a): a is number => typeof a === "number");
+  const chips = advisors.filter((a): a is number => typeof a === "number");
   const availableTutors = tutors.filter((t) => !chips.includes(t.id));
+  const isFull = chips.length >= 2;
 
-  function handleAdd() {
-    if (pending === "") return;
-    if (chips.includes(pending)) {
-      setPending("");
-      return;
-    }
-    setValue("advisors", [...chips, pending], { shouldValidate: true });
-    setPending("");
+  function handlePick(val: number | "") {
+    if (val === "" || isFull) return;
+    if (chips.includes(val)) return;
+    setValue("advisors", [...chips, val], { shouldValidate: true });
   }
 
   function handleRemove(id: number) {
@@ -54,24 +49,19 @@ export default function AdvisorsChips({ tutors }: AdvisorsChipsProps) {
           })}
         </div>
       )}
-      <div className="a-input-wrap">
+      {!isFull && (
         <Combobox
           options={availableTutors}
-          value={pending}
-          onChange={(val) => setPending(val)}
-          placeholder="Buscar tutor..."
-          emptyLabel="Sin tutores"
-          disabled={chips.length >= 2}
+          value=""
+          onChange={handlePick}
+          placeholder={
+            chips.length === 0
+              ? "Selecciona un tutor..."
+              : "Añadir un tutor más..."
+          }
+          emptyLabel="Sin tutores disponibles"
         />
-        <button
-          type="button"
-          className="add"
-          disabled={chips.length >= 2 || pending === ""}
-          onClick={handleAdd}
-        >
-          + Añadir
-        </button>
-      </div>
+      )}
     </div>
   );
 }

@@ -118,8 +118,80 @@ export default function SeguimientoTable({
     );
   }
 
+  const showColumn = (key: SeguimientoColumnKey) =>
+    (columns as readonly SeguimientoColumnKey[]).includes(key);
+
   return (
     <div className="seg-table-card">
+      <div className="seg-cards">
+        {items.map((project) => {
+          const action = cardAction(role, project, viewerId);
+          const isTesis = project.type === "tesis";
+          return (
+            <article key={project.id} className="seg-card">
+              <header className="seg-card-head">
+                <span className={`tdot ${isTesis ? "teg" : "pteg"}`} aria-hidden />
+                <span className="seg-card-title" title={project.title}>{project.title}</span>
+                <span className={`spill ${isTesis ? "teg" : "pteg"}`}>
+                  {isTesis ? "TEG" : "PTEG"}
+                </span>
+              </header>
+
+              <dl className="seg-card-meta">
+                {showColumn("estudiante") && (
+                  <div className="seg-card-row">
+                    <dt>Estudiante</dt>
+                    <dd>{project.student}</dd>
+                  </div>
+                )}
+                {showColumn("tutorJurado") && (
+                  <>
+                    <div className="seg-card-row">
+                      <dt>Tutor</dt>
+                      <dd>{project.advisorNames?.[0] ?? "—"}</dd>
+                    </div>
+                    {role !== "Jurado" && (
+                      <div className="seg-card-row">
+                        <dt>Jurado</dt>
+                        <dd>
+                          {project.reviewerName ?? (
+                            <span className="seg-sin-asignar">Sin asignar</span>
+                          )}
+                        </dd>
+                      </div>
+                    )}
+                  </>
+                )}
+                {showColumn("jurado") && (
+                  <div className="seg-card-row">
+                    <dt>Jurado</dt>
+                    <dd>{reviewerDisplay(project.reviewerName)}</dd>
+                  </div>
+                )}
+                {(showColumn("ultimaActividad") || showColumn("recibido")) && (
+                  <div className="seg-card-row">
+                    <dt>{showColumn("recibido") ? "Recibido" : "Actividad"}</dt>
+                    <dd>{formatDate(project.submittedDate)}</dd>
+                  </div>
+                )}
+              </dl>
+
+              <footer className="seg-card-foot">
+                <div className="seg-card-state">
+                  {showColumn("estado") && (
+                    <StatePill state={project.state} projectType={project.type} />
+                  )}
+                  {showColumn("fase") && <FaseLadder project={project} />}
+                </div>
+                <Link href={action.href} className={intentToClass(action.intent)}>
+                  {action.label}
+                </Link>
+              </footer>
+            </article>
+          );
+        })}
+      </div>
+
       <div className="seg-table-scroll">
       <table className="seg-table">
         <colgroup>
@@ -151,7 +223,7 @@ export default function SeguimientoTable({
                           className={`tdot ${project.type === "tesis" ? "teg" : "pteg"}`}
                           aria-hidden
                         />
-                        <span className="seg-title-name">{project.title}</span>
+                        <span className="seg-title-name" title={project.title}>{project.title}</span>
                       </div>
                     )}
                     {col === "estudiante" && (

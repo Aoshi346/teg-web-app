@@ -72,33 +72,35 @@ export default function PresentationRow({
         <span className="d">{presentation.duration_minutes} min</span>
       </div>
 
-      <div className="ptitle">
-        <span className={`tdot ${isTesis ? "teg" : "pteg"}`} aria-hidden />
-        {presentation.project_title}
-        <span className={`spill ${isTesis ? "teg" : "pteg"}`}>
-          {isTesis ? "TEG" : "PTEG"}
-        </span>
-        {mine && youChip && (
-          <span className="spill you">{youChip}</span>
-        )}
-      </div>
+      <div className="prow-mid">
+        <div className="ptitle">
+          <span className={`tdot ${isTesis ? "teg" : "pteg"}`} aria-hidden />
+          <span className="ptitle-text" title={presentation.project_title}>{presentation.project_title}</span>
+          <span className={`spill ${isTesis ? "teg" : "pteg"}`}>
+            {isTesis ? "TEG" : "PTEG"}
+          </span>
+          {mine && youChip && (
+            <span className="spill you">{youChip}</span>
+          )}
+        </div>
 
-      <div className="pmeta">
-        {role === "admin" ? (
-          <>
-            <span>
-              <b>Estud.</b> {presentation.student_name}
-            </span>
-            <span>
-              <b>Tutor</b> {presentation.tutor_name}
-            </span>
-            <span>
-              <b>Jur.</b> {presentation.jurado.length}
-            </span>
-          </>
-        ) : (
-          <span>{presentation.jurado_names.join(", ")}</span>
-        )}
+        <div className="pmeta">
+          {role === "admin" ? (
+            <>
+              <span>
+                <b>Estud.</b> {presentation.student_name}
+              </span>
+              <span>
+                <b>Tutor</b> {presentation.tutor_name}
+              </span>
+              <span>
+                <b>Jur.</b> {presentation.jurado.length}
+              </span>
+            </>
+          ) : (
+            <span>{presentation.jurado_names.join(", ")}</span>
+          )}
+        </div>
       </div>
 
       <div className="pactions">

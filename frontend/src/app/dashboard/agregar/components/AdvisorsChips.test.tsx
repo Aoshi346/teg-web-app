@@ -133,10 +133,9 @@ describe("AdvisorsChips — Sub-H", () => {
     expect(screen.getByText("Prof. Beta")).toBeTruthy();
   });
 
-  // Test 2: Adding a tutor via combobox + "Añadir" appends to advisors.
-  // We select the option in the mock <select>, then click the "Añadir" button.
-  // Form state is read from the <span data-testid="advisors-state">.
-  it("appends a new advisor when a tutor is selected and Añadir is clicked", async () => {
+  // Test 2: Selecting a tutor in the combobox immediately appends it.
+  // The "Añadir" button has been removed — selection is the action.
+  it("appends a new advisor as soon as a tutor is selected", async () => {
     renderWithForm(
       { advisors: [12] },
       <AdvisorsChips tutors={TUTORS} />,
@@ -145,11 +144,6 @@ describe("AdvisorsChips — Sub-H", () => {
     const combobox = screen.getByTestId("advisors-combobox");
     await act(async () => {
       fireEvent.change(combobox, { target: { value: "34" } });
-    });
-
-    const addButton = screen.getByRole("button", { name: /añadir/i });
-    await act(async () => {
-      fireEvent.click(addButton);
     });
 
     const stateEl = screen.getByTestId("advisors-state");
@@ -193,8 +187,9 @@ describe("AdvisorsChips — Sub-H", () => {
     expect(cleaned).toContain(34);
   });
 
-  // Test 4: Dedup — adding an already-present advisor is a no-op.
-  // The Añadir handler must silently ignore duplicates; form state stays [12].
+  // Test 4: Dedup — picking an already-present advisor is a no-op.
+  // The component filters available tutors so duplicates aren't an option, but
+  // even if a stale value reaches the handler, form state stays [12].
   it("does not add a duplicate advisor (dedup is silent)", async () => {
     renderWithForm(
       { advisors: [12] },
@@ -206,29 +201,20 @@ describe("AdvisorsChips — Sub-H", () => {
       fireEvent.change(combobox, { target: { value: "12" } });
     });
 
-    const addButton = screen.getByRole("button", { name: /añadir/i });
-    await act(async () => {
-      fireEvent.click(addButton);
-    });
-
     const stateEl = screen.getByTestId("advisors-state");
     const advisors = JSON.parse(stateEl.textContent ?? "[]");
     const cleaned = advisors.filter((a: number | "") => a !== "");
     expect(cleaned).toEqual([12]);
   });
 
-  // Test 5: 2-tutor cap — "+ Añadir" button is disabled when 2 advisors are present.
-  // Decision: assert toBeDisabled() on the button (not hidden). The implementer should
-  // render the button with the `disabled` attribute when advisors.length >= 2. This is
-  // simpler than hiding and keeps the affordance visible to screen readers.
-  it("disables the Añadir button when 2 tutors are already added", () => {
+  // Test 5: 2-tutor cap — the combobox is hidden once the cap is reached.
+  it("hides the combobox when 2 tutors are already added", () => {
     renderWithForm(
       { advisors: [12, 34] },
       <AdvisorsChips tutors={TUTORS} />,
     );
 
-    const addButton = screen.getByRole("button", { name: /añadir/i });
-    expect(addButton).toBeDisabled();
+    expect(screen.queryByTestId("advisors-combobox")).toBeNull();
   });
 
   // Test 6: No empty "" entries — starting from advisors: [] renders no chips

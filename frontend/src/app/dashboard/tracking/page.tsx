@@ -279,8 +279,8 @@ export default function TrackingPage() {
             </div>
           ) : (
             <>
-              <div className="flex flex-col xl:flex-row items-stretch xl:items-center gap-3 mb-4">
-                <div className="relative flex-1">
+              <div className="seg-filters flex flex-col xl:flex-row items-stretch xl:items-center gap-3 mb-4">
+                <div className="seg-filter-search relative flex-1">
                   <input
                     type="text"
                     placeholder="Buscar..."
@@ -293,7 +293,7 @@ export default function TrackingPage() {
                   />
                 </div>
 
-                <div className="flex items-center gap-2 flex-wrap">
+                <div className="seg-filter-selects flex items-center gap-2 flex-wrap">
                   <label className="text-[11px] font-semibold uppercase tracking-[0.1em] text-text-muted">
                     Fase
                     <select

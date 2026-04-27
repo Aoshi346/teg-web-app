@@ -52,7 +52,7 @@ export default function StudentReassignModal({ open, project, onClose, onSuccess
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full max-w-sm bg-surface rounded-2xl shadow-2xl ring-1 ring-black/5 overflow-hidden">
+      <div className="detail-modal relative w-full max-w-sm bg-surface rounded-2xl shadow-2xl ring-1 ring-black/5 overflow-hidden">
         <div className="p-5 border-b border-border-subtle">
           <h3 className="text-base font-extrabold text-text-strong">Reasignar estudiante</h3>
           <p className="text-xs text-text-muted mt-0.5">Estudiante actual: {project.student}</p>
