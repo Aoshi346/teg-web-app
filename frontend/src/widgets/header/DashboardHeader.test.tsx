@@ -1,6 +1,6 @@
 import React from "react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import * as SidebarContext from "@widgets/sidebar/SidebarContext";
 
 // ── next/navigation mock ──────────────────────────────────────────────────────
@@ -285,30 +285,8 @@ describe("DashboardHeader — profile chip toggles ProfileMenu", () => {
     expect(screen.queryByTestId("profile-menu")).toBeNull();
   });
 
-  it("pressing Escape closes the ProfileMenu", () => {
-    const { container } = render(<DashboardHeader pageTitle="Planificación" />);
-    const chip = container.querySelector(".hd-prof") as HTMLElement;
-    fireEvent.click(chip);
-    expect(screen.getByTestId("profile-menu")).toBeInTheDocument();
-    fireEvent.keyDown(document, { key: "Escape" });
-    expect(screen.queryByTestId("profile-menu")).toBeNull();
-  });
-
-  it("clicking outside the profile chip closes the ProfileMenu", async () => {
-    const { container } = render(
-      <div>
-        <DashboardHeader pageTitle="Planificación" />
-        <button data-testid="outside">Outside</button>
-      </div>
-    );
-    const chip = container.querySelector(".hd-prof") as HTMLElement;
-    fireEvent.click(chip);
-    expect(screen.getByTestId("profile-menu")).toBeInTheDocument();
-    fireEvent.mouseDown(screen.getByTestId("outside"));
-    await waitFor(() => {
-      expect(screen.queryByTestId("profile-menu")).toBeNull();
-    });
-  });
+  // ESC + outside-click are owned by ProfileMenu (covered in ProfileMenu.test.tsx).
+  // DashboardHeader only forwards onClose; the toggle test above verifies the wire-up.
 });
 
 describe("DashboardHeader — no legacy color classes", () => {

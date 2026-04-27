@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronsLeft, ChevronDown } from "lucide-react";
 import { getUserEmail, getUserRole, logout } from "@features/auth/api/clientAuth";
@@ -33,28 +33,6 @@ export default function DashboardHeader({ pageTitle }: DashboardHeaderProps) {
   const role = getUserRole() ?? "";
   const displayName = deriveName(email);
   const initials = email.charAt(0).toUpperCase();
-
-  // Cierra el menú de perfil al presionar ESC
-  useEffect(() => {
-    if (!profileOpen) return;
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setProfileOpen(false);
-    };
-    document.addEventListener("keydown", handler);
-    return () => document.removeEventListener("keydown", handler);
-  }, [profileOpen]);
-
-  // Cierra el menú de perfil al hacer clic fuera
-  useEffect(() => {
-    if (!profileOpen) return;
-    const handler = (e: MouseEvent) => {
-      const target = e.target as Node;
-      if (profileRef.current?.contains(target)) return;
-      setProfileOpen(false);
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [profileOpen]);
 
   const handleLogout = useCallback(() => {
     logout();

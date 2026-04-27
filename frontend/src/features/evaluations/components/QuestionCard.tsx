@@ -18,6 +18,7 @@ interface QuestionCardProps {
   onAdvance?: () => void;
   hasError?: boolean;
   isFocused?: boolean;
+  numeral: string;
 }
 
 export default function QuestionCard({
@@ -26,10 +27,16 @@ export default function QuestionCard({
   onChange,
   onAdvance,
   hasError,
-  isFocused,
+  numeral,
 }: QuestionCardProps) {
   const numVal = typeof value === "number" ? value : Number(value) || 0;
   const strVal = typeof value === "string" ? value : "";
+
+  const isDone = question.answerType === "text"
+    ? strVal.trim().length > 0
+    : numVal > 0;
+
+  const statusPill = hasError ? "Falta" : isDone ? "Respondida" : "Pendiente";
 
   const renderInput = () => {
     switch (question.answerType) {
@@ -55,32 +62,28 @@ export default function QuestionCard({
   return (
     <div
       id={`qt-${question.id}`}
-      className={`flex flex-col h-full bg-white rounded-xl border p-4 transition-all duration-300 scroll-mt-32 ${
-        hasError
-          ? "border-red-300 ring-2 ring-red-100 ring-offset-1 shadow-sm"
-          : isFocused
-            ? "border-blue-400 ring-2 ring-blue-100 ring-offset-1 shadow-md"
-            : "border-gray-200 shadow-sm hover:border-gray-300 hover:shadow-md"
-      }`}
+      className={`qcard${isDone ? " done" : ""}${hasError ? " error" : ""}`}
     >
-      <div className="mb-3 flex-1">
-        <h5 className="font-bold text-gray-900 text-sm leading-snug mb-1 flex items-start justify-between gap-2">
-          <span>{question.label}</span>
-          {question.relatedImage && (
-            <ImageTooltip imageUrl={question.relatedImage} title={question.label}>
-              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-600 border border-blue-100 hover:bg-blue-100 cursor-help flex-shrink-0">
-                IMG
+      <div className="qcard-header">
+        <span className="qcard-num font-display">{numeral}</span>
+        <div className="qcard-body">
+          <div className="qcard-label-row">
+            <h5 className="qcard-label">{question.label}</h5>
+            {question.relatedImage && (
+              <span className="qcard-img-badge">
+                <ImageTooltip imageUrl={question.relatedImage} title={question.label}>
+                  <span>IMG</span>
+                </ImageTooltip>
               </span>
-            </ImageTooltip>
+            )}
+          </div>
+          {question.helper && (
+            <p className="qcard-helper">{question.helper}</p>
           )}
-        </h5>
-        {question.helper && (
-          <p className="text-xs text-gray-500 leading-relaxed">
-            {question.helper}
-          </p>
-        )}
+        </div>
+        <span className="qcard-status">{statusPill}</span>
       </div>
-      <div className="mt-auto pt-3 border-t border-gray-100">{renderInput()}</div>
+      <div className="qcard-input">{renderInput()}</div>
     </div>
   );
 }

@@ -16,7 +16,7 @@ export default function FrequencyInput({ value, onChange, onAdvance }: Frequency
   };
 
   return (
-    <div className="space-y-1.5">
+    <div className="inp-seg">
       {FREQUENCY_OPTIONS.map((opt) => {
         const active = value === opt.value;
         return (
@@ -24,12 +24,14 @@ export default function FrequencyInput({ value, onChange, onAdvance }: Frequency
             key={opt.value}
             type="button"
             onClick={() => handleClick(opt.value)}
-            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleClick(opt.value); } }}
-            className={`w-full px-3.5 py-2.5 rounded-lg text-sm font-medium border text-left transition-all ${
-              active
-                ? `${opt.color} shadow-sm ring-1 ring-offset-1 ring-transparent`
-                : "bg-white text-gray-600 border-gray-200 hover:border-gray-300 hover:bg-gray-50"
-            }`}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                handleClick(opt.value);
+              }
+            }}
+            className={active ? "active blue" : ""}
+            aria-pressed={active}
           >
             {opt.label}
           </button>

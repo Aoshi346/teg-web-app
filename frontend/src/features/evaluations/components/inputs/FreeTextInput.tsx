@@ -9,17 +9,14 @@ interface FreeTextInputProps {
 
 export default function FreeTextInput({ value, onChange }: FreeTextInputProps) {
   return (
-    <div>
+    <div className="inp-text">
       <textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}
         rows={3}
-        className="w-full bg-white border border-gray-200 rounded-lg p-3 text-sm shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 transition-all resize-none placeholder:text-gray-400"
+        className="inp-text-area"
         placeholder="Escriba sus observaciones..."
       />
-      <p className="text-[11px] text-gray-400 mt-1">
-        Texto libre — no afecta el puntaje numérico.
-      </p>
     </div>
   );
 }

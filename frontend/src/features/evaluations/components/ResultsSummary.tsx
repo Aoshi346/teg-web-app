@@ -2,7 +2,6 @@
 
 import React from "react";
 import { useRouter } from "next/navigation";
-import { Check, X } from "lucide-react";
 import type { Question } from "@features/evaluations/lib/questions/questions";
 import {
   YESNO_OPTIONS,
@@ -11,7 +10,7 @@ import {
   TERNARY_NA_OPTIONS,
   TERNARY_INFO_OPTIONS,
 } from "@features/evaluations/lib/questions/questions";
-import { MAX_SCORE, PASSING_SCORE } from "@features/evaluations/lib/questions/scoring";
+import { MAX_SCORE } from "@features/evaluations/lib/questions/scoring";
 
 interface ResultsSummaryProps {
   score: number;
@@ -23,7 +22,7 @@ interface ResultsSummaryProps {
   onReset: () => void;
 }
 
-function getLabel(q: Question, val: number | string | undefined): string {
+function getAnswerLabel(q: Question, val: number | string | undefined): string {
   if (q.answerType === "text") {
     return typeof val === "string" && val.trim() ? val.trim() : "Sin respuesta";
   }
@@ -43,6 +42,16 @@ function getLabel(q: Question, val: number | string | undefined): string {
   return "Sin respuesta";
 }
 
+function getAnswerPillClass(q: Question, val: number | string | undefined): string {
+  if (q.answerType === "text") {
+    return typeof val === "string" && val.trim() ? "success-soft" : "neutral";
+  }
+  const n = typeof val === "number" ? val : Number(val) || 0;
+  if (n === 0) return "neutral";
+  if (n >= 2) return "success-soft";
+  return "danger-soft";
+}
+
 export default function ResultsSummary({
   score,
   passStatus,
@@ -55,86 +64,109 @@ export default function ResultsSummary({
   const router = useRouter();
   const passed = passStatus === "Pass";
 
+  const pct = MAX_SCORE > 0 ? Math.round((score / MAX_SCORE) * 100) : 0;
+
+  const sections = [...new Set(questions.map((q) => q.section || "General"))];
+
   return (
-    <div className="bg-white p-6 sm:p-8 rounded-xl shadow-lg space-y-6">
-      <div className="flex items-center gap-3 pb-4 border-b border-gray-200">
+    <div className="res-wrap">
+      <div className="res-band">
         <div
-          className={`w-12 h-12 rounded-full flex items-center justify-center ${
-            passed ? "bg-green-100" : "bg-red-100"
-          }`}
+          className="res-score"
+          style={{
+            background: `conic-gradient(var(--brand-yellow) 0% ${pct}%, rgba(255,255,255,.18) ${pct}% 100%)`,
+          }}
         >
-          {passed ? (
-            <Check className="w-6 h-6 text-green-600" />
-          ) : (
-            <X className="w-6 h-6 text-red-600" />
-          )}
+          <span className="res-score-num font-display">{score}</span>
         </div>
-        <div>
-          <h3 className="text-xl font-bold text-gray-900">
-            Evaluación completada: {passed ? "Aprobado" : "Reprobado"}
-          </h3>
-          <p className="text-sm text-gray-600 mt-1">
-            Puntaje:{" "}
-            <strong className={passed ? "text-green-600" : "text-red-600"}>
-              {score} / {MAX_SCORE}
-            </strong>{" "}
-            (Mínimo: {PASSING_SCORE})
-          </p>
+
+        <div className="res-band-info">
+          <p className="res-band-eyebrow">Evaluación completada</p>
+          <h2 className="res-band-title font-display">
+            {typeParam === "tesis" ? "Tesis" : "Proyecto"}
+          </h2>
+        </div>
+
+        <div className="res-band-status">
+          <span className={passed ? "success-soft res-pill" : "danger-soft res-pill"}>
+            {passed ? "✓ Aprobado" : "✗ Reprobado"}
+          </span>
         </div>
       </div>
 
-      <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 space-y-4">
-        <h4 className="font-semibold text-gray-700 text-sm">
-          Resumen de respuestas
-        </h4>
-        <div className="bg-white rounded-lg p-3 border border-gray-200 space-y-2 max-h-80 overflow-y-auto">
-          {questions.map((q) => (
-            <div
-              key={q.id}
-              className="pb-2 border-b border-gray-100 last:border-0 last:pb-0"
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">
-                    {q.label}
-                  </p>
-                  <p className="text-[11px] text-gray-400">{q.section}</p>
-                </div>
-                <span className="text-sm font-semibold text-blue-600 whitespace-nowrap">
-                  {getLabel(q, ratings[q.id])}
+      <div className="res-body">
+        {sections.map((section, idx) => {
+          const sectionQs = questions.filter((q) => (q.section || "General") === section);
+          const isDiagramacion = !section.toLowerCase().includes("contenido");
+          const sectionClass = isDiagramacion ? "pteg-soft" : "teg-soft";
+          const sectionAnswered = sectionQs.filter((q) => {
+            const v = ratings[q.id];
+            if (q.answerType === "text") return typeof v === "string" && v.trim().length > 0;
+            const n = typeof v === "number" ? v : Number(v) || 0;
+            return n > 0;
+          }).length;
+
+          return (
+            <div key={section} className={`res-section ${sectionClass}`}>
+              <div className="res-sec-header">
+                <span className="res-sec-num font-display">
+                  {String(idx + 1).padStart(2, "0")}
                 </span>
+                <span className="res-sec-label">{section}</span>
+                <span className="res-sec-count">{sectionAnswered}/{sectionQs.length}</span>
               </div>
+
+              {sectionQs.map((q) => {
+                const answerLabel = getAnswerLabel(q, ratings[q.id]);
+                const pillClass = getAnswerPillClass(q, ratings[q.id]);
+                return (
+                  <div key={q.id} className="res-q">
+                    <div className="res-q-info">
+                      <span className="res-q-label">{q.label}</span>
+                      <span className="res-q-sub">{q.subsection}</span>
+                    </div>
+                    <span className={`res-q-pill ${pillClass}`}>{answerLabel}</span>
+                  </div>
+                );
+              })}
             </div>
-          ))}
-        </div>
+          );
+        })}
+
         {comments && (
-          <div className="bg-white rounded-lg p-3 border border-gray-200">
-            <h5 className="text-xs font-semibold text-gray-600 mb-1">
-              Comentarios:
-            </h5>
-            <p className="text-sm text-gray-600 whitespace-pre-wrap">
-              {comments}
-            </p>
+          <div className="pending-soft comments-callout">
+            <p className="comments-callout-title font-display">Comentarios del evaluador</p>
+            <p className="comments-callout-text">{comments}</p>
           </div>
         )}
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-3 pt-4">
+      <div className="res-actions">
         <button
+          type="button"
+          className="btn cta"
           onClick={() =>
             router.push(
               typeParam === "tesis" ? "/dashboard/tesis" : "/dashboard/proyectos",
             )
           }
-          className="flex-1 sm:flex-initial bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-all shadow-sm"
         >
           Volver
         </button>
         <button
+          type="button"
+          className="btn outline"
           onClick={onReset}
-          className="flex-1 sm:flex-initial border-2 border-gray-300 text-gray-700 px-6 py-3 rounded-lg font-medium hover:bg-gray-50 transition-all"
         >
           Nueva evaluación
+        </button>
+        <button
+          type="button"
+          className="btn ghost"
+          aria-disabled="true"
+          onClick={(e) => e.preventDefault()}
+        >
+          Descargar PDF
         </button>
       </div>
     </div>
