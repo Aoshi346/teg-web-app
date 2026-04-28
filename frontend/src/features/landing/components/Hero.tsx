@@ -5,7 +5,6 @@
 import React, { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import SplitType from "split-type";
-import { LogIn, ChevronDown, ArrowRight, Sparkles } from "lucide-react";
 
 /**
  * Lightweight animated canvas — drifting circles and soft connecting lines
@@ -18,7 +17,6 @@ const HeroCanvas = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    // Respect reduced-motion
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     const ctx = canvas.getContext("2d");
@@ -44,10 +42,10 @@ const HeroCanvas = () => {
     const connectDist = 150;
 
     const palette = [
-      "0, 102, 255",   // blue
-      "255, 107, 53",  // orange
-      "255, 210, 63",  // yellow
-      "255, 255, 255", // white
+      "0, 102, 255",
+      "255, 107, 53",
+      "255, 210, 63",
+      "255, 255, 255",
     ];
 
     const resize = () => {
@@ -79,7 +77,6 @@ const HeroCanvas = () => {
     const draw = () => {
       ctx.clearRect(0, 0, w, h);
 
-      // Lines
       for (let i = 0; i < orbs.length; i++) {
         for (let j = i + 1; j < orbs.length; j++) {
           const dx = orbs[i].x - orbs[j].x;
@@ -97,7 +94,6 @@ const HeroCanvas = () => {
         }
       }
 
-      // Orbs
       for (const o of orbs) {
         o.x += o.vx;
         o.y += o.vy;
@@ -145,10 +141,10 @@ export default function Hero() {
   const titleRef = useRef<HTMLHeadingElement>(null);
   const gradientRef = useRef<HTMLSpanElement>(null);
   const subtitleRef = useRef<HTMLParagraphElement>(null);
-  const secondaryRef = useRef<HTMLParagraphElement>(null);
+  const secondaryRef = useRef<HTMLDivElement>(null);
   const ctaRef = useRef<HTMLDivElement>(null);
   const arrowRef = useRef<HTMLDivElement>(null);
-  const badgeRef = useRef<HTMLDivElement>(null);
+  const cursorLightRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (
@@ -163,6 +159,10 @@ export default function Hero() {
       return undefined;
     }
 
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      return undefined;
+    }
+
     const splitInstances: SplitType[] = [];
 
     const ctx = gsap.context(() => {
@@ -172,8 +172,6 @@ export default function Hero() {
       });
       splitInstances.push(titleSplit, subtitleSplit);
 
-      // Initial hidden states
-      gsap.set(badgeRef.current, { autoAlpha: 0, y: -16, scale: 0.85 });
       gsap.set(arrowRef.current, { autoAlpha: 0, y: 20 });
       gsap.set(secondaryRef.current, { autoAlpha: 0, y: 24 });
       gsap.set(ctaRef.current, { autoAlpha: 0, y: 24 });
@@ -186,11 +184,9 @@ export default function Hero() {
         gsap.set(banners, { clipPath: "inset(0 100% 0 0)", autoAlpha: 1 });
       }
 
-      // Entrance timeline — lean, no overlapping tweens
       const tl = gsap.timeline({ defaults: { ease: "power3.out" }, delay: 0.15 });
 
-      tl.to(badgeRef.current, { autoAlpha: 1, y: 0, scale: 1, duration: 0.5, ease: "back.out(1.5)" })
-        .to(titleRef.current, { autoAlpha: 1, duration: 0.05 }, "-=0.2")
+      tl.to(titleRef.current, { autoAlpha: 1, duration: 0.05 })
         .to(banners ?? [], { clipPath: "inset(0 0% 0 0)", duration: 0.8, stagger: 0.12, ease: "power3.inOut" }, "-=0.15")
         .to(titleSplit.lines, { opacity: 1, y: 0, duration: 0.7, stagger: 0.08 }, "-=0.5")
         .to(subtitleSplit.lines, { opacity: 1, y: 0, duration: 0.6, stagger: 0.08 }, "-=0.35")
@@ -198,12 +194,12 @@ export default function Hero() {
         .to(ctaRef.current, { autoAlpha: 1, y: 0, duration: 0.5, ease: "back.out(1.2)" }, "-=0.25")
         .to(arrowRef.current, { autoAlpha: 1, y: 0, duration: 0.4 }, "-=0.2");
 
-      // Ambient — only 2 lightweight infinite tweens
       tl.add(() => {
         gsap.to(arrowRef.current, { y: 6, duration: 1.4, ease: "sine.inOut", repeat: -1, yoyo: true });
         if (gradientRef.current) {
           gsap.to(gradientRef.current, { y: -5, rotation: -2.5, duration: 4, ease: "sine.inOut", repeat: -1, yoyo: true });
         }
+        gsap.to(".lh-bridge-pill", { y: 4, duration: 1.2, repeat: -1, yoyo: true, ease: "sine.inOut" });
       });
     }, heroRef);
 
@@ -213,9 +209,65 @@ export default function Hero() {
     };
   }, []);
 
+  // Cursor light follower — only on desktop pointer-fine, non-reduced-motion.
+  useEffect(() => {
+    const hero = heroRef.current;
+    const light = cursorLightRef.current;
+    if (!hero || !light) return undefined;
+
+    const desktop = window.matchMedia("(min-width: 1024px) and (pointer: fine)");
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+    if (!desktop.matches || reduced.matches) return undefined;
+
+    const onMove = (e: MouseEvent) => {
+      const rect = hero.getBoundingClientRect();
+      light.style.setProperty("--lh-cx", `${e.clientX - rect.left}px`);
+      light.style.setProperty("--lh-cy", `${e.clientY - rect.top}px`);
+    };
+
+    hero.addEventListener("mousemove", onMove, { passive: true });
+    return () => {
+      hero.removeEventListener("mousemove", onMove);
+    };
+  }, []);
+
+  // Banner parallax — translate the orange b2 banner up to ~24px between
+  // scrollY 0 and 600. rAF-throttled, single-token cancel-and-schedule.
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+    if (reduced.matches) return undefined;
+
+    let rafId: number | null = null;
+    const schedule = () => {
+      if (rafId !== null) return;
+      rafId = requestAnimationFrame(() => {
+        rafId = null;
+        const el = gradientRef.current;
+        if (!el) return;
+        const y = Math.min(Math.max(window.scrollY, 0), 600);
+        const offset = (y / 600) * 24;
+        el.classList.add("is-parallaxed");
+        el.style.setProperty("--lh-parallax-y", `${-offset}px`);
+        el.style.transform = `translateY(${-offset}px) rotate(-2deg)`;
+      });
+    };
+
+    window.addEventListener("scroll", schedule, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", schedule);
+      if (rafId !== null) cancelAnimationFrame(rafId);
+    };
+  }, []);
+
   const handleScrollToFeatures = () => {
     const el = document.getElementById("features");
     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const handlePrimaryClick = () => {
+    const modal = document.querySelector('[aria-label="Ingresar"]') as HTMLButtonElement | null;
+    if (modal) modal.click();
   };
 
   return (
@@ -235,25 +287,16 @@ export default function Hero() {
       {/* Animated canvas — lightweight drifting orbs */}
       <HeroCanvas />
 
-      {/* Soft ambient CSS blobs — no JS, GPU-composited */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-[10%] left-[5%] w-60 h-60 md:w-80 md:h-80 rounded-full bg-usm-blue/10 floating" style={{ animationDuration: "8s" }} />
-        <div className="absolute bottom-[8%] right-[3%] w-52 h-52 md:w-72 md:h-72 rounded-full bg-usm-orange/10 floating" style={{ animationDuration: "10s", animationDelay: "3s" }} />
-      </div>
+      {/* Atmosphere layers — Landing Hero v2026 */}
+      <div className="lh-aurora" aria-hidden />
+      <div className="lh-grain" aria-hidden />
+      <div className="lh-cursor-light" aria-hidden ref={cursorLightRef} />
 
       {/* Content */}
       <div
         ref={contentRef}
         className="relative z-20 flex flex-col items-center max-w-screen-xl px-4 text-center mt-4 md:mt-10"
       >
-        {/* Badge */}
-        <div ref={badgeRef} className="mb-6">
-          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-sm font-medium text-white/90">
-            <Sparkles className="h-3.5 w-3.5 text-usm-yellow" />
-            Plataforma de Gestión Académica
-          </span>
-        </div>
-
         <div className="relative inline-block mb-4">
           <h1
             ref={titleRef}
@@ -265,7 +308,7 @@ export default function Hero() {
             </span>
             <span
               ref={gradientRef}
-              className="hero-banner text-white px-7 py-4 bg-gradient-to-r from-usm-orange to-orange-500 inline-block transform -rotate-2 shadow-2xl z-10 relative self-center sm:self-start sm:ml-8 border border-white/20"
+              className="hero-banner banner b2 text-white px-7 py-4 bg-gradient-to-r from-usm-orange to-orange-500 inline-block transform -rotate-2 shadow-2xl z-10 relative self-center sm:self-start sm:ml-8 border border-white/20"
             >
               Trabajo Especial de Grado
             </span>
@@ -284,60 +327,51 @@ export default function Hero() {
           </h1>
         </div>
 
-        <div className="mt-8 relative inline-block">
-          <p
-            ref={subtitleRef}
-            className="max-w-3xl text-lg text-slate-100 md:text-xl font-medium px-6 sm:px-8 py-4 relative z-10 bg-usm-navy/70 backdrop-blur-xl border border-white/15 shadow-2xl rounded-2xl"
-            style={{ textShadow: "0px 2px 8px rgba(0, 0, 0, 0.3)" }}
-          >
-            Centraliza entregas, evaluaciones y aprobaciones en un flujo seguro
-            con recordatorios automáticos y reportes listos para tus comités.
-          </p>
+        {/* Stacked-layered pair (Option III) */}
+        <div className="lh-stack-pair" data-testid="hero-stack-pair">
+          <div className="lh-stack-sub">
+            <p ref={subtitleRef}>
+              Centraliza <em>entregas, evaluaciones y aprobaciones</em> en un flujo seguro
+              con recordatorios automáticos y reportes listos para tus comités.
+            </p>
+          </div>
+          <div ref={secondaryRef} className="lh-stack-secondary">
+            <span className="dash">—</span>&nbsp;Coordina a estudiantes, tutores y jurados con comunicación fluida.
+          </div>
         </div>
 
-        <p
-          ref={secondaryRef}
-          className="mt-6 font-semibold max-w-2xl text-base text-usm-navy bg-white/95 px-6 sm:px-8 py-3 rounded-full shadow-xl md:text-lg inline-block"
-        >
-          Coordina a estudiantes, tutores y jurados con comunicación fluida.
-        </p>
-
-        {/* CTA Buttons */}
+        {/* CTA Buttons — stamp + ghost */}
         <div ref={ctaRef} className="mt-8 flex flex-col sm:flex-row items-center gap-4">
           <button
-            onClick={() => {
-              const modal = document.querySelector('[aria-label="Ingresar"]') as HTMLButtonElement;
-              if (modal) modal.click();
-            }}
-            className="group inline-flex items-center gap-2.5 px-8 py-3.5 text-base font-bold text-white
-                       bg-gradient-to-r from-usm-orange to-orange-500
-                       rounded-full shadow-lg shadow-orange-500/25
-                       hover:shadow-xl hover:shadow-orange-500/40 hover:-translate-y-0.5
-                       active:translate-y-0 transition-all duration-200"
+            type="button"
+            onClick={handlePrimaryClick}
+            className="lh-btn-stamp"
           >
-            <LogIn className="h-5 w-5" />
-            Comenzar ahora
+            <span className="corner tr" aria-hidden />
+            <span className="corner bl" aria-hidden />
+            <span className="lh-btn-num">01</span>
+            <span>Comenzar ahora</span>
+            <span className="arr" aria-hidden>→</span>
           </button>
           <button
+            type="button"
             onClick={handleScrollToFeatures}
-            className="group inline-flex items-center gap-2 px-7 py-3.5 text-base font-semibold text-white
-                       bg-white/10 backdrop-blur-md border border-white/25
-                       rounded-full hover:bg-white/20 hover:-translate-y-0.5
-                       active:translate-y-0 transition-all duration-200"
+            className="lh-btn-stamp-ghost"
           >
             Ver funciones
-            <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" />
           </button>
         </div>
 
-        {/* Scroll arrow */}
+        {/* Bridge pill — replaces ChevronDown scroll arrow */}
         <div ref={arrowRef} className="mt-10 mb-4">
           <button
+            type="button"
+            className="lh-bridge-pill"
+            aria-label="Cómo te ayuda Tesisfar — desplazarse"
             onClick={handleScrollToFeatures}
-            className="p-2 rounded-full text-white/50 hover:text-white transition-colors duration-200"
-            aria-label="Scroll down"
           >
-            <ChevronDown className="h-8 w-8" />
+            Cómo te ayuda Tesisfar
+            <span className="arr" aria-hidden>↓</span>
           </button>
         </div>
       </div>

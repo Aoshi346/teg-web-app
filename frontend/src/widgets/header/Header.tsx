@@ -271,26 +271,6 @@ export default function Header() {
     };
   }, [gsapLoaded]);
 
-  const handleButtonHover = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (!gsapLoaded) return;
-    gsap.to(e.currentTarget, {
-      y: -2,
-      scale: 1.02,
-      duration: 0.18,
-      ease: "power2.out",
-    });
-  };
-
-  const handleButtonLeave = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (!gsapLoaded) return;
-    gsap.to(e.currentTarget, {
-      y: 0,
-      scale: 1,
-      duration: 0.18,
-      ease: "power2.out",
-    });
-  };
-
   const handleButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     // Always open the login modal; play a subtle micro-interaction
     setIsLoginModalOpen(true);
@@ -337,7 +317,7 @@ export default function Header() {
       <div ref={componentRef}>
         <header
           ref={headerRef}
-          className="fixed top-0 z-40 w-full bg-white"
+          className="lh-header-rule fixed top-0 z-40 w-full bg-white"
           style={headerInlineStyle}
         >
           <div className="container mx-auto flex h-full items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -361,31 +341,31 @@ export default function Header() {
             {/* Desktop Action Button */}
             <nav className="hidden md:flex items-center gap-6">
               <Link
+                href="#hero2"
+                onClick={(e) => {
+                  e.preventDefault();
+                  document.getElementById("hero2")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                }}
+                className="text-sm text-gray-700 hover:text-gray-900"
+              >
+                Plataforma
+              </Link>
+              <Link
                 href="#features"
                 onClick={(e) => handleScrollToFeatures(e, false)}
                 className="text-sm text-gray-700 hover:text-gray-900"
               >
                 Funciones
               </Link>
-              <Link
-                href="#contact"
-                className="text-sm text-gray-700 hover:text-gray-900"
-              >
-                Contacto
-              </Link>
               <div className="desktop-btn-anim">
                 <button
-                  onMouseEnter={handleButtonHover}
-                  onMouseLeave={handleButtonLeave}
                   onClick={handleButtonClick}
-                  className="inline-flex items-center gap-3 px-5 py-2.5 text-sm font-semibold text-white
-                        bg-usm-orange hover:bg-orange-600
-                        rounded-full shadow-md hover:shadow-orange-500/20
-                        focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-usm-orange
-                        transition-transform duration-200"
+                  className="lh-header-stamp"
                   aria-label="Ingresar"
                   title="Ingresar"
                 >
+                  <span className="corner tr" aria-hidden />
+                  <span className="corner bl" aria-hidden />
                   <LogIn className="h-4 w-4" aria-hidden />
                   <span>Ingresar</span>
                 </button>
@@ -429,17 +409,22 @@ export default function Header() {
 
             <div className="space-y-4">
               <Link
+                href="#hero2"
+                onClick={(e) => {
+                  e.preventDefault();
+                  document.getElementById("hero2")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  setIsMobileMenuOpen(false);
+                }}
+                className="block text-lg font-medium text-gray-800"
+              >
+                Plataforma
+              </Link>
+              <Link
                 href="#features"
                 onClick={(e) => handleScrollToFeatures(e, true)}
                 className="block text-lg font-medium text-gray-800"
               >
                 Funciones
-              </Link>
-              <Link
-                href="#contact"
-                className="block text-lg font-medium text-gray-800"
-              >
-                Contacto
               </Link>
             </div>
 

@@ -1,191 +1,78 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
-import { Instagram, ArrowRight } from "lucide-react";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-gsap.registerPlugin(ScrollTrigger);
+import React from "react";
+import Link from "next/link";
 
 export default function Footer() {
-  const ctaSectionRef = useRef<HTMLElement>(null);
-  const ctaContentRef = useRef<HTMLDivElement>(null);
-  const footerRef = useRef<HTMLElement>(null);
-  const footerGridRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const ctx = gsap.context(() => {
-      // CTA Banner reveal
-      if (ctaContentRef.current) {
-        const elements = ctaContentRef.current.children;
-        gsap.set(elements, { autoAlpha: 0, y: 40 });
-
-        ScrollTrigger.create({
-          trigger: ctaSectionRef.current,
-          start: "top 80%",
-          onEnter: () => {
-            gsap.to(elements, {
-              autoAlpha: 1,
-              y: 0,
-              duration: 0.8,
-              stagger: 0.15,
-              ease: "power3.out",
-            });
-          },
-        });
-      }
-
-      // Footer grid columns stagger in
-      if (footerGridRef.current) {
-        const cols = footerGridRef.current.children;
-        gsap.set(cols, { autoAlpha: 0, y: 30 });
-
-        ScrollTrigger.create({
-          trigger: footerRef.current,
-          start: "top 90%",
-          onEnter: () => {
-            gsap.to(cols, {
-              autoAlpha: 1,
-              y: 0,
-              duration: 0.7,
-              stagger: 0.1,
-              ease: "power2.out",
-            });
-          },
-        });
-      }
-    });
-
-    return () => {
-      ctx.revert();
-      ScrollTrigger.getAll().forEach((t) => t.kill());
-    };
-  }, []);
-
   return (
-    <>
-      {/* CTA Banner */}
-      <section
-        ref={ctaSectionRef}
-        className="relative bg-gradient-to-br from-usm-navy via-usm-navy to-blue-900 py-20 px-4 overflow-hidden noise-overlay"
-      >
-        {/* Background decoration */}
-        <div className="absolute inset-0 dot-grid opacity-10" />
-        <div className="absolute top-0 right-0 w-96 h-96 bg-usm-blue/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-72 h-72 bg-usm-orange/10 rounded-full blur-3xl" />
+    <footer className="lh-footer">
+      <span className="lh-footer-rule-top" aria-hidden />
 
-        <div
-          ref={ctaContentRef}
-          className="relative container mx-auto max-w-3xl text-center z-10"
-        >
-          <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-4">
-            ¿Listo para comenzar?
-          </h2>
-          <p className="text-lg text-slate-300 mb-8 max-w-xl mx-auto">
-            Simplifica la gestión de tu Trabajo Especial de Grado con una
-            herramienta diseñada para ti.
+      {/* Desktop / tablet 4-col grid */}
+      <div className="brandcol hidden md:block">
+        <h5>TesisFar</h5>
+        <p>
+          La plataforma que acompaña tu Trabajo Especial de Grado, desde el primer artículo hasta la defensa.
+        </p>
+      </div>
+      <div className="hidden md:block">
+        <h5>Plataforma</h5>
+        <Link href="/">Inicio</Link>
+        <Link href="#features">Funciones</Link>
+        <Link href="#roles">Roles</Link>
+      </div>
+      <div className="hidden md:block">
+        <h5>Universidad</h5>
+        <a href="#">Reglamento TEG</a>
+        <a href="#">Coordinación</a>
+        <a href="#">Calendario</a>
+      </div>
+      <div className="hidden md:block">
+        <h5>Contacto</h5>
+        <a href="mailto:decanato.farmacia@usm.edu.ve">Soporte</a>
+        <a href="#">Cuenta</a>
+        <a href="#">Estado del sistema</a>
+      </div>
+
+      {/* Mobile accordion (≤640px shown via CSS, replaces md:block above) */}
+      <div className="md:hidden" style={{ gridColumn: "1 / -1" }}>
+        <div style={{ marginBottom: 16 }}>
+          <h5 style={{ fontFamily: "Fraunces, serif", fontWeight: 800, fontSize: 18, color: "#011638", margin: 0 }}>TesisFar</h5>
+          <p style={{ fontSize: 13, color: "#64748b", margin: "8px 0 0", lineHeight: 1.55 }}>
+            La plataforma que acompaña tu Trabajo Especial de Grado, desde el primer artículo hasta la defensa.
           </p>
-          <button
-            onClick={() => {
-              const btn = document.querySelector(
-                '[aria-label="Ingresar"]'
-              ) as HTMLButtonElement;
-              if (btn) btn.click();
-            }}
-            className="group inline-flex items-center gap-2.5 px-8 py-3.5 text-base font-bold text-white
-                       bg-gradient-to-r from-usm-orange to-orange-500
-                       rounded-full shadow-lg shadow-orange-500/25
-                       hover:shadow-xl hover:shadow-orange-500/40 hover:-translate-y-1
-                       active:translate-y-0 active:shadow-md
-                       transition-all duration-300 ease-out"
-          >
-            Ingresar a la plataforma
-            <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
-          </button>
         </div>
-      </section>
+        <details open>
+          <summary>Plataforma</summary>
+          <div className="links">
+            <Link href="/">Inicio</Link>
+            <Link href="#features">Funciones</Link>
+            <Link href="#roles">Roles</Link>
+          </div>
+        </details>
+        <details>
+          <summary>Universidad</summary>
+          <div className="links">
+            <a href="#">Reglamento TEG</a>
+            <a href="#">Coordinación</a>
+            <a href="#">Calendario</a>
+          </div>
+        </details>
+        <details>
+          <summary>Contacto</summary>
+          <div className="links">
+            <a href="mailto:decanato.farmacia@usm.edu.ve">Soporte</a>
+            <a href="#">Cuenta</a>
+            <a href="#">Estado del sistema</a>
+          </div>
+        </details>
+      </div>
 
-      {/* Footer */}
-      <footer ref={footerRef} className="bg-gray-950 text-white">
-        <div className="container mx-auto px-4 py-12">
-          <div
-            ref={footerGridRef}
-            className="grid grid-cols-1 gap-8 md:grid-cols-4"
-          >
-            <div className="md:col-span-1">
-              <h3 className="text-2xl font-bold">TesisFar</h3>
-              <p className="mt-3 text-gray-400 leading-relaxed text-sm">
-                Plataforma para la gestión, entrega y evaluación del Trabajo
-                Especial de Grado.
-              </p>
-            </div>
-            <div>
-              <h4 className="font-semibold text-sm uppercase tracking-wider text-gray-300">
-                Enlaces
-              </h4>
-              <ul className="mt-4 space-y-2.5">
-                <li>
-                  <a
-                    href="#"
-                    className="text-gray-400 transition-colors hover:text-usm-blue text-sm"
-                  >
-                    Acerca de
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="text-gray-400 transition-colors hover:text-usm-blue text-sm"
-                  >
-                    Soporte
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="text-gray-400 transition-colors hover:text-usm-blue text-sm"
-                  >
-                    Blog
-                  </a>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold text-sm uppercase tracking-wider text-gray-300">
-                Dirección
-              </h4>
-              <address className="not-italic mt-4 text-gray-400 space-y-2 text-sm leading-relaxed">
-                <div>
-                  La Florencia - Caracas. Km. 3 de la carretera Petare-Santa
-                  Lucía, Estado Miranda.
-                </div>
-                <div>Email: decanato.farmacia@usm.edu.ve</div>
-              </address>
-            </div>
-            <div>
-              <h4 className="font-semibold text-sm uppercase tracking-wider text-gray-300">
-                Síguenos
-              </h4>
-              <div className="mt-4 flex space-x-4">
-                <a
-                  href="#"
-                  className="flex items-center justify-center w-10 h-10 rounded-full bg-white/5 border border-white/10
-                           text-gray-400 transition-all hover:text-usm-blue hover:bg-usm-blue/10 hover:border-usm-blue/30 hover:scale-110"
-                  aria-label="Instagram"
-                >
-                  <Instagram size={18} />
-                </a>
-              </div>
-            </div>
-          </div>
-          <div className="mt-12 border-t border-gray-800 pt-8 text-center text-gray-500 text-sm">
-            <p>
-              &copy; {new Date().getFullYear()} Aoshi Blanco. Todos los derechos
-              reservados.
-            </p>
-          </div>
-        </div>
-      </footer>
-    </>
+      <div className="lh-footer-rule" />
+      <div className="lh-footer-meta">
+        <span>© {new Date().getFullYear()} TesisFar · Universidad Santa María · Caracas</span>
+        <span>v2026.04</span>
+      </div>
+    </footer>
   );
 }
