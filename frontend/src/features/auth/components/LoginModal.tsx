@@ -1,9 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { X, Eye, EyeOff, Mail, Lock, User, Sparkles } from "lucide-react";
-import { Button } from "@shared/ui/button";
-import { Input } from "@shared/ui/input";
+import { X, Eye, EyeOff, Mail, Lock, User, ArrowRight, HelpCircle } from "lucide-react";
 import Toast from "@shared/ui/Toast";
 import LoginLoading from "@shared/ui/LoginLoading";
 import {
@@ -12,220 +10,10 @@ import {
 } from "@features/auth/api/clientAuth";
 import { useRouter } from "next/navigation";
 import { gsap } from "gsap";
+import RoleGrid from "./RoleGrid";
+import CedulaField, { Nationality } from "./CedulaField";
 
-const REMEMBER_EMAIL_KEY = 'tf_remembered_email';
-
-// --- Animated Canvas Background with floating geometric shapes ---
-const BrandCanvas = () => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    let animId: number;
-    let width = 0;
-    let height = 0;
-
-    const colors = {
-      blue: "rgba(0, 102, 255, 0.5)",
-      blueFaint: "rgba(0, 102, 255, 0.12)",
-      orange: "rgba(255, 107, 53, 0.45)",
-      orangeFaint: "rgba(255, 107, 53, 0.10)",
-      yellow: "rgba(255, 210, 63, 0.35)",
-      white: "rgba(255, 255, 255, 0.15)",
-      whiteLine: "rgba(255, 255, 255, 0.06)",
-    };
-
-    type Shape = {
-      x: number;
-      y: number;
-      size: number;
-      type: "circle" | "ring" | "square" | "triangle" | "dot" | "cross";
-      color: string;
-      vx: number;
-      vy: number;
-      rotation: number;
-      rotSpeed: number;
-      pulsePhase: number;
-      pulseSpeed: number;
-      opacity: number;
-    };
-
-    const shapes: Shape[] = [];
-    const shapeCount = 28;
-    const connectDist = 120;
-
-    const resize = () => {
-      const rect = canvas.parentElement!.getBoundingClientRect();
-      width = rect.width;
-      height = rect.height;
-      canvas.width = width * window.devicePixelRatio;
-      canvas.height = height * window.devicePixelRatio;
-      canvas.style.width = `${width}px`;
-      canvas.style.height = `${height}px`;
-      ctx.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0);
-    };
-
-    const createShape = (): Shape => {
-      const typeRoll = Math.random();
-      let type: Shape["type"];
-      if (typeRoll < 0.2) type = "circle";
-      else if (typeRoll < 0.35) type = "ring";
-      else if (typeRoll < 0.5) type = "square";
-      else if (typeRoll < 0.65) type = "triangle";
-      else if (typeRoll < 0.85) type = "dot";
-      else type = "cross";
-
-      const colorPick = [colors.blue, colors.orange, colors.yellow, colors.white];
-      return {
-        x: Math.random() * width,
-        y: Math.random() * height,
-        size: type === "dot" ? 2 + Math.random() * 3 : 6 + Math.random() * 14,
-        type,
-        color: colorPick[Math.floor(Math.random() * colorPick.length)],
-        vx: (Math.random() - 0.5) * 0.4,
-        vy: (Math.random() - 0.5) * 0.4,
-        rotation: Math.random() * Math.PI * 2,
-        rotSpeed: (Math.random() - 0.5) * 0.008,
-        pulsePhase: Math.random() * Math.PI * 2,
-        pulseSpeed: 0.01 + Math.random() * 0.02,
-        opacity: 0.4 + Math.random() * 0.6,
-      };
-    };
-
-    const init = () => {
-      resize();
-      shapes.length = 0;
-      for (let i = 0; i < shapeCount; i++) {
-        shapes.push(createShape());
-      }
-    };
-
-    const drawShape = (s: Shape, pulse: number) => {
-      ctx.save();
-      ctx.translate(s.x, s.y);
-      ctx.rotate(s.rotation);
-      ctx.globalAlpha = s.opacity * (0.7 + pulse * 0.3);
-
-      const sz = s.size * (0.9 + pulse * 0.1);
-
-      switch (s.type) {
-        case "circle":
-          ctx.fillStyle = s.color;
-          ctx.beginPath();
-          ctx.arc(0, 0, sz, 0, Math.PI * 2);
-          ctx.fill();
-          break;
-        case "ring":
-          ctx.strokeStyle = s.color;
-          ctx.lineWidth = 1.5;
-          ctx.beginPath();
-          ctx.arc(0, 0, sz, 0, Math.PI * 2);
-          ctx.stroke();
-          break;
-        case "square":
-          ctx.fillStyle = s.color;
-          ctx.fillRect(-sz / 2, -sz / 2, sz, sz);
-          break;
-        case "triangle":
-          ctx.fillStyle = s.color;
-          ctx.beginPath();
-          ctx.moveTo(0, -sz);
-          ctx.lineTo(sz * 0.866, sz * 0.5);
-          ctx.lineTo(-sz * 0.866, sz * 0.5);
-          ctx.closePath();
-          ctx.fill();
-          break;
-        case "dot":
-          ctx.fillStyle = s.color;
-          ctx.beginPath();
-          ctx.arc(0, 0, sz, 0, Math.PI * 2);
-          ctx.fill();
-          break;
-        case "cross": {
-          ctx.strokeStyle = s.color;
-          ctx.lineWidth = 1.5;
-          ctx.beginPath();
-          ctx.moveTo(-sz, 0);
-          ctx.lineTo(sz, 0);
-          ctx.moveTo(0, -sz);
-          ctx.lineTo(0, sz);
-          ctx.stroke();
-          break;
-        }
-      }
-
-      ctx.restore();
-    };
-
-    const animate = () => {
-      ctx.clearRect(0, 0, width, height);
-
-      // Connection lines
-      for (let a = 0; a < shapes.length; a++) {
-        for (let b = a + 1; b < shapes.length; b++) {
-          const dx = shapes[a].x - shapes[b].x;
-          const dy = shapes[a].y - shapes[b].y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < connectDist) {
-            const opacity = (1 - dist / connectDist) * 0.3;
-            ctx.strokeStyle = colors.whiteLine.replace("0.06", String(opacity * 0.15));
-            ctx.lineWidth = 0.8;
-            ctx.beginPath();
-            ctx.moveTo(shapes[a].x, shapes[a].y);
-            ctx.lineTo(shapes[b].x, shapes[b].y);
-            ctx.stroke();
-          }
-        }
-      }
-
-      // Update and draw shapes
-      for (const s of shapes) {
-        s.x += s.vx;
-        s.y += s.vy;
-        s.rotation += s.rotSpeed;
-        s.pulsePhase += s.pulseSpeed;
-        const pulse = (Math.sin(s.pulsePhase) + 1) / 2;
-
-        // Wrap around edges
-        if (s.x < -20) s.x = width + 20;
-        if (s.x > width + 20) s.x = -20;
-        if (s.y < -20) s.y = height + 20;
-        if (s.y > height + 20) s.y = -20;
-
-        drawShape(s, pulse);
-      }
-
-      animId = requestAnimationFrame(animate);
-    };
-
-    init();
-    animate();
-
-    const onResize = () => {
-      cancelAnimationFrame(animId);
-      init();
-      animate();
-    };
-    window.addEventListener("resize", onResize);
-
-    return () => {
-      window.removeEventListener("resize", onResize);
-      cancelAnimationFrame(animId);
-    };
-  }, []);
-
-  return (
-    <canvas
-      ref={canvasRef}
-      className="absolute inset-0 w-full h-full"
-      style={{ pointerEvents: "none" }}
-    />
-  );
-};
+const REMEMBER_EMAIL_KEY = "tf_remembered_email";
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -238,34 +26,32 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const formContainerRef = useRef<HTMLDivElement>(null);
 
   const [isLoginMode, setIsLoginMode] = useState(true);
+  const [isForgotMode, setIsForgotMode] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotSent, setForgotSent] = useState(false);
+
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [registerFullName, setRegisterFullName] = useState("");
   const [registerEmail, setRegisterEmail] = useState("");
-  const [registerRole, setRegisterRole] = useState<
-    "Estudiante" | "Tutor" | "Jurado"
-  >("Estudiante");
+  const [registerCedula, setRegisterCedula] = useState("");
+  const [registerNationality, setRegisterNationality] = useState<Nationality>("V");
+  const [registerRole, setRegisterRole] = useState<"Estudiante" | "Tutor" | "Jurado">("Estudiante");
   const [registerPassword, setRegisterPassword] = useState("");
   const [registerConfirmPassword, setRegisterConfirmPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [loginShowPassword, setLoginShowPassword] = useState(false);
   const [registerShowPassword, setRegisterShowPassword] = useState(false);
-  const [registerShowConfirmPassword, setRegisterShowConfirmPassword] =
-    useState(false);
+  const [registerShowConfirmPassword, setRegisterShowConfirmPassword] = useState(false);
 
   const [toastState, setToastState] = useState<{
     visible: boolean;
     message: string;
     type: "error" | "success" | "info";
-  }>({
-    visible: false,
-    message: "",
-    type: "error",
-  });
+  }>({ visible: false, message: "", type: "error" });
 
-  // Load remembered email on mount
   useEffect(() => {
-    if (typeof window !== 'undefined' && localStorage.getItem(REMEMBER_EMAIL_KEY)) {
+    if (typeof window !== "undefined" && localStorage.getItem(REMEMBER_EMAIL_KEY)) {
       const remembered = localStorage.getItem(REMEMBER_EMAIL_KEY);
       if (remembered) {
         setLoginEmail(remembered);
@@ -278,82 +64,65 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
   const [loading, setLoading] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
 
-  // GSAP entrance animation
+  const reducedMotion = typeof window !== "undefined"
+    && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
   useEffect(() => {
-    if (isOpen && modalRef.current) {
+    if (isOpen && modalRef.current && !reducedMotion) {
       gsap.fromTo(
         modalRef.current,
-        { scale: 0.92, opacity: 0, y: 30 },
-        {
-          scale: 1,
-          opacity: 1,
-          y: 0,
-          duration: 0.45,
-          ease: "power3.out",
-        }
+        { scale: 0.94, opacity: 0, y: 24 },
+        { scale: 1, opacity: 1, y: 0, duration: 0.4, ease: "power3.out" }
       );
     }
-  }, [isOpen]);
+  }, [isOpen, reducedMotion]);
 
   const handleClose = useCallback(() => {
     setIsClosing(true);
-    if (modalRef.current) {
+    if (modalRef.current && !reducedMotion) {
       gsap.to(modalRef.current, {
-        scale: 0.92,
-        opacity: 0,
-        y: 20,
-        duration: 0.3,
-        ease: "power2.in",
-        onComplete: () => {
-          onClose();
-          setIsClosing(false);
-        },
+        scale: 0.94, opacity: 0, y: 16,
+        duration: 0.28, ease: "power2.in",
+        onComplete: () => { onClose(); setIsClosing(false); },
       });
     } else {
-      setTimeout(() => {
-        onClose();
-        setIsClosing(false);
-      }, 300);
+      setTimeout(() => { onClose(); setIsClosing(false); }, reducedMotion ? 0 : 280);
     }
-  }, [onClose]);
+  }, [onClose, reducedMotion]);
 
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "auto";
-    }
-    return () => {
-      document.body.style.overflow = "auto";
-    };
+    if (isOpen) document.body.style.overflow = "hidden";
+    else document.body.style.overflow = "auto";
+    return () => { document.body.style.overflow = "auto"; };
   }, [isOpen]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") handleClose();
+      if (e.key !== "Escape") return;
+      if (isForgotMode) {
+        setIsForgotMode(false);
+        setForgotSent(false);
+      } else {
+        handleClose();
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [handleClose]);
+  }, [handleClose, isForgotMode]);
 
-  // Animate form switch
   useEffect(() => {
-    if (formContainerRef.current) {
+    if (formContainerRef.current && !reducedMotion) {
       gsap.fromTo(
         formContainerRef.current,
-        { opacity: 0, x: isLoginMode ? -20 : 20 },
-        { opacity: 1, x: 0, duration: 0.35, ease: "power2.out" }
+        { opacity: 0, x: isLoginMode ? -16 : 16 },
+        { opacity: 1, x: 0, duration: 0.32, ease: "power2.out" }
       );
     }
-  }, [isLoginMode]);
+  }, [isLoginMode, isForgotMode, reducedMotion]);
 
-  const showToast = (
-    message: string,
-    type: "error" | "success" | "info" = "error"
-  ) => {
+  const showToast = (message: string, type: "error" | "success" | "info" = "error") => {
     setToastState({ visible: true, message, type });
   };
-
   const hideToast = () => setToastState((t) => ({ ...t, visible: false }));
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -370,7 +139,6 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
       }
 
       setIsLoggingIn(true);
-
       demoLogin(loginEmail, loginPassword)
         .then((result) => {
           if (!result.success) {
@@ -378,31 +146,20 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
             showToast(result.message || "Credenciales incorrectas.", "error");
             return;
           }
-
           if (result.user && result.user.status === "pending") {
             setIsLoggingIn(false);
-            showToast(
-              "Tu cuenta aún está pendiente de aprobación por un administrador.",
-              "info"
-            );
+            showToast("Tu cuenta aún está pendiente de aprobación por un administrador.", "info");
             return;
           }
-
           showToast("Inicio de sesión exitoso.", "success");
           try {
             sessionStorage.setItem("justLoggedIn", "1");
-            if (rememberMe) {
-              localStorage.setItem(REMEMBER_EMAIL_KEY, loginEmail);
-            } else {
-              localStorage.removeItem(REMEMBER_EMAIL_KEY);
-            }
+            if (rememberMe) localStorage.setItem(REMEMBER_EMAIL_KEY, loginEmail);
+            else localStorage.removeItem(REMEMBER_EMAIL_KEY);
           } catch {}
           setTimeout(() => {
-            try {
-              router.push("/dashboard");
-            } catch {
-              window.location.href = "/dashboard";
-            }
+            try { router.push("/dashboard"); }
+            catch { window.location.href = "/dashboard"; }
           }, 1000);
         })
         .catch(() => {
@@ -419,7 +176,6 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
         showToast("Por favor completa todos los campos de registro.", "error");
         return;
       }
-
       if (registerPassword !== registerConfirmPassword) {
         showToast("Las contraseñas no coinciden", "error");
         return;
@@ -430,19 +186,17 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
         fullName: registerFullName,
         password: registerPassword,
         role: registerRole,
+        cedula: registerCedula || undefined,
+        nationality: registerNationality,
         status: "pending" as const,
       };
 
       setLoading(true);
-
       demoRegister(newUser)
         .then((res) => {
           setLoading(false);
           if (res.success) {
-            showToast(
-              "Registro exitoso. Espera la aprobación de un administrador.",
-              "success"
-            );
+            showToast("Registro exitoso. Espera la aprobación de un administrador.", "success");
             setTimeout(() => {
               setIsLoginMode(true);
               setLoginEmail(registerEmail);
@@ -458,24 +212,21 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
     }
   };
 
+  const handleForgotSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!forgotEmail.trim()) {
+      showToast("Ingresa tu correo institucional.", "error");
+      return;
+    }
+    // Note: real wiring pending future brief 010-forgot-password.
+    setForgotSent(true);
+    showToast("Si la cuenta existe, te enviaremos un enlace.", "success");
+  };
+
   if (!isOpen && !isClosing) return null;
 
-  const show = isOpen && !isClosing;
-  const backdropClasses = show
-    ? "opacity-100"
-    : "opacity-0 pointer-events-none";
-
-  // Shared input styling
-  const inputClass =
-    "pl-12 h-12 bg-slate-50/80 border-slate-200 focus:bg-white focus:ring-2 focus:ring-usm-blue/20 focus:border-usm-blue rounded-xl transition-all duration-200";
-  const inputClassSm =
-    "pl-12 h-11 bg-slate-50/80 border-slate-200 focus:bg-white focus:ring-2 focus:ring-usm-blue/20 focus:border-usm-blue rounded-xl transition-all duration-200 text-sm";
-  const labelClass = "text-sm font-semibold text-slate-700 ml-1";
-  const labelClassSm = "text-xs font-semibold text-slate-700 ml-1";
-  const iconClass =
-    "absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-usm-blue transition-colors duration-200";
-  const iconClassSm =
-    "absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-usm-blue transition-colors duration-200";
+  const numeral = isForgotMode ? "?" : isLoginMode ? "01" : "02";
+  const eyebrow = isForgotMode ? "Recuperación" : isLoginMode ? "Acceso" : "Solicita acceso";
 
   return (
     <>
@@ -487,344 +238,312 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
         onClose={hideToast}
       />
 
-      {/* Backdrop */}
-      <div
-        className={`fixed inset-0 bg-usm-navy/60 backdrop-blur-sm z-50 transition-opacity ease-in-out duration-300 ${backdropClasses}`}
-        onClick={handleClose}
-      />
-
-      {/* Modal wrapper */}
-      <div
-        className="fixed inset-0 z-50 flex items-center justify-center p-0 md:p-4"
-        role="dialog"
-        aria-modal="true"
-      >
+      <div className="lm-overlay" onClick={handleClose} role="presentation">
         <div
           ref={modalRef}
+          className="lm-modal"
           onClick={(e) => e.stopPropagation()}
-          className="bg-white shadow-2xl w-full max-w-md md:max-w-2xl lg:max-w-4xl flex overflow-hidden
-                     modal-mobile-full md:rounded-2xl md:h-auto"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="lm-band-title"
         >
-          {/* Left Side: Forms */}
-          <div className="flex-1 p-6 sm:p-8 lg:p-12 flex flex-col justify-center relative overflow-y-auto max-h-[100dvh] md:max-h-[85vh]">
-            {/* Close button */}
+          <div className="lm-utility">
+            <a className="help" href="#" onClick={(e) => e.preventDefault()}>
+              <HelpCircle size={12} style={{ display: "inline", marginRight: 4, verticalAlign: "-2px" }} />
+              ¿Necesitas ayuda?
+            </a>
             <button
+              type="button"
+              className="x"
+              aria-label="Cerrar"
               onClick={handleClose}
-              className="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-800 hover:bg-slate-100 rounded-full transition-all duration-200 ease-out hover:rotate-90 z-20"
             >
-              <X className="h-5 w-5" />
+              <X size={18} />
             </button>
+          </div>
 
-            {/* Mobile brand header (visible only on small screens) */}
-            <div className="md:hidden mb-6 text-center">
-              <h2 className="text-2xl font-bold text-usm-navy">TesisFar</h2>
-              <p className="text-sm text-slate-500 mt-1">
-                Gestión del Trabajo Especial de Grado
-              </p>
+          <div className="lm-band">
+            <span className="lm-band-corner tl" />
+            <span className="lm-band-corner br" />
+            <div className="lm-band-row">
+              <span className="lm-band-num">{numeral}</span>
+              <div className="lm-band-info">
+                <span className="lm-band-eyebrow">{eyebrow}</span>
+                <h3 id="lm-band-title" className="lm-band-title">
+                  {isForgotMode ? (
+                    <>¿Olvidaste tu <em>contraseña</em>?</>
+                  ) : isLoginMode ? (
+                    <>Bienvenido <em>de vuelta</em>.</>
+                  ) : (
+                    <>Crea tu <em>cuenta</em>.</>
+                  )}
+                </h3>
+                <p className="lm-band-lede">
+                  {isForgotMode
+                    ? "Te enviaremos un enlace para restablecerla."
+                    : isLoginMode
+                    ? "Entra y la plataforma te lleva directo a lo pendiente."
+                    : "Solicita acceso con tus datos institucionales."}
+                </p>
+              </div>
             </div>
+            <span className="lm-band-strip" />
+          </div>
 
-            <div className="w-full">
-              {/* Tab switcher */}
-              <div className="flex bg-slate-100 rounded-xl p-1 mb-8">
+          <div className="lm-body">
+            {!isForgotMode && (
+              <div className="lm-seg" role="tablist" aria-label="Modo de acceso">
                 <button
+                  type="button"
+                  role="tab"
+                  aria-selected={isLoginMode}
                   onClick={() => setIsLoginMode(true)}
-                  className={`flex-1 py-2.5 text-center text-sm font-semibold rounded-lg transition-all duration-300 ${
-                    isLoginMode
-                      ? "bg-white text-usm-navy shadow-sm"
-                      : "text-slate-500 hover:text-slate-700"
-                  }`}
                 >
                   Iniciar sesión
                 </button>
                 <button
+                  type="button"
+                  role="tab"
+                  aria-selected={!isLoginMode}
                   onClick={() => setIsLoginMode(false)}
-                  className={`flex-1 py-2.5 text-center text-sm font-semibold rounded-lg transition-all duration-300 ${
-                    !isLoginMode
-                      ? "bg-white text-usm-navy shadow-sm"
-                      : "text-slate-500 hover:text-slate-700"
-                  }`}
                 >
-                  Registrarse
+                  Crear cuenta
                 </button>
               </div>
+            )}
 
-              <div ref={formContainerRef}>
-                {isLoginMode ? (
-                  /* Login Form */
-                  <form
-                    onSubmit={handleSubmit}
-                    className="space-y-5"
-                    noValidate
-                  >
-                    <div className="space-y-2">
-                      <label className={labelClass}>Correo electrónico</label>
-                      <div className="relative group">
-                        <Mail className={iconClass} />
-                        <Input
-                          type="email"
-                          value={loginEmail}
-                          onChange={(e) => setLoginEmail(e.target.value)}
-                          placeholder="nombre@correo.com"
-                          className={inputClass}
-                          required
-                        />
-                      </div>
+            <div ref={formContainerRef}>
+              {isForgotMode ? (
+                <form id="lm-forgot-form" onSubmit={handleForgotSubmit} className="lm-fields" noValidate>
+                  <label className="lm-field">
+                    <span className="lm-field-lbl">Correo institucional</span>
+                    <div className="lm-field-row">
+                      <Mail className="icon" size={18} />
+                      <input
+                        type="email"
+                        autoComplete="email"
+                        placeholder="tu.nombre@usm.edu.ve"
+                        value={forgotEmail}
+                        onChange={(e) => setForgotEmail(e.target.value)}
+                        required
+                        disabled={forgotSent}
+                      />
                     </div>
-                    <div className="space-y-2">
-                      <label className={labelClass}>Contraseña</label>
-                      <div className="relative group">
-                        <Lock className={iconClass} />
-                        <Input
-                          type={loginShowPassword ? "text" : "password"}
-                          value={loginPassword}
-                          onChange={(e) => setLoginPassword(e.target.value)}
-                          placeholder="Ingresa tu contraseña"
-                          className={`${inputClass} pr-12`}
-                          required
-                        />
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setLoginShowPassword(!loginShowPassword)
-                          }
-                          className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
-                        >
-                          {loginShowPassword ? (
-                            <EyeOff className="h-5 w-5" />
-                          ) : (
-                            <Eye className="h-5 w-5" />
-                          )}
-                        </button>
-                      </div>
+                    <span className="lm-field-help">
+                      {forgotSent
+                        ? "Revisa tu bandeja de entrada en los próximos minutos."
+                        : "Te enviaremos un enlace de recuperación."}
+                    </span>
+                  </label>
+                </form>
+              ) : isLoginMode ? (
+                <form id="lm-login-form" onSubmit={handleSubmit} className="lm-fields" noValidate>
+                  <label className="lm-field">
+                    <span className="lm-field-lbl">Correo institucional</span>
+                    <div className="lm-field-row">
+                      <Mail className="icon" size={18} />
+                      <input
+                        type="email"
+                        autoComplete="email"
+                        placeholder="tu.nombre@usm.edu.ve"
+                        value={loginEmail}
+                        onChange={(e) => setLoginEmail(e.target.value)}
+                        required
+                      />
                     </div>
-                    <div className="flex items-center justify-between text-sm pt-1">
-                      <label className="flex items-center gap-2 text-slate-600 cursor-pointer hover:text-slate-900 transition-colors">
-                        <input
-                          type="checkbox"
-                          checked={rememberMe}
-                          onChange={(e) => {
-                            setRememberMe(e.target.checked);
-                            if (!e.target.checked) {
-                              localStorage.removeItem(REMEMBER_EMAIL_KEY);
-                            }
-                          }}
-                          className="w-4 h-4 text-usm-blue border-slate-300 rounded focus:ring-usm-blue cursor-pointer"
-                        />
-                        Recuérdame
-                      </label>
+                  </label>
+                  <label className="lm-field">
+                    <span className="lm-field-lbl">Contraseña</span>
+                    <div className="lm-field-row">
+                      <Lock className="icon" size={18} />
+                      <input
+                        type={loginShowPassword ? "text" : "password"}
+                        autoComplete="current-password"
+                        placeholder="••••••••"
+                        value={loginPassword}
+                        onChange={(e) => setLoginPassword(e.target.value)}
+                        required
+                      />
                       <button
                         type="button"
-                        className="font-medium text-usm-blue hover:text-blue-700 transition-colors"
+                        className="toggle"
+                        aria-label={loginShowPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                        onClick={() => setLoginShowPassword(!loginShowPassword)}
                       >
-                        ¿Olvidaste tu contraseña?
+                        {loginShowPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                       </button>
                     </div>
-                    <Button
-                      type="submit"
-                      className="w-full h-12 text-base font-bold bg-gradient-to-r from-usm-blue to-blue-600 text-white hover:from-blue-700 hover:to-blue-800 rounded-xl shadow-lg shadow-usm-blue/25 hover:shadow-usm-blue/35 active:scale-[0.98] transition-all duration-200 mt-4"
+                  </label>
+                  <div className="lm-meta">
+                    <label className="check">
+                      <input
+                        type="checkbox"
+                        checked={rememberMe}
+                        onChange={(e) => {
+                          setRememberMe(e.target.checked);
+                          if (!e.target.checked) localStorage.removeItem(REMEMBER_EMAIL_KEY);
+                        }}
+                      />
+                      Mantener sesión
+                    </label>
+                    <button
+                      type="button"
+                      className="forgot"
+                      onClick={() => { setIsForgotMode(true); setForgotSent(false); setForgotEmail(loginEmail); }}
                     >
-                      Iniciar sesión
-                    </Button>
-
-                    {/* Mobile: show switch prompt */}
-                    <p className="text-center text-sm text-slate-500 md:hidden pt-2">
-                      ¿No tienes cuenta?{" "}
+                      ¿Olvidaste tu contraseña?
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <form id="lm-register-form" onSubmit={handleSubmit} className="lm-fields" noValidate>
+                  <label className="lm-field">
+                    <span className="lm-field-lbl">Nombre completo</span>
+                    <div className="lm-field-row">
+                      <User className="icon" size={18} />
+                      <input
+                        type="text"
+                        autoComplete="name"
+                        placeholder="María Fernández"
+                        value={registerFullName}
+                        onChange={(e) => setRegisterFullName(e.target.value)}
+                        required
+                      />
+                    </div>
+                  </label>
+                  <label className="lm-field">
+                    <span className="lm-field-lbl">Correo institucional</span>
+                    <div className="lm-field-row">
+                      <Mail className="icon" size={18} />
+                      <input
+                        type="email"
+                        autoComplete="email"
+                        placeholder="tu.nombre@usm.edu.ve"
+                        value={registerEmail}
+                        onChange={(e) => setRegisterEmail(e.target.value)}
+                        required
+                      />
+                    </div>
+                  </label>
+                  <CedulaField
+                    nationality={registerNationality}
+                    cedula={registerCedula}
+                    onChange={({ nationality, cedula }) => {
+                      setRegisterNationality(nationality);
+                      setRegisterCedula(cedula);
+                    }}
+                  />
+                  <RoleGrid value={registerRole} onChange={setRegisterRole} />
+                  <label className="lm-field">
+                    <span className="lm-field-lbl">Contraseña</span>
+                    <div className="lm-field-row">
+                      <Lock className="icon" size={18} />
+                      <input
+                        type={registerShowPassword ? "text" : "password"}
+                        autoComplete="new-password"
+                        placeholder="Mínimo 8 caracteres"
+                        value={registerPassword}
+                        onChange={(e) => setRegisterPassword(e.target.value)}
+                        required
+                      />
                       <button
                         type="button"
-                        onClick={() => setIsLoginMode(false)}
-                        className="font-semibold text-usm-blue hover:text-blue-700"
+                        className="toggle"
+                        aria-label={registerShowPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                        onClick={() => setRegisterShowPassword(!registerShowPassword)}
                       >
-                        Regístrate
+                        {registerShowPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                       </button>
-                    </p>
-                  </form>
-                ) : (
-                  /* Register Form */
-                  <form
-                    onSubmit={handleSubmit}
-                    className="space-y-3"
-                    noValidate
-                  >
-                    <div className="space-y-1">
-                      <label className={labelClassSm}>Nombre completo</label>
-                      <div className="relative group">
-                        <User className={iconClassSm} />
-                        <Input
-                          type="text"
-                          value={registerFullName}
-                          onChange={(e) => setRegisterFullName(e.target.value)}
-                          placeholder="Tu nombre completo"
-                          className={inputClassSm}
-                          required
-                        />
-                      </div>
                     </div>
-                    <div className="space-y-1">
-                      <label className={labelClassSm}>
-                        Correo electrónico
-                      </label>
-                      <div className="relative group">
-                        <Mail className={iconClassSm} />
-                        <Input
-                          type="email"
-                          value={registerEmail}
-                          onChange={(e) => setRegisterEmail(e.target.value)}
-                          placeholder="nombre@correo.com"
-                          className={inputClassSm}
-                          required
-                        />
-                      </div>
-                    </div>
-                    <div className="space-y-1">
-                      <label className={labelClassSm}>Rol de usuario</label>
-                      <div className="relative group">
-                        <User className={iconClassSm} />
-                        <select
-                          value={registerRole}
-                          onChange={(e) =>
-                            setRegisterRole(
-                              e.target.value as
-                                | "Estudiante"
-                                | "Tutor"
-                                | "Jurado"
-                            )
-                          }
-                          className="w-full pl-12 pr-4 h-11 bg-slate-50/80 border border-slate-200 rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-usm-blue/20 focus:border-usm-blue outline-none appearance-none cursor-pointer transition-all duration-200"
-                        >
-                          <option value="Estudiante">Estudiante</option>
-                          <option value="Tutor">Tutor</option>
-                          <option value="Jurado">Jurado</option>
-                        </select>
-                      </div>
-                    </div>
-                    <div className="space-y-1">
-                      <label className={labelClassSm}>Contraseña</label>
-                      <div className="relative group">
-                        <Lock className={iconClassSm} />
-                        <Input
-                          type={registerShowPassword ? "text" : "password"}
-                          value={registerPassword}
-                          onChange={(e) => setRegisterPassword(e.target.value)}
-                          placeholder="Crea una contraseña segura"
-                          className={`${inputClassSm} pr-12`}
-                          required
-                        />
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setRegisterShowPassword(!registerShowPassword)
-                          }
-                          className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
-                        >
-                          {registerShowPassword ? (
-                            <EyeOff className="h-4 w-4" />
-                          ) : (
-                            <Eye className="h-4 w-4" />
-                          )}
-                        </button>
-                      </div>
-                    </div>
-                    <div className="space-y-1">
-                      <label className={labelClassSm}>
-                        Confirmar contraseña
-                      </label>
-                      <div className="relative group">
-                        <Lock className={iconClassSm} />
-                        <Input
-                          type={
-                            registerShowConfirmPassword ? "text" : "password"
-                          }
-                          value={registerConfirmPassword}
-                          onChange={(e) =>
-                            setRegisterConfirmPassword(e.target.value)
-                          }
-                          placeholder="Confirma tu contraseña"
-                          className={`${inputClassSm} pr-12`}
-                          required
-                        />
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setRegisterShowConfirmPassword(
-                              !registerShowConfirmPassword
-                            )
-                          }
-                          className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
-                        >
-                          {registerShowConfirmPassword ? (
-                            <EyeOff className="h-4 w-4" />
-                          ) : (
-                            <Eye className="h-4 w-4" />
-                          )}
-                        </button>
-                      </div>
-                    </div>
-                    <div className="pt-2">
-                      <Button
-                        type="submit"
-                        disabled={loading}
-                        className="w-full h-12 text-sm font-bold bg-gradient-to-r from-usm-orange to-orange-500 text-white hover:from-orange-600 hover:to-orange-700 rounded-xl shadow-lg shadow-usm-orange/25 hover:shadow-usm-orange/35 active:scale-[0.98] transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed"
-                      >
-                        {loading ? "Registrando..." : "Registrarse"}
-                      </Button>
-                    </div>
-
-                    {/* Mobile: show switch prompt */}
-                    <p className="text-center text-sm text-slate-500 md:hidden pt-2">
-                      ¿Ya tienes cuenta?{" "}
+                  </label>
+                  <label className="lm-field">
+                    <span className="lm-field-lbl">Confirmar contraseña</span>
+                    <div className="lm-field-row">
+                      <Lock className="icon" size={18} />
+                      <input
+                        type={registerShowConfirmPassword ? "text" : "password"}
+                        autoComplete="new-password"
+                        placeholder="Repite la contraseña"
+                        value={registerConfirmPassword}
+                        onChange={(e) => setRegisterConfirmPassword(e.target.value)}
+                        required
+                      />
                       <button
                         type="button"
-                        onClick={() => setIsLoginMode(true)}
-                        className="font-semibold text-usm-blue hover:text-blue-700"
+                        className="toggle"
+                        aria-label={registerShowConfirmPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                        onClick={() => setRegisterShowConfirmPassword(!registerShowConfirmPassword)}
                       >
-                        Inicia sesión
+                        {registerShowConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                       </button>
-                    </p>
-                  </form>
-                )}
-              </div>
+                    </div>
+                  </label>
+                </form>
+              )}
             </div>
           </div>
 
-          {/* Right Side: Brand Panel — visible on md+ (not just lg) */}
-          <div className="flex-1 relative hidden md:flex brand-gradient-animated overflow-hidden">
-            <BrandCanvas />
-            <div className="relative h-full w-full flex flex-col justify-center items-center p-10 lg:p-12 text-center z-10">
-              <div className="text-white space-y-6">
-                {/* Glowing logo */}
-                <div className="relative inline-block">
-                  <div className="absolute inset-0 blur-3xl bg-usm-blue/30 rounded-full scale-150" />
-                  <h3 className="text-5xl lg:text-6xl font-bold drop-shadow-lg relative">
-                    TesisFar
-                  </h3>
-                </div>
-
-                <p className="text-base lg:text-lg font-light tracking-wide opacity-90 leading-relaxed max-w-xs mx-auto">
-                  La plataforma integral para la gestión y seguimiento eficiente
-                  de Trabajos Especiales de Grado.
+          <div className="lm-foot">
+            {isForgotMode ? (
+              <>
+                <button
+                  type="submit"
+                  form="lm-forgot-form"
+                  className="lm-stamp"
+                  disabled={forgotSent}
+                >
+                  <span className="num">?</span>
+                  {forgotSent ? "Enlace enviado" : "Enviar enlace"}
+                  <ArrowRight className="arrow" size={16} />
+                </button>
+                <p className="lm-alt-foot">
+                  <button
+                    type="button"
+                    onClick={() => { setIsForgotMode(false); setForgotSent(false); }}
+                  >
+                    ← Volver a iniciar sesión
+                  </button>
                 </p>
-
-                {/* Feature pills */}
-                <div className="flex flex-wrap justify-center gap-2 pt-4">
-                  {["Entregas", "Evaluaciones", "Seguimiento"].map((tag) => (
-                    <span
-                      key={tag}
-                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-xs font-medium text-white/80"
-                    >
-                      <Sparkles className="h-3 w-3 text-usm-yellow" />
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-
-                {/* Decorative dots */}
-                <div className="pt-6 flex justify-center gap-2 opacity-60">
-                  <div className="w-2 h-2 rounded-full bg-white" />
-                  <div className="w-2 h-2 rounded-full bg-white/40" />
-                  <div className="w-2 h-2 rounded-full bg-white/40" />
-                </div>
-              </div>
-            </div>
+              </>
+            ) : isLoginMode ? (
+              <>
+                <button
+                  type="submit"
+                  form="lm-login-form"
+                  className="lm-stamp"
+                  disabled={isLoggingIn}
+                >
+                  <span className="num">01</span>
+                  {isLoggingIn ? "Verificando..." : "Continuar"}
+                  <ArrowRight className="arrow" size={16} />
+                </button>
+                <p className="lm-alt-foot">
+                  ¿Eres nuevo?{" "}
+                  <button type="button" onClick={() => setIsLoginMode(false)}>
+                    Solicita acceso →
+                  </button>
+                </p>
+              </>
+            ) : (
+              <>
+                <button
+                  type="submit"
+                  form="lm-register-form"
+                  className="lm-stamp"
+                  disabled={loading}
+                >
+                  <span className="num">02</span>
+                  {loading ? "Registrando..." : "Crear cuenta"}
+                  <ArrowRight className="arrow" size={16} />
+                </button>
+                <p className="lm-alt-foot">
+                  ¿Ya tienes cuenta?{" "}
+                  <button type="button" onClick={() => setIsLoginMode(true)}>
+                    Inicia sesión →
+                  </button>
+                </p>
+              </>
+            )}
           </div>
         </div>
       </div>

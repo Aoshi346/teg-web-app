@@ -90,6 +90,7 @@ export async function register(user: User): Promise<{ success: boolean; message?
       first_name: user.firstName,
       last_name: user.lastName,
       cedula: user.cedula,
+      nationality: user.nationality,
       role: user.role,
       semester: user.semester,
       phone: user.phone,
