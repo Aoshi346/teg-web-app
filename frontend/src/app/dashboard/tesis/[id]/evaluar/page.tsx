@@ -49,9 +49,7 @@ const GATES: Gate[] = [
     title: "Fase 3: Defensa Oral",
     blurb: "Evaluación de la presentación oral y defensa ante el jurado.",
     icon: Mic,
-    // Note: TEG defensa todavía no tiene formulario propio; el href apunta a la
-    // ruta planeada `/fase3` (TODO crear, similar a `/fase1`).
-    href: (id) => `/dashboard/tesis/${id}/evaluar/fase3`,
+    href: (id) => `/dashboard/tesis/${id}/evaluar/defensa`,
     unlocked: (s) => s === "pending_defensa" || s === "approved" || s === "failed_final",
     active: (s) => s === "pending_defensa",
   },

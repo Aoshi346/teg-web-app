@@ -8,7 +8,7 @@ import {
 } from './questions';
 
 export const MAX_SCORE = 20;
-export const PASSING_SCORE = 10;
+export const PASSING_SCORE = 14;
 
 export type PassStatus = 'Pass' | 'Fail';
 
@@ -94,6 +94,29 @@ export function getPointValue(
         case 1: return 0.2;
         default: return 0;
       }
+
+    case 'quaternary_defense': {
+      const sec = (question.section || '').toLowerCase();
+      if (sec.includes('tecnic') || sec.includes('técnic')) {
+        switch (answerValue) {
+          case 1: return 0.2;
+          case 2: return 0.5;
+          case 3: return 0.8;
+          case 4: return 1.0;
+          default: return 0;
+        }
+      }
+      if (sec.includes('divulgativ')) {
+        switch (answerValue) {
+          case 1: return 0.4;
+          case 2: return 1.0;
+          case 3: return 1.6;
+          case 4: return 2.0;
+          default: return 0;
+        }
+      }
+      return 0;
+    }
 
     case 'quintary':
       // 1=Deficiente → 5=Excelente, factor 0.2 per level
@@ -278,6 +301,81 @@ export function calculateTegEntregaSectionScores(
 
 export function getTegEntregaPassStatus(score: number): PassStatus {
   return score >= TEG_ENTREGA_PASSING_SCORE ? 'Pass' : 'Fail';
+}
+
+// ---------------------------------------------------------------------------
+// TEG Defensa Oral — scoring engine
+// ---------------------------------------------------------------------------
+
+export const TEG_DEFENSA_PASSING_SCORE = 14;
+export const TEG_DEFENSA_MAX_DISPLAY = 20;
+
+export interface TegDefensaSectionScores {
+  total: number;
+  tecnica: number;
+  divulgativa: number;
+}
+
+/**
+ * Calcula el puntaje total de la evaluación TEG Defensa Oral.
+ * Suma los puntos por sección (Técnica + Divulgativa) y clampea a 20.
+ */
+export function calculateTegDefensaScore(
+  ratings: Record<string, number | string>,
+  questions: Question[]
+): number {
+  let tecnica = 0;
+  let divulgativa = 0;
+
+  for (const question of questions) {
+    const ratingRaw = ratings[question.id];
+    const val = typeof ratingRaw === 'number' ? ratingRaw : Number(ratingRaw) || 0;
+    const points = getPointValue(question, val);
+    const sec = (question.section || '').toLowerCase();
+
+    if (sec.includes('tecnic') || sec.includes('técnic')) {
+      tecnica += points;
+    } else if (sec.includes('divulgativ')) {
+      divulgativa += points;
+    }
+  }
+
+  const total = Math.min(tecnica + divulgativa, 20);
+  return Math.round(total * 100) / 100;
+}
+
+/**
+ * Calcula el puntaje desglosado por sección para la evaluación TEG Defensa Oral.
+ */
+export function calculateTegDefensaSectionScores(
+  ratings: Record<string, number | string>,
+  questions: Question[]
+): TegDefensaSectionScores {
+  let tecnicaRaw = 0;
+  let divulgativaRaw = 0;
+
+  for (const question of questions) {
+    const ratingRaw = ratings[question.id];
+    const val = typeof ratingRaw === 'number' ? ratingRaw : Number(ratingRaw) || 0;
+    const points = getPointValue(question, val);
+    const sec = (question.section || '').toLowerCase();
+
+    if (sec.includes('tecnic') || sec.includes('técnic')) {
+      tecnicaRaw += points;
+    } else if (sec.includes('divulgativ')) {
+      divulgativaRaw += points;
+    }
+  }
+
+  const tecnica = Math.round(tecnicaRaw * 100) / 100;
+  const divulgativa = Math.round(divulgativaRaw * 100) / 100;
+  const total = Math.round(Math.min(tecnicaRaw + divulgativaRaw, 20) * 100) / 100;
+
+  return { total, tecnica, divulgativa };
+}
+
+export function getTegDefensaPassStatus(score: number): PassStatus {
+  return score >= TEG_DEFENSA_PASSING_SCORE ? 'Pass' : 'Fail';
 }
 
 /**

@@ -9,6 +9,7 @@ import {
   TernaryInput,
   TernaryDefenseInput,
   QuintaryInput,
+  QuaternaryInput,
   StarRatingInput,
   FreeTextInput,
 } from "./inputs";
@@ -56,6 +57,8 @@ export default function QuestionCard({
         return <TernaryDefenseInput value={numVal} onChange={onChange} onAdvance={onAdvance} />;
       case "quintary":
         return <QuintaryInput value={numVal} onChange={(v) => onChange(v)} onAdvance={onAdvance} />;
+      case "quaternary_defense":
+        return <QuaternaryInput value={numVal} onChange={(v) => onChange(v)} onAdvance={onAdvance} />;
       case "stars":
         return <StarRatingInput value={numVal} onChange={onChange} onAdvance={onAdvance} />;
       case "text":

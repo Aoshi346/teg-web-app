@@ -7914,6 +7914,41 @@ textarea.agg-field-input {
 }
 /* === Quintary input (end) === */
 
+/* === Quaternary input (Sub-O TEG Defensa) === */
+.inp-seg.v-quaternary {
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.inp-seg.v-quaternary button {
+  flex: 1 1 calc(50% - 6px);
+  min-width: 100px;
+}
+.inp-seg.v-quaternary button.active.danger {
+  background: var(--danger, #dc2626);
+  border-color: var(--danger, #dc2626);
+  color: #fff;
+  box-shadow: 0 4px 12px -4px rgba(220,38,38,.35);
+}
+.inp-seg.v-quaternary button.active.warning {
+  background: var(--warning, #d97706);
+  border-color: var(--warning, #d97706);
+  color: #fff;
+  box-shadow: 0 4px 12px -4px rgba(217,119,6,.3);
+}
+.inp-seg.v-quaternary button.active.info {
+  background: var(--color-blue, #0066ff);
+  border-color: var(--color-blue, #0066ff);
+  color: #fff;
+  box-shadow: 0 4px 12px -4px rgba(0,102,255,.3);
+}
+.inp-seg.v-quaternary button.active.success {
+  background: var(--success, #16a34a);
+  border-color: var(--success, #16a34a);
+  color: #fff;
+  box-shadow: 0 4px 12px -4px rgba(22,163,74,.4);
+}
+/* === Quaternary input (end) === */
+
 /* === Combobox (Sub-H aligned) === */
 
 .agg-cb-trigger {

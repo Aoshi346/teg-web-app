@@ -9,6 +9,9 @@ import {
   calculateTegEntregaScore,
   calculateTegEntregaSectionScores,
   getTegEntregaPassStatus,
+  calculateTegDefensaScore,
+  getTegDefensaPassStatus,
+  calculateTegDefensaSectionScores,
 } from "@features/evaluations/lib/questions/scoring";
 import { createEvaluation } from "@features/projects/api/projectService";
 
@@ -39,6 +42,11 @@ export function useEvaluationSubmit(
       onSuccess: (result: SubmitResult) => void,
       onError: (msg: string) => void,
     ) => {
+      const isTegDefensa =
+        documentType === "Tesis" &&
+        kind === "defense" &&
+        projectState === "pending_defensa";
+
       const isTegEntrega =
         documentType === "Tesis" &&
         kind === "review" &&
@@ -48,7 +56,16 @@ export function useEvaluationSubmit(
       let passStatus: "Pass" | "Fail";
       let sectionScores: Record<string, number> | null;
 
-      if (isTegEntrega) {
+      if (isTegDefensa) {
+        score = calculateTegDefensaScore(ratings, questions);
+        passStatus = getTegDefensaPassStatus(score);
+        const defensaSections = calculateTegDefensaSectionScores(ratings, questions);
+        sectionScores = {
+          total: defensaSections.total,
+          tecnica: defensaSections.tecnica,
+          divulgativa: defensaSections.divulgativa,
+        };
+      } else if (isTegEntrega) {
         // Derivar factibilidad desde los ratings de te-s6-1 y te-s6-2
         // yesno encoding: 2 = Sí, 1 = No, 0/ausente = null
         const s61 = typeof ratings["te-s6-1"] === "number" ? ratings["te-s6-1"] : Number(ratings["te-s6-1"]) || 0;

@@ -1,4 +1,4 @@
-export type AnswerType = 'yesno' | 'frequency' | 'stars' | 'text' | 'ternary' | 'ternary_na' | 'ternary_info' | 'ternary_defense' | 'quintary';
+export type AnswerType = 'yesno' | 'frequency' | 'stars' | 'text' | 'ternary' | 'ternary_na' | 'ternary_info' | 'ternary_defense' | 'quintary' | 'quaternary_defense';
 
 export type Question = {
   id: string;
@@ -50,6 +50,14 @@ export const TERNARY_INFO_OPTIONS = [
   { value: 2, label: 'Medianamente', color: 'bg-yellow-100 text-yellow-700 border-yellow-300' },
   { value: 3, label: 'Sí', color: 'bg-green-100 text-green-700 border-green-300' },
   { value: 4, label: 'No se incluyó información', color: 'bg-red-100 text-red-700 border-red-300' },
+];
+
+// 4-option quaternary scale for TEG Defensa Oral (worst-to-best)
+export const QUATERNARY_OPTIONS = [
+  { value: 1, label: 'Deficiente' },
+  { value: 2, label: 'Regular' },
+  { value: 3, label: 'Satisfactorio' },
+  { value: 4, label: 'Excelente' },
 ];
 
 // Scoring weights for Project questions
@@ -435,4 +443,24 @@ export const PTEG_DEFENSA_QUESTIONS: Question[] = [
   { id: 'pd-div3', label: 'Material de apoyo: Legibilidad del texto, Diseños no sobrecargados, Imágenes acordes al apartado', section: 'Criterios de Evaluación Divulgativa', documentType: 'Proyecto', kind: 'defense', answerType: 'ternary_defense' },
   { id: 'pd-div4', label: 'Gestión del tiempo', section: 'Criterios de Evaluación Divulgativa', documentType: 'Proyecto', kind: 'defense', answerType: 'ternary_defense' },
   { id: 'pd-div5', label: 'Precisión y claridad al responder al jurado', section: 'Criterios de Evaluación Divulgativa', documentType: 'Proyecto', kind: 'defense', answerType: 'ternary_defense' },
+];
+
+export const TEG_DEFENSA_QUESTIONS: Question[] = [
+  // Criterios de Evaluación Técnica (10 questions, ids td-tech1..td-tech10)
+  { id: 'td-tech1', label: 'Planteamiento y delimitación del problema / Justificación.', section: 'Criterios de Evaluación Técnica', documentType: 'Tesis', kind: 'defense', phase: 'defensa', answerType: 'quaternary_defense' },
+  { id: 'td-tech2', label: 'Objetivo General y Objetivos Específicos. Operacionalización de variables.', section: 'Criterios de Evaluación Técnica', documentType: 'Tesis', kind: 'defense', phase: 'defensa', answerType: 'quaternary_defense' },
+  { id: 'td-tech3', label: 'Antecedentes.', section: 'Criterios de Evaluación Técnica', documentType: 'Tesis', kind: 'defense', phase: 'defensa', answerType: 'quaternary_defense' },
+  { id: 'td-tech4', label: 'Tipo, diseño, nivel y modo de la investigación.', section: 'Criterios de Evaluación Técnica', documentType: 'Tesis', kind: 'defense', phase: 'defensa', answerType: 'quaternary_defense' },
+  { id: 'td-tech5', label: 'Población, muestra y muestreo.', section: 'Criterios de Evaluación Técnica', documentType: 'Tesis', kind: 'defense', phase: 'defensa', answerType: 'quaternary_defense' },
+  { id: 'td-tech6', label: 'Técnica, métodos y procedimientos experimentales', section: 'Criterios de Evaluación Técnica', documentType: 'Tesis', kind: 'defense', phase: 'defensa', answerType: 'quaternary_defense' },
+  { id: 'td-tech7', label: 'Técnica e instrumentos de recolección de datos. Validez y Confiabilidad. Técnicas y Herramientas de Procesamiento de datos', section: 'Criterios de Evaluación Técnica', documentType: 'Tesis', kind: 'defense', phase: 'defensa', answerType: 'quaternary_defense' },
+  { id: 'td-tech8', label: 'Organización o tabulación de los datos obtenidos. Análisis e interpretación de resultados: Coherencia.', section: 'Criterios de Evaluación Técnica', documentType: 'Tesis', kind: 'defense', phase: 'defensa', answerType: 'quaternary_defense' },
+  { id: 'td-tech9', label: 'Conclusiones: Claras y precisas. Responden al problema planteado y son coherentes con los objetivos.', section: 'Criterios de Evaluación Técnica', documentType: 'Tesis', kind: 'defense', phase: 'defensa', answerType: 'quaternary_defense' },
+  { id: 'td-tech10', label: 'Recomendaciones: Fomentan nuevas investigaciones o fortalecer la investigación actual.', section: 'Criterios de Evaluación Técnica', documentType: 'Tesis', kind: 'defense', phase: 'defensa', answerType: 'quaternary_defense' },
+  // Criterios de Evaluación Divulgativa (5 questions, ids td-div1..td-div5)
+  { id: 'td-div1', label: 'Adecuada dicción, vocabulario, tono de voz, postura y lenguaje corporal, contacto visual', section: 'Criterios de Evaluación Divulgativa', documentType: 'Tesis', kind: 'defense', phase: 'defensa', answerType: 'quaternary_defense' },
+  { id: 'td-div2', label: 'Seguridad y dominio del tema', section: 'Criterios de Evaluación Divulgativa', documentType: 'Tesis', kind: 'defense', phase: 'defensa', answerType: 'quaternary_defense' },
+  { id: 'td-div3', label: 'Material de apoyo: Legibilidad del texto, Diseños no sobrecargados, Imágenes acordes al apartado', section: 'Criterios de Evaluación Divulgativa', documentType: 'Tesis', kind: 'defense', phase: 'defensa', answerType: 'quaternary_defense' },
+  { id: 'td-div4', label: 'Gestión del tiempo', section: 'Criterios de Evaluación Divulgativa', documentType: 'Tesis', kind: 'defense', phase: 'defensa', answerType: 'quaternary_defense' },
+  { id: 'td-div5', label: 'Precisión y claridad al responder al jurado', section: 'Criterios de Evaluación Divulgativa', documentType: 'Tesis', kind: 'defense', phase: 'defensa', answerType: 'quaternary_defense' },
 ];

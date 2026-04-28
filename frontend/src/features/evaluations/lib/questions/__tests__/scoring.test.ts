@@ -2,9 +2,13 @@ import { describe, it, expect } from "vitest";
 import {
   getPointValue,
   getPassStatus,
+  PASSING_SCORE,
   calculateTegEntregaScore,
   calculateTegEntregaSectionScores,
   getTegEntregaPassStatus,
+  calculateTegDefensaScore,
+  getTegDefensaPassStatus,
+  calculateTegDefensaSectionScores,
 } from "../scoring";
 import type { Question } from "../questions";
 
@@ -251,16 +255,24 @@ describe("getTegEntregaPassStatus", () => {
 });
 
 // ---------------------------------------------------------------------------
-// 4. Regression: existing getPassStatus is untouched (threshold 10)
+// 4. Global threshold change: PASSING_SCORE raised from 10 to 14
 // ---------------------------------------------------------------------------
 
-describe("getPassStatus — regression (existing threshold 10 unchanged)", () => {
-  it("returns 'Pass' for score 10", () => {
-    expect(getPassStatus(10)).toBe("Pass");
+describe("PASSING_SCORE — global threshold", () => {
+  it("PASSING_SCORE constant equals 14", () => {
+    expect(PASSING_SCORE).toBe(14);
   });
 
-  it("returns 'Fail' for score 9.99", () => {
-    expect(getPassStatus(9.99)).toBe("Fail");
+  it("getPassStatus returns 'Fail' for score 13.99", () => {
+    expect(getPassStatus(13.99)).toBe("Fail");
+  });
+
+  it("getPassStatus returns 'Pass' for score 14", () => {
+    expect(getPassStatus(14)).toBe("Pass");
+  });
+
+  it("getPassStatus returns 'Pass' for score 20", () => {
+    expect(getPassStatus(20)).toBe("Pass");
   });
 });
 
@@ -355,5 +367,264 @@ describe("calculateTegEntregaSectionScores", () => {
       includesModelo: false,
     });
     expect(result.total).toBeCloseTo(scoreFromSimple, 5);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// TEG Entrega pass status: its own constant TEG_ENTREGA_PASSING_SCORE = 14
+// (regression guard — entrega threshold is independent of global PASSING_SCORE)
+// ---------------------------------------------------------------------------
+
+describe("getTegEntregaPassStatus — regression guard (independent threshold 14)", () => {
+  it("returns 'Fail' for 13.99", () => {
+    expect(getTegEntregaPassStatus(13.99)).toBe("Fail");
+  });
+
+  it("returns 'Pass' for 14", () => {
+    expect(getTegEntregaPassStatus(14)).toBe("Pass");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// getPointValue — quaternary_defense answerType
+// ---------------------------------------------------------------------------
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const makeQuaternaryDefenseQuestion = (id: string, section: string): any => ({
+  id,
+  label: `Question ${id}`,
+  section,
+  documentType: "Tesis",
+  answerType: "quaternary_defense",
+  kind: "defense",
+  phase: "defensa",
+});
+
+const SECTION_TECNICA = "Criterios de Evaluación Técnica";
+const SECTION_DIVULGATIVA = "Criterios de Evaluación Divulgativa";
+
+describe("getPointValue — quaternary_defense, Criterios de Evaluación Técnica", () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const q: any = makeQuaternaryDefenseQuestion("td-tech1", SECTION_TECNICA);
+
+  it("returns 0.2 for value 1 (Deficiente)", () => {
+    expect(getPointValue(q, 1)).toBeCloseTo(0.2, 5);
+  });
+
+  it("returns 0.5 for value 2 (Regular)", () => {
+    expect(getPointValue(q, 2)).toBeCloseTo(0.5, 5);
+  });
+
+  it("returns 0.8 for value 3 (Satisfactorio)", () => {
+    expect(getPointValue(q, 3)).toBeCloseTo(0.8, 5);
+  });
+
+  it("returns 1.0 for value 4 (Excelente)", () => {
+    expect(getPointValue(q, 4)).toBeCloseTo(1.0, 5);
+  });
+
+  it("returns 0 for value 0 (out-of-range)", () => {
+    expect(getPointValue(q, 0)).toBe(0);
+  });
+
+  it("returns 0 for value 5 (out-of-range)", () => {
+    expect(getPointValue(q, 5)).toBe(0);
+  });
+});
+
+describe("getPointValue — quaternary_defense, Criterios de Evaluación Divulgativa", () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const q: any = makeQuaternaryDefenseQuestion("td-div1", SECTION_DIVULGATIVA);
+
+  it("returns 0.4 for value 1 (Deficiente)", () => {
+    expect(getPointValue(q, 1)).toBeCloseTo(0.4, 5);
+  });
+
+  it("returns 1.0 for value 2 (Regular)", () => {
+    expect(getPointValue(q, 2)).toBeCloseTo(1.0, 5);
+  });
+
+  it("returns 1.6 for value 3 (Satisfactorio)", () => {
+    expect(getPointValue(q, 3)).toBeCloseTo(1.6, 5);
+  });
+
+  it("returns 2.0 for value 4 (Excelente)", () => {
+    expect(getPointValue(q, 4)).toBeCloseTo(2.0, 5);
+  });
+
+  it("returns 0 for value 0 (out-of-range)", () => {
+    expect(getPointValue(q, 0)).toBe(0);
+  });
+
+  it("returns 0 for value 5 (out-of-range)", () => {
+    expect(getPointValue(q, 5)).toBe(0);
+  });
+});
+
+describe("getPointValue — quaternary_defense, unknown/missing section", () => {
+  it("returns 0 for a question with no section", () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const q: any = makeQuaternaryDefenseQuestion("td-unknown", undefined);
+    expect(getPointValue(q, 4)).toBe(0);
+  });
+
+  it("returns 0 for a question with an unrecognised section", () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const q: any = makeQuaternaryDefenseQuestion("td-other", "Sección Fantasma");
+    expect(getPointValue(q, 4)).toBe(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Fixture: 15 TEG defensa questions (10 Técnica + 5 Divulgativa)
+// ---------------------------------------------------------------------------
+
+function buildDefensaQuestions(): Question[] {
+  const questions: Question[] = [];
+  for (let i = 1; i <= 10; i++) {
+    questions.push(makeQuaternaryDefenseQuestion(`td-tech${i}`, SECTION_TECNICA));
+  }
+  for (let i = 1; i <= 5; i++) {
+    questions.push(makeQuaternaryDefenseQuestion(`td-div${i}`, SECTION_DIVULGATIVA));
+  }
+  return questions;
+}
+
+const DEFENSA_QUESTIONS = buildDefensaQuestions();
+
+// ---------------------------------------------------------------------------
+// calculateTegDefensaScore
+// ---------------------------------------------------------------------------
+
+describe("calculateTegDefensaScore", () => {
+  it("all Excelente (value 4) → 10×1.0 + 5×2.0 = 20", () => {
+    const ratings = Object.fromEntries(DEFENSA_QUESTIONS.map((q) => [q.id, 4]));
+    const score = calculateTegDefensaScore(ratings, DEFENSA_QUESTIONS);
+    expect(score).toBeCloseTo(20, 5);
+  });
+
+  it("all Deficiente (value 1) → 10×0.2 + 5×0.4 = 4", () => {
+    const ratings = Object.fromEntries(DEFENSA_QUESTIONS.map((q) => [q.id, 1]));
+    const score = calculateTegDefensaScore(ratings, DEFENSA_QUESTIONS);
+    expect(score).toBeCloseTo(4, 5);
+  });
+
+  it("all Regular (value 2) → 10×0.5 + 5×1.0 = 10", () => {
+    const ratings = Object.fromEntries(DEFENSA_QUESTIONS.map((q) => [q.id, 2]));
+    const score = calculateTegDefensaScore(ratings, DEFENSA_QUESTIONS);
+    expect(score).toBeCloseTo(10, 5);
+  });
+
+  it("all Satisfactorio (value 3) → 10×0.8 + 5×1.6 = 16", () => {
+    const ratings = Object.fromEntries(DEFENSA_QUESTIONS.map((q) => [q.id, 3]));
+    const score = calculateTegDefensaScore(ratings, DEFENSA_QUESTIONS);
+    expect(score).toBeCloseTo(16, 5);
+  });
+
+  it("mixed: first 5 Técnica=4, last 5 Técnica=1, all Divulgativa=3 → expected breakdown", () => {
+    // First 5 Técnica (Excelente=4): 5×1.0 = 5.0
+    // Last 5 Técnica (Deficiente=1): 5×0.2 = 1.0
+    // All 5 Divulgativa (Satisfactorio=3): 5×1.6 = 8.0
+    // Total = 5.0 + 1.0 + 8.0 = 14.0
+    const ratings: Record<string, number> = {};
+    DEFENSA_QUESTIONS.forEach((q, i) => {
+      if (q.section === SECTION_TECNICA) {
+        ratings[q.id] = i < 5 ? 4 : 1;
+      } else {
+        ratings[q.id] = 3;
+      }
+    });
+    const expected = 5 * 1.0 + 5 * 0.2 + 5 * 1.6;
+    const score = calculateTegDefensaScore(ratings, DEFENSA_QUESTIONS);
+    expect(score).toBeCloseTo(expected, 5);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// getTegDefensaPassStatus
+// ---------------------------------------------------------------------------
+
+describe("getTegDefensaPassStatus", () => {
+  it("returns 'Fail' for score 13.99", () => {
+    expect(getTegDefensaPassStatus(13.99)).toBe("Fail");
+  });
+
+  it("returns 'Pass' for score 14", () => {
+    expect(getTegDefensaPassStatus(14)).toBe("Pass");
+  });
+
+  it("returns 'Pass' for score 14.01", () => {
+    expect(getTegDefensaPassStatus(14.01)).toBe("Pass");
+  });
+
+  it("returns 'Fail' for score 0", () => {
+    expect(getTegDefensaPassStatus(0)).toBe("Fail");
+  });
+
+  it("returns 'Pass' for score 20", () => {
+    expect(getTegDefensaPassStatus(20)).toBe("Pass");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// calculateTegDefensaSectionScores
+// ---------------------------------------------------------------------------
+
+describe("calculateTegDefensaSectionScores", () => {
+  it("all Excelente → { total: 20, tecnica: 10, divulgativa: 10 }", () => {
+    const ratings = Object.fromEntries(DEFENSA_QUESTIONS.map((q) => [q.id, 4]));
+    const result = calculateTegDefensaSectionScores(ratings, DEFENSA_QUESTIONS);
+    expect(result.total).toBeCloseTo(20, 5);
+    expect(result.tecnica).toBeCloseTo(10, 5);
+    expect(result.divulgativa).toBeCloseTo(10, 5);
+  });
+
+  it("all Deficiente → { total: 4, tecnica: 2, divulgativa: 2 }", () => {
+    const ratings = Object.fromEntries(DEFENSA_QUESTIONS.map((q) => [q.id, 1]));
+    const result = calculateTegDefensaSectionScores(ratings, DEFENSA_QUESTIONS);
+    // tecnica: 10×0.2 = 2; divulgativa: 5×0.4 = 2; total = 4
+    expect(result.total).toBeCloseTo(4, 5);
+    expect(result.tecnica).toBeCloseTo(2, 5);
+    expect(result.divulgativa).toBeCloseTo(2, 5);
+  });
+
+  it("all Regular (value 2) → { total: 10, tecnica: 5, divulgativa: 5 }", () => {
+    const ratings = Object.fromEntries(DEFENSA_QUESTIONS.map((q) => [q.id, 2]));
+    const result = calculateTegDefensaSectionScores(ratings, DEFENSA_QUESTIONS);
+    // tecnica: 10×0.5 = 5; divulgativa: 5×1.0 = 5; total = 10
+    expect(result.total).toBeCloseTo(10, 5);
+    expect(result.tecnica).toBeCloseTo(5, 5);
+    expect(result.divulgativa).toBeCloseTo(5, 5);
+  });
+
+  it("mixed half-and-half → expected breakdown", () => {
+    // First 5 Técnica = 4 (Excelente): 5×1.0 = 5.0
+    // Last 5 Técnica  = 1 (Deficiente): 5×0.2 = 1.0
+    // All Divulgativa = 3 (Satisfactorio): 5×1.6 = 8.0
+    // total = 14, tecnica = 6, divulgativa = 8
+    const ratings: Record<string, number> = {};
+    DEFENSA_QUESTIONS.forEach((q, i) => {
+      if (q.section === SECTION_TECNICA) {
+        ratings[q.id] = i < 5 ? 4 : 1;
+      } else {
+        ratings[q.id] = 3;
+      }
+    });
+    const result = calculateTegDefensaSectionScores(ratings, DEFENSA_QUESTIONS);
+    expect(result.tecnica).toBeCloseTo(6, 5);
+    expect(result.divulgativa).toBeCloseTo(8, 5);
+    expect(result.total).toBeCloseTo(14, 5);
+  });
+
+  it("all Regular (score 10) → getTegDefensaPassStatus returns 'Fail' (10 < 14)", () => {
+    const ratings = Object.fromEntries(DEFENSA_QUESTIONS.map((q) => [q.id, 2]));
+    const score = calculateTegDefensaScore(ratings, DEFENSA_QUESTIONS);
+    expect(getTegDefensaPassStatus(score)).toBe("Fail");
+  });
+
+  it("all Satisfactorio (score 16) → getTegDefensaPassStatus returns 'Pass' (16 ≥ 14)", () => {
+    const ratings = Object.fromEntries(DEFENSA_QUESTIONS.map((q) => [q.id, 3]));
+    const score = calculateTegDefensaScore(ratings, DEFENSA_QUESTIONS);
+    expect(getTegDefensaPassStatus(score)).toBe("Pass");
   });
 });
