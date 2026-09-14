@@ -58,3 +58,9 @@ docs/superpowers/specs/2026-04-22-*
 .claude/state/**/*-worker-result.md
 .claude/state/**/frontend-worker-result.md
 .claude/state/**/test-worker-result.md
+
+# User-uploaded media (runtime data, never checked in)
+backend/media/
+
+# Vite cache
+.vite/
