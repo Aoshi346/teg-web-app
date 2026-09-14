@@ -13,5 +13,27 @@
         ]
       }
     ]
+  },
+  "permissions": {
+    "deny": [
+      "Bash(rm -rf*)",
+      "Bash(git push --force*)",
+      "Bash(git push -f*)",
+      "Bash(git reset --hard*)",
+      "Bash(git push origin main*)",
+      "Bash(git push origin master*)",
+      "Bash(pytest -n auto*)",
+      "Bash(pytest)",
+      "Bash(pytest tests/*)",
+      "Write(**/.env)",
+      "Write(**/.env.*)",
+      "Write(**/*.pem)",
+      "Write(**/*.key)",
+      "Write(**/credentials.*)",
+      "Write(**/secrets.*)",
+      "Edit(**/.env)",
+      "Edit(**/*.pem)",
+      "Edit(**/*.key)"
+    ]
   }
 }
