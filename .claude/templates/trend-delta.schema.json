@@ -1,0 +1,198 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tech-lead-template/.claude/templates/trend-delta.schema.json",
+  "title": "trend-delta v1 — salida por corrida de un auditor-persona",
+  "description": "Esquema ESTABLE de la salida por ronda de un auditor-persona (Lidia y derivados). Nace de AUD-7: las claves derivaron entre rondas (score_avg→score, cta_botones→cta, categorical_verdict→verdict_categorico, findings→findings_status) y las tres rondas históricas dejaron de ser comparables por máquina. Validador: .claude/scripts/trend_lint.py. NO confundir con trend.json (histórico acumulado del agente): este fichero es UNA corrida.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "schema_version",
+    "measures",
+    "agent",
+    "session",
+    "iteration",
+    "date",
+    "profile",
+    "na_dimensions",
+    "run",
+    "verdict_categorico",
+    "rubric",
+    "score_raw",
+    "score_profiled",
+    "score_role",
+    "findings"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1,
+      "description": "Versión del esquema. Si sube, trend_lint.py debe saber migrar."
+    },
+    "measures": {
+      "const": "producto-auditado",
+      "description": "AUD-1. Qué mide la nota de este fichero: el PRODUCTO auditado, nunca la habilidad del auditor. Los tres auditores sobre el mismo objetivo en las mismas 3 rondas divergen en signo — eso demuestra que la serie describe el artefacto, no al agente."
+    },
+    "agent": {
+      "type": "string",
+      "description": "Slug del agente que produjo la corrida (p.ej. lidia-naive-tester)."
+    },
+    "persona": {
+      "type": "string",
+      "description": "Slug de la persona encarnada. Distinto de `agent`: el mismo agente puede correr varias personas (ver .claude/agents/personas/)."
+    },
+    "session": { "type": "string", "description": "WAVE_ID de /qa-loop (p.ej. TPL1-W3)." },
+    "iteration": { "type": "integer", "minimum": 1 },
+    "date": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+    "app": { "type": "string" },
+    "pages_tested": { "type": "array", "items": { "type": "string" } },
+    "viewports": { "type": "array", "items": { "type": "string" } },
+
+    "profile": {
+      "enum": ["landing", "herramienta-interna"],
+      "description": "AUD-8. Perfil de rúbrica. En `herramienta-interna` la dimensión fotos_videos es N/A: un informe interno no puede tener fotos de personas y el techo duro de L-D le restaba 0.6 fijos a la media."
+    },
+    "na_dimensions": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/dimension_key" },
+      "uniqueItems": true,
+      "description": "Dimensiones que NO aplican a este objetivo. Debe coincidir exactamente con las entradas `na: true` de `rubric`. Con profile=landing va vacío (L-D sí aplica a una landing)."
+    },
+
+    "run": {
+      "type": "object",
+      "description": "AUD-9. Con qué corrió. Sin esto, el día que el alias del modelo se mueva, el agente cambiará solo y lo leeremos como «mejoró». `unknown` es un valor legítimo para corridas históricas — el validador lo marca como aviso, no como error.",
+      "required": ["model_id", "calibration_version", "target_sha", "agent_sha", "run_index"],
+      "additionalProperties": true,
+      "properties": {
+        "model_id": { "type": "string", "description": "Identificador EXACTO del modelo, no el alias (`sonnet` no vale)." },
+        "calibration_version": { "type": "string", "description": "shared_utils_version de .claude/agents/shared/calibration-v2.md, compartido con Vera e Ignacio." },
+        "target_sha": { "type": "string", "description": "AUD-3. sha del build auditado. Debe ser el MISMO para los N auditores de la ronda." },
+        "agent_sha": { "type": "string", "description": "sha256 de la propia ficha del agente: `sha256sum .claude/agents/<agente>.md | cut -c1-12`." },
+        "run_index": { "type": "integer", "minimum": 1, "description": "Nº de pasada dentro de la ronda (K pasadas para medir σ — AUD-2)." },
+        "build_frozen": { "type": "boolean", "description": "AUD-3. true si el build estuvo congelado durante toda la ronda. false invalida la comparabilidad de la ronda." },
+        "memory_mode": { "enum": ["full", "method-only", "blank"], "description": "AUD-12. Qué memoria se cargó. Solo se usa en el A/B de anclaje; en producción es siempre `full`." },
+        "wall_ms": { "type": "integer", "minimum": 0 },
+        "tokens": { "type": "integer", "minimum": 0 }
+      }
+    },
+
+    "verdict_categorico": {
+      "type": "object",
+      "description": "AUD-11. EL TITULAR. Es la salida más fiable del agente y la que consume /qa-loop; la media de la rúbrica es diagnóstico.",
+      "required": ["question", "label", "passed", "explanation"],
+      "additionalProperties": true,
+      "properties": {
+        "question": { "type": "string", "description": "La pregunta binaria EXACTA que se hizo (p.ej. «¿la usaría sola, sin ayuda?» / «¿contactaría?»)." },
+        "label": { "enum": ["si", "no", "con_ayuda"] },
+        "passed": { "type": "boolean", "description": "Derivado: true SOLO si label == 'si'. `con_ayuda` NO es aprobado." },
+        "explanation": { "type": "string" },
+        "gate_triggered": { "type": "boolean", "description": "true si alguna página cayó en Confuso/Muy Confuso." },
+        "gate_reason": { "type": "string" },
+        "prev_label": { "enum": ["si", "no", "con_ayuda"] },
+        "same_label_as_prev": { "type": "boolean" }
+      }
+    },
+    "pages_verdict": {
+      "type": "object",
+      "description": "Veredicto categórico por página/dimensión de navegación. Valores canónicos: claro | algo_claro | confuso | muy_confuso.",
+      "additionalProperties": { "type": "string" }
+    },
+
+    "rubric": {
+      "type": "object",
+      "description": "Las 8 dimensiones. Claves FIJAS (esta lista es el contrato: `cta_botones` está muerto, es `cta`).",
+      "required": ["modernidad", "claridad", "confianza", "diseno", "fotos_videos", "mobile", "velocidad", "cta"],
+      "additionalProperties": false,
+      "properties": {
+        "modernidad": { "$ref": "#/$defs/dimension" },
+        "claridad": { "$ref": "#/$defs/dimension" },
+        "confianza": { "$ref": "#/$defs/dimension" },
+        "diseno": { "$ref": "#/$defs/dimension" },
+        "fotos_videos": { "$ref": "#/$defs/dimension" },
+        "mobile": { "$ref": "#/$defs/dimension" },
+        "velocidad": { "$ref": "#/$defs/dimension" },
+        "cta": { "$ref": "#/$defs/dimension" }
+      }
+    },
+
+    "score_raw": {
+      "type": "number", "minimum": 0, "maximum": 10,
+      "description": "AUD-8. Media de las 8 dimensiones, incluidas las N/A. Se conserva SOLO para comparar con el histórico previo al perfil."
+    },
+    "score_profiled": {
+      "type": "number", "minimum": 0, "maximum": 10,
+      "description": "AUD-8. Media de las dimensiones que APLICAN. Es el número que consume /qa-loop."
+    },
+    "score_role": {
+      "const": "diagnostico",
+      "description": "AUD-11. Recordatorio en el propio dato: la media es diagnóstico, no titular. 4 de las 8 dimensiones no se movieron nunca en 3 rondas, así que la media divide entre 8 una señal que llevan 4."
+    },
+    "dispersion": {
+      "type": "object",
+      "description": "Solo al agregar K pasadas de la misma versión (AUD-2). Una corrida suelta no tiene SD.",
+      "properties": {
+        "k": { "type": "integer", "minimum": 2 },
+        "score_profiled_sd": { "type": "number", "minimum": 0 },
+        "verdict_agreement": { "type": "number", "minimum": 0, "maximum": 1, "description": "Fracción de las K pasadas con el mismo `label`." },
+        "findings_jaccard_mean": { "type": "number", "minimum": 0, "maximum": 1 }
+      }
+    },
+
+    "findings": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/finding" }
+    },
+    "positive_findings": {
+      "type": "array",
+      "items": { "type": ["string", "object"] }
+    },
+    "console_errors": { "type": ["object", "array", "string"] },
+    "notes": { "type": "string" }
+  },
+
+  "$defs": {
+    "dimension_key": {
+      "enum": ["modernidad", "claridad", "confianza", "diseno", "fotos_videos", "mobile", "velocidad", "cta"]
+    },
+    "dimension": {
+      "type": "object",
+      "required": ["score", "note"],
+      "additionalProperties": true,
+      "properties": {
+        "score": {
+          "type": "number", "minimum": 0, "maximum": 10,
+          "description": "SIEMPRE presente, incluso si na=true — es lo que mantiene comparable `score_raw` con el histórico."
+        },
+        "na": { "type": "boolean", "description": "true = la dimensión no aplica a este perfil de producto; queda fuera de score_profiled." },
+        "delta": { "type": "number" },
+        "note": { "type": "string", "description": "En voz de la persona (Regla #1). La jerga va en los campos de ancla, nunca aquí." }
+      }
+    },
+    "finding": {
+      "type": "object",
+      "required": ["id", "severity", "module", "desc", "status", "anchor_type", "anchor_value", "viewport"],
+      "additionalProperties": true,
+      "properties": {
+        "id": { "type": "string", "pattern": "^[A-Z]-[0-9]{3}$" },
+        "severity": { "enum": ["P0", "P1", "P2", "P3", "info", "unknown"] },
+        "module": { "type": "string" },
+        "desc": { "type": "string", "description": "En voz de la persona." },
+        "status": {
+          "enum": ["open", "open_info", "closed", "closed_stable", "closed_but_superseded", "regression", "unknown"]
+        },
+        "anchor_type": {
+          "enum": ["text", "selector", "scroll_pct", "none"],
+          "description": "AUD-10 · contrato de rules/verdict-contract.md. `none` solo para hallazgos históricos sin ancla — el validador lo cuenta y avisa."
+        },
+        "anchor_value": { "type": "string" },
+        "viewport": {
+          "enum": ["mobile", "tablet", "desktop", "all"],
+          "description": "AVISO: extiende el enum de verdict-contract.md (desktop|mobile) con `tablet`, porque el protocolo de Lidia prueba 768px explícitamente."
+        },
+        "evidence_shot": { "type": "string", "description": "Nombre del png. NO es un ancla: una captura no localiza el elemento en la página." },
+        "versions_seen": { "type": "array", "items": { "type": "string" } },
+        "impact": { "type": "string", "description": "verdict-contract §SBI-I: a quién afecta y con qué resultado. NO es la severidad." },
+        "intent": { "type": "string", "description": "verdict-contract §SBI-I: deliberate | unknown | accident (+ razón)." }
+      }
+    }
+  }
+}

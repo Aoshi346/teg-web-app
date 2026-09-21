@@ -188,11 +188,11 @@ evidencia 🔎/👁 + Impact/Intent). Candidatos ya en el template: `code-review
 >
 > | Workflow | Qué recibe el verificador | Qué exige su schema |
 > |---|---|---|
-> | `workflows/review-branch.js` (fase Verify) | `JSON.stringify(finding)` **y nada más**: ni el `git diff`, ni la ref base, ni instrucción de abrir el fichero | solo `isReal` — ningún campo para citar lo observado |
-> | `workflows/feedback-verify.js` (fase Verify) | el DOM capturado, las capturas, la auditoría de enlaces y la pista de código, con orden explícita de leerlos | `why` **obligatorio**, con doble evidencia 🔎 código + 👁 en vivo |
+> | el workflow `review-branch` del template (fase Verify) | `JSON.stringify(finding)` **y nada más**: ni el `git diff`, ni la ref base, ni instrucción de abrir el fichero | solo `isReal` — ningún campo para citar lo observado |
+> | el workflow `feedback-verify` del template (fase Verify) | el DOM capturado, las capturas, la auditoría de enlaces y la pista de código, con orden explícita de leerlos | `why` **obligatorio**, con doble evidencia 🔎 código + 👁 en vivo |
 >
 > Misma arquitectura de workflow, independencia opuesta. (La misma forma aparece en
-> `workflows/bug-sweep.js:62`, mitigada solo a medias por un voto 2-de-3 entre tres verificadores
+> `el workflow bug-sweep del template`, mitigada solo a medias por un voto 2-de-3 entre tres verificadores
 > igual de ciegos.) El detalle del hallazgo, con líneas y la mitigación concreta, está escrito en un
 > comentario dentro del propio `review-branch.js`.
 >

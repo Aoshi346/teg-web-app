@@ -94,7 +94,7 @@ El plan de una tarea grande va aquí con tag `[PLAN]` (archivos exactos + por qu
 ## Con SpecKit
 
 El progreso granular vive en `tasks.md` de la sesión (checkboxes ` />x!` EN VIVO —
-`rules/speckit-progress-tracking.md`, gate: `scripts/task_progress.py --gate`). PROGRESS.json
+la rule de SpecKit del template (este repo no usa SpecKit), gate: `scripts/task_progress.py --gate`). PROGRESS.json
 mantiene la vista de tarea/estado global; PROGRESS.log la actividad.
 
 ## Anti-patterns

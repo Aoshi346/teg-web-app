@@ -1,0 +1,70 @@
+{
+  "agent": "vera-art-director",
+  "description": "teg-web-app — sin rondas todavia (instalado 2026-09-21)",
+  "measures": {},
+  "measures_note": "AUD-1. Mide el PRODUCTO auditado, no la habilidad de la auditora. Prueba: Vera, Lidia e Ignacio corrieron el mismo objetivo en las mismas 3 rondas y divergen en signo (iter-3: Vera 7.85→7.35 baja, Lidia 7.1→7.75 sube). Su bajada de iter-3 fue del producto — dos regresiones introducidas por el propio fixer — y además está contaminada: auditó ANTES de un parche en caliente que Ignacio sí vio (AUD-3).",
+  "schema_version": 1,
+  "axes": [
+    {
+      "id": 1,
+      "key": "typography",
+      "label": "Escala tipográfica"
+    },
+    {
+      "id": 2,
+      "key": "color_system",
+      "label": "Sistema de color"
+    },
+    {
+      "id": 3,
+      "key": "contrast_wcag",
+      "label": "Contraste WCAG AA"
+    },
+    {
+      "id": 4,
+      "key": "hierarchy",
+      "label": "Jerarquía visual"
+    },
+    {
+      "id": 5,
+      "key": "spacing",
+      "label": "Espaciado / ritmo"
+    },
+    {
+      "id": 6,
+      "key": "consistency",
+      "label": "Consistencia de componentes"
+    },
+    {
+      "id": 7,
+      "key": "micro_interactions",
+      "label": "Micro-interacciones"
+    },
+    {
+      "id": 8,
+      "key": "density",
+      "label": "Densidad"
+    },
+    {
+      "id": 9,
+      "key": "iconography",
+      "label": "Iconografía e imagen"
+    },
+    {
+      "id": 10,
+      "key": "smell_test",
+      "label": "Smell test (2026 tier-1 vs 2015 bootstrap)"
+    }
+  ],
+  "gate_threshold_avg": 9.0,
+  "gate_threshold_note": "Reconciliado (L §2.5): convivían DOS umbrales incompatibles — 7.5 aquí y 9.0 en rules/qa-loop.md. La fuente única es rules/qa-loop.md. En la práctica las 3 rondas ya se cerraron con «BLOQUEAR (gate 9.0)», así que el 7.5 estaba muerto y solo servía para que dos lecturas del mismo dato dieran veredictos distintos.",
+  "gate_threshold_avg_legacy": 7.5,
+  "versions": [
+    {
+      "version": "v0",
+      "date": "2026-09-21",
+      "notes": "Agente instalado en teg-web-app. Primera ronda pendiente."
+    }
+  ],
+  "last_updated": "2026-09-21"
+}

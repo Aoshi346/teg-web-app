@@ -1,0 +1,22 @@
+{
+  "agent": "lidia-naive-tester",
+  "persona": "Daniela — estudiante que entrega su TEG",
+  "app": "teg-web-app (http://localhost:3000)",
+  "last_updated": "2026-09-21",
+  "measures": {},
+  "measures_note": "AUD-1. Esta serie mide CUÁNTO MEJORÓ EL PRODUCTO auditado, no la habilidad de la auditora. No es su boletín de notas. Demostración: los tres auditores (Lidia, Vera, Ignacio) corrieron sobre el MISMO objetivo en las MISMAS 3 rondas, sin tocarlos a ellos, y divergen en signo — en iter-3 Lidia sube (7.1→7.75) y Vera baja (7.85→7.35). Si esto midiera habilidad del auditor sobre un objetivo fijo, no podría pasar. La métrica que SÍ habla del agente es el address_rate de rita-pattern-keeper (sugerencias atendidas / emitidas); para Lidia, ninguna existe todavía — ver .claude/agents/lidia-naive-tester/measurement-protocol.md.",
+  "profile": "herramienta-interna",
+  "profile_note": "AUD-8. El objetivo es una herramienta interna (informes HTML): fotos_videos es N/A. `score` = score_raw (8 dimensiones, comparable con lo publicado antes del perfil); `score_profiled` = media de las 7 que aplican. Recalculado sobre los trend-delta.json que ya existían, sin volver a correr nada.",
+  "p0_threshold_cross_version": 3,
+  "versions": [
+    {
+      "version": "v0",
+      "date": "2026-09-21",
+      "notes": "Agente instalado en teg-web-app. Primera ronda pendiente."
+    }
+  ],
+  "score_progression": {},
+  "score_progression_note": "score = score_raw (8 dimensiones). score_progression_profiled = las 7 que aplican a una herramienta interna (AUD-8): quita el −0.6 fijo que metía fotos_videos clavada en 3 por L-D. Los dos se conservan a propósito: el raw es lo único comparable con lo publicado antes del perfil.",
+  "score_progression_profiled": {},
+  "description": "teg-web-app — sin rondas todavia (instalado 2026-09-21)"
+}

@@ -141,7 +141,7 @@ Todo lo anterior reparte autonomía **entre agentes**. Esta sección reparte res
 Consecuencias prácticas:
 
 1. **Si un rol no técnico necesita algo nuevo, el entregable es un comando**, no un instructivo para editar ficheros. Si te encuentras explicando dónde está `settings.json`, el diseño falló.
-2. **Permisos al revés para roles no técnicos**: el default de dev es *allow amplio, deny estrecho*; para un rol no técnico se empieza **denegando todo** y se abre solo el directorio de su trabajo. Ver `rules/security.md` y `documentation/settings-examples/`.
+2. **Permisos al revés para roles no técnicos**: el default de dev es *allow amplio, deny estrecho*; para un rol no técnico se empieza **denegando todo** y se abre solo el directorio de su trabajo. Ver las reglas de seguridad del template (no copiadas aquí) y `documentation/settings-examples/`.
 3. **La capa 3 es la superficie de contrato**: si cambias lo que hace un comando, cambias el trabajo de otra persona — avísalo como cambio de interfaz, no como refactor interno.
 4. **Esto no sustituye a §2**: un comando ejecutado por un rol no técnico sigue estando sujeto a los approval gates (no puede deployar por el hecho de estar en la capa 3).
 

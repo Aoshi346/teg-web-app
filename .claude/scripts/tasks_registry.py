@@ -8,7 +8,7 @@ veinte tareas — y eso falla siempre, no a veces.
 
 POR QUÉ ES UN HOOK Y NO UNA SKILL. Una skill hay que acordarse de invocarla, que es el mismo fallo
 otra vez. El hook `UserPromptSubmit` corre SIEMPRE, esté el agente distraído o no. Es
-`rules/layer-decision.md` aplicado a nosotros mismos: si el coste de que se ignore es alto, baja de
+`el criterio de capas del template` aplicado a nosotros mismos: si el coste de que se ignore es alto, baja de
 capa.
 
 QUÉ HACE
