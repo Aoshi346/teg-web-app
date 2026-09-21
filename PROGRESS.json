@@ -1,0 +1,12 @@
+{
+  "task": "Tech Lead instalado en teg-web-app — sin tarea de producto en curso",
+  "status": "completed",
+  "startedAt": "2026-09-21T21:15:00Z",
+  "checklist": [
+    {"id": 1, "item": "Nucleo: gate de RAM, PROGRESS.json, registro de peticiones, rules", "done": true}
+  ],
+  "completedAt": "2026-09-21T21:15:00Z",
+  "notes": [
+    "Lo escribe y lo mantiene el TL en cada sesion. El aviso de Telegram lee 'status' para decidir si avisa al cerrar."
+  ]
+}

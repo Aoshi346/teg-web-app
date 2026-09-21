@@ -12,6 +12,39 @@
           }
         ]
       }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/gate-ram-pytest.sh",
+            "timeout": 60
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/validate-progress.sh"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/capture-task.sh",
+            "timeout": 30
+          }
+        ]
+      }
     ]
   },
   "permissions": {
@@ -33,5 +66,9 @@
       "Edit(**/secrets.*)"
     ],
     "allow": []
-  }
+  },
+  "env": {
+    "CLAUDE_CODE_ENABLE_TODO_TOOLS": "1"
+  },
+  "_comment_harness": "2026-09-21: nucleo del tech-lead-template. gate-ram-pytest usa matcher 'Bash' y filtra el comando dentro del script: un matcher tipo 'Bash(pytest*)' NO se dispara nunca (el matcher es una regex sobre el NOMBRE de la tool). En PreToolUse solo exit 2 bloquea."
 }
