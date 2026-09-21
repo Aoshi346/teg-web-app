@@ -64,6 +64,28 @@ Read the conventions in [/CLAUDE.md](../../CLAUDE.md). Key points:
 5. Update views/permissions if the change affects access patterns
 6. Re-run the test that drove this change
 
+## ORM — lo que se revisa antes de dar por hecho un endpoint
+
+Criterio traido de `desarrollador-backend` del tech-lead-template (2026-09-21). El detalle
+con ejemplos vive en la skill `django-orm-optimization`, que se carga sola cuando hace falta.
+
+- **Ninguna lista sin `select_related` / `prefetch_related`.** Un serializer anidado sobre un
+  queryset plano es una N+1: una consulta por fila, y no se nota hasta que hay datos reales.
+  Aqui pasa con `Project` -> tutor/jurado, `Evaluation` -> proyecto y `Presentation` -> jurados.
+- **Cuenta las consultas en un test**, no a ojo: `django_assert_num_queries` (pytest-django) o
+  `CaptureQueriesContext`. Una optimizacion sin numero antes y despues no esta medida.
+- **Indices** en los campos por los que se filtra y ordena de verdad (semestre, estado, fechas).
+- **Validacion en el modelo** (`clean()`), no solo en el serializer: el admin y las migraciones
+  de datos no pasan por DRF.
+- **Campos explicitos en los serializers**, nunca `__all__`: `__all__` publica el campo nuevo que
+  alguien anada manana, y eso es como se filtra un dato sin querer.
+
+## RAM antes de los tests (obligatorio en esta maquina)
+
+`pytest` SIEMPRE por modulo, nunca la suite entera de golpe, y nunca `-n auto`. El hook
+`gate-ram-pytest.sh` lo bloquea solo si no hay memoria, pero el criterio es tuyo: esta maquina
+comparte 15 GB con otros proyectos. Ver `.claude/rules/ram-pytest.md`.
+
 ## How You Report Back
 
 Write your result to `.claude/state/<task-id>/backend-worker-result.md` with this structure:

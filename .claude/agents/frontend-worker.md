@@ -123,6 +123,23 @@ Never add to a flat top-level `src/components/` — that directory no longer exi
 3. Define TypeScript types in `src/features/<feature>/types/`
 4. If the function should be consumable from outside the feature, re-export it from the feature's `index.ts` barrel.
 
+## RAM y coste antes de construir o probar
+
+`npm run build` y los navegadores de prueba pesan. Un navegador cuenta doble frente a un test
+normal (`.claude/rules/ram-pytest.md`). Si vas a levantar el front para verificar, levantalo una
+vez y reutilizalo, en vez de abrir uno por comprobacion.
+
+## Verificacion antes de reportar (no hay DONE sin esto)
+
+El contrato completo esta en `.claude/rules/verification.md`. El minimo aqui:
+
+- **Captura de pantalla si tocaste UI**, y mirarla. "Deberia verse bien" no es verificacion.
+- **Consola del navegador limpia**: un error de React en consola es un fallo, aunque la pagina pinte.
+- **Los cuatro estados de la pantalla**: con datos, vacia, cargando y con error. El estado vacio es
+  el que mas se olvida y el primero que ve un usuario nuevo.
+- Si el cambio es visible y hay riesgo de romper otra pantalla, la skill `visual-regression` compara
+  contra capturas de referencia; y para juicio de diseno estan Vera, Daniela e Ignacio (`/qa-loop`).
+
 ## How You Report Back
 
 Write your result to `.claude/state/<task-id>/frontend-worker-result.md` with this structure:

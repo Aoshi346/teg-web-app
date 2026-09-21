@@ -72,6 +72,22 @@ You may **not** run:
 - No comments unless explaining a non-obvious test setup. Complex helpers can have a **Spanish** docstring.
 - Tests must be deterministic. No real timestamps, no real network, no real filesystem (use tmp_path / vi.mock).
 
+## Que cuenta como verificado (contrato)
+
+`.claude/rules/verification.md` manda. Los tres errores que mas se cuelan aqui:
+
+- **Un test verde no prueba lo que crees si nunca lo viste fallar.** Antes de dar por bueno un test
+  nuevo, rompe a proposito lo que vigila y comprueba que se pone rojo por la razon correcta.
+- **`manage.py check` no habla con la base de datos.** Si tocaste modelos o migraciones, el gate es
+  `python manage.py migrate` sobre una base recien creada, no `check`.
+- **Un instrumento que no puede medir aborta, no devuelve cero.** Si el arnes no puede entrar
+  (login, servidor caido), eso es un fallo del arnes, no "0 fallos".
+
+## RAM antes de correr nada
+
+`pytest` por modulo, jamas la suite entera ni `-n auto` ni `--cov`. El hook `gate-ram-pytest.sh`
+bloquea si no hay memoria; el criterio y el porque, en `.claude/rules/ram-pytest.md`.
+
 ## How You Report Back
 
 ### RED phase report

@@ -86,6 +86,29 @@ Summarize in chat: what changed, where, how it was verified, and what the human 
 - **Frontend:** `vitest` + `@testing-library/react`. Tests live next to components as `*.test.tsx` or in `frontend/tests/`.
 - **TDD is strict:** failing test first, then implementation, then green. The test-worker enforces this.
 
+## Tech Lead harness (installed 2026-09-21)
+
+Beyond the orchestrator/worker pattern above, this repo now carries the pieces from
+`tech-lead-template` that its own stack asks for. **None of them replace the workflow — they
+protect it.**
+
+| Piece | What it does | Where |
+|---|---|---|
+| **RAM gate** | Blocks `pytest` when the machine is out of memory (`exit 2`). This box shares 15 GB with other projects | `.claude/hooks/gate-ram-pytest.sh` |
+| **`PROGRESS.json`** | Task + status at the repo root, updated **live**. The Telegram notifier reads `status` to decide whether to ping at end of turn | root, `.claude/rules/progress-tracking.md` |
+| **`pending-tasks.md`** | Every user request, written automatically by a hook and re-injected each turn | root, `.claude/scripts/tasks_registry.py` |
+| **Verification contract** | What counts as DONE: migrate (not `check`), screenshot, clean console, four screen states | `.claude/rules/verification.md` |
+| **UI auditors** | Daniela (naive student), Vera (art direction), Ignacio (adversarial) + `/qa-loop` | `.claude/agents/`, `.claude/rules/qa-loop.md` |
+| **`django-orm-optimization`** | N+1, `select_related`/`prefetch_related`, counting queries in a test | `.claude/skills/` |
+
+Two rules that override the old habits:
+
+1. **Update `PROGRESS.json` at the start and during the task, not at the end.** A status left at
+   `in_progress` means the Telegram channel stays silent when the session closes, which is exactly
+   when the human wants to hear "done" or "blocked".
+2. **`pytest` by module, never the whole suite, never `-n auto`, never `--cov`.** The gate blocks
+   the worst case; the criterion is yours (`.claude/rules/ram-pytest.md`).
+
 ## When NOT to delegate
 
 Skip the workflow and answer directly when:
@@ -112,3 +135,4 @@ In all other cases, **plan → checkpoint → delegate**.
 | New Next.js page, component, hook, API service call, Tailwind styling | `frontend-worker` |
 | Writing failing tests (TDD red phase), running test suites, coverage reports | `test-worker` |
 | Cross-cutting feature (e.g., new endpoint + UI) | All three, in TDD order: test → backend → test → frontend → test |
+| Judging a finished screen (is it usable? does it look amateur?) | `lidia-naive-tester` (Daniela) · `vera-art-director` · `ignacio-roig`, or `/qa-loop` for the three at once |
