@@ -1,7 +1,7 @@
 ---
 name: add-page
 description: Scaffold a new dashboard page with routing, auth guard, and sidebar entry
-user_invocable: true
+user-invocable: true
 arguments:
   - name: page_name
     description: The route name for the new page (e.g., "reportes", "estadisticas")

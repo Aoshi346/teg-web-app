@@ -1,7 +1,7 @@
 ---
 name: add-evaluation
 description: Add new evaluation questions or sections to the scoring system
-user_invocable: true
+user-invocable: true
 arguments:
   - name: document_type
     description: "Which document type: Proyecto, Tesis, or Both"

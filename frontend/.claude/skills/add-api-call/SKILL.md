@@ -1,7 +1,7 @@
 ---
 name: add-api-call
 description: Add a new API service function with proper typing and CSRF handling
-user_invocable: true
+user-invocable: true
 arguments:
   - name: endpoint
     description: The Django API endpoint path (e.g., "/reports/", "/users/{id}/stats/")

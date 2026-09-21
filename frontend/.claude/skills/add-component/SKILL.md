@@ -1,7 +1,7 @@
 ---
 name: add-component
 description: Create a new React component following TesisFar project conventions
-user_invocable: true
+user-invocable: true
 arguments:
   - name: name
     description: The component name in PascalCase (e.g., "StatusBadge", "ProjectFilter")
