@@ -1,0 +1,25 @@
+# Respuestas al cuestionario del template (templates/configuracion-de-proyecto.yaml) — teg-web-app.
+# Escrito el 2026-11-12 al actualizar al template (plan .docs/plans/2026-11-12-actualizar-template/).
+# El perfil de packs vive en el template (packs/CONFIGURACION.yaml, «teg-web-app»).
+
+proyecto: teg-web-app
+cuestionario_version: 1
+
+capture_task: si
+
+respuestas:
+
+  stack: django-react   # Django 6 + DRF (SQLite) · Next.js 15 + React 19 + TS + Tailwind 4
+  agente_ia: "no"
+  rag: "no"
+  multi_tenant: "no"   # una sola universidad (USM)
+  datos_sensibles: datos-personales   # estudiantes, tutores y jurados: nombre, email, cédula, teléfono
+  datos_reales_desarrollo: "no"   # en local, usuarios de prueba (create_test_users.py, backend/seeds/); db.sqlite3 fuera de git
+  ui: si-publica   # la usan estudiantes y jurados no técnicos
+  observabilidad: ninguna
+  autonomia: semi-autonomous   # default de governance.md §3
+  git_commit: agente   # commit en la rama de trabajo con rutas explícitas
+  git_merge: usuario   # merge a development/master y push: Aoshi
+  git_branching: develop   # rama de integración `development` (ver CLAUDE.md §PROYECTO)
+  auto_format: lineas-tocadas
+  nocturno: "no"

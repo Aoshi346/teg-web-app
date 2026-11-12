@@ -1,24 +1,217 @@
 {
-  "$schema": "https://json.schemastore.org/claude-code-settings.json",
-  "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/gate-ram-pytest.sh",
-            "timeout": 60
-          }
-        ]
-      }
+  "_comment": "Settings del template (tech-lead-template aoshi-develop, 2026-11-12), copiados enteros al actualizar teg-web-app («solo el template», D1). La deny-list del 21-09 está contenida en la del template. Ver .claude/hooks/.",
+  "_comment_permissions": "DIVERGENCIA DELIBERADA respecto a develop (decision del Usuario, 2026-09-17): se conserva la allowlist EXPLICITA de esta rama en vez del `Bash(*)` de upstream — allowlist antes que denylist. El `deny` SI adopta las 12 barandillas de upstream (Read de credenciales + Edit/Write de ~/.claude/audit/**): sin ellas los hooks que se adoptaron quedaban desacoplados de lo que los hace efectivos. NO anadir 'mcp__*' al deny: deny se evalua ANTES que allow y no admite excepciones — dejaria la sesion sin context7 ni playwright (upstream, _comment_har7).",
+  "_comment_hooks_no_registrados": [
+    "Seis hooks existen y NO se declaran aqui. Es DELIBERADO — revisado 2026-09-17 tras /review-branch:",
+    "  . check-ram.sh        — no se registra directo: lo invoca gate-ram-pytest.sh, que filtra pytest",
+    "                          y traduce su exit 1 a exit 2 (en PreToolUse solo el 2 bloquea).",
+    "  . pre-commit-check.sh — es un hook de GIT, no de Claude Code. Va en .git/hooks/pre-commit:",
+    "                          ln -s ../../.claude/hooks/pre-commit-check.sh .git/hooks/pre-commit",
+    "  . pattern-check.sh    — lo invoca la skill `pattern-gate` al cerrar una wave, no cada tool call.",
+    "  . pre-write-guard.sh  — bloquearia escrituras fuera de una lista blanca. Registrarlo cambia el",
+    "                          comportamiento de TODAS las sesiones: requiere aprobacion aparte (ND-3).",
+    "  . gate-arranque.sh    — opt-in con TL_ARRANQUE=1. Este repo es de configuracion, no un producto;",
+    "                          lo enciende la skill `project-setup` donde toca (CLAUDE.md).",
+    "Lo que SI se corrigio en esa revision: audit-incoming-config.sh (SessionStart) y",
+    "flag-visual-staleness.sh (Stop) estaban copiados de upstream y sin registrar. Un hook presente y no",
+    "cableado es peor que ausente, porque parece cobertura. audit-log.sh recupero el matcher Skill|Task."
+  ],
+  "env": {
+    "CLAUDE_CODE_ENABLE_TODO_TOOLS": "1",
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "0",
+    "CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS": "8",
+    "CLAUDE_CODE_WORKFLOW_MAX_CONCURRENT_AGENTS": "8"
+  },
+  "permissions": {
+    "allow": [
+      "Bash(basename*)",
+      "Bash(black *)",
+      "Bash(cat *)",
+      "Bash(chmod *)",
+      "Bash(cp *)",
+      "Bash(curl -X *)",
+      "Bash(curl -s *)",
+      "Bash(cut*)",
+      "Bash(diff*)",
+      "Bash(dirname*)",
+      "Bash(echo*)",
+      "Bash(eslint *)",
+      "Bash(find *)",
+      "Bash(find*)",
+      "Bash(free -g*)",
+      "Bash(free -h*)",
+      "Bash(free -m*)",
+      "Bash(free*)",
+      "Bash(git add*)",
+      "Bash(git branch*)",
+      "Bash(git checkout*)",
+      "Bash(git commit*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git merge*)",
+      "Bash(git show*)",
+      "Bash(git stash*)",
+      "Bash(git status*)",
+      "Bash(git worktree*)",
+      "Bash(grep*)",
+      "Bash(head *)",
+      "Bash(head*)",
+      "Bash(jq *)",
+      "Bash(jq*)",
+      "Bash(ln -s *)",
+      "Bash(ls *)",
+      "Bash(mkdir -p *)",
+      "Bash(mv *)",
+      "Bash(mypy *)",
+      "Bash(npm i *)",
+      "Bash(npm install*)",
+      "Bash(npm run *)",
+      "Bash(npx *)",
+      "Bash(pip install*)",
+      "Bash(pnpm *)",
+      "Bash(poetry run *)",
+      "Bash(prettier *)",
+      "Bash(ps aux*)",
+      "Bash(pytest -k *)",
+      "Bash(pytest -v*)",
+      "Bash(pytest apps/* -v*)",
+      "Bash(pytest backend/apps/* -v*)",
+      "Bash(pytest tests/unit/* -v*)",
+      "Bash(python manage.py *)",
+      "Bash(python3 *)",
+      "Bash(rg*)",
+      "Bash(ruff *)",
+      "Bash(sort*)",
+      "Bash(stat*)",
+      "Bash(systemctl is-active*)",
+      "Bash(systemctl status *)",
+      "Bash(tail *)",
+      "Bash(tail*)",
+      "Bash(tr*)",
+      "Bash(uniq*)",
+      "Bash(wc*)",
+      "Bash(yarn *)",
+      "Edit(**)",
+      "Read(**)",
+      "mcp__context7__*",
+      "mcp__github__*",
+      "mcp__playwright__*"
     ],
+    "deny": [
+      "Bash(git push --force*)",
+      "Bash(git push -f*)",
+      "Bash(git push origin main*)",
+      "Bash(git push origin master*)",
+      "Bash(git reset --hard*)",
+      "Bash(cat /root/.claude/calibracion-diseno/*)",
+      "Bash(grep* /root/.claude/calibracion-diseno/*)",
+      "Bash(pytest -n auto*)",
+      "Bash(pytest backend/ *)",
+      "Bash(pytest tests/)",
+      "Bash(pytest tests/*)",
+      "Bash(pytest)",
+      "Bash(rm -rf *)",
+      "Bash(rm -rf*)",
+      "Edit(**/*.key)",
+      "Edit(**/*.pem)",
+      "Edit(**/.env)",
+      "Edit(~/.claude/audit/**)",
+      "Read(**/*.key)",
+      "Read(**/*.pem)",
+      "Read(**/.aws/**)",
+      "Read(**/.env*)",
+      "Read(**/credentials*)",
+      "Read(**/id_rsa*)",
+      "Read(**/secrets/**)",
+      "Read(//root/.claude/calibracion-diseno/**)",
+      "Read(~/.aws/**)",
+      "Read(~/.config/gcloud/**)",
+      "Read(~/.ssh/**)",
+      "Edit(**/.env.*)",
+      "Edit(**/credentials.*)",
+      "Edit(**/secrets.*)",
+      "Edit(*.key)",
+      "Edit(*.pem)",
+      "Edit(.env*)",
+      "Edit(credentials.*)",
+      "Edit(secrets.*)",
+      "Bash(*ansible-playbook*deploy*)",
+      "Bash(*cdk deploy*)",
+      "Bash(*deploy.py*)",
+      "Bash(*deploy.sh*)",
+      "Bash(*firebase deploy*)",
+      "Bash(*fly deploy*)",
+      "Bash(*flyctl deploy*)",
+      "Bash(*gcloud * deploy*)",
+      "Bash(*helm * install*)",
+      "Bash(*helm * upgrade*)",
+      "Bash(*kamal deploy*)",
+      "Bash(*kubectl * apply*)",
+      "Bash(*make deploy*)",
+      "Bash(*netlify deploy*)",
+      "Bash(*pnpm deploy*)",
+      "Bash(*run deploy*)",
+      "Bash(*serverless deploy*)",
+      "Bash(*sh ./deploy*)",
+      "Bash(*sh deploy*)",
+      "Bash(*sls deploy*)",
+      "Bash(*vercel deploy*)",
+      "Bash(*vercel --prod*)",
+      "Bash(*wrangler deploy*)",
+      "Bash(*yarn deploy*)",
+      "Bash(./deploy*)",
+      "Bash(eb deploy*)",
+      "Bash(helm install*)",
+      "Bash(helm upgrade*)",
+      "Bash(kubectl apply*)",
+      "Bash(*cap production*)",
+      "Bash(*production deploy*)",
+      "Bash(*deploy production*)",
+      "Bash(*--env production*)",
+      "Bash(*--env=production*)",
+      "Bash(*--environment production*)",
+      "Bash(*--environment=production*)",
+      "Bash(*RAILS_ENV=production*)",
+      "Bash(*compose*production*)",
+      "Bash(*kubectl*production*)",
+      "Bash(*terraform*production*)",
+      "Bash(*heroku*production*)",
+      "Bash(*ssh *production*)",
+      "Bash(*scp *production*)",
+      "Bash(*rsync *production*)",
+      "Bash(*manage.py migrate*production*)",
+      "Bash(*manage.py flush*production*)",
+      "Bash(*manage.py loaddata*production*)",
+      "Bash(*production*manage.py migrate*)",
+      "Bash(*production*manage.py flush*)",
+      "Bash(*production*manage.py loaddata*)"
+    ]
+  },
+  "hooks": {
     "SessionStart": [
       {
         "hooks": [
           {
             "type": "command",
-            "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/validate-progress.sh"
+            "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/validate-progress.sh",
+            "timeout": 2
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/otto-briefing.sh\""
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/audit-incoming-config.sh",
+            "timeout": 2
           }
         ]
       }
@@ -28,35 +221,320 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/capture-task.sh",
+            "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/suggest-compact.sh",
+            "timeout": 5,
+            "statusMessage": "Mirando la presion de contexto..."
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/capture-task.sh\""
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/dispatch-hint.sh\""
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/gate-ram-pytest.sh",
+            "timeout": 5,
+            "onFailure": "block"
+          },
+          {
+            "type": "command",
+            "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/guard-pkill.sh",
+            "onFailure": "block",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Bash|Read|Grep",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/guard-secretos.sh",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Bash|Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/guarda-destructivos.sh",
+            "timeout": 10,
+            "onFailure": "block"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash|Artifact|mcp__.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/aviso-envio-externo.sh",
+            "timeout": 10,
+            "onFailure": "block"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash|Write|Edit|MultiEdit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/judge-write-guard.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/auto-format.sh",
+            "timeout": 3
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/auto-progress-log.sh",
+            "async": true
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|Bash|Skill|Task",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/audit-log.sh",
+            "async": true
+          }
+        ]
+      },
+      {
+        "matcher": "Agent|Task",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/agent-registry-log.sh",
+            "async": true
+          }
+        ]
+      },
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/aviso-claude-md.sh",
+            "timeout": 5,
+            "if": "Edit(**/CLAUDE.md)"
+          }
+        ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/aviso-claude-md.sh",
+            "timeout": 5,
+            "if": "Write(**/CLAUDE.md)"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/warn-plans-outside-repo.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/notify-telegram.sh\"",
+            "timeout": 15
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/flag-visual-staleness.sh",
+            "async": true
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -I \"$CLAUDE_PROJECT_DIR/.claude/scripts/gate_secretos.py\" --root \"$CLAUDE_PROJECT_DIR\" --audit-only --since \"$(date -u +%F)\" 1>&2; [ $? -eq 1 ] && exit 1; exit 0",
             "timeout": 30
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/servidores-vivos.sh\"",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/session-stop.sh"
+          }
+        ]
+      }
+    ],
+    "TaskCompleted": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/task-completed-gate.sh",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/pre-compact-archive.sh",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "PermissionDenied": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/permission-denied-log.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "InstructionsLoaded": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/instructions-loaded-log.sh",
+            "timeout": 10,
+            "async": true
+          }
+        ]
+      }
+    ],
+    "PostModelSwitch": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/aviso-modelo.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "ConfigChange": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash $CLAUDE_PROJECT_DIR/.claude/hooks/config-change-guard.sh",
+            "timeout": 10
           }
         ]
       }
     ]
   },
-  "permissions": {
-    "deny": [
-      "Bash(rm -rf*)",
-      "Bash(git push --force*)",
-      "Bash(git push -f*)",
-      "Bash(git reset --hard*)",
-      "Bash(git push origin main*)",
-      "Bash(git push origin master*)",
-      "Bash(pytest -n auto*)",
-      "Bash(pytest)",
-      "Bash(pytest tests/*)",
-      "Edit(**/.env)",
-      "Edit(**/.env.*)",
-      "Edit(**/*.pem)",
-      "Edit(**/*.key)",
-      "Edit(**/credentials.*)",
-      "Edit(**/secrets.*)"
-    ],
-    "allow": []
+  "_comment_plugins_diseno": "DIS-1 de develop (2026-09-18), adoptado en el sync 2 (2026-10-03): los plugins se habilitan POR PROYECTO, no a nivel de usuario. frontend-design se toma de claude-plugins-official (la copia de claude-code-plugins se quedo en una version vieja con el mismo numero 1.1.0). Quien manda cuando frontend-design y nuestro canon dicen cosas distintas: rules/motores-de-diseno.md. Los deny de calibracion-diseno vienen del mismo bloque: el auditor no debe ver las respuestas de su propia calibracion.",
+  "enabledPlugins": {
+    "frontend-design@claude-plugins-official": true,
+    "superdesign@claude-plugins-official": true
   },
-  "env": {
-    "CLAUDE_CODE_ENABLE_TODO_TOOLS": "1"
-  },
-  "_comment_harness": "2026-09-21: nucleo del tech-lead-template. gate-ram-pytest usa matcher 'Bash' y filtra el comando dentro del script: un matcher tipo 'Bash(pytest*)' NO se dispara nunca (el matcher es una regex sobre el NOMBRE de la tool). En PreToolUse solo exit 2 bloquea."
+  "_comment_claudeMdExcludes": [
+    "Las rules SIN 'paths:' se cargan ENTERAS al arrancar cada sesion (doc oficial, code.claude.com/docs/en/memory:",
+    "'Rules without paths frontmatter are loaded at launch'). Medido 2026-09-18: 43 rules = 527 KB = ~150.000",
+    "tokens, el ~30% del contexto antes del primer mensaje. El template asumia carga bajo demanda via INDEX.md",
+    "(CLAUDE.md: 'el detalle vive en rules/'); esa premisa era falsa y este ajuste la hace verdad.",
+    "SE EXCLUYEN las de TAREA: el agente las lee con Read cuando llega esa tarea (INDEX.md + hook dispatch-hint).",
+    "SE QUEDAN CARGADAS las 4 AMBIENTALES, que rigen como trabaja CUALQUIER sesion y no las dispara ninguna tarea:",
+    "progress-tracking, communication-fast-ack, governance, verification. Sin ellas se pierde el flujo.",
+    "No admite 'todo menos': por eso es una lista. Una rule NUEVA se carga por defecto hasta que se decida",
+    "excluirla (falla hacia cargar de mas, no hacia olvidar). Revertir = borrar la clave claudeMdExcludes."
+  ],
+  "claudeMdExcludes": [
+    "**/.claude/rules/adr.md",
+    "**/.claude/rules/agent-autonomy-ladder.md",
+    "**/.claude/rules/agent-security.md",
+    "**/.claude/rules/ai-assistant-risk.md",
+    "**/.claude/rules/api-http-contract.md",
+    "**/.claude/rules/code-style.md",
+    "**/.claude/rules/fairness-audit.md",
+    "**/.claude/rules/fases-diseno.md",
+    "**/.claude/rules/goal-vs-loop.md",
+    "**/.claude/rules/harness-gotchas.md",
+    "**/.claude/rules/html-output.md",
+    "**/.claude/rules/layer-decision.md",
+    "**/.claude/rules/memory.md",
+    "**/.claude/rules/motores-de-diseno.md",
+    "**/.claude/rules/parallelization.md",
+    "**/.claude/rules/plan-docs-structure.md",
+    "**/.claude/rules/plan-gates.md",
+    "**/.claude/rules/qa-loop.md",
+    "**/.claude/rules/ram-pytest.md",
+    "**/.claude/rules/recovery-patterns.md",
+    "**/.claude/rules/refactor-progresivo.md",
+    "**/.claude/rules/report-kit.md",
+    "**/.claude/rules/research-driven-planning.md",
+    "**/.claude/rules/security.md",
+    "**/.claude/rules/self-improvement-loop.md",
+    "**/.claude/rules/speckit-workflow.md",
+    "**/.claude/rules/trunk-based-flow.md",
+    "**/.claude/rules/verdict-contract.md"
+  ]
 }
