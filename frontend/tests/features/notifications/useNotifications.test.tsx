@@ -5,6 +5,15 @@ import * as notificationsService from "@features/notifications/api/notifications
 
 vi.mock("@features/notifications/api/notificationsService");
 
+// Native setTimeout captured before fake timers: the hook schedules its polling
+// interval from a real setTimeout(0), so tests must let a real macrotask run
+// (otherwise the interval may not exist yet on a slow machine such as CI).
+const realSetTimeout = globalThis.setTimeout;
+const flushRealTimers = () =>
+  act(async () => {
+    await new Promise<void>((resolve) => realSetTimeout(resolve, 20));
+  });
+
 const mockedService = notificationsService as {
   listNotifications: ReturnType<typeof vi.fn>;
   getUnreadCount: ReturnType<typeof vi.fn>;
@@ -67,6 +76,7 @@ describe("useNotifications", () => {
     await act(async () => {
       await vi.runAllTimersAsync();
     });
+    await flushRealTimers();
 
     mockedService.getUnreadCount.mockResolvedValue({ count: 3 });
 
@@ -84,6 +94,7 @@ describe("useNotifications", () => {
     await act(async () => {
       await vi.runAllTimersAsync();
     });
+    await flushRealTimers();
 
     const callCountAfterMount = mockedService.getUnreadCount.mock.calls.length;
 

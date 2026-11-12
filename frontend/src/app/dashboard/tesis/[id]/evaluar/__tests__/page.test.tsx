@@ -13,9 +13,9 @@
  * These tests are expected to FAIL (RED) until frontend-worker adds the wiring.
  */
 
-import React from "react";
+import React, { Suspense } from "react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 
 // ── navigation mock ────────────────────────────────────────────────────────────
 vi.mock("next/navigation", () => ({
@@ -72,6 +72,7 @@ vi.mock("@shared/ui/ImageTooltip", () => ({
 
 // ── component under test ───────────────────────────────────────────────────────
 import EvaluarTesisPage from "../page";
+import EvaluarTesisEntregaPage from "../entrega/page";
 
 // ── helpers ────────────────────────────────────────────────────────────────────
 function makeApiProject(state: string) {
@@ -88,27 +89,36 @@ function makeApiProject(state: string) {
 
 // ── tests ──────────────────────────────────────────────────────────────────────
 
-describe("EvaluarTesisPage — pending_entrega state", () => {
+describe("EvaluarTesisEntregaPage — entrega evaluation form (phase picker links here)", () => {
   beforeEach(() => {
     mockGetProject.mockResolvedValue(makeApiProject("pending_entrega"));
   });
 
-  it("renders an entrega question text fragment (te-d1) when state is pending_entrega", async () => {
-    render(<EvaluarTesisPage />);
+  // The phase picker (../page) only routes; the entrega questions live in ../entrega/page.
+  async function renderEntrega() {
+    const params = Promise.resolve({ id: "42" });
+    await act(async () => {
+      render(
+        <Suspense fallback={null}>
+          <EvaluarTesisEntregaPage params={params} />
+        </Suspense>,
+      );
+    });
+  }
 
-    // Wait for async project fetch to settle
+  it("renders an entrega question text fragment (te-d1)", async () => {
+    await renderEntrega();
+
     await waitFor(() => {
-      // The first TEG_ENTREGA question contains "portada" — a distinctive substring
       const element = screen.queryByText(/acta de aprobación del tutor/i);
       expect(element).not.toBeNull();
     }, { timeout: 3000 });
   });
 
-  it("renders the Sec6 factible yes/no UI (te-s6-1) when state is pending_entrega", async () => {
-    render(<EvaluarTesisPage />);
+  it("renders the Sec6 factible yes/no UI (te-s6-1)", async () => {
+    await renderEntrega();
 
     await waitFor(() => {
-      // te-s6-1 label: "¿El estudio constituye un proyecto factible?"
       const element = screen.queryByText(/factible/i);
       expect(element).not.toBeNull();
     }, { timeout: 3000 });

@@ -22,9 +22,9 @@ const tutorUser = {
 };
 
 describe("ProfileForm", () => {
-  it("renders semester field for Estudiante", () => {
+  it("does NOT render an editable semester field for Estudiante (semester is assigned by coordination)", () => {
     render(<ProfileForm initialValues={estudianteUser} onSubmit={vi.fn()} />);
-    expect(screen.getByLabelText(/semestre/i)).toBeInTheDocument();
+    expect(screen.queryByLabelText(/semestre/i)).not.toBeInTheDocument();
   });
 
   it("does NOT render semester field for Tutor", () => {
