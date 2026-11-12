@@ -36,6 +36,8 @@ mkdir -p "$RELEASES" "$STATE" "$LOGS" "$BACKUPS"
 
 log() { printf '[%s] %s\n' "$(date '+%F %T')" "$*" | tee -a "$LOG" >&2; }
 notify() { python3 "$KIT/notify.py" "$@" || true; }
+# Los servicios no deben heredar el candado (fd 9): si lo heredan, el lock no se suelta nunca.
+svc() { sudo -n systemctl "$@" 9>&-; }
 
 exec 9>"$STATE/update.lock"
 flock -n 9 || exit 0   # ya hay una actualización en marcha
@@ -69,7 +71,7 @@ else:
 }
 
 if (( ! FORCE )); then
-  status="$(ci_status || echo unknown)"
+  status="$(ci_status 2>/dev/null || echo unknown)"
   case "$status" in
     success) ;;
     failure)
@@ -117,15 +119,17 @@ set +a
 (
   cd "$NEW/frontend"
   npm ci --no-audit --no-fund --loglevel=error &&
-  NEXT_PUBLIC_API_URL=/api NEXT_TELEMETRY_DISABLED=1 npm run build
+  # PC de 8 GB: la compilación no pasa de ~1,5 GB mientras la web sigue sirviendo.
+  NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=1536}" \
+    NEXT_PUBLIC_API_URL=/api NEXT_TELEMETRY_DISABLED=1 npm run build
 ) >>"$LOG" 2>&1 || fail_build "frontend (npm ci / next build)"
 
 # ── 4. Cambiar de versión ────────────────────────────────────────────────────────────────────
 health() {
   local _
   for _ in $(seq 1 30); do
-    if curl -fsS --max-time 5 -o /dev/null -H "Host: $PUBLIC_HOST" http://127.0.0.1:8080/api/csrf/ &&
-       curl -fsS --max-time 5 -o /dev/null -H "Host: $PUBLIC_HOST" http://127.0.0.1:8080/; then
+    if curl -fs --max-time 5 -o /dev/null -H "Host: $PUBLIC_HOST" http://127.0.0.1:8080/api/csrf/ &&
+       curl -fs --max-time 5 -o /dev/null -H "Host: $PUBLIC_HOST" http://127.0.0.1:8080/; then
       return 0
     fi
     sleep 2
@@ -140,14 +144,14 @@ rollback() {
   log "Volviendo a ${CURRENT:0:7}: $1"
   echo "$TARGET" >"$STATE/failed-sha"
   if [[ -n "$CURRENT" ]]; then
-    sudo -n systemctl stop tesisfar-backend.service || true
+    svc stop tesisfar-backend.service || true
     if [[ -f "$PRE_BACKUP" ]]; then
       cp "$PRE_BACKUP" "$DATA/db.sqlite3"
       rm -f "$DATA/db.sqlite3-wal" "$DATA/db.sqlite3-shm"
     fi
     ln -sfn "$RELEASES/$CURRENT" "$BASE/current.tmp" && mv -Tf "$BASE/current.tmp" "$BASE/current"
-    sudo -n systemctl start tesisfar-backend.service || true
-    sudo -n systemctl restart tesisfar-backend.service tesisfar-frontend.service || true
+    svc start tesisfar-backend.service || true
+    svc restart tesisfar-backend.service tesisfar-frontend.service || true
   fi
   local estado="La web sigue con la versión anterior (${CURRENT:0:7})."
   health || estado="⚠️ La versión anterior TAMPOCO responde: hay que revisar el servidor."
@@ -166,8 +170,7 @@ $(tail -n 25 "$LOG")"
 ) >>"$LOG" 2>&1 || rollback "migraciones / collectstatic"
 
 ln -sfn "$NEW" "$BASE/current.tmp" && mv -Tf "$BASE/current.tmp" "$BASE/current"
-# shellcheck disable=SC2024  # el log es del propio usuario; sudo solo hace falta para systemctl
-sudo -n systemctl restart tesisfar-backend.service tesisfar-frontend.service >>"$LOG" 2>&1 ||
+svc restart tesisfar-backend.service tesisfar-frontend.service >>"$LOG" 2>&1 ||
   rollback "reinicio de servicios"
 health || rollback "la web no responde tras reiniciar"
 

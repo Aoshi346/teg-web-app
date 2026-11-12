@@ -206,9 +206,14 @@ paso "10/10 Activando actualizaciones automáticas y copias de seguridad"
 sudo systemctl enable --now tesisfar-update.timer tesisfar-backup.timer >/dev/null
 ok "Busca versiones nuevas en '$BRANCH' cada 5 minutos · copia de seguridad diaria a las 03:30"
 
+if [[ -d /mnt/c ]]; then
+  mkdir -p /mnt/c/TesisFar && cp "$KIT/install-windows.ps1" /mnt/c/TesisFar/
+fi
+
 printf '\n\033[1;32m✅ Listo. TesisFar está en:  https://%s\033[0m\n\n' "$PUBLIC_HOST"
-echo "Pendiente (una vez):"
-echo "  • En Windows, PowerShell como administrador:  ver la guía, paso «Arranque automático»."
+echo "Pendiente (una vez), en Windows — PowerShell COMO ADMINISTRADOR:"
+echo "    powershell -ExecutionPolicy Bypass -File C:\\TesisFar\\install-windows.ps1"
+echo "  y después el inicio de sesión automático (guía, paso 4)."
 if [[ ! -f "$BASE/mail.env" ]]; then
   echo "  • Avisos por correo (opcional, cuando tengas la contraseña de aplicación de Gmail):"
   echo "        bash $BASE/bin/configure-email.sh"
