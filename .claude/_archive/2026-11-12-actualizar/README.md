@@ -10,6 +10,7 @@ demás y mantén solamente el template». Nada se borró: todo está aquí con s
 | `local/agents/` | El orquestador de abril: `backend-worker`, `frontend-worker`, `test-worker`. Sustituidos por `desarrollador-backend`, `desarrollador-frontend` y la skill `escribir-tests` |
 | `local/hooks/post-edit-lint.sh` | Lint tras cada edición del orquestador. Lo cubren `auto-format` y `pattern-check` del template |
 | `local/state/` | Briefs y resultados de las tareas del orquestador (abril). Histórico |
+| `local/CLAUDE-raiz-orquestador.md` | El `CLAUDE.md` de la raíz (orquestador de abril + harness mínimo del 21-09). Lo sustituye `.claude/CLAUDE.md` |
 | `subdirs/{backend,frontend}/` | Sus `.claude/` (deny-lists y las skills `add-page`, `add-component`, `add-api-call`, `add-evaluation`) y los `AGENT.md` de los workers |
 
 Los antiguos `backend/CLAUDE.md` y `frontend/CLAUDE.md` NO están aquí: son documentación del dominio
