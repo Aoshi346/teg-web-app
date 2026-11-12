@@ -1,0 +1,14 @@
+# Catálogo de patrones del proyecto — fuente de verdad de Rita (rita-pattern-keeper)
+# Contrato de propiedad por directorio (Owns/Can modify/Forbids, herencia vertical): fichero HERMANO
+# `ownership.yaml` + `ownership_check.py` (AGT-8). Los patrones de aquí se MIDEN (dominancia); las
+# reglas de allí se DECLARAN. Rita cita las dos cosas; nunca mezclarlas en el mismo fichero.
+# Regla de oro (RESEARCH.md del plan): un patrón entra SOLO con dominancia medida, ≥2 precedentes
+# citables y mecanismo en el escalón MÁS BARATO posible (formateador→Danger→AST→lint→arch→codemod→Rita).
+# Estados: activo (bloquea nuevas violaciones) · debil (avisa, no bloquea) · sombra (solo mide) · retirado.
+# El objetivo permanente es BAJAR filas de escalón (agente → determinista); si en 3 meses ninguna baja,
+# el diseño está fallando (riesgo transversal del research).
+
+project: teg-web-app
+measured: null   # se mide cuando haya código
+
+patterns: []
