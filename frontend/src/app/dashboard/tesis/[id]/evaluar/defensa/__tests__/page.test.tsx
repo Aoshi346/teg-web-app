@@ -61,8 +61,12 @@ vi.mock("@features/evaluations/components/EvaluationForm", () => ({
 
 // ── component under test ───────────────────────────────────────────────────────
 // This import will fail in RED phase because the file doesn't exist yet.
-import EvaluarTesisDefensaPage from "../page";
+import PageUnderTest from "../page";
 import { TEG_DEFENSA_QUESTIONS } from "@features/evaluations/lib/questions/questions";
+
+const EvaluarTesisDefensaPage = PageUnderTest as unknown as React.ComponentType<{
+  params: Promise<{ id: string }>;
+}>;
 
 // ── tests ──────────────────────────────────────────────────────────────────────
 

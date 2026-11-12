@@ -390,7 +390,7 @@ describe("getTegEntregaPassStatus — regression guard (independent threshold 14
 // ---------------------------------------------------------------------------
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const makeQuaternaryDefenseQuestion = (id: string, section: string): any => ({
+const makeQuaternaryDefenseQuestion = (id: string, section: string | undefined): any => ({
   id,
   label: `Question ${id}`,
   section,

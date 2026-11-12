@@ -528,7 +528,7 @@ describe("PresentationFormModal (Sub-K redesign)", () => {
 
   // 22 — Save flow create mode
   it("calls onSave(dayId, payload, undefined) in create mode when form is valid", async () => {
-    const onSave = vi.fn(() => Promise.resolve());
+    const onSave = vi.fn<(dayId: number, payload: unknown, editId?: number) => Promise<void>>(() => Promise.resolve());
     const onClose = vi.fn();
     render(
       <PresentationFormModal
@@ -563,7 +563,7 @@ describe("PresentationFormModal (Sub-K redesign)", () => {
 
   // 23 — Save flow edit mode
   it("calls onSave(dayId, payload, editTarget.id) in edit mode", async () => {
-    const onSave = vi.fn(() => Promise.resolve());
+    const onSave = vi.fn<(dayId: number, payload: unknown, editId?: number) => Promise<void>>(() => Promise.resolve());
     const onClose = vi.fn();
     render(
       <PresentationFormModal

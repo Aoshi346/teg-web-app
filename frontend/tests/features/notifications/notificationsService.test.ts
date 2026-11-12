@@ -14,7 +14,7 @@ vi.mock("@shared/api/api", () => ({
   },
 }));
 
-const mockApi = api as { get: ReturnType<typeof vi.fn>; post: ReturnType<typeof vi.fn> };
+const mockApi = api as unknown as { get: ReturnType<typeof vi.fn>; post: ReturnType<typeof vi.fn> };
 
 beforeEach(() => {
   vi.clearAllMocks();

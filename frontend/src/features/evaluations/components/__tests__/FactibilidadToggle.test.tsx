@@ -92,10 +92,8 @@ describe("FactibilidadToggle", () => {
       modeloLabel.parentElement;
 
     // Query buttons within that container
-    const buttons = (container ?? document).querySelectorAll
-      ? Array.from(
-          (container as HTMLElement).querySelectorAll("button"),
-        )
+    const buttons = container
+      ? Array.from(container.querySelectorAll("button"))
       : [];
 
     // All buttons in the 6.2 section must be disabled

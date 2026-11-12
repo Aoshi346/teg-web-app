@@ -46,7 +46,7 @@ describe("api timing instrumentation", () => {
     await api.get("/test/");
 
     expect(infoSpy).toHaveBeenCalled();
-    const callArg: string = infoSpy.mock.calls[0][0];
+    const callArg = String(infoSpy.mock.calls[0][0]);
     // Message must mention the method and path
     expect(callArg).toMatch(/GET/i);
     expect(callArg).toMatch(/\/test\//);
@@ -60,7 +60,7 @@ describe("api timing instrumentation", () => {
     await api.post("/test/", { name: "example" });
 
     expect(infoSpy).toHaveBeenCalled();
-    const callArg: string = infoSpy.mock.calls[0][0];
+    const callArg = String(infoSpy.mock.calls[0][0]);
     expect(callArg).toMatch(/POST/i);
     expect(callArg).toMatch(/\/test\//);
     expect(callArg).toMatch(/\d+/);
@@ -78,7 +78,7 @@ describe("api timing instrumentation", () => {
 
     // Timing log must still fire even when the request fails
     expect(infoSpy).toHaveBeenCalled();
-    const callArg: string = infoSpy.mock.calls[0][0];
+    const callArg = String(infoSpy.mock.calls[0][0]);
     // Log must mention the status code so devs can see the failure context
     expect(callArg).toMatch(/500/);
   });

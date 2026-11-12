@@ -22,13 +22,13 @@ beforeEach(() => {
 
 describe("deleteProject", () => {
   it("issues DELETE /projects/{id}/ via the api client", async () => {
-    mockApiDelete.mockResolvedValueOnce({} as void);
+    mockApiDelete.mockResolvedValueOnce({} as unknown as void);
     await deleteProject(99);
     expect(mockApiDelete).toHaveBeenCalledWith("/projects/99/");
   });
 
   it("resolves with no meaningful body on 204 (api returns {})", async () => {
-    mockApiDelete.mockResolvedValueOnce({} as void);
+    mockApiDelete.mockResolvedValueOnce({} as unknown as void);
     const result = await deleteProject(5);
     expect(result).toBeUndefined();
   });
