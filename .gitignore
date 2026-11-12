@@ -80,3 +80,7 @@ CLAUDE.local.md
 .claude/.config-snapshot/
 .claude/graph-dataset.json
 .claude/graph-dataset.full.json
+
+# Restos locales del orquestador de abril (nunca versionados; lo versionado sigue en git)
+.claude/_archive/2026-11-12-actualizar/local/state/
+.claude/_archive/2026-11-12-actualizar/subdirs/*/.claude/state/

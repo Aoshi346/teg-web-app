@@ -2,3 +2,4 @@
 # (architecture, flows, use-cases, superpowers…); lo que SÍ se versiona de docs/ se añadió con -f.
 docs/**
 frontend/docs/**
+.claude/_archive/2026-11-12-actualizar/local/state/**
