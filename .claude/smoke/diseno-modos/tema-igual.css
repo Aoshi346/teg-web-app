@@ -1,0 +1,12 @@
+/* Los mismos valores que el lienzo, escritos de otra forma (ver lienzo.html). Debe salir 0. */
+:root {
+  --color-papel: oklch(0.98 0.01 85);
+  --color-tinta: #1a1916;
+  --color-marca: oklch(0.62 0.08 40);
+  --radio-tarjeta: 12px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-papel: oklch(0.2 0.01 85);
+  }
+}

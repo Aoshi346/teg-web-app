@@ -1,0 +1,151 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# anti-patrones.yaml — las semillas de reglas del gate determinista, MEDIDAS
+# sobre este corpus. Lo consume `scripts/gate_diseno.py` (Ola 5).
+#
+# Qué NO es: una lista de buenas prácticas sacada de un blog. Cada fila apunta a
+# un fichero de este corpus, con línea, donde el defecto ESTÁ. Si una fila no
+# puede señalar dónde ocurrió, no entra aquí — se queda en la doctrina
+# (`patterns/diseno/`), que es otro sitio y no bloquea nada.
+#
+# ESTADO: todas nacen en `sombra` (cuentan, no avisan, no bloquean). Promoverlas
+# exige lo de `rules/refactor-progresivo.md` §4.5, incluida la quinta condición:
+# la firma un humano, con fecha. Y la regla de inversión: una regla que marcaría
+# >30 ficheros existentes está mal planteada.
+# ─────────────────────────────────────────────────────────────────────────────
+version: 1
+generado: 2026-09-18
+origen: resources/referencias-diseno (10 diseños propios, feb-abr 2026)
+
+reglas:
+  - id: GD-01
+    enunciado: "el contenido NO puede depender de que el JS corra para ser visible"
+    severidad: P0
+    estado: sombra
+    como_se_mide: >
+      estático: función de inicio definida y nunca invocada + selectores de sección en opacity:0.
+      vivo: cargar con java_script_enabled=False y medir el ratio de texto visible.
+    visto_en: "mal/attomo-digital.html:1441 (initGSAP definido, una sola aparición) + :1006 (.reveal{opacity:0})"
+    contraejemplo: "bien/elevaiti-v53.html:92-94 (body.js-ready .fade-up{opacity:0})"
+    por_que_importa: "esa página está DESPLEGADA así y no se ve nada. Ningún test de los nuestros lo cazaba."
+
+  - id: GD-02
+    enunciado: "sin loaders forzados que retrasen el contenido"
+    severidad: P1
+    estado: sombra
+    como_se_mide: "setTimeout >=1000ms que retira una capa de carga; y en vivo, tiempo hasta el primer texto legible"
+    visto_en: "bien/yessmassage-v7.html:4636-4637 (3,2 s) · bien/dale-marketing-v4/script.js (barra falsa de 1,6 s)"
+
+  - id: GD-03
+    enunciado: "sin capa de parches con !important"
+    severidad: P2
+    estado: sombra
+    como_se_mide: "DENSIDAD por fichero (ratio), nunca presencia — una regla por presencia marcaría medio repo"
+    visto_en: "bien/yessmassage-v7.html (36 usos, bloques «CONTRAST FIXES» en 2931 y 2990)"
+    aviso: "candidata clara a la regla de inversión. Medir antes de promover."
+
+  - id: GD-04
+    enunciado: "el nombre de un token de color no puede mentir sobre su valor"
+    severidad: P1
+    estado: sombra
+    como_se_mide: "parser de custom properties; se compara la familia de tono del valor con el nombre cuando el nombre nombra un color"
+    visto_en: "bien/yessmassage-v7.html:28 (`--rose: #5a922d`, que es un verde, usado 2 veces)"
+    extra: "también cuenta el token que apunta a otro que no existe — :37 `--bg: var(--beige)`, y `--beige:` no se define en ninguna parte"
+
+  - id: GD-05
+    enunciado: "si hay animación, tiene que haber prefers-reduced-motion"
+    severidad: P1
+    estado: sombra
+    como_se_mide: "existen @keyframes o transition y cero bloques de reduced-motion"
+    visto_en: "mal/attomo-digital.html · bien/kalinayoga-v6.html"
+    contraejemplo: "bien/dale-marketing-v4/styles.css:1423 + script.js:11 (en CSS **y** en JS)"
+
+  - id: GD-06
+    enunciado: "nunca cursor:none global"
+    severidad: P1
+    estado: sombra
+    como_se_mide: "grep exacto sobre body/html"
+    visto_en: "mal/attomo-digital.html:48 y :315 — y TAMBIÉN en una referencia marcada como BUENA: bien/yessmassage-v7.html:105 (10 apariciones en total, incluida :114 sobre `button`). Añadido el 2026-09-18: la yaml citaba solo attomo y daba a entender que era cosa del diseño roto. No lo es — el mejor diseño del corpus hace lo mismo."
+
+  - id: GD-07
+    enunciado: "sin artefactos del modelo ni relleno en el copy"
+    severidad: P1
+    estado: sombra
+    como_se_mide: "absorbe R3 y R10 de red-flags.sh"
+    visto_en: "designs/tech-consultancy (no vendorizado): «NexusTech重构ó», «unafactory», «ajuda»"
+
+  - id: GD-08
+    enunciado: "sin escasez falsa"
+    severidad: P0
+    estado: sombra
+    como_se_mide: "copy de escasez + DOS cargas en vivo comparando el valor del contador"
+    visto_en: "designs/elevaiti/v50 (no vendorizado): contador que se reinicia al recargar · bien/consultorpro.html:1679+ («solo 7 plazas»: aceptable solo si es verdad)"
+
+  - id: GD-09
+    enunciado: "los emojis no son iconos"
+    severidad: P2
+    estado: sombra
+    como_se_mide: "absorbe R6 de red-flags.sh"
+    visto_en: "bien/elevaiti-v53.html — y lo prohíbe el propio documento de marca del cliente (proceso/elevaiti-BRANDING-VISUAL.md)"
+
+  - id: GD-10
+    enunciado: "la declaración de font-family no puede llevar un ';' dentro"
+    severidad: P1
+    estado: sombra
+    como_se_mide: "parser CSS; el ';' corta la declaración y el resto del valor se pierde en silencio"
+    visto_en: "proceso/galeria-elevaiti.html:48, :68, :94, :109, :154 — cinco veces `font-family:'Space Grotesk',system-ui;sans-serif;`. CORREGIDO el 2026-09-18: aquí ponía «designs/elevaiti/v50 (no vendorizado)» y era falso — el fallo SÍ está dentro del corpus, en la galería. Lo encontró el gate al correrse, no la lectura."
+    nota: "determinista y con falso positivo cero, y ahora además con fixture real dentro del corpus. Buena candidata a ser la primera en promocionar."
+
+  - id: GD-11
+    enunciado: "el menú móvil tiene que ser un menú"
+    severidad: P1
+    estado: sombra
+    como_se_mide: "grep de alert() en el manejador + comprobación viva a 390px con page.on(\"dialog\")"
+    visto_en: "bien/kalinayoga-v6.html (alert()) · mal/attomo-digital.html (los enlaces se ocultan a <=768px y no hay sustituto)"
+
+  - id: GD-12
+    enunciado: "outline:none exige reponer el foco con :focus-visible"
+    severidad: P1
+    estado: sombra
+    como_se_mide: "parser CSS"
+    visto_en: "6 de los 9 diseños de bien/ quitan el outline y NO declaran focus-visible: elevaiti-v2, elevaiti-v7, kalinayoga-v4, kalinayoga-v6, dale-marketing-v4/styles.css y (en mal/) attomo-digital"
+    contraejemplo: "bien/yessmassage-v7.html y bien/elevaiti-v5.html (sí declaran :focus-visible)"
+    aviso: >
+      Marca 6 de 9 referencias BUENAS, y eso es justo lo que la regla de inversión
+      (rules/refactor-progresivo.md §4.4) manda mirar dos veces. Aquí la lectura es la
+      contraria de lo habitual: no es que la regla esté mal planteada, es que el corpus
+      tiene un agujero real de accesibilidad — el mismo que qa-loop.md declara sin dueño
+      («a11y que no es contraste»). Antes de promoverla hay que acotarla a elementos
+      interactivos y medirla fuera del corpus; mientras tanto, es la prueba de que estas
+      referencias se citan por su tipografía y su movimiento, NO por su accesibilidad.
+
+  - id: GD-13
+    enunciado: "un token con triplete HSL crudo no se usa como color entero: hsl(var(--x)), nunca var(--x) a pelo"
+    severidad: P0
+    estado: sombra
+    como_se_mide: "valor de cada --token del barrido entero + cada declaración de color en CSS, style=\"\" y objetos style de JSX"
+    visto_en: "elvion .claude/improvements_tl.md:73-82 (P0, Vera e Ignacio a la vez): el color salía transparente sin error en consola. En este corpus da 0 (medido el 31-10, sub-ola 3.64)"
+    fixture: "smoke/diseno/GD-13/{malo,bueno}.html"
+
+  - id: GD-14
+    enunciado: "una regla que declara texto y fondo a la vez cumple su contraste AA"
+    severidad: P1
+    estado: sombra
+    como_se_mide: "scripts/contraste.py sobre color + background de la MISMA regla, si los dos resuelven a un solo valor; 3:1 si la regla declara texto grande"
+    visto_en: "elvion, Vera iter-11 (.docs/feedback/qa-loop/WEBAPP-1/iter-11/vera/findings.json): burbuja del usuario navy #243447 sobre teal #2f6f8f = 2,29:1, nacida al cambiar un token · bien/elevaiti-v53.html:61 (#fff sobre #00B4D8 = 2,46:1)"
+    fixture: "smoke/diseno/GD-14/{malo,bueno}.html (también lo usa contraste.py --dom)"
+    aviso: >
+      Medido el 31-10 con --incluir-corpus: 174 hallazgos en 149 ficheros, y 135 son UNA causa:
+      el contador .ngn de scripts/render_nav.py:76-78 (#6b6b76 sobre #e4e0d7 = 4,00:1, 10,5 px
+      negrita), copiado en cada página del report-kit. Pasa de 30 ficheros por una sola raíz,
+      no porque mida mal: arreglar render_nav.py y regenerar es trabajo aparte. No ve lo
+      heredado ni lo que se pinta encima: eso es contraste.py --dom.
+
+  - id: GD-15
+    enunciado: "presupuesto de la letra de display: ≤2 usos por pantalla en un producto"
+    severidad: P2
+    estado: sombra
+    como_se_mide: "usos de `font-display` en class/className y de var(--font-display) en style; no aplica con perfil web-cliente"
+    visto_en: "fitapp (10-17, fuera del corpus): 109 usos de la letra de display en 77 ficheros; las 12 referencias medidas del sector no usan una condensada dentro del producto"
+    aviso: >
+      Propuesta de fitapp sin medir fuera de su caso (sub-ola 3.67, UX-20): nace en sombra y
+      solo avisa. No ve la letra aplicada desde una hoja (`h1 { font-family: var(--font-display) }`).

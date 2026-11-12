@@ -1,0 +1,4251 @@
+{
+ "meta": {
+  "source": "gen_inventario_stack.py — AST para Python, expresiones regulares para TS/TSX",
+  "metodo": {
+   "python": "AST (exacto)",
+   "typescript": "regex (inventaria y cuenta; NO afirma nada fino sobre tipos)"
+  },
+  "proyecto": "evo-preven-develop",
+  "sha": "(sin git — snapshot .zip)",
+  "date": "2026-08-27",
+  "totales": {
+   "aristas": 4,
+   "componentes": 0,
+   "hooks": 0,
+   "modelos": 19,
+   "paginas": 0,
+   "serializers": 3,
+   "tareas": 28,
+   "vistas": 325
+  },
+  "apps": {
+   "evopreven": {
+    "modelos": 19,
+    "serializers": 3,
+    "vistas": 325,
+    "tareas": 28
+   }
+  },
+  "fuente": "resources/code-refference/evo-preven-develop.zip",
+  "fecha_contenido": "2026-08-24",
+  "aviso": "El zip no es un repo git: no hay sha. La fecha es la del contenido del zip, no la de indexado."
+ },
+ "aristas": [
+  {
+   "de": "getattr",
+   "a": "obj",
+   "tipo": "fija",
+   "file": "evopreven/controller/utils.py",
+   "line": 143
+  },
+  {
+   "de": "None",
+   "a": "obj",
+   "tipo": "fija",
+   "file": "evopreven/controller/utils.py",
+   "line": 145
+  },
+  {
+   "de": "obj",
+   "a": "related_obj",
+   "tipo": "fija",
+   "file": "evopreven/controller/utils.py",
+   "line": 160
+  },
+  {
+   "de": "obj",
+   "a": "rel_obj",
+   "tipo": "fija",
+   "file": "evopreven/controller/utils.py",
+   "line": 196
+  }
+ ],
+ "vistas": [
+  {
+   "nombre": "APIImportationResult",
+   "app": "evopreven",
+   "file": "evopreven/import_export_data/views.py",
+   "line": 538,
+   "bases": [
+    "ModuleTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "APIPortalView",
+   "app": "evopreven",
+   "file": "evopreven/api_portal/views.py",
+   "line": 48,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "AcceptAppointmentView",
+   "app": "evopreven",
+   "file": "evopreven/api_portal/views.py",
+   "line": 356,
+   "bases": [
+    "APIPortalView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "AccessDeniedView",
+   "app": "evopreven",
+   "file": "evopreven/userauth/views.py",
+   "line": 474,
+   "bases": [
+    "TemplateView"
+   ],
+   "doc": "Vista que muestra el error de acceso no autorizado cuando"
+  },
+  {
+   "nombre": "AccidentRelatedToPreviousWorkleaveView",
+   "app": "evopreven",
+   "file": "evopreven/labor_management/accidents/views.py",
+   "line": 313,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "AccidentReportView",
+   "app": "evopreven",
+   "file": "evopreven/labor_management/accidents/views.py",
+   "line": 657,
+   "bases": [
+    "TemplateView"
+   ],
+   "doc": "Vista para generar, subir y ver informe de accidente con configurador"
+  },
+  {
+   "nombre": "ActivateAccountView",
+   "app": "evopreven",
+   "file": "evopreven/userauth/views.py",
+   "line": 440,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "ActiveCompanyAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/filiation/views.py",
+   "line": 25,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "ActiveQueryAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/core/views.py",
+   "line": 179,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "ActiveWorkcenterAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/filiation/views.py",
+   "line": 15,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "ActiveWorkerAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/filiation/views.py",
+   "line": 323,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "ActiveWorkstationAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/structure/views.py",
+   "line": 42,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "AddEvaluatedRisksView",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 1686,
+   "bases": [
+    "ControllerTemplateView"
+   ],
+   "doc": "Vista para añadir riesgos ya evaluados en una misma evaluación a otro evaluation_item (puesto, task, etc) "
+  },
+  {
+   "nombre": "AddOriginValorationsView",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 2508,
+   "bases": [
+    "ControllerView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "AddRelatedView",
+   "app": "evopreven",
+   "file": "evopreven/module/views.py",
+   "line": 279,
+   "bases": [
+    "ControllerTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "AddRiskInstanceModalView",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 913,
+   "bases": [
+    "ControllerTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "AgendaView",
+   "app": "evopreven",
+   "file": "evopreven/module/views.py",
+   "line": 115,
+   "bases": [
+    "ModuleTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "AllRolesAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/structure/views.py",
+   "line": 273,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "AllWorkcentersAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/structure/views.py",
+   "line": 291,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "AllWorkspacesAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/structure/views.py",
+   "line": 183,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "AllWorkstationsAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/structure/views.py",
+   "line": 201,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "AnswerConsultationSomatometry",
+   "app": "evopreven",
+   "file": "evopreven/health/consultation/views.py",
+   "line": 222,
+   "bases": [
+    "TemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "AnswerSomatometryView",
+   "app": "evopreven",
+   "file": "evopreven/health/consultation/views.py",
+   "line": 282,
+   "bases": [
+    "TemplateView"
+   ],
+   "doc": "Vista que renderiza el formulario de somatometria para una Visita "
+  },
+  {
+   "nombre": "AssistantChatView",
+   "app": "evopreven",
+   "file": "evopreven/agents/views.py",
+   "line": 12,
+   "bases": [
+    "TemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "AvailableRiskInstanceQueryAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 1645,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "AvailableRisksForProtocolView",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 1624,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "AvailableRoleAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/structure/views.py",
+   "line": 265,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "AzureAdLogoutView",
+   "app": "evopreven",
+   "file": "evopreven/authentication/azure_dev/views.py",
+   "line": 8,
+   "bases": [
+    "View"
+   ],
+   "doc": "Vista de logout personalizada para Azure AD que:"
+  },
+  {
+   "nombre": "CRUDApiView",
+   "app": "evopreven",
+   "file": "evopreven/module/views.py",
+   "line": 165,
+   "bases": [
+    "ControllerView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "CampaignVaccinesQueryAutocommplete",
+   "app": "evopreven",
+   "file": "evopreven/campaigns/views.py",
+   "line": 290,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "CampaignWorkerQueryAutocommplete",
+   "app": "evopreven",
+   "file": "evopreven/campaigns/views.py",
+   "line": 272,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "CampaignWorkerSideFormView",
+   "app": "evopreven",
+   "file": "evopreven/campaigns/views.py",
+   "line": 132,
+   "bases": [
+    "TemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "CauseQueryAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 1575,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "CenterRiskGraphsView",
+   "app": "evopreven",
+   "file": "evopreven/structure/views.py",
+   "line": 418,
+   "bases": [
+    "ControllerTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "CenterRiskTreeView",
+   "app": "evopreven",
+   "file": "evopreven/structure/views.py",
+   "line": 308,
+   "bases": [
+    "ControllerTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "ChangePassword",
+   "app": "evopreven",
+   "file": "evopreven/userauth/views.py",
+   "line": 345,
+   "bases": [
+    "auth_views.PasswordChangeView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "ChangePasswordDone",
+   "app": "evopreven",
+   "file": "evopreven/userauth/views.py",
+   "line": 331,
+   "bases": [
+    "auth_views.PasswordChangeDoneView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "ChangeRiskMeasuresManagerView",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 2180,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "ChangeView",
+   "app": "evopreven",
+   "file": "evopreven/module/views.py",
+   "line": 452,
+   "bases": [
+    "ControllerTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "CheckWorkerControlView",
+   "app": "evopreven",
+   "file": "evopreven/health/consultation/views.py",
+   "line": 151,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "ChoicesAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/core/views.py",
+   "line": 94,
+   "bases": [
+    "autocomplete.Select2ListView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "ClinicVariables",
+   "app": "evopreven",
+   "file": "evopreven/api_portal/views.py",
+   "line": 367,
+   "bases": [
+    "APIPortalView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "CompaniesForRiskMeasureAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 2857,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "CompanyAndWorkcenterMutualsAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/filiation/views.py",
+   "line": 44,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "CompanyAnnualReportAllDataExcelView",
+   "app": "evopreven",
+   "file": "evopreven/studies/views.py",
+   "line": 161,
+   "bases": [
+    "ControllerView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "CompanyAnnualReportAllDataView",
+   "app": "evopreven",
+   "file": "evopreven/studies/views.py",
+   "line": 136,
+   "bases": [
+    "ControllerTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "CompanyAnnualReportDataView",
+   "app": "evopreven",
+   "file": "evopreven/studies/views.py",
+   "line": 107,
+   "bases": [
+    "ControllerTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "CompanyAnnualReportTablesToPrint",
+   "app": "evopreven",
+   "file": "evopreven/studies/views.py",
+   "line": 169,
+   "bases": [
+    "ControllerView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "ComplementaryTestView",
+   "app": "evopreven",
+   "file": "evopreven/health/procedures/views.py",
+   "line": 16,
+   "bases": [
+    "ControllerView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "ComplementaryTestsActionsView",
+   "app": "evopreven",
+   "file": "evopreven/health/consultation/views.py",
+   "line": 659,
+   "bases": [
+    "TemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "ConfigureForm",
+   "app": "evopreven",
+   "file": "evopreven/form_builder/views.py",
+   "line": 40,
+   "bases": [
+    "ControllerTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "ConfigureLaboratoryView",
+   "app": "evopreven",
+   "file": "evopreven/health/laboratory_test/views.py",
+   "line": 57,
+   "bases": [
+    "ControllerTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "ConfigureProtocolView",
+   "app": "evopreven",
+   "file": "evopreven/health/concepts/views.py",
+   "line": 13,
+   "bases": [
+    "ControllerTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "ConfigureResultsConversionView",
+   "app": "evopreven",
+   "file": "evopreven/health/laboratory_test/views.py",
+   "line": 145,
+   "bases": [
+    "ControllerTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "ConsultationAnamnesisView",
+   "app": "evopreven",
+   "file": "evopreven/health/consultation/views.py",
+   "line": 1908,
+   "bases": [
+    "TemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "ConsultationAptitudeReportConfigurationView",
+   "app": "evopreven",
+   "file": "evopreven/health/consultation/views.py",
+   "line": 1959,
+   "bases": [
+    "TemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "ConsultationConclusionsView",
+   "app": "evopreven",
+   "file": "evopreven/health/consultation/views.py",
+   "line": 824,
+   "bases": [
+    "TemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "ConsultationDocumentAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/health/consultation/views.py",
+   "line": 1575,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "ConsultationExplorationActionsView",
+   "app": "evopreven",
+   "file": "evopreven/health/consultation/views.py",
+   "line": 1319,
+   "bases": [
+    "TemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "ConsultationExplorationsView",
+   "app": "evopreven",
+   "file": "evopreven/health/consultation/views.py",
+   "line": 543,
+   "bases": [
+    "TemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "ConsultationFormsetInlineChangeView",
+   "app": "evopreven",
+   "file": "evopreven/health/consultation/views.py",
+   "line": 441,
+   "bases": [
+    "InlineChangeView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "ConsultationHistoricalExplorationsDataView",
+   "app": "evopreven",
+   "file": "evopreven/health/consultation/views.py",
+   "line": 1060,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "ConsultationHistoricalExplorationsView",
+   "app": "evopreven",
+   "file": "evopreven/health/consultation/views.py",
+   "line": 1137,
+   "bases": [
+    "ModuleTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "ConsultationHistoricalQuestionnairesDataView",
+   "app": "evopreven",
+   "file": "evopreven/health/consultation/views.py",
+   "line": 1178,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "ConsultationHistoricalQuestionnairesView",
+   "app": "evopreven",
+   "file": "evopreven/health/consultation/views.py",
+   "line": 1244,
+   "bases": [
+    "ModuleTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "ConsultationImportJSONView",
+   "app": "evopreven",
+   "file": "evopreven/consultation_import/views.py",
+   "line": 16,
+   "bases": [
+    "ControllerView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "ConsultationLaboratoryTestAssignment",
+   "app": "evopreven",
+   "file": "evopreven/health/consultation/views.py",
+   "line": 1714,
+   "bases": [
+    "TemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "ConsultationReportConfigurationView",
+   "app": "evopreven",
+   "file": "evopreven/health/consultation/views.py",
+   "line": 935,
+   "bases": [
+    "TemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "ConsultationSummaryView",
+   "app": "evopreven",
+   "file": "evopreven/health/consultation/views.py",
+   "line": 1581,
+   "bases": [
+    "ModuleTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "ControllerTemplateView",
+   "app": "evopreven",
+   "file": "evopreven/module/views.py",
+   "line": 96,
+   "bases": [
+    "ControllerView",
+    "ModuleTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "ControllerView",
+   "app": "evopreven",
+   "file": "evopreven/module/views.py",
+   "line": 44,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "CopyRisksView",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 2257,
+   "bases": [
+    "ControllerTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "CreateFromBlueprint",
+   "app": "evopreven",
+   "file": "evopreven/blueprints/views.py",
+   "line": 35,
+   "bases": [
+    "TemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "CreateFromObjView",
+   "app": "evopreven",
+   "file": "evopreven/cloning_objects/views.py",
+   "line": 13,
+   "bases": [
+    "ControllerView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "CreateInfoSheetView",
+   "app": "evopreven",
+   "file": "evopreven/communications/views.py",
+   "line": 30,
+   "bases": [
+    "ControllerView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "CreateView",
+   "app": "evopreven",
+   "file": "evopreven/module/views.py",
+   "line": 404,
+   "bases": [
+    "ControllerTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "CreateWorkerInfoSheetView",
+   "app": "evopreven",
+   "file": "evopreven/communications/views.py",
+   "line": 11,
+   "bases": [
+    "ControllerView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "CrestStatisticsDashboardView",
+   "app": "evopreven",
+   "file": "evopreven/dashboard/views.py",
+   "line": 4133,
+   "bases": [
+    "DashboardTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "CustomAssertionConsumerServiceView",
+   "app": "evopreven",
+   "file": "evopreven/authentication/saml/views.py",
+   "line": 7,
+   "bases": [
+    "AssertionConsumerServiceView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "CustomQueryAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/core/views.py",
+   "line": 222,
+   "bases": [
+    "autocomplete.Select2QuerySetView"
+   ],
+   "doc": "En dependent fields, usar '|' para dividir el custom tag (puede ser cualquier nombre) de la tabla existente."
+  },
+  {
+   "nombre": "DashboardCategorieView",
+   "app": "evopreven",
+   "file": "evopreven/dashboard/views.py",
+   "line": 1776,
+   "bases": [
+    "DashboardTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "DashboardExcel",
+   "app": "evopreven",
+   "file": "evopreven/dashboard/views.py",
+   "line": 3809,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "DashboardManagementIndicatorsView",
+   "app": "evopreven",
+   "file": "evopreven/dashboard/views.py",
+   "line": 1815,
+   "bases": [
+    "DashboardTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "DashboardPanelView",
+   "app": "evopreven",
+   "file": "evopreven/dashboard/views.py",
+   "line": 3065,
+   "bases": [
+    "DashboardTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "DashboardTemplateView",
+   "app": "evopreven",
+   "file": "evopreven/dashboard/views.py",
+   "line": 1319,
+   "bases": [
+    "ModuleTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "DashboardVSManagementIndicatorsView",
+   "app": "evopreven",
+   "file": "evopreven/dashboard/views.py",
+   "line": 2282,
+   "bases": [
+    "DashboardTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "DashboardView",
+   "app": "evopreven",
+   "file": "evopreven/dashboard/views.py",
+   "line": 1750,
+   "bases": [
+    "DashboardTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "DeltaRelapseWorkleavesAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/labor_management/accidents/views.py",
+   "line": 445,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "DerivationsDataView",
+   "app": "evopreven",
+   "file": "evopreven/health/derivations/views.py",
+   "line": 9,
+   "bases": [
+    "ControllerView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "DirectLinks",
+   "app": "evopreven",
+   "file": "evopreven/module/views.py",
+   "line": 624,
+   "bases": [
+    "ControllerView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "DiscardRiskInheritance",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 2669,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "DocumentRelatedEntityAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/health/medical_history/views.py",
+   "line": 77,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "DoubleStructureActionsViews",
+   "app": "evopreven",
+   "file": "evopreven/filiation/views.py",
+   "line": 119,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "DownloadPermissionSetPermissions",
+   "app": "evopreven",
+   "file": "evopreven/userauth/views.py",
+   "line": 419,
+   "bases": [
+    "ControllerView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "DownloadProfilePermissions",
+   "app": "evopreven",
+   "file": "evopreven/userauth/views.py",
+   "line": 397,
+   "bases": [
+    "ControllerView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "DownloadUserPermissions",
+   "app": "evopreven",
+   "file": "evopreven/userauth/views.py",
+   "line": 357,
+   "bases": [
+    "ControllerView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "DraftFormView",
+   "app": "evopreven",
+   "file": "evopreven/form_builder/views.py",
+   "line": 119,
+   "bases": [
+    "ControllerTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "EpidemiologicStudyAllDataExcelView",
+   "app": "evopreven",
+   "file": "evopreven/studies/views.py",
+   "line": 80,
+   "bases": [
+    "ControllerView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "EpidemiologicStudyAllDataView",
+   "app": "evopreven",
+   "file": "evopreven/studies/views.py",
+   "line": 56,
+   "bases": [
+    "ControllerTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "EpidemiologicStudyDataView",
+   "app": "evopreven",
+   "file": "evopreven/studies/views.py",
+   "line": 26,
+   "bases": [
+    "ControllerTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "EpidemiologicStudyTablesToPrint",
+   "app": "evopreven",
+   "file": "evopreven/studies/views.py",
+   "line": 88,
+   "bases": [
+    "ControllerView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "EvaluateStructure",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 304,
+   "bases": [
+    "ControllerView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "EvaluationReportConfigurationView",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 1972,
+   "bases": [
+    "TemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "EvaluationRiskView",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 494,
+   "bases": [
+    "ControllerTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "EvaluationStructureEquipmentUnitAutocomplete",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 2815,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "EvaluationStructureWorkspaceAutocomplete",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 2728,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "EvaluationStructureWorkstationAutocomplete",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 2772,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "EvaluationTabView",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 2483,
+   "bases": [
+    "ControllerTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "ExecuteMeasuresView",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 2162,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "ExportAPIView",
+   "app": "evopreven",
+   "file": "evopreven/import_export_data/views.py",
+   "line": 309,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "ExportModelView",
+   "app": "evopreven",
+   "file": "evopreven/import_export_data/views.py",
+   "line": 157,
+   "bases": [
+    "ControllerTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "ExportTableView",
+   "app": "evopreven",
+   "file": "evopreven/module/views.py",
+   "line": 651,
+   "bases": [
+    "ControllerView"
+   ],
+   "doc": "Exportacion desde las tablas datatables frontend "
+  },
+  {
+   "nombre": "ExtManagerQueryAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 212,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "ExternalCompanyAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/filiation/views.py",
+   "line": 36,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "ExtractionsView",
+   "app": "evopreven",
+   "file": "evopreven/module/views.py",
+   "line": 774,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "FieldChoicesAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/form_builder/views.py",
+   "line": 16,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "FiliationTreeCompanyAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/filiation/views.py",
+   "line": 52,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "FiliationTreeLocalizerAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/filiation/views.py",
+   "line": 77,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "FiliationTreePositionAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/filiation/views.py",
+   "line": 98,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "FillFieldsRiskMeasure",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 2122,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "FilteredAnalyticalTestsAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/dashboard/views.py",
+   "line": 4322,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "FinishEvaluationItems",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 1163,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "FlowchartIncident",
+   "app": "evopreven",
+   "file": "evopreven/labor_management/accidents/views.py",
+   "line": 360,
+   "bases": [
+    "ControllerView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "GenerateConsultationImportFromXmlView",
+   "app": "evopreven",
+   "file": "evopreven/consultation_import/views.py",
+   "line": 75,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "GenerateConsultationImportMatchingExcelView",
+   "app": "evopreven",
+   "file": "evopreven/health/entities/views.py",
+   "line": 475,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "GenerateDeltaRelapseXml",
+   "app": "evopreven",
+   "file": "evopreven/labor_management/accidents/views.py",
+   "line": 453,
+   "bases": [
+    "ControllerView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "GenerateDeltaReportXml",
+   "app": "evopreven",
+   "file": "evopreven/labor_management/accidents/views.py",
+   "line": 84,
+   "bases": [
+    "ControllerView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "GenerateNoWorkleaveDeltaReportXml",
+   "app": "evopreven",
+   "file": "evopreven/labor_management/accidents/views.py",
+   "line": 25,
+   "bases": [
+    "ControllerView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "GenerateSelfInsurerReportExcel",
+   "app": "evopreven",
+   "file": "evopreven/labor_management/accidents/views.py",
+   "line": 410,
+   "bases": [
+    "ControllerView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "GenerateTokenView",
+   "app": "evopreven",
+   "file": "evopreven/import_export_data/views.py",
+   "line": 571,
+   "bases": [
+    "View"
+   ],
+   "doc": "Vista para generar/regenerar un token para un APIToken existente."
+  },
+  {
+   "nombre": "GenerateWorkleaveEndDeltaReportXml",
+   "app": "evopreven",
+   "file": "evopreven/labor_management/accidents/views.py",
+   "line": 270,
+   "bases": [
+    "ControllerView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "GeneratedReportView",
+   "app": "evopreven",
+   "file": "evopreven/reporting/views.py",
+   "line": 241,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "GetAnalyticalTestDetails",
+   "app": "evopreven",
+   "file": "evopreven/dashboard/views.py",
+   "line": 3981,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "GetBlueprintText",
+   "app": "evopreven",
+   "file": "evopreven/blueprints/views.py",
+   "line": 25,
+   "bases": [
+    "ControllerTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "GetCalendarEventsView",
+   "app": "evopreven",
+   "file": "evopreven/health/consultation/views.py",
+   "line": 1888,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "GetCampaignVaccinationSideFormView",
+   "app": "evopreven",
+   "file": "evopreven/campaigns/views.py",
+   "line": 59,
+   "bases": [
+    "TemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "GetDatatablesDataView",
+   "app": "evopreven",
+   "file": "evopreven/module/views.py",
+   "line": 292,
+   "bases": [
+    "ControllerView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "GetDatatablesStatisticsView",
+   "app": "evopreven",
+   "file": "evopreven/module/views.py",
+   "line": 318,
+   "bases": [
+    "ControllerView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "GetMeasureDescription",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 34,
+   "bases": [
+    "ControllerView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "GetObjDescription",
+   "app": "evopreven",
+   "file": "evopreven/module/views.py",
+   "line": 799,
+   "bases": [
+    "ControllerView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "GetPublicKey",
+   "app": "evopreven",
+   "file": "evopreven/core/views.py",
+   "line": 14,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "GetStrView",
+   "app": "evopreven",
+   "file": "evopreven/module/views.py",
+   "line": 617,
+   "bases": [
+    "ControllerView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "GetUserNotificationsView",
+   "app": "evopreven",
+   "file": "evopreven/module/views.py",
+   "line": 780,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "GridView",
+   "app": "evopreven",
+   "file": "evopreven/module/views.py",
+   "line": 130,
+   "bases": [
+    "ModuleTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "HealthExamConsultationAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/labor_management/accidents/views.py",
+   "line": 405,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "HealthQuestionnairesAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/health/medical_history/views.py",
+   "line": 292,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "HistoricalAudit",
+   "app": "evopreven",
+   "file": "evopreven/historical_audit/views.py",
+   "line": 29,
+   "bases": [
+    "ControllerView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "HistoricalAuditTable",
+   "app": "evopreven",
+   "file": "evopreven/historical_audit/views.py",
+   "line": 89,
+   "bases": [
+    "ControllerView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "HistoricalComments",
+   "app": "evopreven",
+   "file": "evopreven/health/medical_history/views.py",
+   "line": 146,
+   "bases": [
+    "TemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "HistoricalDocumentsView",
+   "app": "evopreven",
+   "file": "evopreven/health/medical_history/views.py",
+   "line": 274,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "HistoricalVaccinesDataView",
+   "app": "evopreven",
+   "file": "evopreven/health/consultation/views.py",
+   "line": 515,
+   "bases": [
+    "TemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "ISOAuditVisitPreventionItemsQueryAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 1670,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "ISOQuestionnaireQueryAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 1560,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "ImportAPIView",
+   "app": "evopreven",
+   "file": "evopreven/import_export_data/views.py",
+   "line": 211,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "ImportModelView",
+   "app": "evopreven",
+   "file": "evopreven/import_export_data/views.py",
+   "line": 62,
+   "bases": [
+    "ControllerTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "ImportStatusAPIView",
+   "app": "evopreven",
+   "file": "evopreven/import_export_data/views.py",
+   "line": 607,
+   "bases": [
+    "View"
+   ],
+   "doc": "Endpoint GET para consultar el status de una carga por ID personalizado"
+  },
+  {
+   "nombre": "IncidentReportView",
+   "app": "evopreven",
+   "file": "evopreven/labor_management/accidents/views.py",
+   "line": 674,
+   "bases": [
+    "TemplateView"
+   ],
+   "doc": "Vista para generar, subir y ver informe de incidente con configurador"
+  },
+  {
+   "nombre": "IncidentRiskInstanceQueryAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 1653,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "IncidentStructureView",
+   "app": "evopreven",
+   "file": "evopreven/labor_management/accidents/views.py",
+   "line": 333,
+   "bases": [
+    "ControllerView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "IncomingPortalNotificationtView",
+   "app": "evopreven",
+   "file": "evopreven/api_portal/views.py",
+   "line": 828,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "IndexView",
+   "app": "evopreven",
+   "file": "evopreven/module/views.py",
+   "line": 100,
+   "bases": [
+    "ModuleTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "InheritedRiskMeasuresView",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 1096,
+   "bases": [
+    "ControllerTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "InheritedWorkerMeasuresView",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 1131,
+   "bases": [
+    "ControllerTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "InlineChangeView",
+   "app": "evopreven",
+   "file": "evopreven/module/views.py",
+   "line": 532,
+   "bases": [
+    "ChangeView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "InlineCreateView",
+   "app": "evopreven",
+   "file": "evopreven/module/views.py",
+   "line": 529,
+   "bases": [
+    "CreateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "InlineListView",
+   "app": "evopreven",
+   "file": "evopreven/module/views.py",
+   "line": 570,
+   "bases": [
+    "ListView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "InlineUploadFilesView",
+   "app": "evopreven",
+   "file": "evopreven/module/views.py",
+   "line": 592,
+   "bases": [
+    "ControllerTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "InstanceCollectorDeletion",
+   "app": "evopreven",
+   "file": "evopreven/module/views.py",
+   "line": 707,
+   "bases": [
+    "ControllerView"
+   ],
+   "doc": "Vista que se encarga de generar el jstree con los objetos que se eliminarian al eliminar la lista de objetos objs[]"
+  },
+  {
+   "nombre": "IsoAuditVisitItemView",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 2415,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "LaboratoryTestAssignment",
+   "app": "evopreven",
+   "file": "evopreven/health/consultation/views.py",
+   "line": 1681,
+   "bases": [
+    "TemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "LaboratoryTestView",
+   "app": "evopreven",
+   "file": "evopreven/health/laboratory_test/views.py",
+   "line": 14,
+   "bases": [
+    "ControllerView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "LastRiskInstanceQueryAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 1632,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "ListView",
+   "app": "evopreven",
+   "file": "evopreven/module/views.py",
+   "line": 147,
+   "bases": [
+    "ControllerTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "LoginView",
+   "app": "evopreven",
+   "file": "evopreven/userauth/views.py",
+   "line": 299,
+   "bases": [
+    "auth_views.LoginView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "LogsDataView",
+   "app": "evopreven",
+   "file": "evopreven/action_log/views.py",
+   "line": 73,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "LogsView",
+   "app": "evopreven",
+   "file": "evopreven/action_log/views.py",
+   "line": 17,
+   "bases": [
+    "ModuleTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "MainView",
+   "app": "evopreven",
+   "file": "evopreven/module/views.py",
+   "line": 127,
+   "bases": [
+    "ModuleTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "ManageRiskInherence",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 1187,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "MassiveVaccinationView",
+   "app": "evopreven",
+   "file": "evopreven/campaigns/views.py",
+   "line": 301,
+   "bases": [
+    "TemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "MeasureQueryAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 1588,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "MeasuresReportConfigurationView",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 2094,
+   "bases": [
+    "TemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "MediaView",
+   "app": "evopreven",
+   "file": "evopreven/core/views.py",
+   "line": 31,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "MedicAgendaChangeEventView",
+   "app": "evopreven",
+   "file": "evopreven/health/entities/views.py",
+   "line": 405,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "MedicAgendaConfigurationView",
+   "app": "evopreven",
+   "file": "evopreven/health/entities/views.py",
+   "line": 15,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "MedicAgendaView",
+   "app": "evopreven",
+   "file": "evopreven/health/entities/views.py",
+   "line": 44,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "MedicalHistoryAlertView",
+   "app": "evopreven",
+   "file": "evopreven/health/medical_history/views.py",
+   "line": 317,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "MedicalHistoryPortalActions",
+   "app": "evopreven",
+   "file": "evopreven/health/medical_history/views.py",
+   "line": 338,
+   "bases": [
+    "View"
+   ],
+   "doc": "Acción masiva de \"Notificar visitas\" desde la pantalla Histórico Clínico Laboral."
+  },
+  {
+   "nombre": "MedicalHistorySerologies",
+   "app": "evopreven",
+   "file": "evopreven/health/medical_history/views.py",
+   "line": 183,
+   "bases": [
+    "TemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "MedicalHistorySummaryLinks",
+   "app": "evopreven",
+   "file": "evopreven/health/medical_history/views.py",
+   "line": 214,
+   "bases": [
+    "TemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "MedicalHistoryVaccination",
+   "app": "evopreven",
+   "file": "evopreven/health/medical_history/views.py",
+   "line": 85,
+   "bases": [
+    "TemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "ModuleTemplateView",
+   "app": "evopreven",
+   "file": "evopreven/module/views.py",
+   "line": 31,
+   "bases": [
+    "TemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "MultiSignView",
+   "app": "evopreven",
+   "file": "evopreven/websign/views.py",
+   "line": 96,
+   "bases": [
+    "ModuleTemplateView"
+   ],
+   "doc": "Page where you can see what files you have been assigned to sign,"
+  },
+  {
+   "nombre": "MultipleTestResultsView",
+   "app": "evopreven",
+   "file": "evopreven/dashboard/views.py",
+   "line": 3996,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "NecessaryIPESAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/equipment/views.py",
+   "line": 5,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "NewAssistantChatView",
+   "app": "evopreven",
+   "file": "evopreven/agents/views.py",
+   "line": 30,
+   "bases": [
+    "TemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "NewEvaluationView",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 785,
+   "bases": [
+    "TemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "NewRecruitsView",
+   "app": "evopreven",
+   "file": "evopreven/health/consultation/views.py",
+   "line": 1769,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "NoExternalCompanyAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/filiation/views.py",
+   "line": 40,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "NoProfessionalDiseaseAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/labor_management/accidents/views.py",
+   "line": 322,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "OpenRoleAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/structure/views.py",
+   "line": 168,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "OpenWorkstationAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/structure/views.py",
+   "line": 154,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "OpenedAccidentsResearchView",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 1434,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "OrderWorkleavesAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/labor_management/accidents/views.py",
+   "line": 328,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "PRLHistoryView",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 1550,
+   "bases": [
+    "ModuleTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "PRLManagementView",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 2144,
+   "bases": [
+    "ModuleTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "PRLSummaryView",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 1249,
+   "bases": [
+    "ModuleTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "PathView",
+   "app": "evopreven",
+   "file": "evopreven/module/views.py",
+   "line": 106,
+   "bases": [
+    "ModuleTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "PendingConsultationsView",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 1527,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "PendingIPEsView",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 1463,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "PendingTrainingsView",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 1487,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "PortalDeliveriesStatusView",
+   "app": "evopreven",
+   "file": "evopreven/module/views.py",
+   "line": 118,
+   "bases": [
+    "ModuleTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "PortalMedicAgendaConfigurationView",
+   "app": "evopreven",
+   "file": "evopreven/api_portal/views.py",
+   "line": 1073,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "PortalMedicAgendaView",
+   "app": "evopreven",
+   "file": "evopreven/api_portal/views.py",
+   "line": 1099,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "PortalNotificationDataView",
+   "app": "evopreven",
+   "file": "evopreven/api_portal/views.py",
+   "line": 600,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "PortalNotificationView",
+   "app": "evopreven",
+   "file": "evopreven/api_portal/views.py",
+   "line": 715,
+   "bases": [
+    "ModuleTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "PossibleVaccineDosesAutoCompleteView",
+   "app": "evopreven",
+   "file": "evopreven/health/vaccines/views.py",
+   "line": 25,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "PossibleVaccinesAutoCompleteView",
+   "app": "evopreven",
+   "file": "evopreven/health/vaccines/views.py",
+   "line": 13,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "PossibleWorkcenterAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/structure/views.py",
+   "line": 125,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "PossibleWorkstationAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/structure/views.py",
+   "line": 102,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "PrescriptionBookAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/health/procedures/views.py",
+   "line": 120,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "PrescriptionsListOfficialExcel",
+   "app": "evopreven",
+   "file": "evopreven/health/procedures/views.py",
+   "line": 51,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "PreventionTreeCompanyAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/structure/views.py",
+   "line": 560,
+   "bases": [
+    "PreventionTreeAutocompleteMixin",
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "PreventionTreeEquipmentUnitAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/structure/views.py",
+   "line": 711,
+   "bases": [
+    "PreventionTreeAutocompleteMixin",
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "PreventionTreeWorkcenterAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/structure/views.py",
+   "line": 599,
+   "bases": [
+    "PreventionTreeAutocompleteMixin",
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "PreventionTreeWorkspaceAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/structure/views.py",
+   "line": 648,
+   "bases": [
+    "PreventionTreeAutocompleteMixin",
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "PreventionTreeWorkstationAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/structure/views.py",
+   "line": 687,
+   "bases": [
+    "PreventionTreeAutocompleteMixin",
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "PreviewDocumentDraft",
+   "app": "evopreven",
+   "file": "evopreven/documents/views.py",
+   "line": 6,
+   "bases": [
+    "DetailView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "QueryAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/core/views.py",
+   "line": 107,
+   "bases": [
+    "autocomplete.Select2QuerySetView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "QuestionnaireAnswerView",
+   "app": "evopreven",
+   "file": "evopreven/questionnaires/views.py",
+   "line": 34,
+   "bases": [
+    "ControllerTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "QuestionnaireDataMining",
+   "app": "evopreven",
+   "file": "evopreven/questionnaires/views.py",
+   "line": 495,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "QuestionnaireDataMiningDashboardView",
+   "app": "evopreven",
+   "file": "evopreven/dashboard/views.py",
+   "line": 3965,
+   "bases": [
+    "DashboardTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "QuestionnaireMediaView",
+   "app": "evopreven",
+   "file": "evopreven/questionnaires/views.py",
+   "line": 568,
+   "bases": [
+    "View"
+   ],
+   "doc": "View to serve questionnaire media files with media_id lookup"
+  },
+  {
+   "nombre": "RejectAppointmentView",
+   "app": "evopreven",
+   "file": "evopreven/api_portal/views.py",
+   "line": 341,
+   "bases": [
+    "APIPortalView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "RemoveConsultationReportConfigurationView",
+   "app": "evopreven",
+   "file": "evopreven/health/consultation/views.py",
+   "line": 1046,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "RemoveEvaluationReportConfigurationView",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 2075,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "RemoveIncidentReportConfigurationView",
+   "app": "evopreven",
+   "file": "evopreven/labor_management/accidents/views.py",
+   "line": 739,
+   "bases": [
+    "View"
+   ],
+   "doc": "Vista para eliminar configuración de informe de incidente"
+  },
+  {
+   "nombre": "RemoveSensitivityReportConfigurationView",
+   "app": "evopreven",
+   "file": "evopreven/health/antecedents/views.py",
+   "line": 112,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "RenderForm",
+   "app": "evopreven",
+   "file": "evopreven/form_builder/views.py",
+   "line": 85,
+   "bases": [
+    "ControllerTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "ReportInBackgroundView",
+   "app": "evopreven",
+   "file": "evopreven/reporting/views.py",
+   "line": 214,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "ReportView",
+   "app": "evopreven",
+   "file": "evopreven/api_portal/views.py",
+   "line": 65,
+   "bases": [
+    "APIPortalView"
+   ],
+   "doc": "api_portal/request_report/<str:identif_document>/<str:report>/<int:pk>"
+  },
+  {
+   "nombre": "ReportView",
+   "app": "evopreven",
+   "file": "evopreven/reporting/views.py",
+   "line": 131,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "RequestPRLReportListView",
+   "app": "evopreven",
+   "file": "evopreven/api_portal/views.py",
+   "line": 894,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "RequestPendingWorkstationsView",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 1407,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "ResetPassword",
+   "app": "evopreven",
+   "file": "evopreven/userauth/views.py",
+   "line": 323,
+   "bases": [
+    "BasePasswordResetView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "RiskInstancesReportConfigurationTemplateView",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 2466,
+   "bases": [
+    "ModuleTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "RiskInstancesReportConfigurationView",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 2429,
+   "bases": [
+    "ControllerView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "RiskMeasuresReportConfigurationView",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 2539,
+   "bases": [
+    "ControllerView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "RiskVariableAnswerChoicesAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 205,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "RiskVariableMeasurementView",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 224,
+   "bases": [
+    "ControllerView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "RisksCustomTabView",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 2643,
+   "bases": [
+    "ControllerTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "SaveConsultationReportConfigurationView",
+   "app": "evopreven",
+   "file": "evopreven/health/consultation/views.py",
+   "line": 996,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "SaveCustomPermissions",
+   "app": "evopreven",
+   "file": "evopreven/module/views.py",
+   "line": 812,
+   "bases": [
+    "View"
+   ],
+   "doc": "This is API for the copy/paste inline view in settings "
+  },
+  {
+   "nombre": "SaveEvaluationReportConfigurationView",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 2004,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "SaveIncidentReportConfigurationView",
+   "app": "evopreven",
+   "file": "evopreven/labor_management/accidents/views.py",
+   "line": 700,
+   "bases": [
+    "View"
+   ],
+   "doc": "Vista para guardar configuración de informe de incidente"
+  },
+  {
+   "nombre": "SavePRLPlanningData",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 1601,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "SaveSensitivityReportConfigurationView",
+   "app": "evopreven",
+   "file": "evopreven/health/antecedents/views.py",
+   "line": 55,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "ScoringConfigView",
+   "app": "evopreven",
+   "file": "evopreven/form_builder/views.py",
+   "line": 214,
+   "bases": [
+    "View"
+   ],
+   "doc": "Vista para configurar el scoring de un formulario autoevaluado."
+  },
+  {
+   "nombre": "ScoringPreviewView",
+   "app": "evopreven",
+   "file": "evopreven/form_builder/views.py",
+   "line": 265,
+   "bases": [
+    "View"
+   ],
+   "doc": "Calcula scoring en memoria para previsualización (sin guardar)."
+  },
+  {
+   "nombre": "SendConsultationReport",
+   "app": "evopreven",
+   "file": "evopreven/health/consultation/views.py",
+   "line": 1671,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "SensitivityReportConfigurationView",
+   "app": "evopreven",
+   "file": "evopreven/health/antecedents/views.py",
+   "line": 24,
+   "bases": [
+    "TemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "SetAudiometryView",
+   "app": "evopreven",
+   "file": "evopreven/health/consultation/views.py",
+   "line": 838,
+   "bases": [
+    "ControllerTemplateView"
+   ],
+   "doc": "Vista para configurar las frecuencias a responder de una audiometria "
+  },
+  {
+   "nombre": "SetDefaultConsultationReportConfigurationView",
+   "app": "evopreven",
+   "file": "evopreven/health/consultation/views.py",
+   "line": 1035,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "SetDefaultEvaluationReportConfigurationView",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 2060,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "SetDefaultIncidentReportConfigurationView",
+   "app": "evopreven",
+   "file": "evopreven/labor_management/accidents/views.py",
+   "line": 726,
+   "bases": [
+    "View"
+   ],
+   "doc": "Vista para establecer configuración por defecto de informe de incidente"
+  },
+  {
+   "nombre": "SetDefaultSensitivityReportConfigurationView",
+   "app": "evopreven",
+   "file": "evopreven/health/antecedents/views.py",
+   "line": 99,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "SetSomatometryView",
+   "app": "evopreven",
+   "file": "evopreven/health/consultation/views.py",
+   "line": 186,
+   "bases": [
+    "ControllerTemplateView"
+   ],
+   "doc": "Vista para configurar las somatometrias a responder de una Visita "
+  },
+  {
+   "nombre": "SharedPropertyView",
+   "app": "evopreven",
+   "file": "evopreven/userauth/views.py",
+   "line": 236,
+   "bases": [
+    "ControllerTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "SharedRecordsView",
+   "app": "evopreven",
+   "file": "evopreven/userauth/views.py",
+   "line": 191,
+   "bases": [
+    "ControllerView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "SideChangeView",
+   "app": "evopreven",
+   "file": "evopreven/module/views.py",
+   "line": 493,
+   "bases": [
+    "ControllerTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "SignDocument",
+   "app": "evopreven",
+   "file": "evopreven/health/medical_history/views.py",
+   "line": 47,
+   "bases": [
+    "DetailView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "SignView",
+   "app": "evopreven",
+   "file": "evopreven/websign/views.py",
+   "line": 28,
+   "bases": [
+    "TemplateView"
+   ],
+   "doc": "Page where you can sign a document for a MultiSign object"
+  },
+  {
+   "nombre": "SingleConsultationImportLogTemplateView",
+   "app": "evopreven",
+   "file": "evopreven/consultation_import/views.py",
+   "line": 89,
+   "bases": [
+    "TemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "SomatometryActionsView",
+   "app": "evopreven",
+   "file": "evopreven/health/consultation/views.py",
+   "line": 406,
+   "bases": [
+    "TemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "SomatometryAnswerChoicesAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/health/concepts/views.py",
+   "line": 231,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "StatisticsValorationsView",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 2573,
+   "bases": [
+    "ControllerView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "StockRelatedToWorkcenterAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/equipment/views.py",
+   "line": 20,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "StructureTreeDataView",
+   "app": "evopreven",
+   "file": "evopreven/trees/views.py",
+   "line": 92,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "StructureTreeView",
+   "app": "evopreven",
+   "file": "evopreven/trees/views.py",
+   "line": 21,
+   "bases": [
+    "ModuleTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "TDSubstanceCardView",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 2655,
+   "bases": [
+    "ControllerTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "TablePermissionView",
+   "app": "evopreven",
+   "file": "evopreven/userauth/views.py",
+   "line": 38,
+   "bases": [
+    "ControllerView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "TagAutocomplete",
+   "app": "evopreven",
+   "file": "evopreven/core/views.py",
+   "line": 186,
+   "bases": [
+    "autocomplete.Select2QuerySetView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "TargetDiseasesForVaccineView",
+   "app": "evopreven",
+   "file": "evopreven/health/vaccines/views.py",
+   "line": 45,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "TestResultsView",
+   "app": "evopreven",
+   "file": "evopreven/dashboard/views.py",
+   "line": 3644,
+   "bases": [
+    "TemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "TrainingSessionAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/courses/views.py",
+   "line": 11,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "TransferRiskMeasuresView",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 2221,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "TreeApiView",
+   "app": "evopreven",
+   "file": "evopreven/trees/views.py",
+   "line": 86,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "TreeMenuView",
+   "app": "evopreven",
+   "file": "evopreven/trees/views.py",
+   "line": 106,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "UpdateSigneeName",
+   "app": "evopreven",
+   "file": "evopreven/labor_management/accidents/views.py",
+   "line": 418,
+   "bases": [
+    "ControllerView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "UploadSignedAccidentReportView",
+   "app": "evopreven",
+   "file": "evopreven/labor_management/accidents/views.py",
+   "line": 753,
+   "bases": [
+    "View"
+   ],
+   "doc": "Vista para subir informe de accidente firmado"
+  },
+  {
+   "nombre": "UploadSignedAptitudeReportView",
+   "app": "evopreven",
+   "file": "evopreven/health/consultation/views.py",
+   "line": 2087,
+   "bases": [
+    "View"
+   ],
+   "doc": "Vista para subir informe de aptitud firmado manualmente"
+  },
+  {
+   "nombre": "UploadSignedConsultationReportView",
+   "app": "evopreven",
+   "file": "evopreven/health/consultation/views.py",
+   "line": 1990,
+   "bases": [
+    "View"
+   ],
+   "doc": "Vista para subir informe firmado manualmente"
+  },
+  {
+   "nombre": "UploadSignedEvaluationReportView",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 2886,
+   "bases": [
+    "View"
+   ],
+   "doc": "Vista para subir informe de evaluación firmado manualmente"
+  },
+  {
+   "nombre": "UploadSignedIncidentReportView",
+   "app": "evopreven",
+   "file": "evopreven/labor_management/accidents/views.py",
+   "line": 860,
+   "bases": [
+    "View"
+   ],
+   "doc": "Vista para subir informe de incidente firmado"
+  },
+  {
+   "nombre": "UploadSignedMeasuresReportView",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 2992,
+   "bases": [
+    "View"
+   ],
+   "doc": "Vista para subir informe de planificación/medidas firmado manualmente"
+  },
+  {
+   "nombre": "ValidateConsultationImportMatchingExcelView",
+   "app": "evopreven",
+   "file": "evopreven/health/entities/views.py",
+   "line": 485,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "ValidateConsultationImportXmlView",
+   "app": "evopreven",
+   "file": "evopreven/consultation_import/views.py",
+   "line": 27,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "ValorationsHistoryView",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 1240,
+   "bases": [
+    "ControllerTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "ViewGeneratedReportView",
+   "app": "evopreven",
+   "file": "evopreven/reporting/views.py",
+   "line": 255,
+   "bases": [
+    "View"
+   ],
+   "doc": "Generic view to display generated report files"
+  },
+  {
+   "nombre": "ViewRiskMeasuresReportView",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 2597,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "ViewUploadedAccidentReportView",
+   "app": "evopreven",
+   "file": "evopreven/labor_management/accidents/views.py",
+   "line": 809,
+   "bases": [
+    "View"
+   ],
+   "doc": "Vista para ver el informe de accidente subido"
+  },
+  {
+   "nombre": "ViewUploadedAptitudeReportView",
+   "app": "evopreven",
+   "file": "evopreven/health/consultation/views.py",
+   "line": 2146,
+   "bases": [
+    "View"
+   ],
+   "doc": "Vista para ver el informe de aptitud subido"
+  },
+  {
+   "nombre": "ViewUploadedConsultationReportView",
+   "app": "evopreven",
+   "file": "evopreven/health/consultation/views.py",
+   "line": 2049,
+   "bases": [
+    "View"
+   ],
+   "doc": "Vista para ver el informe subido"
+  },
+  {
+   "nombre": "ViewUploadedEvaluationReportView",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 2940,
+   "bases": [
+    "View"
+   ],
+   "doc": "Vista para ver el informe de evaluación subido"
+  },
+  {
+   "nombre": "ViewUploadedIncidentReportView",
+   "app": "evopreven",
+   "file": "evopreven/labor_management/accidents/views.py",
+   "line": 916,
+   "bases": [
+    "View"
+   ],
+   "doc": "Vista para ver el informe de incidente subido"
+  },
+  {
+   "nombre": "ViewUploadedMeasuresReportView",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 3046,
+   "bases": [
+    "View"
+   ],
+   "doc": "Vista para ver el informe de planificación/medidas subido"
+  },
+  {
+   "nombre": "WebSignTemplateView",
+   "app": "evopreven",
+   "file": "evopreven/websign/views.py",
+   "line": 158,
+   "bases": [
+    "ModuleTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "WebsignView",
+   "app": "evopreven",
+   "file": "evopreven/websign/views.py",
+   "line": 152,
+   "bases": [
+    "ModuleTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "WebsignViewSpecific",
+   "app": "evopreven",
+   "file": "evopreven/websign/views.py",
+   "line": 304,
+   "bases": [
+    "ModuleTemplateView"
+   ],
+   "doc": "Websign API for signing specific document types"
+  },
+  {
+   "nombre": "WorkcenterForConsultationAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/health/consultation/views.py",
+   "line": 2182,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "WorkcentersAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/structure/views.py",
+   "line": 18,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "WorkcentersFromActivePositionPeriodsAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/structure/views.py",
+   "line": 144,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "WorkerAlertView",
+   "app": "evopreven",
+   "file": "evopreven/filiation/views.py",
+   "line": 302,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "WorkerPortalActions",
+   "app": "evopreven",
+   "file": "evopreven/filiation/views.py",
+   "line": 154,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "WorkerRisksView",
+   "app": "evopreven",
+   "file": "evopreven/filiation/views.py",
+   "line": 239,
+   "bases": [
+    "ControllerTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "WorkerTDSControlView",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 49,
+   "bases": [
+    "ControllerTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "WorkerTasksQueryAutocommplete",
+   "app": "evopreven",
+   "file": "evopreven/health/antecedents/views.py",
+   "line": 126,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "WorkerTasksView",
+   "app": "evopreven",
+   "file": "evopreven/filiation/views.py",
+   "line": 266,
+   "bases": [
+    "ControllerTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "WorkerUserCreation",
+   "app": "evopreven",
+   "file": "evopreven/filiation/views.py",
+   "line": 221,
+   "bases": [
+    "View"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "WorkerViewSet",
+   "app": "evopreven",
+   "file": "evopreven/api_portal/views.py",
+   "line": 56,
+   "bases": [
+    "viewsets.ModelViewSet"
+   ],
+   "doc": "API endpoint that allows users to be viewed or edited."
+  },
+  {
+   "nombre": "WorkspaceAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/structure/views.py",
+   "line": 92,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "WorkspaceChildrenAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/structure/views.py",
+   "line": 64,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "WorkspaceCodeAndParentAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/structure/views.py",
+   "line": 530,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "WorkspaceTDSControlView",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 177,
+   "bases": [
+    "ControllerTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "WorkstationTDSControlView",
+   "app": "evopreven",
+   "file": "evopreven/risks_management/views.py",
+   "line": 189,
+   "bases": [
+    "ControllerTemplateView"
+   ],
+   "doc": ""
+  },
+  {
+   "nombre": "WorkstationWithWorkspaceAutocompleteView",
+   "app": "evopreven",
+   "file": "evopreven/filiation/views.py",
+   "line": 294,
+   "bases": [
+    "QueryAutocompleteView"
+   ],
+   "doc": ""
+  }
+ ],
+ "tareas": [
+  {
+   "nombre": "create_historical_record",
+   "app": "evopreven",
+   "file": "evopreven/core/models.py",
+   "line": 108,
+   "doc": ""
+  },
+  {
+   "nombre": "create_worker_portal_users",
+   "app": "evopreven",
+   "file": "evopreven/api_portal/tasks.py",
+   "line": 14,
+   "doc": ""
+  },
+  {
+   "nombre": "create_worker_sheet_report",
+   "app": "evopreven",
+   "file": "evopreven/communications/tasks.py",
+   "line": 5,
+   "doc": ""
+  },
+  {
+   "nombre": "create_worker_users",
+   "app": "evopreven",
+   "file": "evopreven/userauth/tasks.py",
+   "line": 17,
+   "doc": ""
+  },
+  {
+   "nombre": "excel_all_company_annual_reports",
+   "app": "evopreven",
+   "file": "evopreven/studies/tasks.py",
+   "line": 177,
+   "doc": ""
+  },
+  {
+   "nombre": "excel_all_epidemiologic_studies",
+   "app": "evopreven",
+   "file": "evopreven/studies/tasks.py",
+   "line": 48,
+   "doc": ""
+  },
+  {
+   "nombre": "excel_self_insurer_reports",
+   "app": "evopreven",
+   "file": "evopreven/labor_management/accidents/tasks.py",
+   "line": 25,
+   "doc": ""
+  },
+  {
+   "nombre": "export_dashboard_excel",
+   "app": "evopreven",
+   "file": "evopreven/dashboard/tasks.py",
+   "line": 88,
+   "doc": ""
+  },
+  {
+   "nombre": "export_logs",
+   "app": "evopreven",
+   "file": "evopreven/action_log/utils.py",
+   "line": 30,
+   "doc": ""
+  },
+  {
+   "nombre": "export_logs",
+   "app": "evopreven",
+   "file": "evopreven/historical_audit/utils.py",
+   "line": 19,
+   "doc": ""
+  },
+  {
+   "nombre": "export_prescriptions_list_official_excel",
+   "app": "evopreven",
+   "file": "evopreven/health/procedures/tasks.py",
+   "line": 15,
+   "doc": ""
+  },
+  {
+   "nombre": "export_questionnaire",
+   "app": "evopreven",
+   "file": "evopreven/questionnaires/tasks.py",
+   "line": 257,
+   "doc": ""
+  },
+  {
+   "nombre": "export_table",
+   "app": "evopreven",
+   "file": "evopreven/module/utils.py",
+   "line": 39,
+   "doc": ""
+  },
+  {
+   "nombre": "generate_document_pdf",
+   "app": "evopreven",
+   "file": "evopreven/health/medical_history/views.py",
+   "line": 29,
+   "doc": ""
+  },
+  {
+   "nombre": "generate_lazy_report_task",
+   "app": "evopreven",
+   "file": "evopreven/reporting/tasks.py",
+   "line": 133,
+   "doc": ""
+  },
+  {
+   "nombre": "historical_documents_task",
+   "app": "evopreven",
+   "file": "evopreven/health/medical_history/tasks.py",
+   "line": 26,
+   "doc": ""
+  },
+  {
+   "nombre": "import_analytics_task",
+   "app": "evopreven",
+   "file": "evopreven/health/laboratory_test/tasks.py",
+   "line": 31,
+   "doc": ""
+  },
+  {
+   "nombre": "new_generate_lazy_report",
+   "app": "evopreven",
+   "file": "evopreven/reporting/tasks.py",
+   "line": 25,
+   "doc": ""
+  },
+  {
+   "nombre": "process_api_files",
+   "app": "evopreven",
+   "file": "evopreven/import_export_data/tasks.py",
+   "line": 61,
+   "doc": ""
+  },
+  {
+   "nombre": "rescore_questionnaire",
+   "app": "evopreven",
+   "file": "evopreven/questionnaires/tasks.py",
+   "line": 380,
+   "doc": "Re-calcula scoring para todas las respuestas de un cuestionario."
+  },
+  {
+   "nombre": "resend_email_portal_users",
+   "app": "evopreven",
+   "file": "evopreven/api_portal/tasks.py",
+   "line": 49,
+   "doc": ""
+  },
+  {
+   "nombre": "send_consultation_report_zip",
+   "app": "evopreven",
+   "file": "evopreven/health/consultation/utils.py",
+   "line": 198,
+   "doc": ""
+  },
+  {
+   "nombre": "send_push_notifications_to_worker_portal",
+   "app": "evopreven",
+   "file": "evopreven/api_portal/tasks.py",
+   "line": 78,
+   "doc": ""
+  },
+  {
+   "nombre": "update_all_company_annual_reports",
+   "app": "evopreven",
+   "file": "evopreven/studies/tasks.py",
+   "line": 156,
+   "doc": ""
+  },
+  {
+   "nombre": "update_all_epidemiologic_studies",
+   "app": "evopreven",
+   "file": "evopreven/studies/tasks.py",
+   "line": 24,
+   "doc": ""
+  },
+  {
+   "nombre": "update_vaccination_schedules",
+   "app": "evopreven",
+   "file": "evopreven/health/vaccines/signals.py",
+   "line": 9,
+   "doc": ""
+  },
+  {
+   "nombre": "user_operation_signal",
+   "app": "evopreven",
+   "file": "evopreven/userauth/signals.py",
+   "line": 69,
+   "doc": ""
+  },
+  {
+   "nombre": "write_log",
+   "app": "evopreven",
+   "file": "evopreven/action_log/utils.py",
+   "line": 13,
+   "doc": ""
+  }
+ ],
+ "serializers": [
+  {
+   "nombre": "EncryptedPersonalDataSerializer",
+   "app": "evopreven",
+   "file": "evopreven/api_portal/serializers.py",
+   "line": 20,
+   "modelo": "EncryptedPersonalData",
+   "bases": [
+    "serializers.ModelSerializer"
+   ]
+  },
+  {
+   "nombre": "Serializer",
+   "app": "evopreven",
+   "file": "evopreven/core/serializers.py",
+   "line": 3,
+   "modelo": "",
+   "bases": [
+    "JSONSerializer"
+   ]
+  },
+  {
+   "nombre": "WorkerSerializer",
+   "app": "evopreven",
+   "file": "evopreven/api_portal/serializers.py",
+   "line": 26,
+   "modelo": "Worker",
+   "bases": [
+    "serializers.ModelSerializer"
+   ]
+  }
+ ],
+ "modelos": [
+  {
+   "nombre": "ActiveMixin",
+   "app": "evopreven",
+   "file": "evopreven/core/models.py",
+   "line": 245,
+   "bases": [
+    "Model"
+   ],
+   "campos": [
+    {
+     "nombre": "active",
+     "tipo": "BooleanField"
+    }
+   ],
+   "relaciones": [],
+   "doc": "",
+   "abstracto": false
+  },
+  {
+   "nombre": "AgentThread",
+   "app": "evopreven",
+   "file": "evopreven/agents/models.py",
+   "line": 11,
+   "bases": [
+    "djongomodels.Model"
+   ],
+   "campos": [
+    {
+     "nombre": "created_at",
+     "tipo": "DateTimeField"
+    },
+    {
+     "nombre": "thread_id",
+     "tipo": "CharField"
+    },
+    {
+     "nombre": "agent_id",
+     "tipo": "CharField"
+    },
+    {
+     "nombre": "endpoint",
+     "tipo": "URLField"
+    },
+    {
+     "nombre": "data",
+     "tipo": "TextField"
+    },
+    {
+     "nombre": "user_id",
+     "tipo": "PositiveIntegerField"
+    }
+   ],
+   "relaciones": [],
+   "doc": "",
+   "abstracto": false
+  },
+  {
+   "nombre": "AzureAdGroupProfileMapping",
+   "app": "evopreven",
+   "file": "evopreven/authentication/azure_dev/models.py",
+   "line": 7,
+   "bases": [
+    "Model"
+   ],
+   "campos": [
+    {
+     "nombre": "object_id",
+     "tipo": "CharField"
+    },
+    {
+     "nombre": "profile",
+     "tipo": "ForeignKey"
+    }
+   ],
+   "relaciones": [
+    {
+     "campo": "profile",
+     "tipo": "ForeignKey",
+     "hacia": "Profile"
+    }
+   ],
+   "doc": "",
+   "abstracto": false
+  },
+  {
+   "nombre": "CRUDModel",
+   "app": "evopreven",
+   "file": "evopreven/core/models.py",
+   "line": 83,
+   "bases": [
+    "Model"
+   ],
+   "campos": [
+    {
+     "nombre": "created_at",
+     "tipo": "DateTimeField"
+    },
+    {
+     "nombre": "updated_at",
+     "tipo": "DateTimeField"
+    },
+    {
+     "nombre": "owner",
+     "tipo": "ForeignKey"
+    },
+    {
+     "nombre": "created_by",
+     "tipo": "ForeignKey"
+    },
+    {
+     "nombre": "updated_by",
+     "tipo": "ForeignKey"
+    },
+    {
+     "nombre": "shared_property",
+     "tipo": "ManyToManyField"
+    }
+   ],
+   "relaciones": [
+    {
+     "campo": "owner",
+     "tipo": "ForeignKey",
+     "hacia": "userauth.User"
+    },
+    {
+     "campo": "created_by",
+     "tipo": "ForeignKey",
+     "hacia": "userauth.User"
+    },
+    {
+     "campo": "updated_by",
+     "tipo": "ForeignKey",
+     "hacia": "userauth.User"
+    },
+    {
+     "campo": "shared_property",
+     "tipo": "ManyToManyField",
+     "hacia": "userauth.User"
+    }
+   ],
+   "doc": "",
+   "abstracto": false
+  },
+  {
+   "nombre": "ConsultationImport",
+   "app": "evopreven",
+   "file": "evopreven/consultation_import/models.py",
+   "line": 12,
+   "bases": [
+    "Model"
+   ],
+   "campos": [
+    {
+     "nombre": "name",
+     "tipo": "CharField"
+    },
+    {
+     "nombre": "created_at",
+     "tipo": "DateTimeField"
+    },
+    {
+     "nombre": "imported_at",
+     "tipo": "DateTimeField"
+    },
+    {
+     "nombre": "company",
+     "tipo": "ForeignKey"
+    },
+    {
+     "nombre": "workcenter",
+     "tipo": "ForeignKey"
+    },
+    {
+     "nombre": "medical_center",
+     "tipo": "ForeignKey"
+    },
+    {
+     "nombre": "data_id",
+     "tipo": "CharField"
+    },
+    {
+     "nombre": "import_dict_basic_errors",
+     "tipo": "JSONField"
+    },
+    {
+     "nombre": "import_dict_complete_errors",
+     "tipo": "JSONField"
+    },
+    {
+     "nombre": "import_dict_log",
+     "tipo": "JSONField"
+    },
+    {
+     "nombre": "import_xml_file",
+     "tipo": "FileField"
+    },
+    {
+     "nombre": "import_xml_file_date",
+     "tipo": "DateTimeField"
+    }
+   ],
+   "relaciones": [
+    {
+     "campo": "company",
+     "tipo": "ForeignKey",
+     "hacia": "filiation.Company"
+    },
+    {
+     "campo": "workcenter",
+     "tipo": "ForeignKey",
+     "hacia": "structure.Workcenter"
+    },
+    {
+     "campo": "medical_center",
+     "tipo": "ForeignKey",
+     "hacia": "entities.MedicalCenter"
+    }
+   ],
+   "doc": "",
+   "abstracto": false
+  },
+  {
+   "nombre": "EncryptedPostalMixin",
+   "app": "evopreven",
+   "file": "evopreven/generals/models.py",
+   "line": 88,
+   "bases": [
+    "Model"
+   ],
+   "campos": [
+    {
+     "nombre": "street_type",
+     "tipo": "CharField"
+    },
+    {
+     "nombre": "bis",
+     "tipo": "BooleanField"
+    },
+    {
+     "nombre": "block",
+     "tipo": "CharField"
+    },
+    {
+     "nombre": "stair",
+     "tipo": "CharField"
+    },
+    {
+     "nombre": "flat",
+     "tipo": "CharField"
+    },
+    {
+     "nombre": "door",
+     "tipo": "CharField"
+    },
+    {
+     "nombre": "province",
+     "tipo": "ForeignKey"
+    },
+    {
+     "nombre": "town",
+     "tipo": "ForeignKey"
+    },
+    {
+     "nombre": "locality",
+     "tipo": "ForeignKey"
+    },
+    {
+     "nombre": "country",
+     "tipo": "CharField"
+    }
+   ],
+   "relaciones": [
+    {
+     "campo": "province",
+     "tipo": "ForeignKey",
+     "hacia": "Province"
+    },
+    {
+     "campo": "town",
+     "tipo": "ForeignKey",
+     "hacia": "Municipality"
+    },
+    {
+     "campo": "locality",
+     "tipo": "ForeignKey",
+     "hacia": "Locality"
+    }
+   ],
+   "doc": "",
+   "abstracto": false
+  },
+  {
+   "nombre": "FixtureMixin",
+   "app": "evopreven",
+   "file": "evopreven/core/models.py",
+   "line": 254,
+   "bases": [
+    "Model"
+   ],
+   "campos": [
+    {
+     "nombre": "fixture",
+     "tipo": "BooleanField"
+    }
+   ],
+   "relaciones": [],
+   "doc": "",
+   "abstracto": false
+  },
+  {
+   "nombre": "ICD",
+   "app": "evopreven",
+   "file": "evopreven/health/icd/models.py",
+   "line": 6,
+   "bases": [
+    "djongomodels.Model"
+   ],
+   "campos": [
+    {
+     "nombre": "icd_id",
+     "tipo": "CharField"
+    },
+    {
+     "nombre": "parent",
+     "tipo": "CharField"
+    },
+    {
+     "nombre": "children",
+     "tipo": "TextField"
+    },
+    {
+     "nombre": "code",
+     "tipo": "CharField"
+    },
+    {
+     "nombre": "title",
+     "tipo": "CharField"
+    },
+    {
+     "nombre": "definition",
+     "tipo": "TextField"
+    },
+    {
+     "nombre": "long_definition",
+     "tipo": "TextField"
+    },
+    {
+     "nombre": "full_name",
+     "tipo": "CharField"
+    }
+   ],
+   "relaciones": [],
+   "doc": "",
+   "abstracto": false
+  },
+  {
+   "nombre": "IP",
+   "app": "evopreven",
+   "file": "evopreven/import_export_data/models.py",
+   "line": 104,
+   "bases": [
+    "Model"
+   ],
+   "campos": [
+    {
+     "nombre": "ip",
+     "tipo": "GenericIPAddressField"
+    },
+    {
+     "nombre": "token",
+     "tipo": "ForeignKey"
+    }
+   ],
+   "relaciones": [
+    {
+     "campo": "token",
+     "tipo": "ForeignKey",
+     "hacia": "APIToken"
+    }
+   ],
+   "doc": "",
+   "abstracto": false
+  },
+  {
+   "nombre": "IntCodeMixin",
+   "app": "evopreven",
+   "file": "evopreven/core/models.py",
+   "line": 199,
+   "bases": [
+    "Model"
+   ],
+   "campos": [
+    {
+     "nombre": "int_code",
+     "tipo": "CharField"
+    }
+   ],
+   "relaciones": [],
+   "doc": "",
+   "abstracto": false
+  },
+  {
+   "nombre": "Mail",
+   "app": "evopreven",
+   "file": "evopreven/import_export_data/models.py",
+   "line": 121,
+   "bases": [
+    "Model"
+   ],
+   "campos": [
+    {
+     "nombre": "mail",
+     "tipo": "EmailField"
+    },
+    {
+     "nombre": "token",
+     "tipo": "ForeignKey"
+    }
+   ],
+   "relaciones": [
+    {
+     "campo": "token",
+     "tipo": "ForeignKey",
+     "hacia": "APIToken"
+    }
+   ],
+   "doc": "",
+   "abstracto": false
+  },
+  {
+   "nombre": "Model",
+   "app": "evopreven",
+   "file": "evopreven/core/models.py",
+   "line": 48,
+   "bases": [
+    "models.Model"
+   ],
+   "campos": [],
+   "relaciones": [],
+   "doc": "",
+   "abstracto": false
+  },
+  {
+   "nombre": "NamedMixin",
+   "app": "evopreven",
+   "file": "evopreven/core/models.py",
+   "line": 261,
+   "bases": [
+    "Model"
+   ],
+   "campos": [
+    {
+     "nombre": "name",
+     "tipo": "CharField"
+    }
+   ],
+   "relaciones": [],
+   "doc": "",
+   "abstracto": false
+  },
+  {
+   "nombre": "OrderMixin",
+   "app": "evopreven",
+   "file": "evopreven/core/models.py",
+   "line": 154,
+   "bases": [
+    "Model"
+   ],
+   "campos": [
+    {
+     "nombre": "order",
+     "tipo": "IntegerField"
+    }
+   ],
+   "relaciones": [],
+   "doc": "",
+   "abstracto": false
+  },
+  {
+   "nombre": "PeriodModel",
+   "app": "evopreven",
+   "file": "evopreven/generals/models.py",
+   "line": 266,
+   "bases": [
+    "Model"
+   ],
+   "campos": [
+    {
+     "nombre": "init_date",
+     "tipo": "DateField"
+    },
+    {
+     "nombre": "end_date",
+     "tipo": "DateField"
+    }
+   ],
+   "relaciones": [],
+   "doc": "",
+   "abstracto": false
+  },
+  {
+   "nombre": "PostalMixin",
+   "app": "evopreven",
+   "file": "evopreven/generals/models.py",
+   "line": 157,
+   "bases": [
+    "Model"
+   ],
+   "campos": [
+    {
+     "nombre": "street",
+     "tipo": "CharField"
+    },
+    {
+     "nombre": "street_type",
+     "tipo": "CharField"
+    },
+    {
+     "nombre": "number",
+     "tipo": "CharField"
+    },
+    {
+     "nombre": "bis",
+     "tipo": "BooleanField"
+    },
+    {
+     "nombre": "block",
+     "tipo": "CharField"
+    },
+    {
+     "nombre": "stair",
+     "tipo": "CharField"
+    },
+    {
+     "nombre": "flat",
+     "tipo": "CharField"
+    },
+    {
+     "nombre": "door",
+     "tipo": "CharField"
+    },
+    {
+     "nombre": "province",
+     "tipo": "ForeignKey"
+    },
+    {
+     "nombre": "postal_code",
+     "tipo": "CharField"
+    },
+    {
+     "nombre": "town",
+     "tipo": "ForeignKey"
+    },
+    {
+     "nombre": "locality",
+     "tipo": "ForeignKey"
+    },
+    {
+     "nombre": "country",
+     "tipo": "CharField"
+    }
+   ],
+   "relaciones": [
+    {
+     "campo": "province",
+     "tipo": "ForeignKey",
+     "hacia": "Province"
+    },
+    {
+     "campo": "town",
+     "tipo": "ForeignKey",
+     "hacia": "Municipality"
+    },
+    {
+     "campo": "locality",
+     "tipo": "ForeignKey",
+     "hacia": "Locality"
+    }
+   ],
+   "doc": "",
+   "abstracto": false
+  },
+  {
+   "nombre": "SignatureMixin",
+   "app": "evopreven",
+   "file": "evopreven/core/models.py",
+   "line": 274,
+   "bases": [
+    "models.Model"
+   ],
+   "campos": [
+    {
+     "nombre": "signature_img",
+     "tipo": "TextField"
+    },
+    {
+     "nombre": "signature",
+     "tipo": "TextField"
+    },
+    {
+     "nombre": "signature_date",
+     "tipo": "DateTimeField"
+    }
+   ],
+   "relaciones": [],
+   "doc": "",
+   "abstracto": false
+  },
+  {
+   "nombre": "TextBlueprint",
+   "app": "evopreven",
+   "file": "evopreven/blueprints/models.py",
+   "line": 245,
+   "bases": [
+    "Model"
+   ],
+   "campos": [],
+   "relaciones": [],
+   "doc": "",
+   "abstracto": false
+  },
+  {
+   "nombre": "User",
+   "app": "evopreven",
+   "file": "evopreven/userauth/models.py",
+   "line": 47,
+   "bases": [
+    "AbstractUser",
+    "CRUDModel"
+   ],
+   "campos": [
+    {
+     "nombre": "reset_password",
+     "tipo": "BooleanField"
+    },
+    {
+     "nombre": "access_type",
+     "tipo": "CharField"
+    },
+    {
+     "nombre": "expiration_date_account",
+     "tipo": "DateField"
+    },
+    {
+     "nombre": "can_expire_pass",
+     "tipo": "BooleanField"
+    },
+    {
+     "nombre": "days_expiration_password",
+     "tipo": "PositiveIntegerField"
+    },
+    {
+     "nombre": "password_last_changed",
+     "tipo": "DateTimeField"
+    },
+    {
+     "nombre": "profile",
+     "tipo": "ForeignKey"
+    },
+    {
+     "nombre": "is_portal",
+     "tipo": "BooleanField"
+    },
+    {
+     "nombre": "manage_perms",
+     "tipo": "BooleanField"
+    },
+    {
+     "nombre": "org_perms",
+     "tipo": "BooleanField"
+    },
+    {
+     "nombre": "worker",
+     "tipo": "OneToOneField"
+    },
+    {
+     "nombre": "is_external",
+     "tipo": "BooleanField"
+    }
+   ],
+   "relaciones": [
+    {
+     "campo": "profile",
+     "tipo": "ForeignKey",
+     "hacia": "userauth.Profile"
+    },
+    {
+     "campo": "worker",
+     "tipo": "OneToOneField",
+     "hacia": "filiation.Worker"
+    }
+   ],
+   "doc": "",
+   "abstracto": true
+  }
+ ],
+ "componentes": [],
+ "hooks": [],
+ "paginas": []
+}

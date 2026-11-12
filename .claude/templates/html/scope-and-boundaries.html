@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="es">
+<!--
+  PLANTILLA ALCANCE Y LÍMITES · In-scope / Out-of-scope / Assumptions / Risks en columnas + diagrama de frontera.
+  ── Cómo usar ──────────────────────────────────────────────────────────────
+  1) Rellena los arrays SCOPE.inScope / SCOPE.outScope / SCOPE.assumptions / SCOPE.risks
+     (los risks llevan {text, severity:"low"|"med"|"high"}).
+  2) Edita el diagrama de frontera: INSIDE[] (lo que vive dentro del sistema) y
+     OUTSIDE[] (lo que queda fuera / lo provee otro). El SVG se dibuja solo.
+  Tier 1 editorial (rules/html-output.md). Self-contained, sin CDN, tokens = base.html.
+  Parte de un plan multi-página (lleva la .topnav; ver hub.html / nav-partial.html).
+-->
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>[Proyecto] · Alcance y límites</title>
+<style>
+  :root{
+    --ink:#1b1b1f;--muted:#6b6b76;--faint:#9a9aa4;--paper:#f6f4ef;--card:#fff;--line:#e4e0d7;
+    --navy:#1b2a4a;--accent:#c2410c;--green:#15803d;--blue:#1d4ed8;--violet:#6d28d9;--red:#b42318;--amber:#b45309;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.55}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 22px}
+  .topnav{position:sticky;top:0;z-index:20;background:rgba(246,244,239,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .topnav .wrap{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:9px 22px}
+  .topnav .brand{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--navy);font-weight:700;margin-right:8px}
+  .topnav a{font-size:13px;color:var(--muted);text-decoration:none;padding:6px 10px;border-radius:8px}
+  .topnav a:hover{background:#efece4;color:var(--navy)} .topnav a.active{background:var(--navy);color:#fff}
+  header.hero{padding:34px 0 14px}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600;margin:0 0 10px}
+  h1{font-size:clamp(24px,3.6vw,38px);margin:0 0 8px;letter-spacing:-.02em}h1 em{font-style:italic;color:var(--navy)}
+  .lead{font-size:16px;color:var(--muted);max-width:78ch;margin:0}
+  section{padding:8px 0 18px}
+  h2{font-size:18px;margin:24px 0 12px;letter-spacing:-.01em}
+  .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
+  .col{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;border-top:3px solid var(--line)}
+  .col.in{border-top-color:var(--green)} .col.out{border-top-color:var(--red)}
+  .col.assume{border-top-color:var(--blue)} .col.risk{border-top-color:var(--amber)}
+  .col h3{margin:0 0 3px;font-size:15px;color:var(--navy);display:flex;align-items:center;gap:7px}
+  .col h3 .ic{font-size:17px}
+  .col .sub{font-size:11.5px;color:var(--faint);margin:0 0 11px}
+  .col ul{margin:0;padding:0;list-style:none}
+  .col li{font-size:13.5px;padding:7px 0;border-top:1px solid var(--line);display:flex;gap:8px;align-items:baseline}
+  .col li:first-of-type{border-top:none}
+  .col li::before{content:"";flex:0 0 7px;height:7px;border-radius:50%;margin-top:6px;background:var(--faint)}
+  .col.in li::before{background:var(--green)} .col.out li::before{background:var(--red)}
+  .col.assume li::before{background:var(--blue)}
+  .sev{margin-left:auto;font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.05em;padding:1px 7px;border-radius:99px;align-self:center}
+  .sev.low{background:#ecfdf3;color:var(--green)} .sev.med{background:#fef6e7;color:var(--amber)} .sev.high{background:#fef2f2;color:var(--red)}
+  /* diagrama de frontera */
+  .boundary{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;overflow:auto}
+  svg{width:100%;height:auto;display:block;max-width:720px;margin:0 auto}
+  .b-frame{fill:#f7fbf8;stroke:var(--green);stroke-width:2;stroke-dasharray:7 5}
+  .b-label{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+  .b-in text{font-family:var(--sans);font-size:12px;fill:#fff;font-weight:600}
+  .b-out text{font-family:var(--sans);font-size:12px;fill:var(--ink);font-weight:600}
+  footer{padding:26px 0 60px;color:var(--faint);font-size:13px}
+</style>
+</head>
+<body>
+<nav class="topnav"><div class="wrap">
+  <span class="brand">[PROYECTO]</span>
+  <a href="index.html">Overview</a>
+  <a href="architecture.html">Arquitectura</a>
+  <a href="scope-and-boundaries.html" class="active">Alcance</a>
+  <a href="data-model.html">Datos</a>
+  <a href="user-flows.html">Flujos</a>
+  <a href="integrations.html">Integraciones</a>
+  <a href="parallelization.html">Paralelización</a>
+  <a href="dashboard.html">Dashboard</a>
+</div></nav>
+
+<header class="hero"><div class="wrap">
+  <p class="eyebrow">Alcance · límites · supuestos · riesgos</p>
+  <h1>Alcance y <em>límites</em></h1>
+  <p class="lead">Qué construimos, qué queda explícitamente fuera, de qué partimos y qué nos puede morder. El diagrama de frontera fija qué vive dentro del sistema y qué lo provee otro.</p>
+</div></header>
+
+<main class="wrap">
+  <section>
+    <div class="cols">
+      <div class="col in">
+        <h3><span class="ic">✓</span> En alcance</h3>
+        <p class="sub" id="in-sub"></p>
+        <ul id="c-in"></ul>
+      </div>
+      <div class="col out">
+        <h3><span class="ic">✕</span> Fuera de alcance</h3>
+        <p class="sub" id="out-sub"></p>
+        <ul id="c-out"></ul>
+      </div>
+      <div class="col assume">
+        <h3><span class="ic">◆</span> Supuestos</h3>
+        <p class="sub">Damos por cierto que…</p>
+        <ul id="c-assume"></ul>
+      </div>
+      <div class="col risk">
+        <h3><span class="ic">⚠</span> Riesgos</h3>
+        <p class="sub">Ordenados por severidad.</p>
+        <ul id="c-risk"></ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Diagrama de frontera</h2>
+    <div class="boundary">
+      <svg id="svg" viewBox="0 0 720 320" role="img" aria-label="Diagrama de frontera del sistema">
+        <rect class="b-frame" x="20" y="50" width="430" height="250" rx="16"/>
+        <text class="b-label" x="36" y="42" fill="#15803d">Dentro del sistema</text>
+        <text class="b-label" x="492" y="42" fill="#b42318">Fuera (lo provee otro)</text>
+        <g id="g-in" class="b-in"></g>
+        <g id="g-out" class="b-out"></g>
+      </svg>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap">Alcance generado desde datos · un .html autocontenido · snapshot [FECHA].</footer>
+
+<script>
+  /* ===== EDITA AQUÍ: alcance del proyecto (ejemplo genérico) ===== */
+  const SCOPE={
+    inSub:"Lo que este equipo entrega en esta fase.",
+    outSub:"Explícitamente NO en esta fase (evita scope creep).",
+    inScope:[
+      "Gestión de proyectos y tareas (CRUD)",
+      "Asignación de tareas a usuarios",
+      "Etiquetado y filtrado",
+      "Exportación a CSV",
+      "Auth por email + verificación"
+    ],
+    outScope:[
+      "App móvil nativa",
+      "Facturación / pagos",
+      "Notificaciones push en tiempo real",
+      "Permisos granulares por rol (RBAC)",
+      "Integración con calendarios externos"
+    ],
+    assumptions:[
+      "El usuario tiene un email válido y accesible",
+      "El volumen cabe en una sola BD Postgres (sin sharding)",
+      "El stack de auth ya existe y se reutiliza",
+      "El equipo trabaja sobre el branch develop"
+    ],
+    risks:[
+      {text:"La exportación grande puede bloquear el worker", severity:"high"},
+      {text:"El proveedor de email puede rate-limitear el alta", severity:"med"},
+      {text:"Falta diseño final de los estados vacíos", severity:"low"}
+    ]
+  };
+  /* frontera: lo que vive dentro vs lo que provee un externo */
+  const INSIDE=["API + ORM","Web app","Worker de export","BD propia"];
+  const OUTSIDE=["Proveedor email","Storage S3","Auth SSO"];
+
+  const li=(t,extra="")=>`<li>${t}${extra}</li>`;
+  document.getElementById("in-sub").textContent=SCOPE.inSub;
+  document.getElementById("out-sub").textContent=SCOPE.outSub;
+  document.getElementById("c-in").innerHTML=SCOPE.inScope.map(t=>li(t)).join("");
+  document.getElementById("c-out").innerHTML=SCOPE.outScope.map(t=>li(t)).join("");
+  document.getElementById("c-assume").innerHTML=SCOPE.assumptions.map(t=>li(t)).join("");
+  const sevRank={high:0,med:1,low:2};
+  document.getElementById("c-risk").innerHTML=[...SCOPE.risks].sort((a,b)=>sevRank[a.severity]-sevRank[b.severity])
+    .map(r=>li(r.text,`<span class="sev ${r.severity}">${r.severity}</span>`)).join("");
+
+  // diagrama de frontera (cajas dentro del marco + cajas fuera)
+  const NS="http://www.w3.org/2000/svg";
+  const gin=document.getElementById("g-in"),gout=document.getElementById("g-out");
+  function box(parent,x,y,w,label,fill){
+    const g=document.createElementNS(NS,"g");g.setAttribute("transform",`translate(${x},${y})`);
+    g.innerHTML=`<rect width="${w}" height="40" rx="9" fill="${fill}" stroke="rgba(0,0,0,.12)"/><text x="${w/2}" y="25" text-anchor="middle">${label}</text>`;
+    parent.appendChild(g);
+  }
+  INSIDE.forEach((l,i)=>{const col=i%2,row=Math.floor(i/2);box(gin,42+col*200,72+row*60,180,l,"#1b2a4a");});
+  OUTSIDE.forEach((l,i)=>box(gout,492,72+i*64,200,l,"#fff"));
+  gout.querySelectorAll("rect").forEach(r=>r.setAttribute("stroke","#d6c3b0"));
+  gout.querySelectorAll("rect").forEach(r=>r.setAttribute("fill","#fff"));
+</script>
+</body>
+</html>

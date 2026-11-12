@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="es">
+<!--
+  PLANTILLA MODELO DE DATOS · diagrama Entidad-Relación SVG CLICABLE (entidad → panel con campos/relaciones).
+  ── Cómo usar ──────────────────────────────────────────────────────────────
+  1) Define las entidades y relaciones en ENTITIES/RELATIONS del <script>:
+     ENTITIES = {id,label,fields:[{name,type,pk?,fk?}],x,y,group}
+     RELATIONS = {from,to,kind:"1-1"|"1-N"|"N-N",label}
+  2) El SVG (cajas de entidad + líneas con cardinalidad) se dibuja solo desde esos datos.
+  3) Click en una entidad → panel lateral con sus campos y relaciones.
+  Tier 2 (rules/html-output.md). Self-contained, sin CDN, tokens = base.html.
+  Ejemplo = app Django genérica (User, Project, Task, Tag, Comment).
+  Parte de un plan multi-página (lleva la .topnav; ver hub.html / nav-partial.html).
+-->
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>[Proyecto] · Modelo de datos</title>
+<style>
+  :root{
+    --ink:#1b1b1f;--muted:#6b6b76;--faint:#9a9aa4;--paper:#f6f4ef;--card:#fff;--line:#e4e0d7;
+    --navy:#1b2a4a;--accent:#c2410c;--green:#15803d;--blue:#1d4ed8;--violet:#6d28d9;--red:#b42318;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.55}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 22px}
+  .topnav{position:sticky;top:0;z-index:20;background:rgba(246,244,239,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .topnav .wrap{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:9px 22px}
+  .topnav .brand{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--navy);font-weight:700;margin-right:8px}
+  .topnav a{font-size:13px;color:var(--muted);text-decoration:none;padding:6px 10px;border-radius:8px}
+  .topnav a:hover{background:#efece4;color:var(--navy)} .topnav a.active{background:var(--navy);color:#fff}
+  header.hero{padding:34px 0 18px}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600;margin:0 0 10px}
+  h1{font-size:clamp(24px,3.6vw,38px);margin:0 0 8px;letter-spacing:-.02em}h1 em{font-style:italic;color:var(--navy)}
+  .lead{font-size:16px;color:var(--muted);max-width:78ch;margin:0}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;margin:14px 0 4px;font-size:12.5px;color:var(--muted)}
+  .legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:middle}
+  .stage{display:grid;grid-template-columns:1fr 320px;gap:16px;padding:14px 0 40px}
+  @media(max-width:860px){.stage{grid-template-columns:1fr}}
+  .diagram{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:8px;overflow:auto}
+  svg{width:100%;height:auto;display:block}
+  .ent{cursor:pointer}
+  .ent rect.box{stroke-width:1.5;transition:.12s}
+  .ent:hover rect.box{filter:brightness(.98)}
+  .ent.sel rect.box{stroke:var(--accent);stroke-width:3}
+  .ent text.title{font-family:var(--sans);font-size:12.5px;fill:#fff;font-weight:700}
+  .ent text.field{font-family:var(--mono);font-size:10px;fill:var(--ink)}
+  .ent text.field.pk{fill:var(--accent);font-weight:700}
+  .ent text.field.fk{fill:var(--blue)}
+  .rel{stroke:#9aa1ad;stroke-width:1.6;fill:none}
+  .rel-card{font-family:var(--mono);font-size:9.5px;fill:var(--muted)}
+  aside.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;align-self:start;position:sticky;top:64px}
+  aside.panel h3{margin:0 0 4px;font-size:17px;color:var(--navy)}
+  aside.panel .tag{font-family:var(--mono);font-size:11px;color:var(--faint)}
+  aside.panel p{font-size:13.5px;color:var(--muted)}
+  aside.panel h4{margin:14px 0 6px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+  aside.panel table{width:100%;border-collapse:collapse;font-size:12.5px}
+  aside.panel td{padding:3px 6px;border-bottom:1px solid var(--line)}
+  aside.panel td.k{font-family:var(--mono);color:var(--navy)}
+  aside.panel td.t{font-family:var(--mono);color:var(--muted);font-size:11px;text-align:right}
+  aside.panel .pill{display:inline-block;font-family:var(--mono);font-size:9px;padding:0 5px;border-radius:99px;margin-left:5px;vertical-align:middle}
+  aside.panel .pill.pk{background:#fdebd9;color:var(--accent)} aside.panel .pill.fk{background:#e7eefb;color:var(--blue)}
+  aside.panel ul{margin:4px 0;padding-left:18px;font-size:13px}
+  footer{padding:26px 0 60px;color:var(--faint);font-size:13px}
+</style>
+</head>
+<body>
+<nav class="topnav"><div class="wrap">
+  <span class="brand">[PROYECTO]</span>
+  <a href="index.html">Overview</a>
+  <a href="architecture.html">Arquitectura</a>
+  <a href="scope-and-boundaries.html">Alcance</a>
+  <a href="data-model.html" class="active">Datos</a>
+  <a href="user-flows.html">Flujos</a>
+  <a href="integrations.html">Integraciones</a>
+  <a href="parallelization.html">Paralelización</a>
+  <a href="dashboard.html">Dashboard</a>
+</div></nav>
+
+<header class="hero"><div class="wrap">
+  <p class="eyebrow">Modelo de datos · entidad-relación</p>
+  <h1>Modelo de <em>datos</em></h1>
+  <p class="lead">Cada caja es una entidad (tabla / modelo). Click para ver sus campos y relaciones. Las líneas indican cardinalidad (1-1 · 1-N · N-N).</p>
+  <div class="legend">
+    <span><i style="background:#1b2a4a"></i>Núcleo</span>
+    <span><i style="background:#6d28d9"></i>Contenido</span>
+    <span><i style="background:#15803d"></i>Taxonomía</span>
+    <span><i style="background:#c2410c"></i>PK</span>
+    <span><i style="background:#1d4ed8"></i>FK</span>
+  </div>
+</div></header>
+
+<div class="wrap stage">
+  <div class="diagram">
+    <svg id="svg" viewBox="0 0 760 540" role="img" aria-label="Diagrama entidad-relación">
+      <g id="rels"></g><g id="ents"></g>
+    </svg>
+  </div>
+  <aside class="panel" id="panel">
+    <span class="tag">entidad</span>
+    <h3 id="p-title">Selecciona una entidad</h3>
+    <p id="p-desc">Click en una caja del diagrama para ver sus campos (PK/FK), tipos y relaciones con otras entidades.</p>
+    <div id="p-extra"></div>
+  </aside>
+</div>
+
+<footer class="wrap">Modelo de datos generado desde datos · un .html autocontenido · snapshot [FECHA].</footer>
+
+<script>
+  /* ===== EDITA AQUÍ: entidades y relaciones (ejemplo = app Django genérica) ===== */
+  const COLORS={core:"#1b2a4a",content:"#6d28d9",tax:"#15803d"};
+  const ENTITIES=[
+    {id:"user",label:"User",group:"core",x:40,y:40,desc:"Usuario autenticado (auth.User extendido).",fields:[
+      {name:"id",type:"BigAuto",pk:true},{name:"email",type:"Email"},{name:"name",type:"Char"},{name:"is_active",type:"Bool"}]},
+    {id:"project",label:"Project",group:"core",x:300,y:40,desc:"Espacio de trabajo; agrupa tareas. Pertenece a un User (owner).",fields:[
+      {name:"id",type:"BigAuto",pk:true},{name:"owner_id",type:"FK→User",fk:true},{name:"name",type:"Char"},{name:"created_at",type:"DateTime"}]},
+    {id:"task",label:"Task",group:"content",x:300,y:300,desc:"Unidad de trabajo dentro de un Project, asignable a un User.",fields:[
+      {name:"id",type:"BigAuto",pk:true},{name:"project_id",type:"FK→Project",fk:true},{name:"assignee_id",type:"FK→User",fk:true},{name:"title",type:"Char"},{name:"status",type:"Char"},{name:"due_date",type:"Date"}]},
+    {id:"tag",label:"Tag",group:"tax",x:570,y:300,desc:"Etiqueta reutilizable. Relación N-N con Task vía tabla intermedia.",fields:[
+      {name:"id",type:"BigAuto",pk:true},{name:"label",type:"Char"},{name:"color",type:"Char"}]},
+    {id:"comment",label:"Comment",group:"content",x:40,y:300,desc:"Comentario de un User sobre una Task.",fields:[
+      {name:"id",type:"BigAuto",pk:true},{name:"task_id",type:"FK→Task",fk:true},{name:"author_id",type:"FK→User",fk:true},{name:"body",type:"Text"},{name:"created_at",type:"DateTime"}]}
+  ];
+  const RELATIONS=[
+    {from:"user",to:"project",kind:"1-N",label:"owns"},
+    {from:"project",to:"task",kind:"1-N",label:"has"},
+    {from:"user",to:"task",kind:"1-N",label:"assigned"},
+    {from:"task",to:"tag",kind:"N-N",label:"tagged"},
+    {from:"task",to:"comment",kind:"1-N",label:"has"},
+    {from:"user",to:"comment",kind:"1-N",label:"wrote"}
+  ];
+
+  const W=180,HEAD=24,ROW=15;
+  const NS="http://www.w3.org/2000/svg";
+  const byId=Object.fromEntries(ENTITIES.map(e=>[e.id,e]));
+  const h=e=>HEAD+e.fields.length*ROW+6;          // alto total de la caja
+  const cx=e=>e.x+W/2, cy=e=>e.y+h(e)/2;
+  const rg=document.getElementById("rels"),eg=document.getElementById("ents");
+
+  // relaciones (línea centro-a-centro recortada al borde + etiqueta de cardinalidad)
+  RELATIONS.forEach(r=>{
+    const A=byId[r.from],B=byId[r.to];if(!A||!B)return;
+    const x1=cx(A),y1=cy(A),x2=cx(B),y2=cy(B);
+    const p=document.createElementNS(NS,"line");
+    p.setAttribute("x1",x1);p.setAttribute("y1",y1);p.setAttribute("x2",x2);p.setAttribute("y2",y2);
+    p.setAttribute("class","rel");rg.appendChild(p);
+    const t=document.createElementNS(NS,"text");
+    t.setAttribute("x",(x1+x2)/2);t.setAttribute("y",(y1+y2)/2-3);t.setAttribute("text-anchor","middle");
+    t.setAttribute("class","rel-card");t.textContent=r.kind+" "+r.label;rg.appendChild(t);
+  });
+
+  // entidades
+  ENTITIES.forEach(e=>{
+    const g=document.createElementNS(NS,"g");g.setAttribute("class","ent");g.dataset.id=e.id;
+    g.setAttribute("transform",`translate(${e.x},${e.y})`);
+    let rows="";
+    e.fields.forEach((f,i)=>{
+      const cls=f.pk?"field pk":f.fk?"field fk":"field";
+      const mark=f.pk?"◆ ":f.fk?"↗ ":"  ";
+      rows+=`<text class="${cls}" x="10" y="${HEAD+12+i*ROW}">${mark}${f.name}</text>`;
+    });
+    g.innerHTML=`<rect class="box" width="${W}" height="${h(e)}" rx="10" fill="#fff" stroke="${COLORS[e.group]}"/>
+      <rect width="${W}" height="${HEAD}" rx="10" fill="${COLORS[e.group]}"/>
+      <rect y="${HEAD-10}" width="${W}" height="10" fill="${COLORS[e.group]}"/>
+      <text class="title" x="10" y="16">${e.label}</text>${rows}`;
+    g.onclick=()=>select(e.id);eg.appendChild(g);
+  });
+
+  function select(id){
+    document.querySelectorAll(".ent").forEach(n=>n.classList.toggle("sel",n.dataset.id===id));
+    const e=byId[id];
+    document.getElementById("p-title").textContent=e.label;
+    document.getElementById("p-desc").textContent=e.desc;
+    const fieldRows=e.fields.map(f=>{
+      const pill=f.pk?'<span class="pill pk">PK</span>':f.fk?'<span class="pill fk">FK</span>':"";
+      return `<tr><td class="k">${f.name}${pill}</td><td class="t">${f.type}</td></tr>`;
+    }).join("");
+    const rels=RELATIONS.filter(r=>r.from===id||r.to===id).map(r=>{
+      const other=r.from===id?byId[r.to].label:byId[r.from].label;
+      const dir=r.from===id?"→":"←";
+      return `<li>${dir} <strong>${other}</strong> <span style="color:var(--faint)">(${r.kind} · ${r.label})</span></li>`;
+    }).join("");
+    document.getElementById("p-extra").innerHTML=
+      `<h4>Campos</h4><table>${fieldRows}</table>`+
+      (rels?`<h4>Relaciones</h4><ul>${rels}</ul>`:"");
+  }
+</script>
+</body>
+</html>

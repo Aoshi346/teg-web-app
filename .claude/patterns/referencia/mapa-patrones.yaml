@@ -1,0 +1,207 @@
+# Mapa: patrón → dónde está resuelto en código real
+#
+# COMO SE LEE, y el orden importa:
+#   1. Se lee el PATRÓN (`patterns/stack/<fichero>`): corto, con la regla y el porqué.
+#   2. SOLO si el patrón no basta, se baja al cuerpo de referencia — es caro de leer y
+#      hay que traerlo antes (`scripts/traer_referencias.py`).
+#
+# Lo leen `update-agent` y `gen_tareas_del_harness.py`.
+# SE REGENERA, no se edita:  python3 .claude/scripts/gen_mapa_patrones.py --escribir
+generado: 2026-08-27
+patrones:
+  - patron: accesibilidad.md
+    lineas: 186
+    resuelto_en: []   # SIN precedente — el patrón afirma y no enseña dónde
+  - patron: agente-arquitecturas.md
+    lineas: 177
+    cuando: "al montar un agente **nuevo** con LangGraph, o al replantear uno que se ha"
+    resuelto_en:
+      - cuerpo: open_deep_research
+        ruta: .docs/resources/langgraph/expertos/open_deep_research
+        ensena: "El grafo mas ramificado de los nueve. Referencia de FORMA del grafo."
+      - cuerpo: langgraph-supervisor-py
+        ruta: .docs/resources/langgraph/expertos/langgraph-supervisor-py
+        ensena: "El patron SUPERVISOR en su version minima y legible."
+      - cuerpo: langgraph-swarm-py
+        ruta: .docs/resources/langgraph/expertos/langgraph-swarm-py
+        ensena: "El patron SWARM. Es diminuto a proposito."
+  - patron: agente-cuando-no.md
+    lineas: 142
+    cuando: "ANTES de elegir arquitectura, en cuanto alguien dice 'esto lo resolvemos con un"
+    resuelto_en: []   # SIN precedente — el patrón afirma y no enseña dónde
+  - patron: agente-determinismo.md
+    lineas: 211
+    cuando: "cualquier agente que **ejecute algo** — reservar, cobrar, cambiar una cita,"
+    resuelto_en: []   # SIN precedente — el patrón afirma y no enseña dónde
+  - patron: agente-evaluator-optimizer.md
+    lineas: 299
+    cuando: "la salida del modelo tiene que cumplir algo **comprobable** antes de salir —un"
+    resuelto_en: []   # SIN precedente — el patrón afirma y no enseña dónde
+  - patron: agente-hitl.md
+    lineas: 412
+    cuando: "al montar un agente que puede **escribir en un sistema que no es el nuestro**"
+    resuelto_en: []   # SIN precedente — el patrón afirma y no enseña dónde
+  - patron: agente-memoria.md
+    lineas: 353
+    cuando: "cualquier agente conversacional con checkpointer (LangGraph u otro) que"
+    resuelto_en:
+      - cuerpo: LangGraph-Udemy-Course
+        ruta: .docs/resources/langgraph/LangGraph-Udemy-Course
+        ensena: "La version 1.x moderna — el UNICO con la version pineada exacta. Util para ver que cambio respecto a"
+  - patron: agente-observabilidad.md
+    lineas: 290
+    cuando: "cualquier agente construido sobre LangGraph/LangChain que ejecute tools."
+    resuelto_en: []   # SIN precedente — el patrón afirma y no enseña dónde
+  - patron: agente-panel-debug.md
+    lineas: 262
+    cuando: "cualquier agente conversacional en producción que alguien tenga que depurar sin"
+    resuelto_en:
+      - cuerpo: advanced_marketing_system
+        ruta: .docs/resources/langgraph/advanced_marketing_system
+        ensena: "El mas completo: Django + React + LangGraph en produccion. UNICO con panel de depuracion del agente "
+        privado: true   # hace falta acceso al remote
+  - patron: agente-rag.md
+    lineas: 140
+    cuando: "el agente tiene que **encontrar algo** en un catálogo, una base de documentos o"
+    resuelto_en:
+      - cuerpo: advanced_marketing_system
+        ruta: .docs/resources/langgraph/advanced_marketing_system
+        ensena: "El mas completo: Django + React + LangGraph en produccion. UNICO con panel de depuracion del agente "
+        privado: true   # hace falta acceso al remote
+  - patron: agente-tools.md
+    lineas: 280
+    cuando: "al escribir o revisar una tool que un agente LLM puede invocar."
+    resuelto_en:
+      - cuerpo: deepagents
+        ruta: .docs/resources/langgraph/expertos/deepagents
+        ensena: "Un agente con MUCHISIMAS tools: como se nombran y se describen cuando son 182."
+  - patron: api-y-errores.md
+    lineas: 379
+    resuelto_en: []   # SIN precedente — el patrón afirma y no enseña dónde
+  - patron: backend-cache-redis.md
+    lineas: 136
+    cuando: "al cachear cualquier cosa y al configurar `CACHES`."
+    resuelto_en: []   # SIN precedente — el patrón afirma y no enseña dónde
+  - patron: backend-celery.md
+    lineas: 206
+    cuando: "al escribir o tocar cualquier `@shared_task`, y al configurar Celery en"
+    resuelto_en:
+      - cuerpo: advanced_marketing_system
+        ruta: .docs/resources/langgraph/advanced_marketing_system
+        ensena: "El mas completo: Django + React + LangGraph en produccion. UNICO con panel de depuracion del agente "
+        privado: true   # hace falta acceso al remote
+      - cuerpo: evo-preven
+        ruta: resources/code-refference/evo-preven-develop
+        ensena: "Un backend Django grande y vivo: 40+ apps por dominio (no por capa tecnica) y vistas basadas en clas"
+        privado: true   # hace falta acceso al remote
+  - patron: backend-controllers.md
+    lineas: 501
+    cuando: "cuando trabajas en un repo Django que tiene su **propio framework CRUD** —una"
+    resuelto_en: []   # SIN precedente — el patrón afirma y no enseña dónde
+  - patron: backend-docker-env.md
+    lineas: 140
+    cuando: "al tocar `docker-compose*.yml`, `settings/*.py` o cualquier fichero que lea"
+    resuelto_en: []   # SIN precedente — el patrón afirma y no enseña dónde
+  - patron: backend-estructura-apps.md
+    lineas: 201
+    cuando: "al crear una app, al añadir una plantilla, al mover código entre apps y al"
+    resuelto_en:
+      - cuerpo: evo-preven
+        ruta: resources/code-refference/evo-preven-develop
+        ensena: "Un backend Django grande y vivo: 40+ apps por dominio (no por capa tecnica) y vistas basadas en clas"
+        privado: true   # hace falta acceso al remote
+  - patron: backend-formularios-django.md
+    lineas: 581
+    cuando: "en un backend Django que **renderiza plantillas en el servidor**, donde la"
+    resuelto_en: []   # SIN precedente — el patrón afirma y no enseña dónde
+  - patron: backend-mensajeria-rabbitmq.md
+    lineas: 133
+    cuando: "al declarar colas, exchanges o routing de Celery sobre RabbitMQ."
+    resuelto_en: []   # SIN precedente — el patrón afirma y no enseña dónde
+  - patron: backend-modelos.md
+    lineas: 535
+    cuando: "al crear o modificar cualquier modelo, y en toda migración de datos."
+    resuelto_en: []   # SIN precedente — el patrón afirma y no enseña dónde
+  - patron: backend-observabilidad.md
+    lineas: 144
+    cuando: "al montar un proyecto, antes de dejar trabajo corriendo sin nadie delante, y"
+    resuelto_en: []   # SIN precedente — el patrón afirma y no enseña dónde
+  - patron: backend-serializers.md
+    lineas: 118
+    cuando: "al crear o modificar cualquier serializer de DRF."
+    resuelto_en:
+      - cuerpo: advanced_marketing_system
+        ruta: .docs/resources/langgraph/advanced_marketing_system
+        ensena: "El mas completo: Django + React + LangGraph en produccion. UNICO con panel de depuracion del agente "
+        privado: true   # hace falta acceso al remote
+  - patron: backend-servicios.md
+    lineas: 238
+    cuando: "siempre que una operación haga algo más que leer y devolver: cambiar de"
+    resuelto_en: []   # SIN precedente — el patrón afirma y no enseña dónde
+  - patron: backend-signals.md
+    lineas: 162
+    cuando: "al escribir o tocar cualquier `@receiver`, y al decidir si algo debe reaccionar"
+    resuelto_en: []   # SIN precedente — el patrón afirma y no enseña dónde
+  - patron: backend-tests.md
+    lineas: 307
+    cuando: "al escribir cualquier test de backend, al montar la suite de un proyecto que"
+    resuelto_en: []   # SIN precedente — el patrón afirma y no enseña dónde
+  - patron: backend-validacion.md
+    lineas: 198
+    cuando: "siempre que se escriba en la base de datos **sin pasar por el formulario ni"
+    resuelto_en: []   # SIN precedente — el patrón afirma y no enseña dónde
+  - patron: backend-vistas.md
+    lineas: 613
+    cuando: "al crear o modificar cualquier vista de backend. Este documento cubre **los"
+    resuelto_en:
+      - cuerpo: evo-preven
+        ruta: resources/code-refference/evo-preven-develop
+        ensena: "Un backend Django grande y vivo: 40+ apps por dominio (no por capa tecnica) y vistas basadas en clas"
+        privado: true   # hace falta acceso al remote
+  - patron: componentes.md
+    lineas: 150
+    resuelto_en: []   # SIN precedente — el patrón afirma y no enseña dónde
+  - patron: estado.md
+    lineas: 142
+    resuelto_en: []   # SIN precedente — el patrón afirma y no enseña dónde
+  - patron: estilos.md
+    lineas: 323
+    resuelto_en: []   # SIN precedente — el patrón afirma y no enseña dónde
+  - patron: formularios.md
+    lineas: 279
+    resuelto_en: []   # SIN precedente — el patrón afirma y no enseña dónde
+  - patron: frontend-a-prueba-de-errores.md
+    lineas: 249
+    resuelto_en: []   # SIN precedente — el patrón afirma y no enseña dónde
+  - patron: frontend-auth.md
+    lineas: 192
+    resuelto_en: []   # SIN precedente — el patrón afirma y no enseña dónde
+  - patron: frontend-contrato-con-el-backend.md
+    lineas: 199
+    resuelto_en: []   # SIN precedente — el patrón afirma y no enseña dónde
+  - patron: frontend-design-system.md
+    lineas: 225
+    resuelto_en: []   # SIN precedente — el patrón afirma y no enseña dónde
+  - patron: frontend-nueva-pantalla.md
+    lineas: 255
+    resuelto_en:
+      - cuerpo: bulletproof-react
+        ruta: .docs/resources/stack-referencia/bulletproof-react
+        ensena: "Estructura de un React grande: carpetas por FEATURE, no por tipo de fichero."
+  - patron: frontend-stack.md
+    lineas: 246
+    resuelto_en:
+      - cuerpo: bulletproof-react
+        ruta: .docs/resources/stack-referencia/bulletproof-react
+        ensena: "Estructura de un React grande: carpetas por FEATURE, no por tipo de fichero."
+  - patron: rutas.md
+    lineas: 189
+    resuelto_en: []   # SIN precedente — el patrón afirma y no enseña dónde
+  - patron: saneado.md
+    lineas: 209
+    resuelto_en: []   # SIN precedente — el patrón afirma y no enseña dónde
+  - patron: tests.md
+    lineas: 139
+    resuelto_en: []   # SIN precedente — el patrón afirma y no enseña dónde
+
+# 11 patrones con precedente · 29 SIN precedente · 40 en total

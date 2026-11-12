@@ -1,0 +1,21 @@
+<!doctype html><html lang=es><head><meta charset=utf-8><title>GD-11 bueno</title>
+<style>
+  .nav-links { display: flex; gap: 24px; }
+  @media (max-width: 768px) {
+    .nav-links { display: none; }
+    .nav-links[data-abierto="true"] { display: block; }
+    .menu-toggle { display: block; }
+  }
+</style></head><body>
+  <nav>
+    <button class="menu-toggle" aria-expanded="false" aria-controls="lista">Menú</button>
+    <ul id="lista" class="nav-links"><li><a href="/a">Servicios</a></li></ul>
+  </nav>
+<script>
+  var b = document.querySelector('.menu-toggle'), l = document.getElementById('lista');
+  b.addEventListener('click', function () {
+    var abierto = b.getAttribute('aria-expanded') === 'true';
+    b.setAttribute('aria-expanded', String(!abierto));
+    l.dataset.abierto = String(!abierto);
+  });
+</script></body></html>

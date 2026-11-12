@@ -1,0 +1,19 @@
+{
+ "_comment": "Plantilla (sub-ola 2.29, SE-40): lo que las skills vendorizadas de este proyecto mandan a servicios externos. Se copia a .claude/envios-externos.json y lo lee el hook aviso-envio-externo.sh: en un proyecto delicado (.claude/proyecto-delicado.md) PREGUNTA antes de cada envío; en los demás, avisa. `patron` es una regex: en `comandos`, sobre el comando de Bash; en `herramientas`, sobre el nombre de la tool. Procedimiento: rules/vendoring.md. El ejemplo es el de fitapp (T-070). `always_ask: true` en una entrada: pregunta en CUALQUIER proyecto, delicado o no (3.66).",
+ "comandos": [
+  {
+   "patron": "scripts/(logo|cip|icon)/generate\\.py",
+   "que": "el texto de la marca y, con --logo, la imagen del logo",
+   "adonde": "Gemini, AtlasCloud o MuAPI (ui-ux-pro-max-design)",
+   "skill": "ui-ux-pro-max-design",
+   "always_ask": true
+  },
+  {
+   "patron": "@superdesign/cli|\\bsuperdesign\\s+(?:extract|create|init|login|publish|generate)",
+   "que": "las URLs de referencia y el trabajo de diseño; la CLI además envía telemetría anónima (DO_NOT_TRACK=1 la apaga)",
+   "adonde": "la nube de superdesign",
+   "skill": "marca (superdesign, versión fijada en skills/marca/SKILL.md)"
+  }
+ ],
+ "herramientas": []
+}

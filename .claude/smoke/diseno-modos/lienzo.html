@@ -1,0 +1,20 @@
+<!doctype html><html lang=es><head><meta charset=utf-8><title>Lienzo aprobado (fixture)</title>
+<style>
+  /* El artboard de PANTALLA: es el que el código tiene que copiar. Los valores van escritos con
+     otro formato que el tema (0.980 frente a 0.98, #1A1916 frente a #1a1916): el gate compara
+     números y colores, no cadenas. Va aquí y no en el .css porque el formateador del repo los
+     normaliza al guardar un .css. */
+  :root {
+    --color-papel: oklch(0.980 0.010 85);
+    --color-tinta: #1A1916;
+    --color-marca: oklch(0.62 0.080 40);
+    --radio-tarjeta: 12px;
+  }
+  @media (prefers-color-scheme: dark) {
+    /* El oscuro va aparte: no hace «ambiguo» al claro. */
+    :root { --color-papel: oklch(0.2 0.01 85); }
+  }
+</style></head><body>
+  <h1>Pedidos de hoy</h1>
+  <p>Tres pedidos pendientes de preparar antes de las 13:00.</p>
+</body></html>

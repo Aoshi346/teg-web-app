@@ -3,7 +3,7 @@
 > **Cuándo aplicar:** siempre que se **escriba** texto que va a leer una persona (copy de web, email,
 > post, propuesta, microcopy, headline, CTA) y siempre que se **audite** texto buscando tells de
 > generación automática. Es la **fuente única**: antes esta lógica vivía triplicada en
-> `agents/especialista-contenido.md`, `agents/persuasion-specialist.md` (la evitaban al escribir) e
+> `agents/especialista-contenido.md`, `agents/persuasion-specialist.md` (archivados; la evitaban al escribir) e
 > `agents/ignacio-roig.md` (la detecta como categoría AI-SLOP), y las tres divergían. Los dos
 > primeros pasaron el 2026-08-22 a la skill `/escribir-copy`; la fuente única sigue siendo esta.
 >

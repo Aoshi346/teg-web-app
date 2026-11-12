@@ -74,11 +74,25 @@ Cada violación obliga a una penalización numérica **no negociable**.
 | # | Violación | Umbral | Penalización |
 |---|-----------|--------|--------------|
 | A1 | Hover opacity delta | >0.3 | -0.5 (clickbait) |
-| A2 | Micro-interaction duration | >500ms · >1000ms | -0.5 · -1.0 |
+| A2 | Micro-interaction duration | >500ms · >1000ms | -0.5 · -1.0 · **ver la frontera de abajo: no toda animación es micro-interacción** |
 | A3 | Secciones animándose simultáneamente | >3 | -1.0 |
 | A4 | Gradient border rotation speed | <4s por ciclo | -1.0 (casino) |
 | A5 | Shine sweep opacity | >25% | -0.5 |
 | A6 | Urgency badge pulse scale | >1.05 · cycle <2s | -0.5 cada |
+
+> ⚠️ **La frontera que A2 daba por sabida y no lo estaba (2026-09-18).** A2 penaliza toda duración
+> >500 ms, y los reveals medidos en el corpus de la casa duran **0,7-0,9 s** — o sea que aplicarlo
+> a rajatabla penaliza precisamente lo que el Usuario eligió. Falta distinguir tres cosas:
+>
+> | | Qué es | Techo | ¿Aplica A2? |
+> |---|---|---|---|
+> | **Micro-interacción** | Responde a una acción y tiene que sentirse instantáneo: hover, foco, abrir un desplegable | **≤400 ms** | **Sí, entero** |
+> | **Reveal / entrada** | Ocurre solo, una vez, y no bloquea a nadie | 0,7-0,9 s | **No** |
+> | **Ambiente en bucle** | Blobs, respiración, marquesinas | 3-30 s | **No** — lo que aplica es A4 |
+>
+> Excepción nombrada: **transformaciones de imagen al hover, hasta 0,8 s** — responden a una acción,
+> pero es lo que las hace parecer caras en vez de bruscas. Fuera de ahí, 400 ms.
+> Detalle y precedentes: `patterns/diseno/movimiento.md` §10.
 
 ### Shadows
 
@@ -130,23 +144,69 @@ Cada violación obliga a una penalización numérica **no negociable**.
 
 ---
 
-## 4. Reference comparison (mandatory para score >7.0)
+## 3b. Bonificaciones (B1-B8) — porque una rúbrica que solo resta no puede llegar al gate
 
-Antes de asignar score >7.0, el agente debe explicitar paridad con:
-- Stripe.com
-- Linear.app
-- Vercel.com
+**El diagnóstico es aritmético, no de actitud.** Base 5.0 + nueve tablas de penalización y **cero**
+de premio hace que el 9.0 de `rules/qa-loop.md` sea inalcanzable por construcción: el mejor
+resultado medido en tres rondas fue **7,89**, y la salida de emergencia —escalar al Usuario— se
+está usando como camino normal. Es el mismo fallo que §8d ya diagnosticó para `fotos_videos` de
+Lidia, a otra escala.
 
-Formato obligatorio:
+**+0,5 cada una · tope global +2,5 por eje.** Y la regla que impide que esto infle notas:
+
+> **Una bonificación exige CITA o MEDICIÓN. Un adjetivo no es evidencia.**
+> Sin la evidencia de la tercera columna, la bonificación no se concede — igual que una penalización
+> sin su umbral no se aplica.
+
+| # | Se premia | Evidencia obligatoria |
+|---|---|---|
+| B1 | Emparejamiento tipográfico real, con el papel de cada familia declarado | los dos `font-family` computados + qué hace cada uno |
+| B2 | Una decisión formal que se sostiene en todo el producto | el mismo gesto citado en **3 pantallas** |
+| B3 | **Movimiento con intención**: escalonado coherente, un easing por familia, y expresa el sector | `motion.json` + reduced-motion y sin-JS en verde |
+| B4 | Composición con foco claro y asimetría deliberada | captura + la referencia del set que lo ejemplifica |
+| B5 | Tratamiento de imagen único y consistente | 3 imágenes, misma medida |
+| B6 | Detalle de oficio medible: ritmo vertical exacto, alineación óptica, cifras tabulares | estilos computados |
+| B7 | Los cuatro estados diseñados, no un spinner | 4 capturas |
+| B8 | **Restricción**: hace menos y mejor que la referencia | conteo de elementos, misma tarea |
+
+⚠️ **B3 no se concede si `motion_probe` no valida reduced-motion Y sin-JS.** No se premia un
+movimiento bonito que rompe la página cuando el JS no corre — que es exactamente el defecto real de
+`resources/referencias-diseno/mal/attomo-digital.html`.
+
+---
+
+## 4. Reference comparison (mandatory para score >7.0) — v2, contra el set DEL PROYECTO
+
+**Qué cambia y por qué (2026-09-18).** Hasta hoy esto exigía comparar con **Stripe, Linear y
+Vercel**, siempre, fuera cual fuera el producto. Dos problemas medidos:
+
+1. **Empuja a todo hacia el mismo sitio.** Una clínica, una panadería y un despacho auditados
+   contra tres webs de SaaS acaban pareciéndose a tres webs de SaaS — y ese look es literalmente el
+   *cluster 4* que el skill oficial `frontend-design` lista como señal de página generada.
+2. **La comparación no exigía NINGUNA evidencia.** «Stripe.com: [aspecto específico]» se escribe de
+   memoria y nadie puede verificarlo. Una cita que no se puede comprobar no es rigor: es forma.
+
+**El formato nuevo — misma obligación, más rigor:**
 
 ```
-Comparación con referencias premium:
-- Stripe: [aspecto específico donde iguala o no]
-- Linear: [aspecto específico]
-- Vercel: [aspecto específico]
+Comparación con el set de referencias del proyecto:
+- <fichero:línea de una referencia real>: [dónde iguala, dónde se queda corto]
+- <fichero:línea de otra>:                [ídem]
+Veredicto por eje: iguala · supera · se queda corto
 ```
 
-Si el agente no puede identificar 3+ aspectos de paridad → **score ≤7.0**.
+- Las referencias salen de **`.docs/diseno/referencias/<proyecto>/set.json`** (lo produce el paso
+  3 de la skill `marca`) o de **`resources/referencias-diseno/INDEX.json`** (el corpus de la casa).
+  Las dos se citan con **fichero y línea**, y eso **sí** se puede comprobar.
+- **Anti-monocultivo:** al menos **2 de las 5** plazas del set son de FUERA del sector del proyecto.
+- **Si no existe set de referencias → el agente NO puede puntuar >7,0 y lo DECLARA** en su bloque
+  `run` (`referencias: ausentes`). No inventa un techo ni compara de memoria: el instrumento que no
+  puede medir lo dice (`rules/verification.md`).
+- Stripe/Linear/Vercel sobreviven como **fallback declarado**: si se usan, va `referencias:
+  fallback-generico` en el `run`, para que el monocultivo quede visible en los datos en vez de ser
+  el default invisible.
+
+Si el agente no puede citar **2 referencias con fichero:línea** → **techo de 7,0 en ese eje**.
 
 ---
 

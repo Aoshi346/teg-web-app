@@ -1,0 +1,13 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Widget — pareja rota</title>
+<!-- Reproduce el defecto que midió Vera en elvion (iter-11): la burbuja del usuario enfrenta dos
+     tokens de marca. Con --widget-accent teal #2f6f8f, el texto navy queda en 2,29:1. -->
+<style>
+:root{--widget-primary:#243447;--widget-accent:#2f6f8f;--widget-on-primary:#ffffff}
+body{margin:0;background:#fff;font:14px/1.4 system-ui,sans-serif}
+.chat{max-width:360px;margin:24px auto;display:flex;flex-direction:column;gap:8px}
+.bot{align-self:flex-start;background:var(--widget-primary);color:var(--widget-on-primary);padding:8px 12px;border-radius:12px}
+.yo{align-self:flex-end;background:var(--widget-accent);color:var(--widget-primary);padding:8px 12px;border-radius:12px;font-weight:500}
+</style></head><body><main class="chat">
+<p class="bot">Hola, ¿qué estás buscando?</p>
+<p class="yo">busco aceite para motor diésel</p>
+</main></body></html>

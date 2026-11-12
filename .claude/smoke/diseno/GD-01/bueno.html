@@ -1,0 +1,14 @@
+<!doctype html><html lang=es><head><meta charset=utf-8><title>GD-01 bueno</title>
+<style>
+  .reveal { transition: opacity .6s ease; }
+  body.js-ready .reveal { opacity: 0; }
+  body.js-ready .reveal.visible { opacity: 1; }
+</style></head><body>
+  <section class="reveal"><h1>Este titular se ve SIN JS: la guarda la pone el propio JS</h1></section>
+<script>
+  function initReveal() {
+    document.body.classList.add('js-ready');
+    document.querySelectorAll('.reveal').forEach(function (e) { e.classList.add('visible'); });
+  }
+  initReveal();
+</script></body></html>

@@ -1,0 +1,18 @@
+# ANTIPATRÓN A PROPÓSITO — banco de pruebas del checker. No copiar nada de aquí.
+services:
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: facturacion
+      POSTGRES_USER: facturacion
+      POSTGRES_PASSWORD: supersecreto123
+
+  cache:
+    image: redis
+
+  backend:
+    build: ./backend
+    command: python manage.py runserver 0.0.0.0:8000
+    depends_on:
+      - db
+      - cache

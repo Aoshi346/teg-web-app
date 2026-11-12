@@ -1,0 +1,13 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Fallo que solo existe en el móvil</title>
+<!-- Fixture de auditar_a11y.py: a 1440 y 768 px no hay violaciones; a 390 px aparece un aviso gris
+     claro sobre blanco (2,3:1). Es el caso de AMC: medir solo en escritorio da un «0» incompleto. -->
+<style>
+body{margin:0;font:16px/1.5 system-ui,sans-serif;color:#1b2a4a;background:#fff}
+main{max-width:640px;margin:24px auto;padding:0 16px}
+.aviso-movil{display:none;color:#a3a3a3}
+@media (max-width:500px){.aviso-movil{display:block}}
+</style></head><body><main>
+<h1>Pedidos</h1>
+<p>Lista de pedidos del día.</p>
+<p class="aviso-movil">Desliza para ver más columnas</p>
+</main></body></html>

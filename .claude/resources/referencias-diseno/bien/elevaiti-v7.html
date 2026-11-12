@@ -1,0 +1,3348 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ElevaiTI — Agencia de Inteligencia Artificial · Barcelona</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<style>
+/* ===== RESET & ROOT ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --indigo: #4F46E5;
+  --indigo-light: #818CF8;
+  --indigo-dark: #3730A3;
+  --indigo-50: #EEF2FF;
+  --coral: #F97316;
+  --coral-light: #FDBA74;
+  --coral-dark: #EA580C;
+  --coral-50: #FFF7ED;
+  --green: #10B981;
+  --green-light: #6EE7B7;
+  --green-dark: #059669;
+  --green-50: #ECFDF5;
+  --purple: #8B5CF6;
+  --pink: #EC4899;
+  --yellow: #F59E0B;
+  --dark: #0F0F1A;
+  --dark-2: #1A1A2E;
+  --dark-3: #16213E;
+  --mid: #2D2D4E;
+  --light: #F8F9FF;
+  --text: #1E1B4B;
+  --text-soft: #6B7280;
+  --border: rgba(79,70,229,0.15);
+  --radius: 16px;
+  --radius-sm: 8px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+  --shadow: 0 4px 24px rgba(79,70,229,0.12);
+  --shadow-lg: 0 12px 48px rgba(79,70,229,0.2);
+  --transition: 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  --font-head: 'Sora', sans-serif;
+  --font-body: 'Inter', sans-serif;
+}
+html { scroll-behavior: smooth; font-size: 16px; }
+body {
+  font-family: var(--font-body);
+  background: var(--dark);
+  color: #fff;
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+a { text-decoration: none; color: inherit; }
+img { max-width: 100%; }
+button { cursor: pointer; border: none; outline: none; font-family: var(--font-body); }
+ul { list-style: none; }
+
+/* ===== SCROLL PROGRESS BAR ===== */
+#progress-bar {
+  position: fixed;
+  top: 0; left: 0;
+  height: 3px;
+  width: 0%;
+  background: linear-gradient(90deg, var(--indigo), var(--coral), var(--green));
+  z-index: 9999;
+  transition: width 0.1s linear;
+  box-shadow: 0 0 12px rgba(249,115,22,0.8);
+}
+
+/* ===== NAVBAR ===== */
+.navbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 1000;
+  padding: 1rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.3s ease;
+  background: transparent;
+}
+.navbar.scrolled {
+  background: rgba(15,15,26,0.92);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 0.75rem 2rem;
+}
+.nav-logo {
+  font-family: var(--font-head);
+  font-size: 1.5rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.nav-logo-icon {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, var(--indigo), var(--coral));
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem;
+}
+.nav-logo span.hi { color: var(--indigo-light); }
+.nav-logo span.ti { color: var(--coral); }
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+.nav-links a {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: rgba(255,255,255,0.75);
+  transition: color 0.2s;
+  position: relative;
+}
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: -4px; left: 0; right: 0;
+  height: 2px;
+  background: var(--coral);
+  transform: scaleX(0);
+  transition: transform 0.3s;
+}
+.nav-links a:hover { color: #fff; }
+.nav-links a:hover::after { transform: scaleX(1); }
+.nav-cta {
+  padding: 0.6rem 1.4rem;
+  background: linear-gradient(135deg, var(--indigo), var(--purple));
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: #fff !important;
+  transition: var(--transition) !important;
+  box-shadow: 0 4px 16px rgba(79,70,229,0.4);
+}
+.nav-cta:hover {
+  transform: translateY(-2px) scale(1.04) !important;
+  box-shadow: 0 8px 28px rgba(79,70,229,0.5) !important;
+}
+.nav-cta::after { display: none !important; }
+.hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; }
+.hamburger span { width: 24px; height: 2px; background: #fff; transition: 0.3s; border-radius: 2px; }
+
+/* ===== HERO ===== */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  padding: 6rem 2rem 4rem;
+}
+.hero-bg {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(79,70,229,0.35) 0%, transparent 60%),
+              radial-gradient(ellipse 60% 40% at 90% 80%, rgba(249,115,22,0.2) 0%, transparent 50%),
+              radial-gradient(ellipse 50% 50% at 10% 90%, rgba(16,185,129,0.15) 0%, transparent 50%);
+}
+.hero-grid {
+  position: absolute; inset: 0;
+  background-image: linear-gradient(rgba(79,70,229,0.06) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(79,70,229,0.06) 1px, transparent 1px);
+  background-size: 60px 60px;
+  animation: gridPulse 8s ease-in-out infinite;
+}
+@keyframes gridPulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+.hero-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(79,70,229,0.15);
+  border: 1px solid rgba(79,70,229,0.3);
+  border-radius: 50px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--indigo-light);
+  margin-bottom: 1.5rem;
+  backdrop-filter: blur(10px);
+}
+.hero-badge-dot {
+  width: 8px; height: 8px;
+  background: var(--green);
+  border-radius: 50%;
+  animation: pulse-dot 2s infinite;
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+.hero-title {
+  font-family: var(--font-head);
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 800;
+  line-height: 1.1;
+  margin-bottom: 1.5rem;
+}
+.hero-title .line-1 { display: block; }
+.hero-title .gradient-text {
+  background: linear-gradient(135deg, var(--indigo-light), var(--coral));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero-title .accent { color: var(--green); }
+.hero-desc {
+  font-size: 1.15rem;
+  color: rgba(255,255,255,0.7);
+  margin-bottom: 2.5rem;
+  line-height: 1.7;
+  max-width: 520px;
+}
+.hero-buttons {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.btn-primary {
+  padding: 0.9rem 2rem;
+  background: linear-gradient(135deg, var(--indigo), var(--coral));
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 1rem;
+  color: #fff;
+  transition: var(--transition);
+  box-shadow: 0 8px 32px rgba(79,70,229,0.4);
+  display: inline-flex; align-items: center; gap: 0.5rem;
+}
+.btn-primary:hover {
+  transform: translateY(-3px) scale(1.04);
+  box-shadow: 0 16px 48px rgba(79,70,229,0.5);
+}
+.btn-ghost {
+  padding: 0.9rem 2rem;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 1rem;
+  color: #fff;
+  transition: var(--transition);
+  backdrop-filter: blur(10px);
+  display: inline-flex; align-items: center; gap: 0.5rem;
+}
+.btn-ghost:hover {
+  background: rgba(255,255,255,0.1);
+  border-color: rgba(255,255,255,0.3);
+  transform: translateY(-2px);
+}
+.hero-stats {
+  display: flex;
+  gap: 2.5rem;
+  margin-top: 3rem;
+}
+.hero-stat-item { }
+.hero-stat-num {
+  font-family: var(--font-head);
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1;
+  background: linear-gradient(135deg, var(--indigo-light), var(--coral-light));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero-stat-label {
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.5);
+  margin-top: 0.25rem;
+}
+
+/* Hero Visual */
+.hero-visual {
+  position: relative;
+  height: 500px;
+}
+.hero-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  animation: float 6s ease-in-out infinite;
+}
+.hero-orb-1 {
+  width: 300px; height: 300px;
+  background: rgba(79,70,229,0.4);
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+}
+.hero-orb-2 {
+  width: 200px; height: 200px;
+  background: rgba(249,115,22,0.3);
+  top: 20%; right: 10%;
+  animation-delay: -2s;
+}
+.hero-orb-3 {
+  width: 150px; height: 150px;
+  background: rgba(16,185,129,0.3);
+  bottom: 20%; left: 10%;
+  animation-delay: -4s;
+}
+@keyframes float {
+  0%, 100% { transform: translate(-50%, -50%) translateY(0); }
+  50% { transform: translate(-50%, -50%) translateY(-20px); }
+}
+.hero-card-float {
+  position: absolute;
+  background: rgba(30,27,74,0.7);
+  border: 1px solid rgba(79,70,229,0.3);
+  border-radius: var(--radius);
+  padding: 1.25rem 1.5rem;
+  backdrop-filter: blur(20px);
+  box-shadow: var(--shadow-lg);
+  animation: cardFloat 5s ease-in-out infinite;
+}
+@keyframes cardFloat {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  33% { transform: translateY(-12px) rotate(1deg); }
+  66% { transform: translateY(-6px) rotate(-0.5deg); }
+}
+.hero-card-1 {
+  top: 15%; left: 50%;
+  transform: translateX(-50%);
+  width: 240px;
+  animation-delay: 0s;
+}
+.hero-card-2 {
+  bottom: 20%; left: 5%;
+  width: 180px;
+  animation-delay: -1.5s;
+}
+.hero-card-3 {
+  top: 45%; right: 5%;
+  width: 160px;
+  animation-delay: -3s;
+}
+.hero-card-label {
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.5rem;
+}
+.hero-card-val {
+  font-family: var(--font-head);
+  font-size: 1.4rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.hero-card-val .up { color: var(--green); font-size: 0.9rem; }
+.hero-card-sparkline {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 28px;
+  margin-top: 0.75rem;
+}
+.sparkline-bar {
+  width: 8px;
+  background: var(--indigo);
+  border-radius: 2px;
+  transition: height 0.5s;
+}
+.hero-card-ai {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.hero-card-ai-icon {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, var(--coral), var(--pink));
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+.hero-card-ai-text { }
+.hero-card-ai-name { font-size: 0.875rem; font-weight: 600; }
+.hero-card-ai-sub { font-size: 0.75rem; color: rgba(255,255,255,0.5); }
+.hero-center-sphere {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  background: conic-gradient(from 180deg, var(--indigo), var(--coral), var(--green), var(--purple), var(--indigo));
+  animation: spin 20s linear infinite;
+  box-shadow: 0 0 80px rgba(79,70,229,0.5);
+}
+.hero-center-sphere::before {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  background: var(--dark-2);
+  border-radius: 50%;
+}
+.hero-center-sphere::after {
+  content: '🧠';
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 3rem;
+  z-index: 1;
+}
+@keyframes spin { from { transform: translate(-50%, -50%) rotate(0deg); } to { transform: translate(-50%, -50%) rotate(360deg); } }
+.orbit-ring {
+  position: absolute;
+  top: 50%; left: 50%;
+  border-radius: 50%;
+  border: 1px solid rgba(79,70,229,0.2);
+  animation: orbit-spin 15s linear infinite;
+}
+.orbit-ring-1 {
+  width: 280px; height: 280px;
+  margin: -140px 0 0 -140px;
+}
+.orbit-ring-2 {
+  width: 360px; height: 360px;
+  margin: -180px 0 0 -180px;
+  animation-direction: reverse;
+  animation-duration: 20s;
+  border-color: rgba(249,115,22,0.15);
+}
+.orbit-dot {
+  position: absolute;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  top: -5px; left: 50%;
+  margin-left: -5px;
+}
+.orbit-dot-1 { background: var(--indigo-light); box-shadow: 0 0 12px var(--indigo); }
+.orbit-dot-2 { background: var(--coral); box-shadow: 0 0 12px var(--coral); top: auto; bottom: -5px; }
+.orbit-dot-3 { background: var(--green); box-shadow: 0 0 12px var(--green); top: 50%; left: -5px; margin: -5px 0 0 0; }
+@keyframes orbit-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+/* ===== SECTION COMMON ===== */
+section {
+  padding: 6rem 2rem;
+  position: relative;
+}
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.section-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 1rem;
+  border-radius: 50px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 1rem;
+}
+.tag-indigo { background: rgba(79,70,229,0.15); color: var(--indigo-light); border: 1px solid rgba(79,70,229,0.3); }
+.tag-coral { background: rgba(249,115,22,0.15); color: var(--coral-light); border: 1px solid rgba(249,115,22,0.3); }
+.tag-green { background: rgba(16,185,129,0.15); color: var(--green-light); border: 1px solid rgba(16,185,129,0.3); }
+.tag-purple { background: rgba(139,92,246,0.15); color: #C4B5FD; border: 1px solid rgba(139,92,246,0.3); }
+.section-title {
+  font-family: var(--font-head);
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 800;
+  line-height: 1.15;
+  margin-bottom: 1rem;
+}
+.section-sub {
+  font-size: 1.1rem;
+  color: rgba(255,255,255,0.6);
+  max-width: 560px;
+  line-height: 1.7;
+}
+.text-center { text-align: center; }
+.text-center .section-sub { margin: 0 auto; }
+.gradient-text {
+  background: linear-gradient(135deg, var(--indigo-light), var(--coral));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.gradient-text-green {
+  background: linear-gradient(135deg, var(--green), var(--indigo-light));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ===== LOGOS STRIP ===== */
+.logos-section {
+  padding: 3rem 2rem;
+  border-top: 1px solid rgba(79,70,229,0.1);
+  border-bottom: 1px solid rgba(79,70,229,0.1);
+  background: rgba(79,70,229,0.03);
+}
+.logos-label {
+  text-align: center;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255,255,255,0.35);
+  margin-bottom: 2rem;
+  font-weight: 600;
+}
+.logos-track-wrap {
+  overflow: hidden;
+  mask-image: linear-gradient(90deg, transparent 0%, #000 15%, #000 85%, transparent 100%);
+}
+.logos-track {
+  display: flex;
+  gap: 4rem;
+  align-items: center;
+  animation: scrollLogos 25s linear infinite;
+  width: max-content;
+}
+.logos-track:hover { animation-play-state: paused; }
+@keyframes scrollLogos {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.logo-item {
+  font-family: var(--font-head);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.25);
+  white-space: nowrap;
+  transition: color 0.3s;
+}
+.logo-item:hover { color: rgba(255,255,255,0.6); }
+.logo-item span { color: var(--indigo-light); }
+
+/* ===== FLIP CARDS SECTION ===== */
+.services-section {
+  background: linear-gradient(180deg, var(--dark) 0%, var(--dark-2) 50%, var(--dark) 100%);
+}
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-top: 3.5rem;
+}
+.flip-card {
+  height: 340px;
+  perspective: 1200px;
+  cursor: pointer;
+}
+.flip-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.7s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  transform-style: preserve-3d;
+}
+.flip-card:hover .flip-card-inner {
+  transform: rotateY(180deg);
+}
+.flip-front, .flip-back {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.flip-front {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  overflow: hidden;
+}
+.flip-back {
+  transform: rotateY(180deg);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+/* Card themes */
+.card-indigo .flip-front { background: linear-gradient(135deg, #1E1B4B 0%, #312E81 50%, #4338CA 100%); border: 1px solid rgba(79,70,229,0.3); }
+.card-indigo .flip-back { background: linear-gradient(135deg, var(--indigo), #6366F1); }
+.card-coral .flip-front { background: linear-gradient(135deg, #1C1007 0%, #431407 50%, #7C2D12 100%); border: 1px solid rgba(249,115,22,0.3); }
+.card-coral .flip-back { background: linear-gradient(135deg, var(--coral-dark), var(--coral)); }
+.card-green .flip-front { background: linear-gradient(135deg, #022C22 0%, #064E3B 50%, #065F46 100%); border: 1px solid rgba(16,185,129,0.3); }
+.card-green .flip-back { background: linear-gradient(135deg, var(--green-dark), var(--green)); }
+.card-purple .flip-front { background: linear-gradient(135deg, #1C1531 0%, #2E1065 50%, #4C1D95 100%); border: 1px solid rgba(139,92,246,0.3); }
+.card-purple .flip-back { background: linear-gradient(135deg, #6D28D9, var(--purple)); }
+.card-pink .flip-front { background: linear-gradient(135deg, #1A0820 0%, #500724 50%, #831843 100%); border: 1px solid rgba(236,72,153,0.3); }
+.card-pink .flip-back { background: linear-gradient(135deg, #BE185D, var(--pink)); }
+.card-yellow .flip-front { background: linear-gradient(135deg, #1C1400 0%, #451A03 50%, #78350F 100%); border: 1px solid rgba(245,158,11,0.3); }
+.card-yellow .flip-back { background: linear-gradient(135deg, #B45309, var(--yellow)); }
+.flip-front-icon {
+  font-size: 3.5rem;
+  margin-bottom: 1.25rem;
+  display: block;
+  filter: drop-shadow(0 0 20px currentColor);
+}
+.flip-front-bg-text {
+  position: absolute;
+  top: 1rem; right: 1rem;
+  font-family: var(--font-head);
+  font-size: 4rem;
+  font-weight: 900;
+  color: rgba(255,255,255,0.04);
+  line-height: 1;
+  pointer-events: none;
+}
+.flip-front-title {
+  font-family: var(--font-head);
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+.flip-front-tag {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  background: rgba(255,255,255,0.1);
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.flip-back-title {
+  font-family: var(--font-head);
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+.flip-back-desc {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  opacity: 0.9;
+  margin-bottom: 1.25rem;
+}
+.flip-back-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+}
+.flip-back-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  opacity: 0.9;
+}
+.flip-back-list li::before { content: '✓'; font-weight: 700; }
+.flip-hint {
+  position: absolute;
+  top: 1rem; right: 1rem;
+  font-size: 0.7rem;
+  opacity: 0.4;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* ===== TABS SECTION ===== */
+.tabs-section {
+  background: var(--dark-2);
+}
+.tabs-header {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2.5rem;
+  flex-wrap: wrap;
+}
+.tab-btn {
+  padding: 0.65rem 1.4rem;
+  border-radius: 50px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.5);
+  border: 1px solid transparent;
+  transition: all 0.3s;
+}
+.tab-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+.tab-btn.active {
+  background: linear-gradient(135deg, var(--indigo), var(--purple));
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(79,70,229,0.4);
+}
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+.tab-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  align-items: center;
+}
+.tab-info h3 {
+  font-family: var(--font-head);
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+.tab-info p {
+  color: rgba(255,255,255,0.65);
+  line-height: 1.7;
+  margin-bottom: 1.5rem;
+}
+.tab-features {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.tab-feature {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: rgba(255,255,255,0.04);
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255,255,255,0.06);
+  transition: border-color 0.3s;
+}
+.tab-feature:hover { border-color: rgba(79,70,229,0.3); }
+.tab-feature-icon {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+.tab-feature-icon.ind { background: rgba(79,70,229,0.2); }
+.tab-feature-icon.cor { background: rgba(249,115,22,0.2); }
+.tab-feature-icon.gre { background: rgba(16,185,129,0.2); }
+.tab-feature-text strong { display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 0.15rem; }
+.tab-feature-text span { font-size: 0.8rem; color: rgba(255,255,255,0.5); }
+.tab-visual {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(79,70,229,0.2);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  position: relative;
+  overflow: hidden;
+}
+.tab-visual::before {
+  content: '';
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, rgba(79,70,229,0.15), transparent);
+  border-radius: 50%;
+}
+
+/* ===== MINI CHATBOT DEMO ===== */
+.chat-demo {
+  background: rgba(15,15,26,0.8);
+  border: 1px solid rgba(79,70,229,0.2);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.chat-header {
+  padding: 1rem 1.25rem;
+  background: rgba(79,70,229,0.1);
+  border-bottom: 1px solid rgba(79,70,229,0.2);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.chat-avatar {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, var(--indigo), var(--coral));
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem;
+}
+.chat-header-info .name { font-weight: 600; font-size: 0.875rem; }
+.chat-header-info .status { font-size: 0.75rem; color: var(--green); display: flex; align-items: center; gap: 0.3rem; }
+.chat-header-info .status::before { content: '●'; animation: pulse-dot 2s infinite; }
+.chat-header-controls { margin-left: auto; display: flex; gap: 0.5rem; }
+.chat-ctrl { width: 10px; height: 10px; border-radius: 50%; }
+.chat-ctrl.red { background: #FF5F57; }
+.chat-ctrl.yellow { background: #FFBD2E; }
+.chat-ctrl.green { background: #28CA41; }
+.chat-messages {
+  padding: 1.25rem;
+  height: 260px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.chat-messages::-webkit-scrollbar { width: 4px; }
+.chat-messages::-webkit-scrollbar-track { background: transparent; }
+.chat-messages::-webkit-scrollbar-thumb { background: rgba(79,70,229,0.3); border-radius: 2px; }
+.msg {
+  max-width: 85%;
+  padding: 0.65rem 0.9rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  animation: msgIn 0.3s ease;
+}
+@keyframes msgIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.msg-bot {
+  background: rgba(79,70,229,0.15);
+  border: 1px solid rgba(79,70,229,0.2);
+  border-bottom-left-radius: 4px;
+  align-self: flex-start;
+}
+.msg-user {
+  background: linear-gradient(135deg, rgba(249,115,22,0.2), rgba(249,115,22,0.1));
+  border: 1px solid rgba(249,115,22,0.2);
+  border-bottom-right-radius: 4px;
+  align-self: flex-end;
+}
+.msg-typing {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  padding: 0.75rem 1rem;
+}
+.typing-dot {
+  width: 6px; height: 6px;
+  background: var(--indigo-light);
+  border-radius: 50%;
+  animation: typing 1.2s infinite;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes typing { 0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); } 40% { opacity: 1; transform: scale(1); } }
+.chat-input-area {
+  padding: 0.75rem 1rem;
+  border-top: 1px solid rgba(79,70,229,0.2);
+  display: flex;
+  gap: 0.5rem;
+}
+.chat-input {
+  flex: 1;
+  padding: 0.5rem 0.85rem;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  font-size: 0.8rem;
+  color: #fff;
+  font-family: var(--font-body);
+}
+.chat-input::placeholder { color: rgba(255,255,255,0.3); }
+.chat-input:focus { outline: none; border-color: rgba(79,70,229,0.4); }
+.chat-send {
+  width: 32px; height: 32px;
+  background: linear-gradient(135deg, var(--indigo), var(--coral));
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.8rem;
+  color: #fff;
+  transition: var(--transition);
+}
+.chat-send:hover { transform: scale(1.1) rotate(-10deg); }
+
+/* ===== MINI DASHBOARD DEMO ===== */
+.dash-demo {
+  background: rgba(15,15,26,0.8);
+  border: 1px solid rgba(16,185,129,0.2);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.dash-topbar {
+  padding: 0.85rem 1.25rem;
+  background: rgba(16,185,129,0.08);
+  border-bottom: 1px solid rgba(16,185,129,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.dash-topbar-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--green-light);
+}
+.dash-topbar-time {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.4);
+  font-family: monospace;
+}
+.dash-kpis {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+}
+.dash-kpi {
+  padding: 1rem;
+  border-right: 1px solid rgba(255,255,255,0.05);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.dash-kpi:last-child { border-right: none; }
+.dash-kpi-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.4); margin-bottom: 0.4rem; }
+.dash-kpi-val { font-family: var(--font-head); font-size: 1.4rem; font-weight: 700; }
+.dash-kpi-change { font-size: 0.7rem; margin-top: 0.2rem; }
+.dash-kpi-change.up { color: var(--green); }
+.dash-kpi-change.down { color: var(--coral); }
+.dash-chart-area {
+  padding: 1rem 1.25rem;
+}
+.dash-chart-title { font-size: 0.75rem; color: rgba(255,255,255,0.4); margin-bottom: 0.75rem; }
+.dash-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 80px;
+}
+.dash-bar {
+  flex: 1;
+  border-radius: 4px 4px 0 0;
+  position: relative;
+  transition: height 0.5s ease;
+  cursor: pointer;
+}
+.dash-bar:hover { filter: brightness(1.2); }
+.dash-bar-tooltip {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--dark);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.65rem;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+.dash-bar:hover .dash-bar-tooltip { opacity: 1; }
+.dash-labels {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+.dash-label { flex: 1; text-align: center; font-size: 0.6rem; color: rgba(255,255,255,0.3); }
+
+/* ===== STATS SECTION ===== */
+.stats-section {
+  background: linear-gradient(135deg, var(--dark-3) 0%, var(--dark-2) 50%, var(--dark) 100%);
+  overflow: hidden;
+}
+.stats-bg {
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 60% 80% at 50% 50%, rgba(79,70,229,0.08) 0%, transparent 70%);
+}
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem;
+  margin-top: 4rem;
+  position: relative;
+  z-index: 1;
+}
+.stat-card {
+  text-align: center;
+  padding: 2.5rem 1.5rem;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: var(--radius-lg);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s, border-color 0.3s;
+}
+.stat-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(79,70,229,0.3);
+}
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+}
+.stat-card-1::before { background: linear-gradient(90deg, var(--indigo), var(--purple)); }
+.stat-card-2::before { background: linear-gradient(90deg, var(--coral), var(--pink)); }
+.stat-card-3::before { background: linear-gradient(90deg, var(--green), var(--indigo-light)); }
+.stat-card-4::before { background: linear-gradient(90deg, var(--yellow), var(--coral)); }
+.stat-icon { font-size: 2rem; margin-bottom: 1rem; }
+.stat-number {
+  font-family: var(--font-head);
+  font-size: 3rem;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+.stat-number.c1 { color: var(--indigo-light); }
+.stat-number.c2 { color: var(--coral-light); }
+.stat-number.c3 { color: var(--green-light); }
+.stat-number.c4 { color: #FDE68A; }
+.stat-label { font-size: 0.9rem; color: rgba(255,255,255,0.6); font-weight: 500; }
+.stat-sublabel { font-size: 0.75rem; color: rgba(255,255,255,0.3); margin-top: 0.25rem; }
+
+/* ===== PROCESS SECTION ===== */
+.process-section { background: var(--dark); }
+.process-steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  margin-top: 3.5rem;
+  position: relative;
+}
+.process-steps::before {
+  content: '';
+  position: absolute;
+  top: 32px; left: 10%; right: 10%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--indigo), var(--coral), var(--green), var(--purple));
+  z-index: 0;
+}
+.process-step {
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+.process-num {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 1.5rem;
+  font-family: var(--font-head);
+  font-size: 1.3rem;
+  font-weight: 800;
+  position: relative;
+}
+.process-num-1 { background: linear-gradient(135deg, var(--indigo), var(--purple)); box-shadow: 0 0 24px rgba(79,70,229,0.5); }
+.process-num-2 { background: linear-gradient(135deg, var(--coral-dark), var(--coral)); box-shadow: 0 0 24px rgba(249,115,22,0.5); }
+.process-num-3 { background: linear-gradient(135deg, var(--green-dark), var(--green)); box-shadow: 0 0 24px rgba(16,185,129,0.5); }
+.process-num-4 { background: linear-gradient(135deg, #7C3AED, var(--pink)); box-shadow: 0 0 24px rgba(139,92,246,0.5); }
+.process-step h4 {
+  font-family: var(--font-head);
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+.process-step p { font-size: 0.85rem; color: rgba(255,255,255,0.55); line-height: 1.6; }
+
+/* ===== PRICING SECTION ===== */
+.pricing-section {
+  background: linear-gradient(180deg, var(--dark-2) 0%, var(--dark) 100%);
+}
+.pricing-toggle-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin: 2rem 0 3rem;
+}
+.pricing-toggle-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.6);
+  transition: color 0.3s;
+}
+.pricing-toggle-label.active { color: #fff; }
+.pricing-toggle {
+  position: relative;
+  width: 60px; height: 30px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 15px;
+  cursor: pointer;
+  transition: background 0.3s;
+  border: 1px solid rgba(255,255,255,0.15);
+}
+.pricing-toggle.yearly { background: linear-gradient(135deg, var(--indigo), var(--coral)); }
+.pricing-toggle-thumb {
+  position: absolute;
+  top: 3px; left: 3px;
+  width: 22px; height: 22px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+.pricing-toggle.yearly .pricing-toggle-thumb { transform: translateX(30px); }
+.pricing-badge {
+  padding: 0.3rem 0.7rem;
+  background: rgba(16,185,129,0.15);
+  border: 1px solid rgba(16,185,129,0.3);
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--green-light);
+}
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+.pricing-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: var(--radius-xl);
+  padding: 2rem;
+  position: relative;
+  transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+}
+.pricing-card:hover {
+  transform: translateY(-8px);
+  border-color: rgba(79,70,229,0.3);
+  box-shadow: var(--shadow-lg);
+}
+.pricing-card.featured {
+  border-color: var(--indigo);
+  background: linear-gradient(135deg, rgba(79,70,229,0.12), rgba(139,92,246,0.08));
+  transform: scale(1.03);
+}
+.pricing-card.featured:hover { transform: scale(1.03) translateY(-8px); }
+.pricing-popular {
+  position: absolute;
+  top: -12px; left: 50%;
+  transform: translateX(-50%);
+  padding: 0.25rem 0.9rem;
+  background: linear-gradient(135deg, var(--indigo), var(--coral));
+  border-radius: 50px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.pricing-plan-icon {
+  width: 52px; height: 52px;
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+.pricing-plan-name {
+  font-family: var(--font-head);
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+}
+.pricing-plan-desc {
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.5);
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+.pricing-price-block {
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  padding-bottom: 1.5rem;
+}
+.pricing-amount {
+  font-family: var(--font-head);
+  font-size: 2.5rem;
+  font-weight: 800;
+  line-height: 1;
+}
+.pricing-amount .currency { font-size: 1.2rem; vertical-align: top; margin-top: 0.4rem; display: inline-block; }
+.pricing-amount .period { font-size: 0.85rem; font-weight: 400; color: rgba(255,255,255,0.5); }
+.pricing-orig { font-size: 0.85rem; color: rgba(255,255,255,0.35); text-decoration: line-through; margin-top: 0.25rem; }
+.pricing-features {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-bottom: 2rem;
+}
+.pricing-feature {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-size: 0.875rem;
+  color: rgba(255,255,255,0.8);
+}
+.pricing-feature .check { color: var(--green); flex-shrink: 0; }
+.pricing-feature .x { color: rgba(255,255,255,0.2); flex-shrink: 0; }
+.pricing-feature.disabled { opacity: 0.35; }
+.pricing-btn {
+  width: 100%;
+  padding: 0.85rem;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  transition: var(--transition);
+}
+.pricing-btn-outline {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.2);
+  color: #fff;
+}
+.pricing-btn-outline:hover {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.4);
+  transform: translateY(-2px);
+}
+.pricing-btn-fill {
+  background: linear-gradient(135deg, var(--indigo), var(--coral));
+  border: none;
+  color: #fff;
+  box-shadow: 0 6px 24px rgba(79,70,229,0.4);
+}
+.pricing-btn-fill:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 36px rgba(79,70,229,0.5);
+}
+
+/* ===== TESTIMONIALS ===== */
+.testimonials-section { background: var(--dark-3); overflow: hidden; }
+.testimonials-track-outer {
+  overflow: hidden;
+  margin: 3rem -2rem;
+  mask-image: linear-gradient(90deg, transparent 0%, #000 10%, #000 90%, transparent 100%);
+}
+.testimonials-track {
+  display: flex;
+  gap: 1.5rem;
+  padding: 1rem 2rem;
+  animation: scrollTestimonials 35s linear infinite;
+  width: max-content;
+}
+.testimonials-track:hover { animation-play-state: paused; }
+@keyframes scrollTestimonials {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.testimonial-card {
+  width: 320px;
+  flex-shrink: 0;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem;
+  transition: border-color 0.3s, transform 0.3s;
+}
+.testimonial-card:hover {
+  border-color: rgba(79,70,229,0.3);
+  transform: translateY(-4px);
+}
+.testimonial-stars {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 1rem;
+  color: var(--yellow);
+  font-size: 0.85rem;
+}
+.testimonial-text {
+  font-size: 0.875rem;
+  color: rgba(255,255,255,0.75);
+  line-height: 1.65;
+  margin-bottom: 1.25rem;
+  font-style: italic;
+}
+.testimonial-author {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.testimonial-avatar {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+.testimonial-name { font-weight: 600; font-size: 0.875rem; }
+.testimonial-role { font-size: 0.75rem; color: rgba(255,255,255,0.4); }
+.testimonial-company-badge {
+  margin-left: auto;
+  padding: 0.2rem 0.5rem;
+  background: rgba(255,255,255,0.06);
+  border-radius: 6px;
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.4);
+}
+
+/* ===== FAQ SECTION ===== */
+.faq-section { background: var(--dark-2); }
+.faq-layout {
+  display: grid;
+  grid-template-columns: 2fr 3fr;
+  gap: 4rem;
+  align-items: start;
+  margin-top: 3rem;
+}
+.faq-list { display: flex; flex-direction: column; gap: 0.75rem; }
+.faq-item {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: border-color 0.3s;
+}
+.faq-item.open { border-color: rgba(79,70,229,0.35); }
+.faq-question {
+  padding: 1.15rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.925rem;
+  transition: color 0.3s;
+  user-select: none;
+}
+.faq-item.open .faq-question { color: var(--indigo-light); }
+.faq-icon {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: rgba(79,70,229,0.15);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem;
+  flex-shrink: 0;
+  transition: transform 0.4s, background 0.3s;
+  color: var(--indigo-light);
+  font-weight: 700;
+  line-height: 1;
+}
+.faq-item.open .faq-icon {
+  transform: rotate(45deg);
+  background: rgba(79,70,229,0.3);
+}
+.faq-answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease, padding 0.3s;
+  padding: 0 1.25rem;
+}
+.faq-item.open .faq-answer {
+  max-height: 200px;
+  padding: 0 1.25rem 1.25rem;
+}
+.faq-answer p {
+  font-size: 0.875rem;
+  color: rgba(255,255,255,0.65);
+  line-height: 1.7;
+}
+.faq-contact-card {
+  background: linear-gradient(135deg, rgba(79,70,229,0.15), rgba(249,115,22,0.1));
+  border: 1px solid rgba(79,70,229,0.25);
+  border-radius: var(--radius-xl);
+  padding: 2.5rem;
+  position: sticky;
+  top: 100px;
+}
+.faq-contact-card h3 {
+  font-family: var(--font-head);
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+}
+.faq-contact-card p {
+  font-size: 0.875rem;
+  color: rgba(255,255,255,0.6);
+  margin-bottom: 1.75rem;
+  line-height: 1.6;
+}
+.faq-contact-options { display: flex; flex-direction: column; gap: 0.75rem; }
+.faq-contact-option {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #fff;
+}
+.faq-contact-option:hover {
+  background: rgba(79,70,229,0.15);
+  border-color: rgba(79,70,229,0.3);
+  transform: translateX(4px);
+}
+.faq-contact-icon {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem;
+}
+
+/* ===== TECH STACK ===== */
+.tech-section { background: var(--dark); }
+.tech-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 1rem;
+  margin-top: 3rem;
+}
+.tech-item {
+  padding: 1.25rem 1rem;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: var(--radius);
+  text-align: center;
+  transition: all 0.3s;
+  cursor: default;
+}
+.tech-item:hover {
+  transform: translateY(-4px);
+  border-color: rgba(79,70,229,0.3);
+  background: rgba(79,70,229,0.08);
+}
+.tech-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+.tech-name { font-size: 0.75rem; font-weight: 600; color: rgba(255,255,255,0.6); }
+
+/* ===== CTA SECTION ===== */
+.cta-section {
+  background: linear-gradient(135deg, var(--indigo-dark) 0%, var(--dark-3) 40%, var(--dark-2) 60%, #0C0C1D 100%);
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+}
+.cta-bg {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 60% 60% at 30% 50%, rgba(79,70,229,0.25) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 50% at 70% 50%, rgba(249,115,22,0.15) 0%, transparent 60%);
+}
+.cta-particles {
+  position: absolute; inset: 0; overflow: hidden;
+}
+.cta-particle {
+  position: absolute;
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: rgba(79,70,229,0.6);
+  animation: particleFloat linear infinite;
+}
+@keyframes particleFloat {
+  from { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  to { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+}
+.cta-content {
+  position: relative;
+  z-index: 2;
+  max-width: 720px;
+  margin: 0 auto;
+}
+.cta-emoji { font-size: 4rem; display: block; margin-bottom: 1.5rem; }
+.cta-title {
+  font-family: var(--font-head);
+  font-size: clamp(2.2rem, 5vw, 3.5rem);
+  font-weight: 800;
+  margin-bottom: 1.25rem;
+  line-height: 1.15;
+}
+.cta-sub {
+  font-size: 1.1rem;
+  color: rgba(255,255,255,0.65);
+  margin-bottom: 3rem;
+  line-height: 1.7;
+}
+.cta-buttons { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+.cta-bottom-badges {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  margin-top: 3rem;
+  flex-wrap: wrap;
+}
+.cta-badge-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.5);
+}
+.cta-badge-item span { font-size: 1.1rem; }
+
+/* ===== FOOTER ===== */
+footer {
+  background: var(--dark);
+  border-top: 1px solid rgba(255,255,255,0.05);
+  padding: 4rem 2rem 2rem;
+}
+.footer-top {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 3rem;
+  margin-bottom: 3rem;
+}
+.footer-brand .footer-logo {
+  font-family: var(--font-head);
+  font-size: 1.4rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+.footer-brand .footer-logo-icon {
+  width: 32px; height: 32px;
+  background: linear-gradient(135deg, var(--indigo), var(--coral));
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+}
+.footer-desc {
+  font-size: 0.875rem;
+  color: rgba(255,255,255,0.45);
+  line-height: 1.7;
+  margin-bottom: 1.5rem;
+  max-width: 280px;
+}
+.footer-socials {
+  display: flex;
+  gap: 0.6rem;
+}
+.footer-social {
+  width: 36px; height: 36px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem;
+  transition: all 0.3s;
+  color: rgba(255,255,255,0.5);
+}
+.footer-social:hover {
+  background: rgba(79,70,229,0.2);
+  border-color: rgba(79,70,229,0.4);
+  color: var(--indigo-light);
+  transform: translateY(-2px);
+}
+.footer-col h5 {
+  font-family: var(--font-head);
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.5);
+  margin-bottom: 1.25rem;
+}
+.footer-col ul { display: flex; flex-direction: column; gap: 0.6rem; }
+.footer-col ul li a {
+  font-size: 0.875rem;
+  color: rgba(255,255,255,0.5);
+  transition: color 0.2s, transform 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.footer-col ul li a:hover { color: #fff; }
+.footer-bottom {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.footer-bottom-left { font-size: 0.8rem; color: rgba(255,255,255,0.35); }
+.footer-bottom-right {
+  display: flex;
+  gap: 1.5rem;
+}
+.footer-bottom-right a { font-size: 0.8rem; color: rgba(255,255,255,0.35); transition: color 0.2s; }
+.footer-bottom-right a:hover { color: rgba(255,255,255,0.7); }
+
+/* ===== SCROLL TO TOP ===== */
+#scroll-top {
+  position: fixed;
+  bottom: 2rem; right: 2rem;
+  width: 44px; height: 44px;
+  background: linear-gradient(135deg, var(--indigo), var(--coral));
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s;
+  z-index: 999;
+  box-shadow: 0 4px 20px rgba(79,70,229,0.4);
+  color: #fff;
+  border: none;
+}
+#scroll-top.visible { opacity: 1; pointer-events: all; }
+#scroll-top:hover { transform: translateY(-3px) scale(1.08); box-shadow: 0 8px 28px rgba(79,70,229,0.5); }
+
+/* ===== SECTION DIVIDER ===== */
+.section-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(79,70,229,0.3), rgba(249,115,22,0.3), transparent);
+  margin: 0;
+}
+
+/* ===== REVEAL ANIMATIONS ===== */
+.reveal { opacity: 0; transform: translateY(30px); }
+.reveal.revealed { opacity: 1; transform: translateY(0); transition: opacity 0.7s ease, transform 0.7s ease; }
+
+/* ===== MOBILE MENU ===== */
+.mobile-menu {
+  position: fixed;
+  top: 0; right: 0; bottom: 0;
+  width: 280px;
+  background: rgba(15,15,26,0.98);
+  backdrop-filter: blur(20px);
+  border-left: 1px solid rgba(79,70,229,0.2);
+  z-index: 2000;
+  padding: 5rem 2rem 2rem;
+  transform: translateX(100%);
+  transition: transform 0.4s cubic-bezier(0.23,1,0.32,1);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.mobile-menu.open { transform: translateX(0); }
+.mobile-menu a {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.75);
+  padding: 0.5rem 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  display: block;
+  transition: color 0.2s;
+}
+.mobile-menu a:hover { color: #fff; }
+.mobile-menu-close {
+  position: absolute;
+  top: 1.5rem; right: 1.5rem;
+  width: 36px; height: 36px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem;
+  cursor: pointer;
+  color: #fff;
+  transition: background 0.2s;
+}
+.mobile-menu-close:hover { background: rgba(255,255,255,0.15); }
+.mobile-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 1999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+.mobile-overlay.open { opacity: 1; pointer-events: all; }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+  .hero-content { grid-template-columns: 1fr; gap: 3rem; text-align: center; }
+  .hero-visual { height: 300px; }
+  .hero-desc { margin: 0 auto 2.5rem; }
+  .hero-stats { justify-content: center; }
+  .hero-buttons { justify-content: center; }
+  .services-grid { grid-template-columns: repeat(2, 1fr); }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .process-steps { grid-template-columns: repeat(2, 1fr); }
+  .process-steps::before { display: none; }
+  .pricing-grid { grid-template-columns: 1fr; max-width: 400px; margin: 0 auto; }
+  .pricing-card.featured { transform: none; }
+  .tech-grid { grid-template-columns: repeat(3, 1fr); }
+  .footer-top { grid-template-columns: 1fr 1fr; }
+  .tab-layout { grid-template-columns: 1fr; }
+  .faq-layout { grid-template-columns: 1fr; }
+}
+@media (max-width: 768px) {
+  .nav-links { display: none; }
+  .hamburger { display: flex; }
+  .services-grid { grid-template-columns: 1fr; }
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+  .process-steps { grid-template-columns: 1fr 1fr; }
+  .tech-grid { grid-template-columns: repeat(3, 1fr); }
+  .footer-top { grid-template-columns: 1fr; }
+  .footer-bottom { flex-direction: column; text-align: center; }
+  .dash-kpis { grid-template-columns: repeat(3, 1fr); }
+  section { padding: 4rem 1.5rem; }
+  .hero { padding: 5rem 1.5rem 3rem; }
+  .hero-card-1, .hero-card-2, .hero-card-3 { display: none; }
+}
+@media (max-width: 480px) {
+  .stats-grid { grid-template-columns: 1fr; }
+  .process-steps { grid-template-columns: 1fr; }
+  .tech-grid { grid-template-columns: repeat(2, 1fr); }
+  .hero-stats { flex-direction: column; gap: 1rem; }
+  .cta-buttons { flex-direction: column; align-items: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- Scroll Progress Bar -->
+<div id="progress-bar"></div>
+
+<!-- Scroll to Top -->
+<button id="scroll-top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<!-- Mobile Menu Overlay -->
+<div class="mobile-overlay" id="mobileOverlay" onclick="closeMobileMenu()"></div>
+
+<!-- Mobile Menu -->
+<div class="mobile-menu" id="mobileMenu">
+  <button class="mobile-menu-close" onclick="closeMobileMenu()">✕</button>
+  <a href="#servicios">Servicios</a>
+  <a href="#soluciones">Soluciones</a>
+  <a href="#resultados">Resultados</a>
+  <a href="#proceso">Proceso</a>
+  <a href="#precios">Precios</a>
+  <a href="#faq">FAQ</a>
+  <a href="#contacto" class="btn-primary" style="text-align:center;border-radius:50px;padding:0.75rem 1rem;">Hablar con un experto</a>
+</div>
+
+<!-- Navbar -->
+<nav class="navbar" id="navbar">
+  <div class="nav-logo">
+    <div class="nav-logo-icon">🤖</div>
+    <span>Eleva<span class="hi">i</span><span class="ti">TI</span></span>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#servicios">Servicios</a></li>
+    <li><a href="#soluciones">Soluciones</a></li>
+    <li><a href="#resultados">Resultados</a></li>
+    <li><a href="#proceso">Proceso</a></li>
+    <li><a href="#precios">Precios</a></li>
+    <li><a href="#faq">FAQ</a></li>
+    <li><a href="#contacto" class="nav-cta">Hablar con un experto →</a></li>
+  </ul>
+  <div class="hamburger" onclick="openMobileMenu()">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- ===== HERO ===== -->
+<section class="hero" id="inicio">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="hero-text">
+      <div class="hero-badge">
+        <span class="hero-badge-dot"></span>
+        Agencia de IA #1 en Barcelona
+      </div>
+      <h1 class="hero-title">
+        <span class="line-1">Transforma tu</span>
+        <span class="gradient-text">empresa con IA</span>
+        <span class="accent">real</span>
+      </h1>
+      <p class="hero-desc">
+        Automatizamos procesos, creamos asistentes inteligentes y desarrollamos soluciones de IA a medida para empresas que quieren crecer más rápido.
+      </p>
+      <div class="hero-buttons">
+        <a href="#contacto" class="btn-primary">Solicitar Demo Gratuita ✨</a>
+        <a href="#soluciones" class="btn-ghost">Ver Soluciones →</a>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat-item">
+          <div class="hero-stat-num" data-count="150">0</div>
+          <div class="hero-stat-label">Proyectos entregados</div>
+        </div>
+        <div class="hero-stat-item">
+          <div class="hero-stat-num" data-count="98">0</div>
+          <div class="hero-stat-label">% Clientes satisfechos</div>
+        </div>
+        <div class="hero-stat-item">
+          <div class="hero-stat-num" data-count="40">0</div>
+          <div class="hero-stat-label">% Reducción de costes</div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-orb hero-orb-1"></div>
+      <div class="hero-orb hero-orb-2"></div>
+      <div class="hero-orb hero-orb-3"></div>
+      <!-- Orbits -->
+      <div class="orbit-ring orbit-ring-1">
+        <div class="orbit-dot orbit-dot-1"></div>
+        <div class="orbit-dot orbit-dot-2"></div>
+      </div>
+      <div class="orbit-ring orbit-ring-2">
+        <div class="orbit-dot orbit-dot-3"></div>
+      </div>
+      <!-- Center sphere -->
+      <div class="hero-center-sphere"></div>
+      <!-- Floating cards -->
+      <div class="hero-card-float hero-card-1">
+        <div class="hero-card-label">ROI Automatización</div>
+        <div class="hero-card-val">+347% <span class="up">↑</span></div>
+        <div class="hero-card-sparkline" id="spark1"></div>
+      </div>
+      <div class="hero-card-float hero-card-2">
+        <div class="hero-card-ai">
+          <div class="hero-card-ai-icon">🤖</div>
+          <div class="hero-card-ai-text">
+            <div class="hero-card-ai-name">AI Assistant</div>
+            <div class="hero-card-ai-sub">Activo ahora ●</div>
+          </div>
+        </div>
+      </div>
+      <div class="hero-card-float hero-card-3">
+        <div class="hero-card-label">Tareas IA hoy</div>
+        <div class="hero-card-val" style="font-size:1.2rem;">2,847</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Logos Strip -->
+<div class="logos-section">
+  <p class="logos-label">Tecnologías y partners con los que trabajamos</p>
+  <div class="logos-track-wrap">
+    <div class="logos-track" id="logosTrack">
+      <span class="logo-item">Open<span>AI</span></span>
+      <span class="logo-item">Google <span>Cloud</span></span>
+      <span class="logo-item">Anthropic <span>Claude</span></span>
+      <span class="logo-item">Microsoft <span>Azure AI</span></span>
+      <span class="logo-item">Hugging <span>Face</span></span>
+      <span class="logo-item">AWS <span>Bedrock</span></span>
+      <span class="logo-item">Lang<span>Chain</span></span>
+      <span class="logo-item">Pinecone <span>DB</span></span>
+      <span class="logo-item">Meta <span>LLaMA</span></span>
+      <span class="logo-item">Mistral <span>AI</span></span>
+      <span class="logo-item">Stability <span>AI</span></span>
+      <span class="logo-item">Cohere <span>API</span></span>
+      <!-- Duplicate for infinite scroll -->
+      <span class="logo-item">Open<span>AI</span></span>
+      <span class="logo-item">Google <span>Cloud</span></span>
+      <span class="logo-item">Anthropic <span>Claude</span></span>
+      <span class="logo-item">Microsoft <span>Azure AI</span></span>
+      <span class="logo-item">Hugging <span>Face</span></span>
+      <span class="logo-item">AWS <span>Bedrock</span></span>
+      <span class="logo-item">Lang<span>Chain</span></span>
+      <span class="logo-item">Pinecone <span>DB</span></span>
+      <span class="logo-item">Meta <span>LLaMA</span></span>
+      <span class="logo-item">Mistral <span>AI</span></span>
+      <span class="logo-item">Stability <span>AI</span></span>
+      <span class="logo-item">Cohere <span>API</span></span>
+    </div>
+  </div>
+</div>
+
+<div class="section-divider"></div>
+
+<!-- ===== SERVICES (FLIP CARDS) ===== -->
+<section class="services-section" id="servicios">
+  <div class="container">
+    <div class="text-center reveal">
+      <div class="section-tag tag-indigo">🎯 Nuestros Servicios</div>
+      <h2 class="section-title">Todo lo que necesitas<br><span class="gradient-text">en IA y automatización</span></h2>
+      <p class="section-sub">Pasa el ratón sobre las tarjetas para descubrir cómo podemos transformar tu negocio</p>
+    </div>
+    <div class="services-grid">
+
+      <!-- Card 1: Chatbots -->
+      <div class="flip-card reveal">
+        <div class="flip-card-inner">
+          <div class="flip-front card-indigo">
+            <div class="flip-front-bg-text">01</div>
+            <span class="flip-front-icon">💬</span>
+            <div class="flip-front-title">Chatbots & Asistentes IA</div>
+            <div class="flip-front-tag">NLP · LLM · RAG</div>
+            <div class="flip-hint">⟳ Girar</div>
+          </div>
+          <div class="flip-back card-indigo">
+            <div class="flip-back-title">Chatbots Empresariales</div>
+            <div class="flip-back-desc">Asistentes inteligentes entrenados con tu documentación, disponibles 24/7, integrados en tu web, CRM o app.</div>
+            <ul class="flip-back-list">
+              <li>Soporte al cliente automático</li>
+              <li>Chatbot de ventas y cualificación</li>
+              <li>Asistente interno para empleados</li>
+              <li>Multiidioma (ES/EN/CA)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2: Automatización -->
+      <div class="flip-card reveal">
+        <div class="flip-card-inner">
+          <div class="flip-front card-coral">
+            <div class="flip-front-bg-text">02</div>
+            <span class="flip-front-icon">⚙️</span>
+            <div class="flip-front-title">Automatización de Procesos</div>
+            <div class="flip-front-tag">RPA · Workflows · API</div>
+            <div class="flip-hint">⟳ Girar</div>
+          </div>
+          <div class="flip-back card-coral">
+            <div class="flip-back-title">Automatización Inteligente</div>
+            <div class="flip-back-desc">Elimina tareas repetitivas con agentes IA que trabajan solos: extracción de datos, envío de emails, generación de informes.</div>
+            <ul class="flip-back-list">
+              <li>Flujos de trabajo automáticos</li>
+              <li>Integración con +200 herramientas</li>
+              <li>Procesamiento de documentos</li>
+              <li>Notificaciones y alertas IA</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 3: Análisis Predictivo -->
+      <div class="flip-card reveal">
+        <div class="flip-card-inner">
+          <div class="flip-front card-green">
+            <div class="flip-front-bg-text">03</div>
+            <span class="flip-front-icon">📊</span>
+            <div class="flip-front-title">Análisis Predictivo</div>
+            <div class="flip-front-tag">ML · BigData · BI</div>
+            <div class="flip-hint">⟳ Girar</div>
+          </div>
+          <div class="flip-back card-green">
+            <div class="flip-back-title">Inteligencia de Negocio</div>
+            <div class="flip-back-desc">Modelos predictivos que anticipan demanda, detectan fraude o recomiendan acciones basadas en tus datos históricos.</div>
+            <ul class="flip-back-list">
+              <li>Predicción de ventas y demanda</li>
+              <li>Segmentación de clientes</li>
+              <li>Dashboards en tiempo real</li>
+              <li>Modelos de scoring y churn</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 4: Generative AI -->
+      <div class="flip-card reveal">
+        <div class="flip-card-inner">
+          <div class="flip-front card-purple">
+            <div class="flip-front-bg-text">04</div>
+            <span class="flip-front-icon">🎨</span>
+            <div class="flip-front-title">IA Generativa</div>
+            <div class="flip-front-tag">GPT-4 · DALL·E · Imagen</div>
+            <div class="flip-hint">⟳ Girar</div>
+          </div>
+          <div class="flip-back card-purple">
+            <div class="flip-back-title">Contenido con IA</div>
+            <div class="flip-back-desc">Generación automática de textos, imágenes, videos y código. Acelera tu marketing y producción de contenido 10x.</div>
+            <ul class="flip-back-list">
+              <li>Copy y contenido SEO masivo</li>
+              <li>Generación de imágenes y vídeo</li>
+              <li>Personalización a escala</li>
+              <li>Traducción y localización IA</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 5: Visión por Computador -->
+      <div class="flip-card reveal">
+        <div class="flip-card-inner">
+          <div class="flip-front card-pink">
+            <div class="flip-front-bg-text">05</div>
+            <span class="flip-front-icon">👁️</span>
+            <div class="flip-front-title">Visión por Computador</div>
+            <div class="flip-front-tag">CV · OCR · Detección</div>
+            <div class="flip-hint">⟳ Girar</div>
+          </div>
+          <div class="flip-back card-pink">
+            <div class="flip-back-title">Computer Vision</div>
+            <div class="flip-back-desc">Sistemas que ven y entienden imágenes: control de calidad, reconocimiento de documentos, vigilancia inteligente.</div>
+            <ul class="flip-back-list">
+              <li>Control de calidad industrial</li>
+              <li>OCR y extracción de facturas</li>
+              <li>Reconocimiento facial/objetos</li>
+              <li>Análisis de cámaras en tiempo real</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 6: Consultoría IA -->
+      <div class="flip-card reveal">
+        <div class="flip-card-inner">
+          <div class="flip-front card-yellow">
+            <div class="flip-front-bg-text">06</div>
+            <span class="flip-front-icon">🧭</span>
+            <div class="flip-front-title">Consultoría Estratégica IA</div>
+            <div class="flip-front-tag">Roadmap · Auditoría · ROI</div>
+            <div class="flip-hint">⟳ Girar</div>
+          </div>
+          <div class="flip-back card-yellow">
+            <div class="flip-back-title">Estrategia IA a medida</div>
+            <div class="flip-back-desc">Definimos juntos tu hoja de ruta IA, identificamos quick wins y construimos un plan con ROI medible desde el día 1.</div>
+            <ul class="flip-back-list">
+              <li>Auditoría de madurez digital</li>
+              <li>Roadmap IA personalizado</li>
+              <li>Formación de equipos</li>
+              <li>Métricas y KPIs de IA</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ===== TABS + DEMOS SECTION ===== -->
+<section class="tabs-section" id="soluciones">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-tag tag-coral">🚀 Demos Interactivas</div>
+      <h2 class="section-title">Prueba nuestras<br><span class="gradient-text">soluciones en vivo</span></h2>
+      <p class="section-sub">Interactúa con demos reales de las herramientas que construimos para nuestros clientes.</p>
+    </div>
+    <div class="tabs-header reveal" style="margin-top:2rem;">
+      <button class="tab-btn active" data-tab="chatbot">💬 Chatbot IA</button>
+      <button class="tab-btn" data-tab="dashboard">📊 Dashboard</button>
+      <button class="tab-btn" data-tab="automation">⚡ Automatización</button>
+      <button class="tab-btn" data-tab="vision">👁️ Visión IA</button>
+    </div>
+
+    <!-- Tab: Chatbot -->
+    <div class="tab-content active reveal" id="tab-chatbot">
+      <div class="tab-layout">
+        <div class="tab-info">
+          <h3>Asistente IA <span class="gradient-text">que vende y soporta</span></h3>
+          <p>Nuestros chatbots no son bots estúpidos. Son asistentes entrenados con tu negocio, capaces de responder preguntas complejas, cualificar leads y cerrar ventas.</p>
+          <div class="tab-features">
+            <div class="tab-feature">
+              <div class="tab-feature-icon ind">🧠</div>
+              <div class="tab-feature-text">
+                <strong>Entrenado con tus datos</strong>
+                <span>Sube PDFs, webs o FAQs y el bot aprende en minutos</span>
+              </div>
+            </div>
+            <div class="tab-feature">
+              <div class="tab-feature-icon cor">⚡</div>
+              <div class="tab-feature-text">
+                <strong>Respuestas en &lt;1 segundo</strong>
+                <span>Tecnología LLM optimizada para velocidad máxima</span>
+              </div>
+            </div>
+            <div class="tab-feature">
+              <div class="tab-feature-icon gre">🔗</div>
+              <div class="tab-feature-text">
+                <strong>Integración nativa</strong>
+                <span>Se conecta a tu CRM, web, WhatsApp o app</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-visual">
+          <!-- Mini Chatbot Demo -->
+          <div class="chat-demo" id="chatDemoEl">
+            <div class="chat-header">
+              <div class="chat-avatar">🤖</div>
+              <div class="chat-header-info">
+                <div class="name">ElevaiTI Assistant</div>
+                <div class="status">En línea</div>
+              </div>
+              <div class="chat-header-controls">
+                <div class="chat-ctrl red"></div>
+                <div class="chat-ctrl yellow"></div>
+                <div class="chat-ctrl green"></div>
+              </div>
+            </div>
+            <div class="chat-messages" id="chatMessages">
+              <div class="msg msg-bot">👋 ¡Hola! Soy el asistente IA de ElevaiTI. ¿En qué puedo ayudarte hoy?</div>
+            </div>
+            <div class="chat-input-area">
+              <input class="chat-input" id="chatInput" type="text" placeholder="Escribe un mensaje..." />
+              <button class="chat-send" onclick="sendChatMsg()">➤</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab: Dashboard -->
+    <div class="tab-content reveal" id="tab-dashboard">
+      <div class="tab-layout">
+        <div class="tab-info">
+          <h3>Dashboards IA <span class="gradient-text-green">en tiempo real</span></h3>
+          <p>Visualiza métricas de negocio procesadas por IA: detección de anomalías, predicciones y alertas automáticas cuando algo cambia.</p>
+          <div class="tab-features">
+            <div class="tab-feature">
+              <div class="tab-feature-icon gre">📡</div>
+              <div class="tab-feature-text">
+                <strong>Datos en tiempo real</strong>
+                <span>Conecta con tus fuentes de datos y actualiza al instante</span>
+              </div>
+            </div>
+            <div class="tab-feature">
+              <div class="tab-feature-icon ind">🔮</div>
+              <div class="tab-feature-text">
+                <strong>Predicciones automáticas</strong>
+                <span>ML integrado que predice la próxima semana de métricas</span>
+              </div>
+            </div>
+            <div class="tab-feature">
+              <div class="tab-feature-icon cor">🚨</div>
+              <div class="tab-feature-text">
+                <strong>Alertas inteligentes</strong>
+                <span>Notificaciones solo cuando algo realmente importa</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-visual">
+          <!-- Mini Dashboard Demo -->
+          <div class="dash-demo">
+            <div class="dash-topbar">
+              <span class="dash-topbar-title">⚡ Analytics Dashboard — ElevaiTI</span>
+              <span class="dash-topbar-time" id="dashTime">--:--:--</span>
+            </div>
+            <div class="dash-kpis">
+              <div class="dash-kpi">
+                <div class="dash-kpi-label">Ingresos Hoy</div>
+                <div class="dash-kpi-val" style="color:var(--green-light)">€24.8k</div>
+                <div class="dash-kpi-change up">↑ +12.4%</div>
+              </div>
+              <div class="dash-kpi">
+                <div class="dash-kpi-label">Leads IA</div>
+                <div class="dash-kpi-val" style="color:var(--indigo-light)">1,847</div>
+                <div class="dash-kpi-change up">↑ +8.2%</div>
+              </div>
+              <div class="dash-kpi">
+                <div class="dash-kpi-label">Conversión</div>
+                <div class="dash-kpi-val" style="color:var(--coral-light)">7.3%</div>
+                <div class="dash-kpi-change down">↓ -0.4%</div>
+              </div>
+            </div>
+            <div class="dash-chart-area">
+              <div class="dash-chart-title">Rendimiento semanal (% optimización IA)</div>
+              <div class="dash-bars" id="dashBars"></div>
+              <div class="dash-labels" id="dashLabels"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab: Automation -->
+    <div class="tab-content reveal" id="tab-automation">
+      <div class="tab-layout">
+        <div class="tab-info">
+          <h3>Flujos <span class="gradient-text">que trabajan solos</span></h3>
+          <p>Conectamos tus herramientas favoritas con agentes IA que ejecutan tareas complejas sin intervención humana, las 24 horas del día.</p>
+          <div class="tab-features">
+            <div class="tab-feature">
+              <div class="tab-feature-icon cor">🔄</div>
+              <div class="tab-feature-text">
+                <strong>+200 integraciones</strong>
+                <span>Slack, Gmail, Salesforce, HubSpot, SAP y más</span>
+              </div>
+            </div>
+            <div class="tab-feature">
+              <div class="tab-feature-icon ind">🤖</div>
+              <div class="tab-feature-text">
+                <strong>Agentes autónomos</strong>
+                <span>IAs que piensan, deciden y actúan por ti</span>
+              </div>
+            </div>
+            <div class="tab-feature">
+              <div class="tab-feature-icon gre">📋</div>
+              <div class="tab-feature-text">
+                <strong>Sin código necesario</strong>
+                <span>Configura flujos complejos con interfaz visual</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-visual">
+          <!-- Automation Flow Visual -->
+          <div style="padding:1.5rem;">
+            <div style="font-size:0.75rem;color:rgba(255,255,255,0.4);margin-bottom:1rem;text-transform:uppercase;letter-spacing:0.08em;">Flujo de Automatización Activo</div>
+            <div id="autoFlow" style="display:flex;flex-direction:column;gap:0.75rem;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab: Vision -->
+    <div class="tab-content reveal" id="tab-vision">
+      <div class="tab-layout">
+        <div class="tab-info">
+          <h3>Ojos que <span class="gradient-text">entienden el mundo</span></h3>
+          <p>Nuestros sistemas de visión por computador analizan imágenes y vídeo en tiempo real para automatizar la inspección visual de tu negocio.</p>
+          <div class="tab-features">
+            <div class="tab-feature">
+              <div class="tab-feature-icon ind">🔍</div>
+              <div class="tab-feature-text">
+                <strong>Detección de objetos</strong>
+                <span>Identifica productos, personas y anomalías al instante</span>
+              </div>
+            </div>
+            <div class="tab-feature">
+              <div class="tab-feature-icon cor">📄</div>
+              <div class="tab-feature-text">
+                <strong>OCR inteligente</strong>
+                <span>Extrae texto de facturas, contratos y formularios</span>
+              </div>
+            </div>
+            <div class="tab-feature">
+              <div class="tab-feature-icon gre">✅</div>
+              <div class="tab-feature-text">
+                <strong>Control de calidad</strong>
+                <span>99.7% de precisión en detección de defectos</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-visual">
+          <!-- Vision Demo Visual -->
+          <div style="background:rgba(15,15,26,0.8);border:1px solid rgba(139,92,246,0.2);border-radius:var(--radius-lg);padding:1.5rem;text-align:center;">
+            <div style="font-size:0.75rem;color:rgba(255,255,255,0.4);margin-bottom:1rem;">Simulación de Análisis Visual IA</div>
+            <div id="visionDemo" style="position:relative;background:#0a0a14;border-radius:var(--radius);height:200px;display:flex;align-items:center;justify-content:center;overflow:hidden;border:1px solid rgba(139,92,246,0.15);">
+              <div style="position:absolute;inset:0;display:grid;grid-template-columns:repeat(10,1fr);grid-template-rows:repeat(6,1fr);gap:1px;opacity:0.07;">
+                <!-- Grid overlay for scanning effect -->
+              </div>
+              <div id="scanLine" style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(139,92,246,0.8),transparent);animation:scanAnim 3s linear infinite;"></div>
+              <div id="visionAnnotations" style="position:relative;z-index:1;"></div>
+            </div>
+            <style>@keyframes scanAnim{0%{top:0}100%{top:100%}}</style>
+            <div style="display:flex;gap:1rem;justify-content:center;margin-top:1rem;flex-wrap:wrap;" id="visionTags"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ===== STATS SECTION ===== -->
+<section class="stats-section" id="resultados">
+  <div class="stats-bg"></div>
+  <div class="container">
+    <div class="text-center reveal">
+      <div class="section-tag tag-green">📈 Resultados Reales</div>
+      <h2 class="section-title">Números que<br><span class="gradient-text-green">hablan por sí solos</span></h2>
+      <p class="section-sub">Métricas reales de proyectos entregados a empresas españolas que apostaron por la IA.</p>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card stat-card-1 reveal">
+        <div class="stat-icon">🚀</div>
+        <div class="stat-number c1"><span class="count" data-target="150" data-suffix="+">0</span></div>
+        <div class="stat-label">Proyectos IA entregados</div>
+        <div class="stat-sublabel">En España y LATAM</div>
+      </div>
+      <div class="stat-card stat-card-2 reveal">
+        <div class="stat-icon">⚡</div>
+        <div class="stat-number c2"><span class="count" data-target="40" data-suffix="%">0</span></div>
+        <div class="stat-label">Reducción media de costes</div>
+        <div class="stat-sublabel">En procesos automatizados</div>
+      </div>
+      <div class="stat-card stat-card-3 reveal">
+        <div class="stat-icon">🎯</div>
+        <div class="stat-number c3"><span class="count" data-target="98" data-suffix="%">0</span></div>
+        <div class="stat-label">Satisfacción del cliente</div>
+        <div class="stat-sublabel">NPS promedio 87</div>
+      </div>
+      <div class="stat-card stat-card-4 reveal">
+        <div class="stat-icon">⏱️</div>
+        <div class="stat-number c4"><span class="count" data-target="72" data-suffix="h">0</span></div>
+        <div class="stat-label">Prototipo listo</div>
+        <div class="stat-sublabel">De idea a demo funcional</div>
+      </div>
+    </div>
+
+    <!-- Progress bars -->
+    <div style="margin-top:4rem;display:grid;grid-template-columns:1fr 1fr;gap:3rem;" class="reveal">
+      <div>
+        <div style="font-family:var(--font-head);font-size:1.2rem;font-weight:700;margin-bottom:1.5rem;">Casos de Uso más exitosos</div>
+        <div style="display:flex;flex-direction:column;gap:1.25rem;">
+          <div class="progress-item" data-width="94">
+            <div style="display:flex;justify-content:space-between;margin-bottom:0.4rem;font-size:0.875rem;">
+              <span>Chatbots de Soporte</span><span style="color:var(--indigo-light);font-weight:700;">94%</span>
+            </div>
+            <div style="height:6px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden;">
+              <div class="progress-bar-fill" style="height:100%;width:0%;background:linear-gradient(90deg,var(--indigo),var(--purple));border-radius:3px;transition:width 1.5s ease;"></div>
+            </div>
+          </div>
+          <div class="progress-item" data-width="87">
+            <div style="display:flex;justify-content:space-between;margin-bottom:0.4rem;font-size:0.875rem;">
+              <span>Automatización Facturación</span><span style="color:var(--coral-light);font-weight:700;">87%</span>
+            </div>
+            <div style="height:6px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden;">
+              <div class="progress-bar-fill" style="height:100%;width:0%;background:linear-gradient(90deg,var(--coral),var(--pink));border-radius:3px;transition:width 1.5s ease;"></div>
+            </div>
+          </div>
+          <div class="progress-item" data-width="91">
+            <div style="display:flex;justify-content:space-between;margin-bottom:0.4rem;font-size:0.875rem;">
+              <span>Análisis Predictivo</span><span style="color:var(--green-light);font-weight:700;">91%</span>
+            </div>
+            <div style="height:6px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden;">
+              <div class="progress-bar-fill" style="height:100%;width:0%;background:linear-gradient(90deg,var(--green),var(--indigo-light));border-radius:3px;transition:width 1.5s ease;"></div>
+            </div>
+          </div>
+          <div class="progress-item" data-width="78">
+            <div style="display:flex;justify-content:space-between;margin-bottom:0.4rem;font-size:0.875rem;">
+              <span>Generación de Contenido</span><span style="color:#FDE68A;font-weight:700;">78%</span>
+            </div>
+            <div style="height:6px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden;">
+              <div class="progress-bar-fill" style="height:100%;width:0%;background:linear-gradient(90deg,var(--yellow),var(--coral));border-radius:3px;transition:width 1.5s ease;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div style="font-family:var(--font-head);font-size:1.2rem;font-weight:700;margin-bottom:1.5rem;">Sectores donde trabajamos</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+          <div style="padding:1rem;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:var(--radius-sm);display:flex;align-items:center;gap:0.5rem;font-size:0.875rem;transition:all 0.3s;" onmouseover="this.style.borderColor='rgba(79,70,229,0.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.07)'">
+            <span>🏪</span> Retail & eCommerce
+          </div>
+          <div style="padding:1rem;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:var(--radius-sm);display:flex;align-items:center;gap:0.5rem;font-size:0.875rem;transition:all 0.3s;" onmouseover="this.style.borderColor='rgba(249,115,22,0.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.07)'">
+            <span>🏥</span> Salud & Farmacia
+          </div>
+          <div style="padding:1rem;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:var(--radius-sm);display:flex;align-items:center;gap:0.5rem;font-size:0.875rem;transition:all 0.3s;" onmouseover="this.style.borderColor='rgba(16,185,129,0.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.07)'">
+            <span>🏗️</span> Industria & Logística
+          </div>
+          <div style="padding:1rem;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:var(--radius-sm);display:flex;align-items:center;gap:0.5rem;font-size:0.875rem;transition:all 0.3s;" onmouseover="this.style.borderColor='rgba(139,92,246,0.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.07)'">
+            <span>🏦</span> Finanzas & Seguros
+          </div>
+          <div style="padding:1rem;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:var(--radius-sm);display:flex;align-items:center;gap:0.5rem;font-size:0.875rem;transition:all 0.3s;" onmouseover="this.style.borderColor='rgba(236,72,153,0.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.07)'">
+            <span>🎓</span> Educación & EdTech
+          </div>
+          <div style="padding:1rem;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:var(--radius-sm);display:flex;align-items:center;gap:0.5rem;font-size:0.875rem;transition:all 0.3s;" onmouseover="this.style.borderColor='rgba(245,158,11,0.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.07)'">
+            <span>🍽️</span> Hostelería & Turismo
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ===== PROCESS SECTION ===== -->
+<section class="process-section" id="proceso">
+  <div class="container">
+    <div class="text-center reveal">
+      <div class="section-tag tag-purple">🗺️ Nuestro Proceso</div>
+      <h2 class="section-title">De la idea a la IA<br><span class="gradient-text">en 4 pasos</span></h2>
+      <p class="section-sub">Un proceso probado con más de 150 proyectos. Rápido, claro y con resultados medibles.</p>
+    </div>
+    <div class="process-steps">
+      <div class="process-step reveal">
+        <div class="process-num process-num-1">01</div>
+        <h4>Diagnóstico Gratuito</h4>
+        <p>Analizamos tu empresa, identificamos oportunidades de IA y calculamos el ROI potencial. Sin coste, sin compromiso.</p>
+      </div>
+      <div class="process-step reveal">
+        <div class="process-num process-num-2">02</div>
+        <h4>Diseño de Solución</h4>
+        <p>Creamos un plan técnico detallado con arquitectura, herramientas, plazos y métricas de éxito claras.</p>
+      </div>
+      <div class="process-step reveal">
+        <div class="process-num process-num-3">03</div>
+        <h4>Desarrollo Ágil</h4>
+        <p>Construimos en sprints de 2 semanas. Ves progreso real desde el primer día con demos en cada sprint.</p>
+      </div>
+      <div class="process-step reveal">
+        <div class="process-num process-num-4">04</div>
+        <h4>Lanzamiento & Soporte</h4>
+        <p>Desplegamos, formamos a tu equipo y ofrecemos soporte continuo para maximizar el rendimiento de la IA.</p>
+      </div>
+    </div>
+
+    <!-- Timeline visual -->
+    <div style="margin-top:4rem;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:var(--radius-xl);padding:2rem;" class="reveal">
+      <div style="font-family:var(--font-head);font-size:1rem;font-weight:700;margin-bottom:1.5rem;color:rgba(255,255,255,0.6);">📅 Timeline típico de un proyecto</div>
+      <div style="display:grid;grid-template-columns:repeat(8,1fr);gap:0;border-radius:var(--radius-sm);overflow:hidden;">
+        <div style="padding:0.75rem 0.5rem;background:rgba(79,70,229,0.3);text-align:center;font-size:0.7rem;font-weight:700;">Semana 1<br><span style="font-weight:400;opacity:0.8">Diagnóstico</span></div>
+        <div style="padding:0.75rem 0.5rem;background:rgba(79,70,229,0.2);text-align:center;font-size:0.7rem;font-weight:700;">Semana 2<br><span style="font-weight:400;opacity:0.8">Diseño</span></div>
+        <div style="padding:0.75rem 0.5rem;background:rgba(249,115,22,0.25);text-align:center;font-size:0.7rem;font-weight:700;">S.3-4<br><span style="font-weight:400;opacity:0.8">Sprint 1</span></div>
+        <div style="padding:0.75rem 0.5rem;background:rgba(249,115,22,0.2);text-align:center;font-size:0.7rem;font-weight:700;">S.5-6<br><span style="font-weight:400;opacity:0.8">Sprint 2</span></div>
+        <div style="padding:0.75rem 0.5rem;background:rgba(249,115,22,0.15);text-align:center;font-size:0.7rem;font-weight:700;">S.7-8<br><span style="font-weight:400;opacity:0.8">Sprint 3</span></div>
+        <div style="padding:0.75rem 0.5rem;background:rgba(16,185,129,0.25);text-align:center;font-size:0.7rem;font-weight:700;">Semana 9<br><span style="font-weight:400;opacity:0.8">Testing</span></div>
+        <div style="padding:0.75rem 0.5rem;background:rgba(16,185,129,0.35);text-align:center;font-size:0.7rem;font-weight:700;">Semana 10<br><span style="font-weight:400;opacity:0.8">Launch 🚀</span></div>
+        <div style="padding:0.75rem 0.5rem;background:rgba(139,92,246,0.2);text-align:center;font-size:0.7rem;font-weight:700;">Ongoing<br><span style="font-weight:400;opacity:0.8">Soporte ♾️</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ===== PRICING SECTION ===== -->
+<section class="pricing-section" id="precios">
+  <div class="container">
+    <div class="text-center reveal">
+      <div class="section-tag tag-coral">💰 Precios</div>
+      <h2 class="section-title">Planes transparentes<br><span class="gradient-text">sin sorpresas</span></h2>
+      <p class="section-sub">Elige el plan que mejor se adapta a tu empresa. Todos incluyen consultoría inicial gratuita.</p>
+    </div>
+    <div class="pricing-toggle-wrap reveal">
+      <span class="pricing-toggle-label active" id="monthlyLabel">Mensual</span>
+      <div class="pricing-toggle" id="pricingToggle" onclick="togglePricing()">
+        <div class="pricing-toggle-thumb"></div>
+      </div>
+      <span class="pricing-toggle-label" id="yearlyLabel">Anual</span>
+      <div class="pricing-badge">Ahorra 20%</div>
+    </div>
+    <div class="pricing-grid reveal">
+
+      <!-- Plan Starter -->
+      <div class="pricing-card">
+        <div class="pricing-plan-icon" style="background:rgba(79,70,229,0.15);">🌱</div>
+        <div class="pricing-plan-name">Starter</div>
+        <div class="pricing-plan-desc">Perfecto para PYMEs que quieren su primer proyecto de IA funcionando rápido.</div>
+        <div class="pricing-price-block">
+          <div class="pricing-amount">
+            <span class="currency">€</span>
+            <span class="price-val" data-monthly="1.490" data-yearly="1.192">1.490</span>
+            <span class="period">/proyecto</span>
+          </div>
+          <div class="pricing-orig price-orig" data-monthly="" data-yearly="€1.490"><!-- --></div>
+        </div>
+        <ul class="pricing-features">
+          <li class="pricing-feature"><span class="check">✓</span>1 Chatbot IA entrenado</li>
+          <li class="pricing-feature"><span class="check">✓</span>Hasta 5.000 mensajes/mes</li>
+          <li class="pricing-feature"><span class="check">✓</span>Integración web + WhatsApp</li>
+          <li class="pricing-feature"><span class="check">✓</span>Panel de analytics básico</li>
+          <li class="pricing-feature"><span class="check">✓</span>Soporte por email</li>
+          <li class="pricing-feature disabled"><span class="x">✗</span>Automatizaciones avanzadas</li>
+          <li class="pricing-feature disabled"><span class="x">✗</span>API personalizada</li>
+        </ul>
+        <button class="pricing-btn pricing-btn-outline" onclick="this.textContent='¡Enviado! ✓';this.style.background='rgba(16,185,129,0.2)';this.style.borderColor='rgba(16,185,129,0.5)'">Empezar ahora</button>
+      </div>
+
+      <!-- Plan Pro (featured) -->
+      <div class="pricing-card featured">
+        <div class="pricing-popular">⭐ Más popular</div>
+        <div class="pricing-plan-icon" style="background:linear-gradient(135deg,rgba(79,70,229,0.3),rgba(249,115,22,0.2));">🚀</div>
+        <div class="pricing-plan-name">Pro</div>
+        <div class="pricing-plan-desc">La solución completa para empresas que quieren transformar su operativa con IA.</div>
+        <div class="pricing-price-block">
+          <div class="pricing-amount">
+            <span class="currency">€</span>
+            <span class="price-val" data-monthly="3.990" data-yearly="3.192">3.990</span>
+            <span class="period">/proyecto</span>
+          </div>
+          <div class="pricing-orig price-orig" data-monthly="" data-yearly="€3.990"><!-- --></div>
+        </div>
+        <ul class="pricing-features">
+          <li class="pricing-feature"><span class="check">✓</span>3 Chatbots IA personalizados</li>
+          <li class="pricing-feature"><span class="check">✓</span>Mensajes ilimitados</li>
+          <li class="pricing-feature"><span class="check">✓</span>Automatización de 5 procesos</li>
+          <li class="pricing-feature"><span class="check">✓</span>Dashboard avanzado + alertas</li>
+          <li class="pricing-feature"><span class="check">✓</span>API + integraciones CRM</li>
+          <li class="pricing-feature"><span class="check">✓</span>Soporte prioritario 24/5</li>
+          <li class="pricing-feature"><span class="check">✓</span>Formación del equipo (4h)</li>
+        </ul>
+        <button class="pricing-btn pricing-btn-fill" onclick="this.textContent='¡Enviado! ✓';this.style.background='linear-gradient(135deg,var(--green-dark),var(--green))'">Empezar ahora</button>
+      </div>
+
+      <!-- Plan Enterprise -->
+      <div class="pricing-card">
+        <div class="pricing-plan-icon" style="background:rgba(139,92,246,0.15);">🏢</div>
+        <div class="pricing-plan-name">Enterprise</div>
+        <div class="pricing-plan-desc">Solución completa a medida para grandes empresas con necesidades específicas.</div>
+        <div class="pricing-price-block">
+          <div class="pricing-amount" style="font-size:1.8rem;">
+            <span style="font-size:1.4rem;font-weight:600;">A medida</span>
+          </div>
+          <div style="font-size:0.8rem;color:rgba(255,255,255,0.4);margin-top:0.25rem;">Consulta personalizada</div>
+        </div>
+        <ul class="pricing-features">
+          <li class="pricing-feature"><span class="check">✓</span>Proyectos IA sin límite</li>
+          <li class="pricing-feature"><span class="check">✓</span>Infraestructura dedicada</li>
+          <li class="pricing-feature"><span class="check">✓</span>Modelos LLM propios (fine-tuning)</li>
+          <li class="pricing-feature"><span class="check">✓</span>Integración ERP/SAP completa</li>
+          <li class="pricing-feature"><span class="check">✓</span>SLA garantizado 99.9%</li>
+          <li class="pricing-feature"><span class="check">✓</span>Customer Success Manager</li>
+          <li class="pricing-feature"><span class="check">✓</span>Formación completa del equipo</li>
+        </ul>
+        <button class="pricing-btn pricing-btn-outline" onclick="this.textContent='¡Enviado! ✓';this.style.background='rgba(16,185,129,0.2)';this.style.borderColor='rgba(16,185,129,0.5)'">Solicitar propuesta</button>
+      </div>
+
+    </div>
+
+    <!-- Garantía -->
+    <div style="text-align:center;margin-top:3rem;" class="reveal">
+      <div style="display:inline-flex;align-items:center;gap:1.5rem;padding:1.25rem 2.5rem;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);border-radius:50px;flex-wrap:wrap;justify-content:center;">
+        <span style="font-size:1.5rem;">🛡️</span>
+        <div style="text-align:left;">
+          <div style="font-weight:700;font-size:0.925rem;">Garantía de satisfacción 30 días</div>
+          <div style="font-size:0.8rem;color:rgba(255,255,255,0.5);">Si no estás satisfecho, te devolvemos el dinero. Sin preguntas.</div>
+        </div>
+        <span style="color:var(--green);font-weight:700;font-size:0.875rem;">100% garantizado →</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ===== TESTIMONIALS ===== -->
+<section class="testimonials-section" id="clientes">
+  <div class="container">
+    <div class="text-center reveal">
+      <div class="section-tag tag-indigo">💬 Testimonios</div>
+      <h2 class="section-title">Lo que dicen<br><span class="gradient-text">nuestros clientes</span></h2>
+    </div>
+  </div>
+  <div class="testimonials-track-outer">
+    <div class="testimonials-track" id="testimonialsTrack">
+      <!-- Cards row 1 -->
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">"ElevaiTI transformó nuestro servicio al cliente con un chatbot que atiende 3.000 consultas diarias sin intervención humana. ROI en 3 meses."</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar" style="background:linear-gradient(135deg,var(--indigo),var(--purple));">👩</div>
+          <div>
+            <div class="testimonial-name">María González</div>
+            <div class="testimonial-role">Head of Operations</div>
+          </div>
+          <div class="testimonial-company-badge">Retail</div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">"Automatizaron nuestro proceso de facturación que nos llevaba 2 días semanales. Ahora lo hace en 15 minutos. Increíble equipo."</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar" style="background:linear-gradient(135deg,var(--coral),var(--pink));">👨</div>
+          <div>
+            <div class="testimonial-name">Carlos Martínez</div>
+            <div class="testimonial-role">CFO</div>
+          </div>
+          <div class="testimonial-company-badge">Finanzas</div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">"El sistema de visión IA que desarrollaron para nuestra línea de producción detecta defectos con un 99.7% de precisión. Ha eliminado las devoluciones."</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar" style="background:linear-gradient(135deg,var(--green),var(--indigo-light));">🧑</div>
+          <div>
+            <div class="testimonial-name">Ana López</div>
+            <div class="testimonial-role">Directora de Planta</div>
+          </div>
+          <div class="testimonial-company-badge">Industria</div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">"Su roadmap de IA fue revelador. En 6 meses implementamos 4 casos de uso que redujeron costes un 35%. Profesionales de primer nivel."</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar" style="background:linear-gradient(135deg,#7C3AED,var(--pink));">👩</div>
+          <div>
+            <div class="testimonial-name">Laura Sánchez</div>
+            <div class="testimonial-role">CEO & Co-founder</div>
+          </div>
+          <div class="testimonial-company-badge">SaaS</div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">"El chatbot de ventas que crearon cualifica leads automáticamente. Nuestro equipo comercial ahora solo habla con prospectos calientes. +60% en conversión."</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar" style="background:linear-gradient(135deg,var(--yellow),var(--coral));">👨</div>
+          <div>
+            <div class="testimonial-name">Jordi Puig</div>
+            <div class="testimonial-role">VP de Ventas</div>
+          </div>
+          <div class="testimonial-company-badge">B2B</div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★☆</div>
+        <p class="testimonial-text">"Tardamos menos de lo esperado en ver resultados. El equipo es transparente, comunica bien y entrega lo que promete. Los recomendaría sin dudarlo."</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar" style="background:linear-gradient(135deg,var(--indigo-light),var(--green));">🧑</div>
+          <div>
+            <div class="testimonial-name">Elena Torres</div>
+            <div class="testimonial-role">Digital Manager</div>
+          </div>
+          <div class="testimonial-company-badge">Salud</div>
+        </div>
+      </div>
+      <!-- Duplicate for seamless scroll -->
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">"ElevaiTI transformó nuestro servicio al cliente con un chatbot que atiende 3.000 consultas diarias sin intervención humana. ROI en 3 meses."</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar" style="background:linear-gradient(135deg,var(--indigo),var(--purple));">👩</div>
+          <div>
+            <div class="testimonial-name">María González</div>
+            <div class="testimonial-role">Head of Operations</div>
+          </div>
+          <div class="testimonial-company-badge">Retail</div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">"Automatizaron nuestro proceso de facturación que nos llevaba 2 días semanales. Ahora lo hace en 15 minutos. Increíble equipo."</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar" style="background:linear-gradient(135deg,var(--coral),var(--pink));">👨</div>
+          <div>
+            <div class="testimonial-name">Carlos Martínez</div>
+            <div class="testimonial-role">CFO</div>
+          </div>
+          <div class="testimonial-company-badge">Finanzas</div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">"El sistema de visión IA que desarrollaron para nuestra línea de producción detecta defectos con un 99.7% de precisión. Ha eliminado las devoluciones."</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar" style="background:linear-gradient(135deg,var(--green),var(--indigo-light));">🧑</div>
+          <div>
+            <div class="testimonial-name">Ana López</div>
+            <div class="testimonial-role">Directora de Planta</div>
+          </div>
+          <div class="testimonial-company-badge">Industria</div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">"Su roadmap de IA fue revelador. En 6 meses implementamos 4 casos de uso que redujeron costes un 35%. Profesionales de primer nivel."</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar" style="background:linear-gradient(135deg,#7C3AED,var(--pink));">👩</div>
+          <div>
+            <div class="testimonial-name">Laura Sánchez</div>
+            <div class="testimonial-role">CEO & Co-founder</div>
+          </div>
+          <div class="testimonial-company-badge">SaaS</div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">"El chatbot de ventas que crearon cualifica leads automáticamente. Nuestro equipo comercial ahora solo habla con prospectos calientes. +60% en conversión."</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar" style="background:linear-gradient(135deg,var(--yellow),var(--coral));">👨</div>
+          <div>
+            <div class="testimonial-name">Jordi Puig</div>
+            <div class="testimonial-role">VP de Ventas</div>
+          </div>
+          <div class="testimonial-company-badge">B2B</div>
+        </div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★☆</div>
+        <p class="testimonial-text">"Tardamos menos de lo esperado en ver resultados. El equipo es transparente, comunica bien y entrega lo que promete. Los recomendaría sin dudarlo."</p>
+        <div class="testimonial-author">
+          <div class="testimonial-avatar" style="background:linear-gradient(135deg,var(--indigo-light),var(--green));">🧑</div>
+          <div>
+            <div class="testimonial-name">Elena Torres</div>
+            <div class="testimonial-role">Digital Manager</div>
+          </div>
+          <div class="testimonial-company-badge">Salud</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ===== TECH STACK ===== -->
+<section class="tech-section">
+  <div class="container">
+    <div class="text-center reveal">
+      <div class="section-tag tag-green">🛠️ Stack Tecnológico</div>
+      <h2 class="section-title">Las mejores herramientas<br><span class="gradient-text-green">del ecosistema IA</span></h2>
+      <p class="section-sub">Trabajamos con las plataformas más avanzadas para construir soluciones robustas y escalables.</p>
+    </div>
+    <div class="tech-grid">
+      <div class="tech-item reveal"><div class="tech-icon">🤖</div><div class="tech-name">OpenAI GPT-4</div></div>
+      <div class="tech-item reveal"><div class="tech-icon">🧠</div><div class="tech-name">Claude AI</div></div>
+      <div class="tech-item reveal"><div class="tech-icon">🔗</div><div class="tech-name">LangChain</div></div>
+      <div class="tech-item reveal"><div class="tech-icon">🗄️</div><div class="tech-name">Pinecone</div></div>
+      <div class="tech-item reveal"><div class="tech-icon">☁️</div><div class="tech-name">AWS Bedrock</div></div>
+      <div class="tech-item reveal"><div class="tech-icon">🔮</div><div class="tech-name">Google Vertex</div></div>
+      <div class="tech-item reveal"><div class="tech-icon">⚡</div><div class="tech-name">FastAPI</div></div>
+      <div class="tech-item reveal"><div class="tech-icon">🐍</div><div class="tech-name">Python / ML</div></div>
+      <div class="tech-item reveal"><div class="tech-icon">🌊</div><div class="tech-name">n8n / Make</div></div>
+      <div class="tech-item reveal"><div class="tech-icon">📊</div><div class="tech-name">PostgreSQL</div></div>
+      <div class="tech-item reveal"><div class="tech-icon">⚛️</div><div class="tech-name">React / Next.js</div></div>
+      <div class="tech-item reveal"><div class="tech-icon">🐳</div><div class="tech-name">Docker / K8s</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ===== FAQ ===== -->
+<section class="faq-section" id="faq">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-tag tag-purple">❓ Preguntas Frecuentes</div>
+      <h2 class="section-title">Todo lo que quieres<br><span class="gradient-text">saber sobre IA</span></h2>
+    </div>
+    <div class="faq-layout">
+      <div class="faq-list reveal">
+        <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-question">
+            ¿Cuánto tiempo tarda en verse el ROI de un proyecto de IA?
+            <div class="faq-icon">+</div>
+          </div>
+          <div class="faq-answer">
+            <p>En la mayoría de proyectos, nuestros clientes ven el retorno de inversión entre los 2 y 4 meses después del lanzamiento. Los proyectos de automatización suelen ser los más rápidos, con ROI positivo en semanas. Siempre definimos métricas claras antes de empezar para que el resultado sea medible.</p>
+          </div>
+        </div>
+        <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-question">
+            ¿Necesitamos datos propios para usar vuestras soluciones?
+            <div class="faq-icon">+</div>
+          </div>
+          <div class="faq-answer">
+            <p>No siempre. Para soluciones como chatbots, podemos trabajar con modelos base que se ajustan a vuestro negocio con documentación existente (webs, FAQs, manuales). Para proyectos de ML predictivo, los datos propios mejoran la precisión, pero podemos empezar con datasets públicos del sector.</p>
+          </div>
+        </div>
+        <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-question">
+            ¿Es seguro para los datos de nuestra empresa?
+            <div class="faq-icon">+</div>
+          </div>
+          <div class="faq-answer">
+            <p>La seguridad es prioritaria. Ofrecemos despliegue on-premise o en cloud privado, cumplimiento RGPD total, cifrado en tránsito y en reposo, y no compartimos vuestros datos con ningún tercero. Podemos firmar DPA (Data Processing Agreement) adaptado a vuestras necesidades.</p>
+          </div>
+        </div>
+        <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-question">
+            ¿Qué soporte ofrecéis después del lanzamiento?
+            <div class="faq-icon">+</div>
+          </div>
+          <div class="faq-answer">
+            <p>Todos los proyectos incluyen 30 días de soporte post-lanzamiento gratuito. Luego ofrecemos planes de mantenimiento mensual que incluyen actualizaciones del modelo, monitorización de rendimiento, corrección de errores y mejoras continuas basadas en feedback.</p>
+          </div>
+        </div>
+        <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-question">
+            ¿Trabajáis con empresas pequeñas o solo grandes corporaciones?
+            <div class="faq-icon">+</div>
+          </div>
+          <div class="faq-answer">
+            <p>Trabajamos con todo tipo de empresas, desde startups y PYMEs hasta grandes corporaciones. De hecho, nuestro plan Starter está diseñado específicamente para que las empresas pequeñas puedan acceder a la IA sin grandes inversiones iniciales. El tamaño no importa, importan las ganas de mejorar.</p>
+          </div>
+        </div>
+        <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-question">
+            ¿Podemos integrar la IA con nuestros sistemas actuales?
+            <div class="faq-icon">+</div>
+          </div>
+          <div class="faq-answer">
+            <p>Sí, absolutamente. Tenemos experiencia integrando con los principales CRMs (Salesforce, HubSpot), ERPs (SAP, Odoo), plataformas eCommerce (Shopify, WooCommerce), herramientas de comunicación (Slack, Teams) y sistemas legacy via API. Si tiene API, lo integramos.</p>
+          </div>
+        </div>
+        <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-question">
+            ¿Cómo es el proceso de diagnóstico gratuito?
+            <div class="faq-icon">+</div>
+          </div>
+          <div class="faq-answer">
+            <p>Es una llamada de 45-60 minutos donde analizamos vuestros procesos actuales, identificamos los 3-5 casos de uso con mayor potencial de IA y calculamos un ROI estimado para cada uno. Sin compromiso de compra. Al finalizar recibiréis un informe con las recomendaciones concretas.</p>
+          </div>
+        </div>
+        <div class="faq-item" onclick="toggleFaq(this)">
+          <div class="faq-question">
+            ¿Estáis basados en Barcelona? ¿Trabajáis en remoto?
+            <div class="faq-icon">+</div>
+          </div>
+          <div class="faq-answer">
+            <p>Sí, nuestras oficinas están en Barcelona (22@ Tech District). Trabajamos con clientes en toda España, Portugal y LATAM de forma remota. Para proyectos enterprise, ofrecemos visitas presenciales a las instalaciones del cliente. La distancia nunca es un obstáculo.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contact Card -->
+      <div class="faq-contact-card reveal">
+        <h3>¿No encuentras tu respuesta? 🤔</h3>
+        <p>Nuestro equipo está disponible para resolver cualquier duda. Elige cómo prefieres contactarnos:</p>
+        <div class="faq-contact-options">
+          <div class="faq-contact-option" onclick="openChatDemo()">
+            <div class="faq-contact-icon" style="background:rgba(79,70,229,0.2);">💬</div>
+            Chat con IA (ahora mismo)
+          </div>
+          <div class="faq-contact-option" onclick="this.textContent='📧 Enviado! Te contactamos en <24h'">
+            <div class="faq-contact-icon" style="background:rgba(249,115,22,0.2);">📧</div>
+            Email: hola@elevaiti.com
+          </div>
+          <div class="faq-contact-option" onclick="this.textContent='📞 ¡Llamada programada!'">
+            <div class="faq-contact-icon" style="background:rgba(16,185,129,0.2);">📞</div>
+            Llamada gratuita de 30 min
+          </div>
+          <div class="faq-contact-option" onclick="this.textContent='📅 ¡Reunión agendada!'">
+            <div class="faq-contact-icon" style="background:rgba(139,92,246,0.2);">📅</div>
+            Agendar reunión en Barcelona
+          </div>
+        </div>
+        <!-- Mini contact form -->
+        <div style="margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,0.08);">
+          <div style="font-size:0.8rem;font-weight:600;margin-bottom:0.75rem;color:rgba(255,255,255,0.6);">Mensaje rápido:</div>
+          <textarea style="width:100%;padding:0.65rem 0.85rem;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:var(--radius-sm);font-size:0.8rem;color:#fff;font-family:var(--font-body);resize:none;height:80px;margin-bottom:0.5rem;" placeholder="¿En qué podemos ayudarte?" id="quickMsgArea"></textarea>
+          <button onclick="sendQuickMsg()" style="width:100%;padding:0.65rem;background:linear-gradient(135deg,var(--indigo),var(--coral));border:none;border-radius:var(--radius-sm);font-weight:700;font-size:0.875rem;color:#fff;cursor:pointer;transition:all 0.3s;" id="quickMsgBtn">Enviar mensaje →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ===== CTA SECTION ===== -->
+<section class="cta-section" id="contacto">
+  <div class="cta-bg"></div>
+  <div class="cta-particles" id="ctaParticles"></div>
+  <div class="container">
+    <div class="cta-content reveal">
+      <span class="cta-emoji">🚀</span>
+      <h2 class="cta-title">
+        Comienza tu transformación<br>
+        <span class="gradient-text">con IA hoy mismo</span>
+      </h2>
+      <p class="cta-sub">
+        Más de 150 empresas ya trabajan más rápido, gastan menos y venden más gracias a nuestras soluciones de IA. ¿Cuándo te unes?
+      </p>
+      <div class="cta-buttons">
+        <a href="#" class="btn-primary" onclick="this.textContent='✓ ¡Solicitud enviada!';return false;" style="font-size:1.05rem;padding:1rem 2.25rem;">
+          Solicitar Demo Gratuita ✨
+        </a>
+        <a href="#precios" class="btn-ghost" style="font-size:1.05rem;padding:1rem 2.25rem;">
+          Ver planes y precios
+        </a>
+      </div>
+      <div class="cta-bottom-badges">
+        <div class="cta-badge-item"><span>✅</span> Sin permanencia</div>
+        <div class="cta-badge-item"><span>⚡</span> Demo en 48h</div>
+        <div class="cta-badge-item"><span>🛡️</span> Garantía 30 días</div>
+        <div class="cta-badge-item"><span>🤝</span> Soporte en español</div>
+        <div class="cta-badge-item"><span>📍</span> Barcelona</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+  <div class="footer-top">
+    <div class="footer-brand">
+      <div class="footer-logo">
+        <div class="footer-logo-icon">🤖</div>
+        <span>Eleva<span style="color:var(--indigo-light)">i</span><span style="color:var(--coral)">TI</span></span>
+      </div>
+      <p class="footer-desc">Agencia especializada en Inteligencia Artificial para empresas. Transformamos negocios con tecnología IA real y resultados medibles desde Barcelona.</p>
+      <div class="footer-socials">
+        <a class="footer-social" href="#" title="LinkedIn">in</a>
+        <a class="footer-social" href="#" title="Twitter">𝕏</a>
+        <a class="footer-social" href="#" title="YouTube">▶</a>
+        <a class="footer-social" href="#" title="Instagram">◈</a>
+        <a class="footer-social" href="#" title="GitHub">⌨</a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h5>Servicios</h5>
+      <ul>
+        <li><a href="#">Chatbots IA</a></li>
+        <li><a href="#">Automatización</a></li>
+        <li><a href="#">Análisis Predictivo</a></li>
+        <li><a href="#">IA Generativa</a></li>
+        <li><a href="#">Visión Computador</a></li>
+        <li><a href="#">Consultoría IA</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>Empresa</h5>
+      <ul>
+        <li><a href="#">Sobre ElevaiTI</a></li>
+        <li><a href="#">Equipo</a></li>
+        <li><a href="#">Casos de Éxito</a></li>
+        <li><a href="#">Blog IA</a></li>
+        <li><a href="#">Trabaja con nosotros</a></li>
+        <li><a href="#">Prensa</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>Contacto</h5>
+      <ul>
+        <li><a href="#">📍 Barcelona, 22@ District</a></li>
+        <li><a href="#">📧 hola@elevaiti.com</a></li>
+        <li><a href="#">📞 +34 93 XXX XXXX</a></li>
+        <li><a href="#">💬 Chat en vivo</a></li>
+      </ul>
+      <div style="margin-top:1.25rem;padding:0.75rem;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);border-radius:var(--radius-sm);">
+        <div style="font-size:0.7rem;color:var(--green-light);font-weight:700;text-transform:uppercase;letter-spacing:0.06em;">● Ahora disponible</div>
+        <div style="font-size:0.75rem;color:rgba(255,255,255,0.5);margin-top:0.2rem;">Tiempo medio de respuesta: &lt;2h</div>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="footer-bottom-left">© 2026 ElevaiTI. Todos los derechos reservados. Hecho con ❤️ en Barcelona.</div>
+    <div class="footer-bottom-right">
+      <a href="#">Privacidad</a>
+      <a href="#">Términos</a>
+      <a href="#">Cookies</a>
+      <a href="#">RGPD</a>
+    </div>
+  </div>
+</footer>
+
+<!-- ===== JAVASCRIPT ===== -->
+<script>
+// ── Scroll Progress Bar ──────────────────────────────────────
+window.addEventListener('scroll', () => {
+  const scrollTop = window.scrollY;
+  const docHeight = document.body.scrollHeight - window.innerHeight;
+  const progress = (scrollTop / docHeight) * 100;
+  document.getElementById('progress-bar').style.width = progress + '%';
+
+  // Navbar scroll class
+  const navbar = document.getElementById('navbar');
+  navbar.classList.toggle('scrolled', scrollTop > 50);
+
+  // Scroll to top button
+  const scrollBtn = document.getElementById('scroll-top');
+  scrollBtn.classList.toggle('visible', scrollTop > 400);
+});
+
+// ── Sparkline Bars ───────────────────────────────────────────
+const spark1 = document.getElementById('spark1');
+const sparkVals = [40, 55, 45, 70, 60, 85, 75, 90, 80, 95];
+sparkVals.forEach((v, i) => {
+  const bar = document.createElement('div');
+  bar.className = 'sparkline-bar';
+  const colors = ['#4F46E5','#4F46E5','#818CF8','#6366F1','#4F46E5','#F97316','#F97316','#10B981','#10B981','#10B981'];
+  bar.style.cssText = `height:${v}%;background:${colors[i]};flex:1;border-radius:2px;`;
+  spark1.appendChild(bar);
+});
+
+// ── Hero Counter Animation ───────────────────────────────────
+function animateCounters() {
+  document.querySelectorAll('[data-count]').forEach(el => {
+    const target = parseInt(el.dataset.count);
+    const suffix = el.textContent.includes('+') ? '+' : el.textContent.includes('%') ? '%' : '';
+    let current = 0;
+    const step = Math.ceil(target / 60);
+    const interval = setInterval(() => {
+      current = Math.min(current + step, target);
+      el.textContent = current + suffix;
+      if (current >= target) clearInterval(interval);
+    }, 16);
+  });
+}
+
+// ── Mobile Menu ──────────────────────────────────────────────
+function openMobileMenu() {
+  document.getElementById('mobileMenu').classList.add('open');
+  document.getElementById('mobileOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeMobileMenu() {
+  document.getElementById('mobileMenu').classList.remove('open');
+  document.getElementById('mobileOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// ── Tab System ───────────────────────────────────────────────
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    const tabId = 'tab-' + btn.dataset.tab;
+    document.getElementById(tabId).classList.add('active');
+    if (btn.dataset.tab === 'dashboard') initDashboard();
+    if (btn.dataset.tab === 'automation') initAutoFlow();
+    if (btn.dataset.tab === 'vision') initVision();
+  });
+});
+
+// ── Chatbot Demo ─────────────────────────────────────────────
+const chatResponses = {
+  'hola': '¡Hola! 👋 Soy el asistente IA de ElevaiTI. Puedo ayudarte a conocer nuestros servicios, precios o agendar una demo. ¿Qué te interesa?',
+  'precio': '💰 Nuestros planes empiezan desde €1.490 para proyectos básicos. Incluyen chatbot IA, integración web y 30 días de soporte. ¿Quieres más detalles?',
+  'demo': '🚀 ¡Perfecto! Podemos organizar una demo personalizada en menos de 48 horas. Solo necesito tu email o teléfono. ¿Cuál prefieres?',
+  'chatbot': '🤖 Desarrollamos chatbots con IA avanzada entrenados con tu documentación. Se integran en web, WhatsApp, Telegram y más. ¿Para qué sector es tu empresa?',
+  'automatización': '⚙️ Automatizamos procesos como facturación, atención al cliente, generación de informes... Nuestros clientes ahorran hasta 40 horas semanales. ¿Qué proceso quieres automatizar?',
+  'barcelona': '📍 ¡Somos de Barcelona! Estamos en el distrito 22@ (tech hub). Podemos reunirnos presencialmente o trabajar en remoto. ¿Prefieres una llamada o visita?',
+  'gracias': '¡De nada! 😊 Estoy aquí para ayudarte. Si tienes más preguntas o quieres hablar con un experto humano, escríbenos a hola@elevaiti.com',
+};
+const defaultResp = [
+  '🤔 Interesante pregunta. Para darte la mejor respuesta, ¿podrías darme más contexto sobre tu empresa y necesidades?',
+  '💡 Entiendo tu consulta. En ElevaiTI tenemos experiencia con casos similares. ¿Quieres que un experto te llame para explicártelo en detalle?',
+  '🎯 Esa es exactamente el tipo de solución que construimos. ¿Te interesa ver un caso de éxito similar del sector?',
+  '⚡ ¡Buena pregunta! Podemos ayudarte con eso. La mejor forma es agendar un diagnóstico gratuito de 30 minutos. ¿Te parece?',
+];
+
+function sendChatMsg() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+  const msgs = document.getElementById('chatMessages');
+
+  // User message
+  const userMsg = document.createElement('div');
+  userMsg.className = 'msg msg-user';
+  userMsg.textContent = text;
+  msgs.appendChild(userMsg);
+  input.value = '';
+
+  // Typing indicator
+  const typing = document.createElement('div');
+  typing.className = 'msg msg-bot msg-typing';
+  typing.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+  msgs.appendChild(typing);
+  msgs.scrollTop = msgs.scrollHeight;
+
+  setTimeout(() => {
+    msgs.removeChild(typing);
+    const botMsg = document.createElement('div');
+    botMsg.className = 'msg msg-bot';
+    const lowerText = text.toLowerCase();
+    let response = defaultResp[Math.floor(Math.random() * defaultResp.length)];
+    for (const [key, val] of Object.entries(chatResponses)) {
+      if (lowerText.includes(key)) { response = val; break; }
+    }
+    botMsg.textContent = response;
+    msgs.appendChild(botMsg);
+    msgs.scrollTop = msgs.scrollHeight;
+  }, 1200 + Math.random() * 800);
+}
+
+document.getElementById('chatInput').addEventListener('keypress', e => {
+  if (e.key === 'Enter') sendChatMsg();
+});
+
+// ── Dashboard Demo ───────────────────────────────────────────
+function initDashboard() {
+  const barsContainer = document.getElementById('dashBars');
+  const labelsContainer = document.getElementById('dashLabels');
+  if (!barsContainer || barsContainer.children.length > 0) return;
+
+  const days = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
+  const values = [65, 72, 58, 83, 91, 76, 88];
+  const colors = ['#4F46E5','#6366F1','#818CF8','#F97316','#10B981','#4F46E5','#10B981'];
+
+  days.forEach((day, i) => {
+    const bar = document.createElement('div');
+    bar.className = 'dash-bar';
+    bar.style.cssText = `height:${values[i]}%;background:${colors[i]};opacity:0.8;`;
+    bar.innerHTML = `<div class="dash-bar-tooltip">${values[i]}% opt.</div>`;
+    barsContainer.appendChild(bar);
+
+    const label = document.createElement('div');
+    label.className = 'dash-label';
+    label.textContent = day;
+    labelsContainer.appendChild(label);
+  });
+}
+
+// Update dashboard time
+setInterval(() => {
+  const el = document.getElementById('dashTime');
+  if (el) el.textContent = new Date().toLocaleTimeString('es-ES');
+}, 1000);
+
+// ── Automation Flow ──────────────────────────────────────────
+function initAutoFlow() {
+  const container = document.getElementById('autoFlow');
+  if (!container || container.children.length > 0) return;
+
+  const steps = [
+    { icon: '📧', label: 'Email recibido de cliente', color: 'var(--indigo)', status: 'done' },
+    { icon: '🔍', label: 'IA analiza intención y urgencia', color: 'var(--coral)', status: 'done' },
+    { icon: '📋', label: 'Crea ticket en CRM automáticamente', color: 'var(--green)', status: 'done' },
+    { icon: '🤖', label: 'Asistente IA genera respuesta personalizada', color: 'var(--purple)', status: 'active' },
+    { icon: '📨', label: 'Envío automático en <30 segundos', color: 'var(--indigo-light)', status: 'pending' },
+    { icon: '📊', label: 'Métricas actualizadas en dashboard', color: 'var(--yellow)', status: 'pending' },
+  ];
+
+  steps.forEach(step => {
+    const el = document.createElement('div');
+    el.style.cssText = `display:flex;align-items:center;gap:0.75rem;padding:0.65rem 0.85rem;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:var(--radius-sm);font-size:0.825rem;transition:all 0.3s;`;
+    if (step.status === 'done') el.style.borderColor = 'rgba(16,185,129,0.25)';
+    if (step.status === 'active') {
+      el.style.borderColor = `rgba(79,70,229,0.4)`;
+      el.style.background = 'rgba(79,70,229,0.08)';
+      el.style.animation = 'pulse-step 2s infinite';
+    }
+    const statusIcon = step.status === 'done' ? '✅' : step.status === 'active' ? '⚡' : '⏳';
+    el.innerHTML = `<span style="font-size:1.1rem;">${step.icon}</span><span style="flex:1;color:${step.status === 'pending' ? 'rgba(255,255,255,0.4)' : '#fff'}">${step.label}</span><span>${statusIcon}</span>`;
+    container.appendChild(el);
+  });
+}
+
+// ── Vision Demo ──────────────────────────────────────────────
+function initVision() {
+  const annotations = document.getElementById('visionAnnotations');
+  const tagsContainer = document.getElementById('visionTags');
+  if (!annotations || annotations.children.length > 0) return;
+
+  annotations.innerHTML = `
+    <div style="font-size:0.7rem;color:rgba(139,92,246,0.8);font-family:monospace;letter-spacing:0.05em;animation:fadeIn 1s;text-align:center;">
+      <div style="margin-bottom:0.5rem;color:rgba(255,255,255,0.6);">🔍 Analizando imagen...</div>
+      <div id="visionResult" style="color:var(--green-light);font-size:0.8rem;"></div>
+    </div>
+  `;
+
+  const detections = [
+    '✅ Objeto detectado: Factura PDF',
+    '📋 Extrayendo campos: NIF, importe, fecha',
+    '💶 Total encontrado: €2.847,50',
+    '📅 Fecha: 24/03/2026',
+    '🏢 Emisor: Tech Solutions SL',
+    '✅ Validación: Formato correcto',
+    '🗄️ Guardando en sistema...',
+    '✅ Procesado exitosamente',
+  ];
+
+  let i = 0;
+  const interval = setInterval(() => {
+    const result = document.getElementById('visionResult');
+    if (result && i < detections.length) {
+      result.textContent = detections[i];
+      i++;
+    } else {
+      clearInterval(interval);
+    }
+  }, 800);
+
+  const tags = [
+    { label: 'OCR Activo', color: 'rgba(139,92,246,0.3)', border: 'rgba(139,92,246,0.5)' },
+    { label: 'Precisión: 99.7%', color: 'rgba(16,185,129,0.3)', border: 'rgba(16,185,129,0.5)' },
+    { label: 'Tiempo: 0.3s', color: 'rgba(249,115,22,0.3)', border: 'rgba(249,115,22,0.5)' },
+  ];
+  tags.forEach(t => {
+    const tag = document.createElement('span');
+    tag.style.cssText = `padding:0.3rem 0.7rem;background:${t.color};border:1px solid ${t.border};border-radius:50px;font-size:0.7rem;font-weight:600;`;
+    tag.textContent = t.label;
+    tagsContainer.appendChild(tag);
+  });
+}
+
+// ── Pricing Toggle ───────────────────────────────────────────
+let isYearly = false;
+function togglePricing() {
+  isYearly = !isYearly;
+  const toggle = document.getElementById('pricingToggle');
+  const mLabel = document.getElementById('monthlyLabel');
+  const yLabel = document.getElementById('yearlyLabel');
+
+  toggle.classList.toggle('yearly', isYearly);
+  mLabel.classList.toggle('active', !isYearly);
+  yLabel.classList.toggle('active', isYearly);
+
+  document.querySelectorAll('.price-val').forEach(el => {
+    const monthly = el.dataset.monthly;
+    const yearly = el.dataset.yearly;
+    if (!monthly || !yearly) return;
+    el.textContent = isYearly ? yearly : monthly;
+  });
+  document.querySelectorAll('.price-orig').forEach(el => {
+    el.textContent = isYearly ? (el.dataset.yearly || '') : '';
+  });
+}
+
+// ── FAQ Accordion ────────────────────────────────────────────
+function toggleFaq(item) {
+  const wasOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+  if (!wasOpen) item.classList.add('open');
+}
+
+// ── Quick Message ────────────────────────────────────────────
+function sendQuickMsg() {
+  const area = document.getElementById('quickMsgArea');
+  const btn = document.getElementById('quickMsgBtn');
+  if (!area.value.trim()) { area.style.borderColor = 'rgba(249,115,22,0.5)'; return; }
+  btn.textContent = '✅ ¡Mensaje enviado! Te contactamos pronto.';
+  btn.style.background = 'linear-gradient(135deg,var(--green-dark),var(--green))';
+  area.value = '';
+}
+
+// ── CTA Particles ────────────────────────────────────────────
+function createParticles() {
+  const container = document.getElementById('ctaParticles');
+  if (!container) return;
+  for (let i = 0; i < 20; i++) {
+    const p = document.createElement('div');
+    p.className = 'cta-particle';
+    p.style.cssText = `
+      left: ${Math.random() * 100}%;
+      animation-duration: ${6 + Math.random() * 10}s;
+      animation-delay: ${Math.random() * 8}s;
+      width: ${2 + Math.random() * 4}px;
+      height: ${2 + Math.random() * 4}px;
+      background: ${['rgba(79,70,229,0.7)','rgba(249,115,22,0.6)','rgba(16,185,129,0.5)'][Math.floor(Math.random()*3)]};
+    `;
+    container.appendChild(p);
+  }
+}
+createParticles();
+
+// ── GSAP Animations ──────────────────────────────────────────
+gsap.registerPlugin(ScrollTrigger);
+
+// Hero animations
+gsap.timeline()
+  .from('.hero-badge', { opacity: 0, y: 20, duration: 0.6 })
+  .from('.hero-title', { opacity: 0, y: 30, duration: 0.7 }, '-=0.3')
+  .from('.hero-desc', { opacity: 0, y: 20, duration: 0.6 }, '-=0.4')
+  .from('.hero-buttons', { opacity: 0, y: 20, duration: 0.5 }, '-=0.3')
+  .from('.hero-stats', { opacity: 0, y: 15, duration: 0.5 }, '-=0.2')
+  .from('.hero-visual', { opacity: 0, scale: 0.9, duration: 0.8 }, '-=0.8');
+
+// Scroll reveals with GSAP
+gsap.utils.toArray('.reveal').forEach(el => {
+  gsap.fromTo(el,
+    { opacity: 0, y: 40 },
+    {
+      opacity: 1, y: 0, duration: 0.75, ease: 'power2.out',
+      scrollTrigger: {
+        trigger: el,
+        start: 'top 88%',
+        toggleActions: 'play none none none',
+        onEnter: () => {
+          // Trigger counter animations when stats section enters
+          if (el.closest('.stats-section')) {
+            el.querySelectorAll('.count').forEach(counter => {
+              const target = parseInt(counter.dataset.target);
+              const suffix = counter.dataset.suffix || '';
+              let current = 0;
+              const step = Math.max(1, Math.ceil(target / 80));
+              const interval = setInterval(() => {
+                current = Math.min(current + step, target);
+                counter.textContent = current + suffix;
+                if (current >= target) clearInterval(interval);
+              }, 16);
+            });
+          }
+          // Trigger progress bars
+          if (el.closest('.stats-section')) {
+            el.querySelectorAll('.progress-bar-fill').forEach(bar => {
+              const parentItem = bar.closest('.progress-item');
+              if (parentItem) {
+                setTimeout(() => { bar.style.width = parentItem.dataset.width + '%'; }, 300);
+              }
+            });
+          }
+        }
+      }
+    }
+  );
+});
+
+// Process steps stagger
+gsap.utils.toArray('.process-step').forEach((step, i) => {
+  gsap.from(step, {
+    opacity: 0, y: 30, scale: 0.95,
+    duration: 0.6, delay: i * 0.15, ease: 'back.out(1.4)',
+    scrollTrigger: { trigger: step, start: 'top 85%' }
+  });
+});
+
+// Stats cards stagger
+gsap.utils.toArray('.stat-card').forEach((card, i) => {
+  gsap.from(card, {
+    opacity: 0, y: 40, scale: 0.95,
+    duration: 0.6, delay: i * 0.1, ease: 'power2.out',
+    scrollTrigger: { trigger: card, start: 'top 88%' }
+  });
+});
+
+// Flip cards stagger
+gsap.utils.toArray('.flip-card').forEach((card, i) => {
+  gsap.from(card, {
+    opacity: 0, y: 50, rotationX: 15,
+    duration: 0.7, delay: i * 0.08, ease: 'power2.out',
+    scrollTrigger: { trigger: card, start: 'top 90%' }
+  });
+});
+
+// Tech items
+gsap.utils.toArray('.tech-item').forEach((item, i) => {
+  gsap.from(item, {
+    opacity: 0, scale: 0.8, y: 20,
+    duration: 0.4, delay: i * 0.05, ease: 'back.out(1.7)',
+    scrollTrigger: { trigger: item, start: 'top 90%' }
+  });
+});
+
+// Parallax on hero orbs
+gsap.to('.hero-orb-1', {
+  y: -60,
+  scrollTrigger: { trigger: '.hero', scrub: 1 }
+});
+gsap.to('.hero-orb-2', {
+  y: -40,
+  scrollTrigger: { trigger: '.hero', scrub: 1.5 }
+});
+
+// ── Hero counter trigger ─────────────────────────────────────
+setTimeout(() => {
+  document.querySelectorAll('.hero-stat-num[data-count]').forEach(el => {
+    const target = parseInt(el.dataset.count);
+    const text = el.textContent;
+    const suffix = text.includes('+') ? '+' : '';
+    let current = 0;
+    const step = Math.ceil(target / 60);
+    const interval = setInterval(() => {
+      current = Math.min(current + step, target);
+      el.textContent = current + suffix;
+      if (current >= target) clearInterval(interval);
+    }, 20);
+  });
+}, 1500);
+
+// ── Init Dashboard time ──────────────────────────────────────
+const dashTimeEl = document.getElementById('dashTime');
+if (dashTimeEl) dashTimeEl.textContent = new Date().toLocaleTimeString('es-ES');
+
+// ── Preload first tab content ─────────────────────────────────
+// Chat demo is already loaded. Init dashboard if first tab is switched
+document.querySelector('.tab-btn[data-tab="chatbot"]').click();
+
+// ── Floating cards dynamic data ──────────────────────────────
+setInterval(() => {
+  const val = document.querySelector('.hero-card-3 .hero-card-val');
+  if (val) {
+    const num = parseInt(val.textContent.replace(/,/g, '')) + Math.floor(Math.random() * 5);
+    val.textContent = num.toLocaleString('es-ES');
+  }
+}, 2000);
+
+// ── Smooth scroll for anchor links ───────────────────────────
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target) {
+      e.preventDefault();
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      closeMobileMenu();
+    }
+  });
+});
+
+console.log('%c🤖 ElevaiTI — Agencia de Inteligencia Artificial', 'font-size:16px;font-weight:bold;color:#4F46E5;background:#EEF2FF;padding:8px 16px;border-radius:8px;');
+console.log('%cBarcelona · hola@elevaiti.com', 'font-size:12px;color:#818CF8;');
+</script>
+</body>
+</html>

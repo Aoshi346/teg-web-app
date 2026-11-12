@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<!--
+  REPORT-KIT · index.template.html — página 1 del informe (RESUMEN).
+  ── Contrato ───────────────────────────────────────────────────────────────
+  build.py inyecta report.json {meta,items} (schema: item.schema.json) en el
+  placeholder DATA de `const DB` (línea 1 del script; NO escribir el placeholder
+  literal aquí: build.py reemplaza TODAS las ocurrencias). render_nav.py
+  materializa la topnav entre los marcadores NAV:BEGIN / NAV:END del body
+  (nav.json, según meta.profile).
+  Self-contained: CSS/JS inline, tokens de base.html, system fonts, sin CDN.
+  Si DB es null (plantilla sin inyectar) → degrada con aviso claro.
+  Mapa conceptual: mini-grafo epics→páginas DERIVADO de los items — motor SVG
+  adaptado de templates/html/architecture.html (bezier + click → panel lateral).
+-->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Report-kit · Resumen</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Crect%20width='100'%20height='100'%20rx='22'%20fill='%231b2a4a'/%3E%3Ctext%20x='50'%20y='70'%20font-size='56'%20font-family='system-ui,sans-serif'%20font-weight='700'%20fill='%23fff'%20text-anchor='middle'%3ER%3C/text%3E%3C/svg%3E">
+<style>
+  /* SHARED:BEGIN */
+  :root{
+    --ink:#1b1b1f;--muted:#6b6b76;--faint:#6c6c78;--paper:#f6f4ef;--card:#fff;--line:#e4e0d7;
+    --navy:#1b2a4a;--accent:#c2410c;--green:#15803d;--amber:#b45309;--blue:#1d4ed8;--red:#b42318;
+    --radius-sm:6px;--radius-md:10px;--radius:14px;--radius-pill:999px;
+    --shadow-modal:0 20px 60px rgba(27,27,31,.28);
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --s-backlog:#6b6b76;--s-doing:#b45309;--s-review:#1d4ed8;--s-done:#15803d;--s-blocked:#b42318;
+    --d-aprobar:#15803d;--d-modificar:#1d4ed8;--d-aplazar:#b45309;--d-descartar:#b42318;
+  }
+  *{box-sizing:border-box}
+  h1{font-size:clamp(24px,3.6vw,38px);margin:0 0 10px;letter-spacing:-.02em;color:var(--ink)}
+  h1 em{font-style:italic;color:var(--navy)}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600;margin:0 0 10px}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px}
+  .kpi b{display:block;font-size:28px;font-weight:700;letter-spacing:-.02em;color:var(--navy);line-height:1.15}
+  .kpi span{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+  .kpi.warn b{color:var(--red)}
+  .badge{display:inline-block;font-size:11px;font-weight:700;padding:3px 10px;border-radius:var(--radius-pill);color:#fff;text-transform:uppercase;letter-spacing:.04em}
+  .nodata{max-width:560px;margin:80px auto;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:28px 32px;text-align:center}
+  .nodata code{font-family:var(--mono);font-size:.9em;background:#efece4;color:var(--navy);padding:2px 6px;border-radius:6px}
+  .icon{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px}
+  .demo-banner{display:flex;align-items:center;gap:8px;background:#fdf3e3;border:1px solid #eed9b0;border-radius:var(--radius-sm);padding:8px 14px;margin:14px 0 0;font-size:12.5px;color:#78350f}
+  .demo-banner .icon{flex:none}
+  .demo-banner[hidden]{display:none}  /* [hidden] pierde ante .demo-banner{display:flex} — sin esto el banner de demo sale SIEMPRE */
+  .audience-note{display:flex;align-items:center;gap:8px;background:#eef1f5;border:1px solid #d7dee8;border-radius:var(--radius-sm);padding:8px 14px;margin:12px 0 0;font-size:12.5px;color:var(--navy)}
+  .audience-note .icon{flex:none}
+  .scroll-hint{display:none;font-size:11px;color:var(--faint);text-align:right;margin:0 0 6px}
+  @media(max-width:767px){.scroll-hint{display:block}}
+  /* nav responsive: la gestiona el bloque que inyecta render_nav.py (fuente única) */
+  /* SHARED:END */
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55}
+  .wrap{max-width:1100px;margin:0 auto;padding:0 22px}
+  header.hero{border-bottom:1px solid var(--line);padding:36px 0 24px}
+  .lead{font-size:16px;color:var(--muted);max-width:78ch;margin:0}
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+  section{padding:26px 0;border-bottom:1px solid var(--line)}
+  h2{font-size:20px;margin:0 0 12px;letter-spacing:-.01em}
+  .note{background:#fdebd9;border:1px solid #f3c9a8;border-left:4px solid var(--accent);border-radius:10px;padding:12px 16px;color:#7c2d12;font-size:14px;margin:18px 0}
+  button.btn{font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;border:1px solid var(--navy);background:var(--navy);color:#fff;padding:9px 15px;border-radius:10px}
+  button.btn.copied{background:var(--green);border-color:var(--green)}
+  footer{padding:26px 0 60px;color:var(--faint);font-size:13px}
+  /* ===== scroller (tablas anchas en móvil) ===== */
+  .scroller{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:var(--radius);box-shadow:inset -10px 0 8px -8px rgba(27,27,31,.12)}
+  @media(max-width:480px){
+    .scroller{overflow-x:visible;box-shadow:none}
+    .scroller table,.scroller thead,.scroller tbody,.scroller tr,.scroller td{display:block;width:100%}
+    .scroller thead{display:none}
+    .scroller tr{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);margin:0 0 10px;padding:4px 10px}
+    .scroller td{display:flex;justify-content:space-between;gap:10px;padding:6px 2px;border-bottom:1px dashed var(--line);text-align:right}
+    .scroller td:last-child{border-bottom:none}
+    .scroller td::before{content:attr(data-label);font-weight:600;color:var(--muted);text-align:left;margin-right:auto}
+    .scroll-hint{display:none}
+  }
+  /* ===== progreso ===== */
+  .pbar{display:flex;height:14px;border-radius:8px;overflow:hidden;border:1px solid var(--line);background:#eee9df}
+  .pbar i{display:block;height:100%}
+  .plegend{display:flex;gap:16px;flex-wrap:wrap;margin-top:10px;font-size:12.5px;color:var(--muted)}
+  .plegend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:middle}
+  /* ===== mapa (motor architecture.html) ===== */
+  .stage{display:grid;grid-template-columns:1fr 320px;gap:16px}
+  @media(max-width:860px){.stage{grid-template-columns:1fr}}
+  .diagram{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:8px;overflow:auto}
+  svg{width:100%;height:auto;display:block}
+  .node{cursor:pointer}
+  .node rect.box{transition:.12s}
+  .node:hover rect.box{filter:brightness(.96)}
+  .node.sel rect.box{stroke:var(--accent);stroke-width:3}
+  .node text{font-family:var(--sans);font-size:12.5px;fill:#fff;font-weight:600;pointer-events:none}
+  .node text.sub{font-size:10px;fill:#dfe5ee;font-weight:500}
+  .node.page text{fill:var(--navy)} .node.page text.sub{fill:var(--muted)}
+  .medge{fill:none;marker-end:url(#arrow);opacity:.5;transition:.12s}
+  .medge.hot{opacity:.95}
+  .medge.cold{opacity:.12}
+  .colhead{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;fill:var(--faint)}
+  aside.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;align-self:start;position:sticky;top:64px}
+  aside.panel h3{margin:0 0 4px;font-size:16px;color:var(--navy)}
+  aside.panel .tag{font-family:var(--mono);font-size:11px;color:var(--faint)}
+  aside.panel p{font-size:13.5px;color:var(--muted);margin:6px 0}
+  .itemrow{display:flex;gap:8px;align-items:baseline;font-size:12.5px;padding:5px 0;border-bottom:1px dashed var(--line)}
+  .itemrow:last-child{border-bottom:none}
+  .dot{width:9px;height:9px;border-radius:50%;flex:none;position:relative;top:1px}
+  .iid{font-family:var(--mono);font-size:11px;color:var(--faint);flex:none}
+  .sev{font-family:var(--mono);font-size:10px;color:var(--red);font-weight:700;flex:none}
+  /* ===== tablas ===== */
+  table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:13.5px;margin:8px 0}
+  th,td{padding:8px 12px;border-bottom:1px solid var(--line);vertical-align:top;text-align:left}
+  th{background:#fbfaf7;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+  tr:last-child td{border-bottom:none}
+  td.num,th.num{text-align:right;font-family:var(--mono);font-size:12.5px}
+  .chip{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:7px;vertical-align:-1px}
+  .mini{display:inline-block;height:7px;border-radius:4px;background:#eee9df;overflow:hidden;width:90px;vertical-align:middle}
+  .mini i{display:block;height:100%;background:var(--green)}
+  code{font-family:var(--mono);font-size:.88em;background:#efece4;color:var(--navy);padding:1px 6px;border-radius:6px}
+  /* MO-26 · «Lo que pediste y dónde está»: la PRIMERA sección, a propósito (rules/report-kit.md) */
+  #pedido{border-bottom:2px solid var(--navy)}
+  .pedido{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+  .pedido li{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap;background:var(--card);
+    border:1px solid var(--line);border-radius:10px;padding:10px 14px}
+  .pedido .n{font-family:var(--mono);font-size:12px;color:var(--faint);min-width:1.6em}
+  .pedido .q{flex:1 1 260px}
+  .pedido .d{font-size:13.5px}
+  .pedido .e{font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+    border-radius:999px;padding:2px 9px;background:#efece4;color:var(--muted)}
+  .pedido .e.hecho{background:#e6f4ea;color:#1a7f37}
+  .pedido .e.falta{background:#fdecea;color:#b42318}
+  .pedido-vacio{color:var(--muted);font-size:14.5px;margin:0}
+  .pedido-vacio code{font-family:var(--mono);font-size:.88em;background:#efece4;padding:1px 5px;border-radius:5px}
+  .opt-links{font-size:14px;color:var(--muted)}
+  .opt-links a{color:var(--navy)}
+  #toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:8px 16px;border-radius:10px;font-size:13px;opacity:0;transition:.2s;pointer-events:none;z-index:50}
+  #toast.show{opacity:1}
+</style>
+</head>
+<body>
+<!-- ICONS:BEGIN -->
+<svg style="display:none" aria-hidden="true">
+  <symbol id="ic-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></symbol>
+  <symbol id="ic-download" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></symbol>
+  <symbol id="ic-upload" viewBox="0 0 24 24"><path d="M12 21V9"/><path d="m7 14 5-5 5 5"/><path d="M5 21h14"/></symbol>
+  <symbol id="ic-refresh" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></symbol>
+  <symbol id="ic-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".6" fill="currentColor"/></symbol>
+  <symbol id="ic-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><circle cx="12" cy="8" r=".6" fill="currentColor"/></symbol>
+  <symbol id="ic-tool" viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 1 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.1 2.1-2-2z"/></symbol><symbol id="ic-search" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10.5 10.5 L14 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol><symbol id="ic-eye" viewBox="0 0 16 16"><path d="M1.5 8 C4 4.2 12 4.2 14.5 8 C12 11.8 4 11.8 1.5 8 Z" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="8" cy="8" r="2" fill="currentColor"/></symbol><symbol id="ic-arrow" viewBox="0 0 16 16"><path d="M2.5 8 H12 M8.6 4 L13 8 L8.6 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol><symbol id="ic-clip" viewBox="0 0 16 16"><rect x="4" y="2.6" width="8" height="11" rx="1.4" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6 2.6 V1.8 H10 V2.6" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6 6.4 H10 M6 9 H10 M6 11.4 H8.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></symbol>
+</svg>
+<!-- ICONS:END -->
+<!-- NAV:BEGIN -->
+<!-- NAV:END -->
+
+<div class="wrap"><div class="demo-banner" id="demoBanner" hidden><svg class="icon"><use href="#ic-info"></use></svg><span><b>Datos de demostración.</b> Este set usa un fixture de ejemplo, no un proyecto real.</span></div></div>
+
+<header class="hero"><div class="wrap">
+  <p class="eyebrow" id="h-eyebrow">report-kit · resumen</p>
+  <h1 id="h-title">Resumen del plan</h1>
+  <p class="lead" id="h-lead">Avance por estado, epics y páginas, decisiones tomadas y mapa conceptual del alcance.</p>
+  <div class="toolbar"><button class="btn" id="copyBtn"><svg class="icon"><use href="#ic-copy"></use></svg> copiar resumen (md)</button></div>
+</div></header>
+
+<main class="wrap">
+  <div class="nodata" id="nodata" hidden>
+    <p class="eyebrow">Report-kit · Resumen</p>
+    <p><b>Sin datos inyectados.</b></p>
+    <p>Esta es la plantilla sin inyectar. Genera el informe con<br><code>python3 build.py &lt;plan-dir&gt;</code><br>para generar <code>index.html</code> con el <code>report.json</code> del plan.</p>
+  </div>
+
+  <div id="content">
+    <section id="pedido">
+      <h2>Lo que pediste y dónde está</h2>
+      <div id="pedidoBody"></div>
+    </section>
+    <section>
+      <h2>Estado del plan</h2>
+      <div class="kpis" id="kpis"></div>
+    </section>
+
+    <section>
+      <h2>Progreso por estado</h2>
+      <div class="pbar" id="pbar"></div>
+      <div class="plegend" id="plegend"></div>
+    </section>
+
+    <section>
+      <h2>Mapa conceptual — epics × páginas</h2>
+      <p class="lead" style="font-size:14px;margin-bottom:12px">Tamaño ∝ nº de items · halo rojo = P0 abiertos · click en un nodo → detalle de sus items.</p>
+      <div class="stage">
+        <div class="diagram" id="diagram">
+          <svg id="svg" role="img" aria-label="Mapa conceptual epics a páginas">
+            <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#9aa1ad"/></marker></defs>
+            <g id="m-edges"></g><g id="m-nodes"></g>
+          </svg>
+        </div>
+        <aside class="panel">
+          <span class="tag" id="p-tag">mapa</span>
+          <h3 id="p-title">Selecciona un nodo</h3>
+          <p id="p-desc">Click en un epic (izquierda) o una página (derecha) para ver sus items y estado.</p>
+          <div id="p-items"></div>
+        </aside>
+      </div>
+    </section>
+
+    <section>
+      <h2>Por epic</h2>
+      <p class="scroll-hint">deslizá para ver más →</p>
+      <div class="scroller"><table><thead><tr><th>Epic</th><th class="num">backlog</th><th class="num">doing</th><th class="num">review</th><th class="num">done</th><th class="num">blocked</th><th class="num">total</th><th>% done</th></tr></thead>
+      <tbody id="t-epics"></tbody></table></div>
+    </section>
+
+    <section>
+      <h2>Por página</h2>
+      <p class="scroll-hint">deslizá para ver más →</p>
+      <div class="scroller"><table><thead><tr><th>Página</th><th class="num">backlog</th><th class="num">doing</th><th class="num">review</th><th class="num">done</th><th class="num">blocked</th><th class="num">total</th><th>% done</th></tr></thead>
+      <tbody id="t-pages"></tbody></table></div>
+    </section>
+
+    <section>
+      <h2>Decisiones tomadas</h2>
+      <div id="decisions"></div>
+    </section>
+
+    <!-- Solo las páginas opcionales que EXISTEN (build.py las inyecta en meta.optional_present).
+         Antes se enlazaban las 5 siempre con un "si este plan las incluye": en un plan normal eso
+         son 5 enlaces a 404, y un enlace muerto en un informe cuesta más que la página que falta. -->
+    <section id="extrasSec" style="display:none">
+      <h2>Páginas opcionales del set</h2>
+      <p class="opt-links" id="extras"></p>
+    </section>
+  </div>
+</main>
+
+<footer class="wrap" id="foot">Report-kit · un .html autocontenido · convención: rules/report-kit.md</footer>
+
+<script>
+const DB = /*__DATA__*/null;
+(function(){const m=DB&&DB.meta;if(m&&m.project){const t=`${m.project} · ${m.plan_id||""} · ronda ${m.round||1} · ${m.generated||""}`.toUpperCase();document.querySelectorAll(".eyebrow").forEach(el=>el.textContent=t);}})();
+
+/* ===== helpers ===== */
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function toast(m){const t=$("toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1500)}
+function copy(txt,btn){navigator.clipboard?.writeText(txt).then(()=>ok(btn)).catch(()=>{const t=document.createElement("textarea");t.value=txt;document.body.appendChild(t);t.select();document.execCommand("copy");t.remove();ok(btn)})}
+function ok(btn){if(!btn)return;btn.classList.add("copied");const o=btn.textContent;btn.textContent="✓ Copiado";toast("Copiado");setTimeout(()=>{btn.classList.remove("copied");btn.textContent=o},1500)}
+
+const ST={backlog:{label:"Backlog",color:"#8b8b95"},doing:{label:"En curso",color:"#1d4ed8"},review:{label:"Revisión",color:"#b45309"},done:{label:"Hecho",color:"#15803d"},blocked:{label:"Bloqueado",color:"#b42318"}};
+const STK=Object.keys(ST);
+const DEC={aprobar:"#15803d",modificar:"#1d4ed8",aplazar:"#b45309",descartar:"#b42318"};
+
+let S={},EPICS=[],PAGESL=[];
+
+if(!DB||!Array.isArray(DB.items)){
+  $("nodata").hidden=false;$("content").style.display="none";
+  $("copyBtn").onclick=()=>toast("Sin datos que copiar");
+}else{render();}
+
+function counts(list){const c={backlog:0,doing:0,review:0,done:0,blocked:0};list.forEach(i=>{if(c[i.status]!=null)c[i.status]++});return c}
+function pctDone(list){return list.length?Math.round(counts(list).done*100/list.length):0}
+function p0open(list){return list.filter(i=>i.severity==="P0"&&i.status!=="done").length}
+
+function render(){
+  const M=DB.meta||{},IT=DB.items;
+  document.title=`${M.project||"plan"} · ${M.title||"Resumen"}`;
+  /* eyebrow: lo fija el snippet compartido de cabecera (QA iter-3 F1) */
+  $("h-title").textContent=M.title||"Resumen del plan";
+  $("foot").textContent=`Report-kit · ${M.project||""} · ${M.plan_id||""} · generado ${M.generated||"—"} · un .html autocontenido`;
+  if(M.demo===true||(M.project==="tech-lead-template"&&M.plan_id==="report-kit-demo"))$("demoBanner").hidden=false;
+
+  /* --- KPIs --- */
+  const c=counts(IT);
+  S={total:IT.length,done:c.done,pct:pctDone(IT),p0:p0open(IT),blocked:c.blocked,pending:IT.filter(i=>!i.decision).length,c};
+  $("kpis").innerHTML=[
+    ["Items totales",S.total,""],
+    ["% done",S.pct+"%",""],
+    ["P0 abiertos",S.p0,S.p0>0?"warn":""],
+    ["Bloqueados",S.blocked,S.blocked>0?"warn":""],
+    ["Sin decisión",S.pending,""]
+  ].map(([l,v,k])=>`<div class="kpi ${k}"><b>${v}</b><span>${l}</span></div>`).join("");
+
+  /* --- barra de progreso --- */
+  $("pbar").innerHTML=STK.filter(k=>c[k]>0).map(k=>`<i style="width:${c[k]*100/S.total}%;background:${ST[k].color}" title="${ST[k].label}: ${c[k]}"></i>`).join("");
+  $("plegend").innerHTML=STK.map(k=>`<span><i style="background:${ST[k].color}"></i>${ST[k].label} · ${c[k]}</span>`).join("");
+
+  /* --- agrupaciones --- */
+  const epicsMeta=M.epics||{};
+  const eKeys=[...Object.keys(epicsMeta).filter(k=>IT.some(i=>i.epic===k)),
+               ...[...new Set(IT.map(i=>i.epic||"_sin"))].filter(k=>!epicsMeta[k])];
+  EPICS=eKeys.map(k=>{const items=IT.filter(i=>(i.epic||"_sin")===k);
+    return {key:k,name:epicsMeta[k]?.name||(k==="_sin"?"(sin epic)":k),color:epicsMeta[k]?.color||"#8b8b95",items,counts:counts(items),p0:p0open(items)}});
+
+  const pagesMeta=M.pages||[];
+  const pCodes=[...pagesMeta.map(p=>p.code).filter(cd=>IT.some(i=>i.page===cd)),
+                ...[...new Set(IT.filter(i=>i.page).map(i=>i.page))].filter(cd=>!pagesMeta.some(p=>p.code===cd))];
+  PAGESL=pCodes.map(cd=>{const pm=pagesMeta.find(p=>p.code===cd)||{};
+    return {key:cd,name:pm.name||cd,items:IT.filter(i=>i.page===cd)}});
+
+  renderPedido(M);
+  renderMap();
+  renderTables(IT,pagesMeta);
+  renderDecisions(IT);
+  $("copyBtn").onclick=e=>copy(buildMd(M),e.target);
+}
+
+/* ===== MO-26 · «Lo que pediste y dónde está» =====
+   La primera sección del Resumen, y no por estética: el Usuario preguntó «¿está todo lo que te he
+   dicho en el informe?» y no estaba (musa, entrada 52 de improvements_tl.md). Cada petición, en el
+   orden de SU prioridad, con el sitio del informe que la responde. La que no tiene sitio sale en
+   rojo: es que falta. Sin meta.pedido la sección NO desaparece: dice que no está declarado y cómo
+   se declara — omitirla haría creer que no se pidió nada. */
+function renderPedido(M){
+  const P=Array.isArray(M.pedido)?M.pedido:[], el=$("pedidoBody");
+  if(!P.length){
+    el.innerHTML=`<p class="pedido-vacio"><b>Sin declarar.</b> Este informe no dice todavía qué pidió el Usuario ni dónde está cada cosa. Se declara en <code>report.json</code> → <code>meta.pedido</code>: una lista de <code>{"que": "…", "donde": "dashboard.html#ID", "estado": "hecho|en curso|falta"}</code> en el orden de su prioridad (rules/report-kit.md §Lo que pediste).</p>`;
+    return;
+  }
+  el.innerHTML=`<ol class="pedido">${P.map((p,i)=>{
+    const est=p.estado||(p.donde?"hecho":"falta");
+    /* Solo rutas del informe o http(s): un `javascript:` en report.json no se convierte en enlace.
+       Antes de mirar el esquema se quitan los caracteres de control y el espacio, como hace el
+       navegador al leer un href («java\tscript:» ejecutaba; lo cazó el verificador de la 2.15). */
+    /* Se comprueba exactamente la cadena que va al href (trim() de JS quita también U+00A0 y
+       compañía: con un NBSP delante, «javascript:» pasaba — segunda pasada del verificador). */
+    /* Al href va `h`: sin tabuladores ni saltos de línea y sin blancos ni controles en los extremos
+       (lo que quita el navegador), con los espacios de dentro como %20. El esquema se mira en una
+       copia SIN ningún blanco ni control, más estricta que `h`: si ahí no hay esquema, en `h` tampoco. */
+    const h=String(p.donde||"").replace(/[\t\n\r]/g,"").replace(/^[\s\x00-\x1f\x7f]+|[\s\x00-\x1f\x7f]+$/g,"");
+    const prueba=h.replace(/[\s\x00-\x1f\x7f]/g,"");
+    const enlazable=/^https?:\/\//i.test(prueba)||(!!prueba&&!/^[a-z][a-z0-9+.-]*:/i.test(prueba)&&!/^[\/\\]{2}/.test(prueba));
+    const donde=p.donde?(enlazable?`<a class="d" href="${esc(h.replace(/ /g,"%20"))}">${esc(p.donde)}</a>`:`<span class="d">${esc(p.donde)}</span>`):`<span class="d">— sin sitio en el informe</span>`;
+    return `<li><span class="n">${i+1}</span><span class="q">${esc(p.que)}${p.id?` <span class="n">${esc(p.id)}</span>`:""}${p.nota?`<br><small>${esc(p.nota)}</small>`:""}</span>${donde}<span class="e ${esc(est.replace(" ","-"))}">${esc(est)}</span></li>`;
+  }).join("")}</ol>`;
+}
+
+/* ===== mapa conceptual (SVG data-driven, dos columnas + pasillo) ===== */
+function renderMap(){
+  const svg=$("svg"),eg=$("m-edges"),ng=$("m-nodes");
+  if(!EPICS.length){$("diagram").innerHTML='<p style="padding:14px;color:var(--muted)">Sin items que mapear.</p>';return}
+  const EW=216,PW=190,GAP=14,EX=16,PX=558,W=EX+PW+PX;
+  const maxE=Math.max(...EPICS.map(e=>e.items.length),1);
+  EPICS.forEach(e=>e.h=42+Math.round(26*e.items.length/maxE));
+  const maxP=Math.max(...PAGESL.map(p=>p.items.length),1);
+  PAGESL.forEach(p=>p.h=38+Math.round(22*p.items.length/maxP));
+  const hE=EPICS.reduce((a,e)=>a+e.h,0)+GAP*Math.max(EPICS.length-1,0);
+  const hP=PAGESL.reduce((a,p)=>a+p.h,0)+GAP*Math.max(PAGESL.length-1,0);
+  const H=Math.max(hE,hP)+64;
+  let y=(H-hE)/2+8; EPICS.forEach(e=>{e.y=y;y+=e.h+GAP});
+  y=(H-hP)/2+8; PAGESL.forEach(p=>{p.y=y;y+=p.h+GAP});
+  svg.setAttribute("viewBox",`0 0 ${W} ${H}`);
+
+  /* cabeceras de columna */
+  ng.innerHTML=`<text class="colhead" x="${EX}" y="18">Epics</text>`+
+    (PAGESL.length?`<text class="colhead" x="${PX}" y="18">Páginas</text>`:"");
+
+  /* aristas epic→página (nº de items compartidos ⇒ grosor) */
+  const links={};
+  DB.items.forEach(i=>{if(!i.page)return;const k=(i.epic||"_sin")+"→"+i.page;
+    (links[k]=links[k]||{e:i.epic||"_sin",p:i.page,n:0}).n++});
+  const maxL=Math.max(...Object.values(links).map(l=>l.n),1);
+  const eById=Object.fromEntries(EPICS.map(e=>[e.key,e])),pById=Object.fromEntries(PAGESL.map(p=>[p.key,p]));
+  eg.innerHTML="";
+  Object.values(links).forEach(l=>{
+    const A=eById[l.e],B=pById[l.p];if(!A||!B)return;
+    const x1=EX+EW,y1=A.y+A.h/2,x2=PX,y2=B.y+B.h/2,mx=(x1+x2)/2;
+    const pa=document.createElementNS("http://www.w3.org/2000/svg","path");
+    pa.setAttribute("d",`M${x1} ${y1} C ${mx} ${y1}, ${mx} ${y2}, ${x2} ${y2}`);
+    pa.setAttribute("class","medge");pa.setAttribute("stroke",A.color);
+    pa.setAttribute("stroke-width",(1.2+2.6*l.n/maxL).toFixed(1));
+    pa.dataset.e=l.e;pa.dataset.p=l.p;
+    pa.innerHTML=`<title>${esc(A.name)} → ${esc(B.name)} · ${l.n} items</title>`;
+    eg.appendChild(pa);
+  });
+
+  /* nodos epic (color propio, halo rojo si P0 abiertos) */
+  EPICS.forEach(e=>{
+    const g=document.createElementNS("http://www.w3.org/2000/svg","g");
+    g.setAttribute("class","node epic");g.dataset.kind="epic";g.dataset.key=e.key;
+    g.setAttribute("transform",`translate(${EX},${e.y})`);
+    const halo=e.p0>0?`<rect x="-3.5" y="-3.5" width="${EW+7}" height="${e.h+7}" rx="14" fill="none" stroke="#b42318" stroke-width="2.5" opacity=".7"/>`:"";
+    g.innerHTML=`${halo}<rect class="box" width="${EW}" height="${e.h}" rx="11" fill="${e.color}" stroke="rgba(0,0,0,.15)"/>
+      <text x="13" y="21">${esc(trunc(e.name,26))}</text>
+      <text x="13" y="${e.h-9}" class="sub">${e.items.length} items · ${pctDone(e.items)}% done${e.p0>0?` · ${e.p0} P0`:""}</text>
+      <title>${esc(e.name)}</title>`;
+    g.onclick=()=>selectMap("epic",e.key);ng.appendChild(g);
+  });
+  /* nodos página (tarjeta clara) */
+  PAGESL.forEach(p=>{
+    const g=document.createElementNS("http://www.w3.org/2000/svg","g");
+    g.setAttribute("class","node page");g.dataset.kind="page";g.dataset.key=p.key;
+    g.setAttribute("transform",`translate(${PX},${p.y})`);
+    g.innerHTML=`<rect class="box" width="${PW}" height="${p.h}" rx="11" fill="#fbfaf7" stroke="#d8d2c4"/>
+      <text x="13" y="20">${esc(trunc(p.name,24))}</text>
+      <text x="13" y="${p.h-8}" class="sub">${p.items.length} items · ${pctDone(p.items)}% done</text>
+      <title>${esc(p.name)}</title>`;
+    g.onclick=()=>selectMap("page",p.key);ng.appendChild(g);
+  });
+}
+
+function trunc(s,n){s=String(s??"");return s.length>n?s.slice(0,n-1)+"…":s}
+
+function selectMap(kind,key){
+  document.querySelectorAll(".node").forEach(n=>n.classList.toggle("sel",n.dataset.kind===kind&&n.dataset.key===key));
+  document.querySelectorAll(".medge").forEach(e=>{
+    const hot=kind==="epic"?e.dataset.e===key:e.dataset.p===key;
+    e.classList.toggle("hot",hot);e.classList.toggle("cold",!hot);
+  });
+  const src=kind==="epic"?EPICS.find(e=>e.key===key):PAGESL.find(p=>p.key===key);
+  if(!src)return;
+  $("p-tag").textContent=kind==="epic"?"epic":"página";
+  $("p-title").textContent=src.name;
+  const c=counts(src.items);
+  $("p-desc").innerHTML=STK.filter(k=>c[k]>0).map(k=>`${ST[k].label} <b>${c[k]}</b>`).join(" · ")||"Sin items.";
+  const rows=src.items.slice(0,14).map(i=>
+    `<div class="itemrow"><i class="dot" style="background:${(ST[i.status]||ST.backlog).color}" title="${esc(i.status)}"></i>`+
+    (i.severity==="P0"?`<span class="sev">P0</span>`:"")+
+    `<span class="iid">${esc(i.id)}</span><span>${esc(trunc(i.title,54))}</span></div>`).join("");
+  const more=src.items.length>14?`<p style="font-size:12px;color:var(--faint)">+ ${src.items.length-14} items más</p>`:"";
+  $("p-items").innerHTML=rows+more;
+}
+
+/* ===== tablas ===== */
+function renderTables(IT,pagesMeta){
+  const row=(name,chip,items,firstLabel)=>{const c=counts(items),p=pctDone(items);
+    return `<tr><td data-label="${firstLabel}">${chip}${esc(name)}</td><td class="num" data-label="Backlog">${c.backlog}</td><td class="num" data-label="Doing">${c.doing}</td><td class="num" data-label="Review">${c.review}</td><td class="num" data-label="Done">${c.done}</td><td class="num" data-label="Blocked">${c.blocked}</td><td class="num" data-label="Total">${items.length}</td><td data-label="% done"><span class="mini"><i style="width:${p}%"></i></span> <span style="font-family:var(--mono);font-size:12px">${p}%</span></td></tr>`};
+  $("t-epics").innerHTML=EPICS.map(e=>row(e.name,`<span class="chip" style="background:${e.color}"></span>`,e.items,"Epic")).join("")||`<tr><td colspan="8" style="color:var(--muted)">Sin items.</td></tr>`;
+  const noPage=IT.filter(i=>!i.page);
+  $("t-pages").innerHTML=PAGESL.map(p=>row(p.name,`<code style="margin-right:7px">${esc(p.key)}</code>`,p.items,"Página")).join("")+
+    (noPage.length?row("(sin página)","",noPage,"Página"):"")||`<tr><td colspan="8" style="color:var(--muted)">Sin páginas asignadas.</td></tr>`;
+}
+
+/* ===== decisiones ===== */
+function renderDecisions(IT){
+  const dec=IT.filter(i=>i.decision);
+  if(!dec.length){$("decisions").innerHTML='<p style="color:var(--muted);font-size:14px">Aún no hay decisiones tomadas — se toman desde el dashboard.</p>';return}
+  /* en .scroller como las otras dos tablas: a 390 px esta desbordaba la página entera (2.15) */
+  $("decisions").innerHTML=`<div class="scroller"><table><thead><tr><th>Id</th><th>Título</th><th>Decisión</th><th>Nota</th></tr></thead><tbody>`+
+    dec.map(i=>`<tr><td><code>${esc(i.id)}</code></td><td>${esc(i.title)}</td><td><span class="badge" style="background:${DEC[i.decision]||"#8b8b95"}">${esc(i.decision)}</span></td><td style="color:var(--muted)">${esc(i.note||"—")}</td></tr>`).join("")+
+    `</tbody></table></div>`;
+}
+
+/* ===== copiar resumen como markdown ===== */
+function buildMd(M){
+  const L=[`# ${M.title||"Plan"} — resumen · ronda ${M.round||1} · ${M.generated||""}`,"",
+    "## Lo que pediste y dónde está","",
+    ...((Array.isArray(M.pedido)&&M.pedido.length)?M.pedido.map((p,i)=>`${i+1}. ${p.que} → ${p.donde||"FALTA: sin sitio en el informe"}${p.estado?` (${p.estado})`:""}`):["(sin declarar en meta.pedido)"]),"",
+    `- Items: ${S.total} · Done: ${S.done} (${S.pct}%) · P0 abiertos: ${S.p0} · Bloqueados: ${S.blocked} · Sin decisión: ${S.pending}`,"",
+    "| Epic | backlog | doing | review | done | blocked | total | % done |","|---|---|---|---|---|---|---|---|"];
+  EPICS.forEach(e=>{const c=e.counts;
+    L.push(`| ${e.name} | ${c.backlog} | ${c.doing} | ${c.review} | ${c.done} | ${c.blocked} | ${e.items.length} | ${pctDone(e.items)}% |`)});
+  return L.join("\n");
+}
+
+/* ===== páginas opcionales: solo las que existen (meta.optional_present) ===== */
+(function(){
+  const op=(DB&&DB.meta&&DB.meta.optional_present)||[];
+  if(!op.length) return;
+  document.getElementById("extrasSec").style.display="";
+  document.getElementById("extras").innerHTML =
+    op.map(o=>`<a href="${o.href}">${o.label}</a>`).join(" · ");
+})();
+</script>
+<div id="toast"></div>
+</body>
+</html>

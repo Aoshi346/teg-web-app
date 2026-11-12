@@ -1,0 +1,409 @@
+{
+ "meta": {
+  "source": "gen_inventario_stack.py — AST para Python, expresiones regulares para TS/TSX",
+  "metodo": {
+   "python": "AST (exacto)",
+   "typescript": "regex (inventaria y cuenta; NO afirma nada fino sobre tipos)"
+  },
+  "proyecto": "LangGraph-Udemy-Course",
+  "sha": "f8e1eb7",
+  "date": "2026-08-27",
+  "totales": {
+   "aristas": 14,
+   "componentes": 0,
+   "hooks": 0,
+   "modelos": 0,
+   "nodos": 11,
+   "paginas": 0,
+   "serializers": 0,
+   "state": 10,
+   "tareas": 0,
+   "tools": 3,
+   "vistas": 0
+  },
+  "apps": {}
+ },
+ "tools": [
+  {
+   "nombre": "get_current_club",
+   "file": "fullstackapp/backend/workflows/current_club.py",
+   "line": 28,
+   "descripcion": "Gets current club of a player",
+   "args": [
+    {
+     "nombre": "player_name",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_market_value",
+   "file": "fullstackapp/backend/workflows/market_value.py",
+   "line": 28,
+   "descripcion": "Gets current market value of a player",
+   "args": [
+    {
+     "nombre": "player_name",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_weather",
+   "file": "unit_tests/code_to_test.py",
+   "line": 38,
+   "descripcion": "Determines weather of a given city",
+   "args": [
+    {
+     "nombre": "location",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  }
+ ],
+ "state": [
+  {
+   "nombre": "AgentState",
+   "file": "unit_tests/code_to_test.py",
+   "line": 66,
+   "campos": [
+    {
+     "nombre": "question",
+     "tipo": "str",
+     "reducer": ""
+    },
+    {
+     "nombre": "messages",
+     "tipo": "list[BaseMessage]",
+     "reducer": ""
+    },
+    {
+     "nombre": "prompt",
+     "tipo": "str",
+     "reducer": ""
+    },
+    {
+     "nombre": "context",
+     "tipo": "list[Document]",
+     "reducer": ""
+    },
+    {
+     "nombre": "answer",
+     "tipo": "str",
+     "reducer": ""
+    },
+    {
+     "nombre": "on_topic",
+     "tipo": "str",
+     "reducer": ""
+    }
+   ],
+   "n_campos": 6,
+   "doc": ""
+  },
+  {
+   "nombre": "InputArticleState",
+   "file": "fullstackapp/backend/workflows/news_workflow.py",
+   "line": 30,
+   "campos": [
+    {
+     "nombre": "article",
+     "tipo": "str",
+     "reducer": ""
+    }
+   ],
+   "n_campos": 1,
+   "doc": ""
+  },
+  {
+   "nombre": "InputState",
+   "file": "fullstackapp/backend/workflows/market_value.py",
+   "line": 15,
+   "campos": [
+    {
+     "nombre": "article",
+     "tipo": "str",
+     "reducer": ""
+    }
+   ],
+   "n_campos": 1,
+   "doc": ""
+  },
+  {
+   "nombre": "InputState",
+   "file": "fullstackapp/backend/workflows/current_club.py",
+   "line": 15,
+   "campos": [
+    {
+     "nombre": "article",
+     "tipo": "str",
+     "reducer": ""
+    }
+   ],
+   "n_campos": 1,
+   "doc": ""
+  },
+  {
+   "nombre": "InputState",
+   "file": "fullstackapp/backend/workflows/human_workflow.py",
+   "line": 8,
+   "campos": [
+    {
+     "nombre": "question",
+     "tipo": "str",
+     "reducer": ""
+    }
+   ],
+   "n_campos": 1,
+   "doc": ""
+  },
+  {
+   "nombre": "InputState",
+   "file": "fullstackapp/backend/workflows/text_writer.py",
+   "line": 8,
+   "campos": [
+    {
+     "nombre": "article",
+     "tipo": "str",
+     "reducer": ""
+    }
+   ],
+   "n_campos": 1,
+   "doc": ""
+  },
+  {
+   "nombre": "OutputFinalArticleState",
+   "file": "fullstackapp/backend/workflows/news_workflow.py",
+   "line": 34,
+   "campos": [
+    {
+     "nombre": "final_article",
+     "tipo": "str",
+     "reducer": ""
+    },
+    {
+     "nombre": "off_or_ontopic",
+     "tipo": "str",
+     "reducer": ""
+    }
+   ],
+   "n_campos": 2,
+   "doc": ""
+  },
+  {
+   "nombre": "OutputState",
+   "file": "fullstackapp/backend/workflows/market_value.py",
+   "line": 19,
+   "campos": [
+    {
+     "nombre": "agent_output",
+     "tipo": "str",
+     "reducer": ""
+    }
+   ],
+   "n_campos": 1,
+   "doc": ""
+  },
+  {
+   "nombre": "OutputState",
+   "file": "fullstackapp/backend/workflows/current_club.py",
+   "line": 19,
+   "campos": [
+    {
+     "nombre": "agent_output",
+     "tipo": "str",
+     "reducer": ""
+    }
+   ],
+   "n_campos": 1,
+   "doc": ""
+  },
+  {
+   "nombre": "OutputState",
+   "file": "fullstackapp/backend/workflows/text_writer.py",
+   "line": 12,
+   "campos": [
+    {
+     "nombre": "agent_output",
+     "tipo": "str",
+     "reducer": ""
+    }
+   ],
+   "n_campos": 1,
+   "doc": ""
+  }
+ ],
+ "nodos": [
+  {
+   "nombre": "call_model_current_club",
+   "file": "fullstackapp/backend/workflows/current_club.py",
+   "line": 65
+  },
+  {
+   "nombre": "call_model_market_value",
+   "file": "fullstackapp/backend/workflows/market_value.py",
+   "line": 68
+  },
+  {
+   "nombre": "confirm_node",
+   "file": "fullstackapp/backend/workflows/human_workflow.py",
+   "line": 34
+  },
+  {
+   "nombre": "current_club_researcher",
+   "file": "fullstackapp/backend/workflows/news_workflow.py",
+   "line": 135
+  },
+  {
+   "nombre": "expand_text_to_100_words",
+   "file": "fullstackapp/backend/workflows/text_writer.py",
+   "line": 33
+  },
+  {
+   "nombre": "market_value_researcher",
+   "file": "fullstackapp/backend/workflows/news_workflow.py",
+   "line": 134
+  },
+  {
+   "nombre": "news_chef",
+   "file": "fullstackapp/backend/workflows/news_workflow.py",
+   "line": 133
+  },
+  {
+   "nombre": "newsagent_node",
+   "file": "fullstackapp/backend/workflows/human_workflow.py",
+   "line": 33
+  },
+  {
+   "nombre": "tools",
+   "file": "fullstackapp/backend/workflows/market_value.py",
+   "line": 69
+  },
+  {
+   "nombre": "tools",
+   "file": "fullstackapp/backend/workflows/current_club.py",
+   "line": 66
+  },
+  {
+   "nombre": "word_count_rewriter",
+   "file": "fullstackapp/backend/workflows/news_workflow.py",
+   "line": 136
+  }
+ ],
+ "aristas": [
+  {
+   "de": "START",
+   "a": "call_model_market_value",
+   "tipo": "fija",
+   "file": "fullstackapp/backend/workflows/market_value.py",
+   "line": 70
+  },
+  {
+   "de": "call_model_market_value",
+   "a": "should_continue",
+   "tipo": "condicional",
+   "file": "fullstackapp/backend/workflows/market_value.py",
+   "line": 71
+  },
+  {
+   "de": "tools",
+   "a": "call_model_market_value",
+   "tipo": "fija",
+   "file": "fullstackapp/backend/workflows/market_value.py",
+   "line": 72
+  },
+  {
+   "de": "news_chef",
+   "a": "self.news_chef_decider",
+   "tipo": "condicional",
+   "file": "fullstackapp/backend/workflows/news_workflow.py",
+   "line": 138
+  },
+  {
+   "de": "market_value_researcher",
+   "a": "news_chef",
+   "tipo": "fija",
+   "file": "fullstackapp/backend/workflows/news_workflow.py",
+   "line": 148
+  },
+  {
+   "de": "current_club_researcher",
+   "a": "news_chef",
+   "tipo": "fija",
+   "file": "fullstackapp/backend/workflows/news_workflow.py",
+   "line": 149
+  },
+  {
+   "de": "word_count_rewriter",
+   "a": "news_chef",
+   "tipo": "fija",
+   "file": "fullstackapp/backend/workflows/news_workflow.py",
+   "line": 150
+  },
+  {
+   "de": "START",
+   "a": "call_model_current_club",
+   "tipo": "fija",
+   "file": "fullstackapp/backend/workflows/current_club.py",
+   "line": 67
+  },
+  {
+   "de": "call_model_current_club",
+   "a": "should_continue",
+   "tipo": "condicional",
+   "file": "fullstackapp/backend/workflows/current_club.py",
+   "line": 68
+  },
+  {
+   "de": "tools",
+   "a": "call_model_current_club",
+   "tipo": "fija",
+   "file": "fullstackapp/backend/workflows/current_club.py",
+   "line": 69
+  },
+  {
+   "de": "newsagent_node",
+   "a": "confirm_node",
+   "tipo": "fija",
+   "file": "fullstackapp/backend/workflows/human_workflow.py",
+   "line": 36
+  },
+  {
+   "de": "confirm_node",
+   "a": "END",
+   "tipo": "fija",
+   "file": "fullstackapp/backend/workflows/human_workflow.py",
+   "line": 37
+  },
+  {
+   "de": "START",
+   "a": "expand_text_to_100_words",
+   "tipo": "fija",
+   "file": "fullstackapp/backend/workflows/text_writer.py",
+   "line": 34
+  },
+  {
+   "de": "expand_text_to_100_words",
+   "a": "END",
+   "tipo": "fija",
+   "file": "fullstackapp/backend/workflows/text_writer.py",
+   "line": 35
+  }
+ ],
+ "componentes": [],
+ "hooks": [],
+ "paginas": [],
+ "modelos": [],
+ "serializers": [],
+ "vistas": [],
+ "tareas": []
+}

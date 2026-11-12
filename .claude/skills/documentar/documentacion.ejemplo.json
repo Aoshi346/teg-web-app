@@ -1,0 +1,32 @@
+{
+  "_comentario": "Copiar a .docs/documentacion/documentacion.json y adaptar. Todo es opcional: sin este fichero el generador toma .docs/documentacion/NN-*.md y la marca neutra. Las rutas son relativas a la raíz del repo.",
+  "titulo": "Mi Proyecto<br>Documentación",
+  "entradilla": "Qué es, cómo está construido, cómo se opera y cómo se usa. Cada capítulo empieza con «En corto» para quien no es técnico; el detalle viene debajo.",
+  "nombre_fichero": "mi-proyecto-documentacion",
+  "prefijo_capitulos": "mi-proyecto",
+  "capitulos": [
+    ".docs/core/overview.md",
+    ".docs/documentacion/02-arquitectura.md",
+    ".docs/documentacion/03-modelo-de-datos.md"
+  ],
+  "sustituir": [
+    ["/home/usuario/proyectos/", "<carpeta-de-proyectos>/"],
+    ["/etc/mi-proyecto/prod.env", "<fichero-de-secretos>"]
+  ],
+  "diagramas": { "letra_px": 15, "letra_minima_px": 10.5, "max_nodos": 12 },
+  "marca": {
+    "nombre": "Mi Proyecto",
+    "logo": "frontend/public/marca/logo-negativo.png",
+    "titulos_en_mayusculas": false,
+    "colores": {
+      "papel": "#F7F6F2", "papel2": "#ECEAE3", "tinta": "#1F2430", "suave": "#565E6E",
+      "linea": "#D6D3CA", "acento": "#1F5F99", "acento_vivo": "#5AA9E6", "piel": "#E6EEF5"
+    },
+    "fuentes": {
+      "display": { "familia": "Georgia, serif" },
+      "cuerpo": { "familia": "Inter, system-ui, sans-serif",
+                  "ficheros": [{ "peso": 400, "ruta": "frontend/public/fonts/Inter-400.woff2" }] },
+      "mono": { "familia": "ui-monospace, monospace" }
+    }
+  }
+}

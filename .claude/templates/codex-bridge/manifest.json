@@ -1,0 +1,80 @@
+{
+  "_comment": "Qué genera gen_codex_bridge.py y de qué sección de qué rule sale cada pieza. El sha es el de la sección cuando se escribió (o revisó) la pieza: si la rule cambia, `gen_codex_bridge.py --check` sale 1 hasta que alguien revisa la pieza y corre `--rehash`. `replaces`: nombres con los que un proyecto ya escribió esa skill a mano; si existe, no se genera (se avisa).",
+  "params": {
+    "pytest": "pytest"
+  },
+  "block": {
+    "file": "agents-block.md",
+    "sources": [
+      {
+        "ref": "rules/ram-pytest.md#Pytest SIEMPRE en chunks",
+        "sha": "ce55a9cee83f"
+      },
+      {
+        "ref": "rules/governance.md#2. Approval Gates — Qué requiere aprobación del Supervisor",
+        "sha": "cab12d2ffd9a"
+      },
+      {
+        "ref": "rules/security.md#🚫 NINGÚN puerto se expone. Nunca. Solo hay dos formas de llegar",
+        "sha": "7005ade7d03e"
+      },
+      {
+        "ref": "rules/code-style.md#Idioma — el código en inglés; comentarios, docstrings y pantalla en castellano",
+        "sha": "ea0425636500"
+      }
+    ]
+  },
+  "skills": {
+    "ram-before-pytest": {
+      "replaces": [
+        "ram-antes-de-pytest"
+      ],
+      "sources": [
+        {
+          "ref": "rules/ram-pytest.md#Antes de CUALQUIER pytest (PASO 1, siempre)",
+          "sha": "f2a44b3be473"
+        },
+        {
+          "ref": "rules/ram-pytest.md#Pytest SIEMPRE en chunks",
+          "sha": "ce55a9cee83f"
+        },
+        {
+          "ref": "rules/ram-pytest.md#Si ocurre OOM",
+          "sha": "9291ac82493d"
+        }
+      ]
+    },
+    "no-push-merge-deploy": {
+      "replaces": [
+        "sin-push-merge-deploy"
+      ],
+      "sources": [
+        {
+          "ref": "rules/governance.md#2. Approval Gates — Qué requiere aprobación del Supervisor",
+          "sha": "cab12d2ffd9a"
+        },
+        {
+          "ref": "rules/code-style.md#Commits",
+          "sha": "c581d19e8179"
+        }
+      ]
+    },
+    "local-only-network": {
+      "replaces": [],
+      "sources": [
+        {
+          "ref": "rules/security.md#🌐 Servir HTML para verificar — SIEMPRE `--bind 127.0.0.1`",
+          "sha": "b65870984e9f"
+        },
+        {
+          "ref": "rules/security.md#🚫 NINGÚN puerto se expone. Nunca. Solo hay dos formas de llegar",
+          "sha": "7005ade7d03e"
+        },
+        {
+          "ref": "rules/security.md#Y con Docker, el firewall NO te protege — esto es lo que casi nadie sabe",
+          "sha": "5f72e3e049bc"
+        }
+      ]
+    }
+  }
+}

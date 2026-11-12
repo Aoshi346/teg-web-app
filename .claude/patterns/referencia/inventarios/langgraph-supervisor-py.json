@@ -1,0 +1,198 @@
+{
+ "meta": {
+  "source": "gen_inventario_stack.py — AST para Python, expresiones regulares para TS/TSX",
+  "metodo": {
+   "python": "AST (exacto)",
+   "typescript": "regex (inventaria y cuenta; NO afirma nada fino sobre tipos)"
+  },
+  "proyecto": "langgraph-supervisor-py",
+  "sha": "88859b3",
+  "date": "2026-08-26",
+  "totales": {
+   "aristas": 2,
+   "componentes": 0,
+   "hooks": 0,
+   "modelos": 0,
+   "nodos": 3,
+   "paginas": 0,
+   "serializers": 0,
+   "state": 1,
+   "tareas": 1,
+   "tools": 6,
+   "vistas": 0
+  },
+  "apps": {
+   "tests": {
+    "tareas": 1
+   }
+  }
+ },
+ "tools": [
+  {
+   "nombre": "add",
+   "file": "tests/test_supervisor.py",
+   "line": 173,
+   "descripcion": "Add two numbers.",
+   "args": [
+    {
+     "nombre": "a",
+     "tipo": "float"
+    },
+    {
+     "nombre": "b",
+     "tipo": "float"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "echo_tool",
+   "file": "tests/test_supervisor.py",
+   "line": 337,
+   "descripcion": "Echo the input text.",
+   "args": [
+    {
+     "nombre": "text",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "echo_tool",
+   "file": "tests/test_supervisor.py",
+   "line": 432,
+   "descripcion": "Echo the input text.",
+   "args": [
+    {
+     "nombre": "text",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "forward_message",
+   "file": "langgraph_supervisor/handoff.py",
+   "line": 175,
+   "descripcion": "",
+   "args": [
+    {
+     "nombre": "from_agent",
+     "tipo": "str"
+    },
+    {
+     "nombre": "state",
+     "tipo": "Annotated[dict, InjectedState]"
+    }
+   ],
+   "sin_doc": true,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "handoff_to_agent",
+   "file": "langgraph_supervisor/handoff.py",
+   "line": 89,
+   "descripcion": "",
+   "args": [
+    {
+     "nombre": "state",
+     "tipo": "Annotated[dict, InjectedState]"
+    },
+    {
+     "nombre": "tool_call_id",
+     "tipo": "Annotated[str, InjectedToolCallId]"
+    }
+   ],
+   "sin_doc": true,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "web_search",
+   "file": "tests/test_supervisor.py",
+   "line": 178,
+   "descripcion": "Search the web for information.",
+   "args": [
+    {
+     "nombre": "query",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  }
+ ],
+ "nodos": [
+  {
+   "nombre": "agent.name",
+   "file": "langgraph_supervisor/supervisor.py",
+   "line": 458
+  },
+  {
+   "nombre": "supervisor_agent",
+   "file": "langgraph_supervisor/supervisor.py",
+   "line": 455
+  },
+  {
+   "nombre": "test_node",
+   "file": "tests/test_supervisor.py",
+   "line": 576
+  }
+ ],
+ "tareas": [
+  {
+   "nombre": "generate_joke",
+   "app": "tests",
+   "file": "tests/test_supervisor_functional_api.py",
+   "line": 28,
+   "doc": "Generate a joke using the model."
+  }
+ ],
+ "state": [
+  {
+   "nombre": "_OuterState",
+   "file": "langgraph_supervisor/supervisor.py",
+   "line": 205,
+   "campos": [
+    {
+     "nombre": "messages",
+     "tipo": "Annotated[Sequence[AnyMessage], add_messages]",
+     "reducer": "add_messages"
+    }
+   ],
+   "n_campos": 1,
+   "doc": "The state of the supervisor workflow."
+  }
+ ],
+ "aristas": [
+  {
+   "de": "START",
+   "a": "supervisor_agent.name",
+   "tipo": "fija",
+   "file": "langgraph_supervisor/supervisor.py",
+   "line": 456
+  },
+  {
+   "de": "agent.name",
+   "a": "supervisor_agent.name",
+   "tipo": "fija",
+   "file": "langgraph_supervisor/supervisor.py",
+   "line": 467
+  }
+ ],
+ "componentes": [],
+ "hooks": [],
+ "paginas": [],
+ "modelos": [],
+ "serializers": [],
+ "vistas": []
+}

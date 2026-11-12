@@ -1,0 +1,4 @@
+{# Namespaced bajo expedientes/: aunque otra app tenga su propio "detalle.html", las rutas
+   relativas son distintas y ninguna de las dos queda muerta. #}
+{% extends "core/base.html" %}
+{% block contenido %}<h1>{{ expediente.referencia }}</h1>{% endblock %}

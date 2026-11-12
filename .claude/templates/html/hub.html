@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="es">
+<!--
+  PLANTILLA HUB · página índice para un PLAN MULTI-PÁGINA muy visual.
+  ── Cómo usar ──────────────────────────────────────────────────────────────
+  Es el index.html de un set de docs HTML (architecture / scope / data-model / integrations /
+  parallelization / dashboard). Rellena: <title>, hero, .chips (scope), la grid de .doc-card
+  (una por página hermana), la tira .waves (estado de waves) y MD (plan completo como markdown).
+  La nav superior (.topnav) se REPITE en cada página hermana — ver nav-partial.html.
+  Self-contained: CSS/JS inline, sin CDN, fuentes de sistema. Tokens = base.html.
+  Ver rules/html-output.md (caso "plan dashboard" / multi-página).
+-->
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>[Proyecto] · Plan</title>
+<style>
+  :root{
+    --ink:#1b1b1f;--muted:#6b6b76;--faint:#9a9aa4;--paper:#f6f4ef;--card:#fff;--line:#e4e0d7;
+    --navy:#1b2a4a;--accent:#c2410c;--green:#15803d;--amber:#b45309;--blue:#1d4ed8;--red:#b42318;
+    --radius:14px;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.55}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 22px}
+  /* ===== TOP NAV (repetir idéntica en cada página hermana) ===== */
+  .topnav{position:sticky;top:0;z-index:20;background:rgba(246,244,239,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .topnav .wrap{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:9px 22px}
+  .topnav .brand{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--navy);font-weight:700;margin-right:8px}
+  .topnav a{font-size:13px;color:var(--muted);text-decoration:none;padding:6px 10px;border-radius:8px}
+  .topnav a:hover{background:#efece4;color:var(--navy)}
+  .topnav a.active{background:var(--navy);color:#fff}
+  /* ===== HERO ===== */
+  header.hero{border-bottom:1px solid var(--line);padding:46px 0 30px;
+    background:radial-gradient(1100px 300px at 80% -50%,#fff,transparent 70%),var(--paper)}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600;margin:0 0 12px}
+  h1{font-size:clamp(28px,4.4vw,46px);margin:0 0 12px;letter-spacing:-.02em}
+  h1 em{font-style:italic;color:var(--navy)}
+  .lead{font-size:17px;color:var(--muted);max-width:78ch;margin:0}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+  .chip{font-size:12.5px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:5px 12px;color:var(--navy)}
+  .chip.warn{background:#fef2f2;border-color:#f3c0c0;color:var(--red)}
+  .chip.ok{background:#ecfdf3;border-color:#bbe6c8;color:var(--green)}
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+  button.btn{font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;border:1px solid var(--navy);background:var(--navy);color:#fff;padding:9px 15px;border-radius:10px}
+  button.btn.ghost{background:#fff;color:var(--navy)} button.btn.copied{background:var(--green);border-color:var(--green)}
+  /* ===== SECCIONES ===== */
+  section{padding:30px 0;border-bottom:1px solid var(--line)}
+  h2{font-size:21px;margin:0 0 16px;letter-spacing:-.01em}
+  /* doc cards */
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
+  a.doc-card{display:block;text-decoration:none;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px;transition:.15s;color:inherit}
+  a.doc-card:hover{transform:translateY(-2px);border-color:var(--navy);box-shadow:0 8px 24px rgba(27,42,74,.08)}
+  .doc-card .ic{font-size:22px}
+  .doc-card h3{margin:8px 0 4px;font-size:16px;color:var(--navy)}
+  .doc-card p{margin:0;font-size:13px;color:var(--muted)}
+  /* wave strip */
+  .waves{display:flex;gap:8px;flex-wrap:wrap}
+  .wave{flex:1 1 110px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 12px;min-width:110px}
+  .wave .n{font-family:var(--mono);font-size:11px;color:var(--faint)}
+  .wave .t{font-size:13px;font-weight:600;margin:2px 0 7px}
+  .bar{height:6px;border-radius:99px;background:#eceae3;overflow:hidden}
+  .bar>span{display:block;height:100%;background:var(--navy)}
+  .badge{display:inline-block;font-size:10.5px;padding:1px 7px;border-radius:99px;margin-top:7px}
+  .b-loop{background:#eff6ff;color:var(--blue)} .b-review{background:#fdebd9;color:var(--accent)}
+  footer{padding:26px 0 60px;color:var(--faint);font-size:13px}footer a{color:var(--navy)}
+  #toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:8px 16px;border-radius:10px;font-size:13px;opacity:0;transition:.2s;pointer-events:none}
+  #toast.show{opacity:1}
+</style>
+</head>
+<body>
+<!-- ▼▼ NAV (copiar idéntica a cada página hermana, cambiando la clase .active) ▼▼ -->
+<nav class="topnav"><div class="wrap">
+  <span class="brand">[PROYECTO]</span>
+  <a href="index.html" class="active">Overview</a>
+  <a href="architecture.html">Arquitectura</a>
+  <a href="scope-and-boundaries.html">Alcance</a>
+  <a href="data-model.html">Datos</a>
+  <a href="user-flows.html">Flujos</a>
+  <a href="integrations.html">Integraciones</a>
+  <a href="parallelization.html">Paralelización</a>
+  <a href="dashboard.html">Dashboard</a>
+</div></nav>
+
+<header class="hero"><div class="wrap">
+  <p class="eyebrow">[ETIQUETA · contexto]</p>
+  <h1>[Título <em>destacado</em>]</h1>
+  <p class="lead">[Qué es este plan en 1-2 frases.]</p>
+  <div class="chips">
+    <span class="chip">[scope chip]</span>
+    <span class="chip ok">[invariante ✓]</span>
+    <span class="chip warn">[boundary ✗]</span>
+  </div>
+  <div class="toolbar">
+    <button class="btn" id="copyBtn">📋 Copiar plan completo (markdown)</button>
+    <a class="btn ghost" href="dashboard.html">📊 Abrir dashboard</a>
+  </div>
+</div></header>
+
+<main class="wrap">
+  <section>
+    <h2>Documentos del plan</h2>
+    <div class="grid">
+      <a class="doc-card" href="architecture.html"><div class="ic">🏗️</div><h3>Arquitectura</h3><p>Diagrama de componentes y flujo de datos (clicable).</p></a>
+      <a class="doc-card" href="scope-and-boundaries.html"><div class="ic">🎯</div><h3>Alcance y límites</h3><p>Qué hace / qué no. Invariantes clave.</p></a>
+      <a class="doc-card" href="data-model.html"><div class="ic">🗃️</div><h3>Modelo de datos</h3><p>Entidades y relaciones.</p></a>
+      <a class="doc-card" href="user-flows.html"><div class="ic">🧭</div><h3>Flujos de usuario</h3><p>Cómo gestiona todo el usuario, paso a paso.</p></a>
+      <a class="doc-card" href="integrations.html"><div class="ic">🔌</div><h3>Integraciones</h3><p>Servicios externos y plan mock-first.</p></a>
+      <a class="doc-card" href="parallelization.html"><div class="ic">⚡</div><h3>Paralelización</h3><p>Waves → worktrees / teams / subagentes.</p></a>
+      <a class="doc-card" href="dashboard.html"><div class="ic">📊</div><h3>Dashboard</h3><p>Kanban + decisiones + export.</p></a>
+    </div>
+  </section>
+
+  <section>
+    <h2>Estado de las waves</h2>
+    <div class="waves">
+      <!-- repetir .wave; ancho de .bar>span = % completado -->
+      <div class="wave"><div class="n">W0</div><div class="t">Infra</div><div class="bar"><span style="width:0%"></span></div><span class="badge b-review">review</span></div>
+      <div class="wave"><div class="n">W1</div><div class="t">Core+RAG</div><div class="bar"><span style="width:0%"></span></div><span class="badge b-review">review</span></div>
+      <div class="wave"><div class="n">W2</div><div class="t">Canales</div><div class="bar"><span style="width:0%"></span></div><span class="badge b-review">review</span></div>
+      <div class="wave"><div class="n">W3</div><div class="t">Integr.</div><div class="bar"><span style="width:0%"></span></div><span class="badge b-loop">loop</span></div>
+      <div class="wave"><div class="n">W4</div><div class="t">Widget</div><div class="bar"><span style="width:0%"></span></div><span class="badge b-review">review</span></div>
+      <div class="wave"><div class="n">W5</div><div class="t">Dashboard</div><div class="bar"><span style="width:0%"></span></div><span class="badge b-review">review</span></div>
+      <div class="wave"><div class="n">W6</div><div class="t">Eval</div><div class="bar"><span style="width:0%"></span></div><span class="badge b-loop">loop</span></div>
+      <div class="wave"><div class="n">W7</div><div class="t">Cutover</div><div class="bar"><span style="width:0%"></span></div><span class="badge b-review">review</span></div>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap">Plan multi-página · un .html autocontenido por página · snapshot [FECHA]. Convención: rules/html-output.md.</footer>
+
+<script>
+  const MD = `[# Plan completo en markdown — rellénalo o genéralo. El botón lo copia para pegarlo de vuelta al agente.]`;
+  function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1500)}
+  function copy(txt,btn){navigator.clipboard?.writeText(txt).then(()=>ok(btn)).catch(()=>{const t=document.createElement("textarea");t.value=txt;document.body.appendChild(t);t.select();document.execCommand("copy");t.remove();ok(btn)})}
+  function ok(btn){if(!btn)return;btn.classList.add("copied");const o=btn.textContent;btn.textContent="✓ Copiado";toast("Copiado");setTimeout(()=>{btn.classList.remove("copied");btn.textContent=o},1500)}
+  document.getElementById("copyBtn").onclick=e=>copy(MD,e.target);
+</script>
+<div id="toast"></div>
+</body>
+</html>

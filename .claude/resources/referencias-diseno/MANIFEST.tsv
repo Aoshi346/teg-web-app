@@ -1,0 +1,24 @@
+# MANIFEST — huella de cada fichero del corpus. Se genera, no se edita a mano.
+# origen_relativo: bajo /home/web_design (antes /home/old/web_design, movido por Miller el 2026-09-18)
+ruta	bytes	sha256	origen_relativo	fecha_copia
+bien/consultorpro.html	85948	ac898c1087f38ae935e2aa3a26cf4e89cc5a5bc8326513b0e670713b5851a09b	designs/design-for-consultorpro/index.html	2026-09-18
+bien/dale-marketing-v4/index.html	68711	e880f88352edda940bdb7077a475b12f19a8ea7cea9c3ee23bf88bf004ea2001	designs/dale-marketing/v4/index.html	2026-09-18
+bien/dale-marketing-v4/script.js	19391	eca8478db2eba8a2c97c4ed57cbea9070b6a87e2ed81a1a67be8c7e8ad0b147e	designs/dale-marketing/v4/script.js	2026-09-18
+bien/dale-marketing-v4/styles.css	36869	01d213c8911e2aac1bd93169ce94d08460846dcd970276455e4f4fa01d9fabd7	designs/dale-marketing/v4/styles.css	2026-09-18
+bien/elevaiti-v2.html	78195	e44efb90bb91c6db97458789cd2cc6e916d618101b9e9ffaeb941b01d2564cd0	designs/elevaiti/v2/index.html	2026-09-18
+bien/elevaiti-v5.html	169953	327a553d864ce539ddfb077e143ef72608e301b006e7d01a2a1083b560a31e76	designs/elevaiti/v5/index.html	2026-09-18
+bien/elevaiti-v53.html	36709	445c5132176b68c48809d64917d984527660102f593f49c844fc696cf040f8a1	designs/elevaiti/v53/index.html	2026-09-18
+bien/elevaiti-v7.html	132349	75662cd68bd99c9c6d8e6a26720df8c09884dd2241941f55e2ac7247cb763928	designs/elevaiti/v7/index.html	2026-09-18
+bien/kalinayoga-v4.html	58995	f3e3d59f7b0badb6d12cdbda99237182aad4dd47df8b8e4dc67587f8ba14bd48	designs/kalinayoga-v4/index.html	2026-09-18
+bien/kalinayoga-v6.html	85645	c5329e55d8930ea46f1b313ea95406167fb243057c7c1aa8120207d6e736d69c	designs/kalinayoga-v6/index.html	2026-09-18
+bien/yessmassage-v7.html	191956	b7e1c0c5d23501fe941b172335697ebcd03a33001b5ca22a75e26227cf539e47	designs/yessmassage-v7/index.html	2026-09-18
+mal/attomo-digital.html	60134	c96addd92af22399c098ab8e06fd19c4daae4ab5a18b19cda0d184fd39ec835e	designs/attomo-digital/index.html	2026-09-18
+proceso/RANKING.csv	2211	3a5a4b4bd092a4e80a3ebca6b8c13de719c1f48b52b36e94a99182e947cdc20e	designs/elevaiti/RANKING.csv	2026-09-18
+proceso/elevaiti-BRAND-FOUNDATION.md	8008	cb3b7d4895920d39649455710e6992be5f50a503c6d95ae314fb3eb7055ba14a	designs/elevaiti/BRAND-FOUNDATION.md	2026-09-18
+proceso/elevaiti-BRAND-SUMMARY.md	4064	77f944e92004230d9a2990f67508e0abf46656ebdf9f58ba29e59f4e7a12778f	designs/elevaiti/BRAND-SUMMARY.md	2026-09-18
+proceso/elevaiti-BRANDING-VISUAL.md	10882	532e43f08c1098831db97e487c1866b139c889fd269444c480c1fcfc05db5e10	designs/elevaiti/BRANDING-VISUAL.md	2026-09-18
+proceso/elevaiti-FINAL-RECOMMENDATION.md	10093	801b1eda97bfb7ae888dcf7419a62f4c54a7a3db40e0fae8ab0447b3991c61cb	designs/elevaiti/FINAL-RECOMMENDATION.md	2026-09-18
+proceso/elevaiti-IDENTITY.md	683	e07463216cffe2f6cad34e3db46f86ee9885d1aa5454594770b4593d89f72917	designs/elevaiti/IDENTITY.md	2026-09-18
+proceso/elevaiti-ITERATIONS-LOG.md	23102	934b9adc67d54690daa488174f6638a2032be602ab99222d72d332c3a46e0778	designs/elevaiti/ITERATIONS-LOG.md	2026-09-18
+proceso/galeria-designs.html	25970	fae59b0a77f2a20a5f35dda3c8499bb964167163d588a09f102b3b9df667c1db	designs/index.html	2026-09-18
+proceso/galeria-elevaiti.html	22942	9ee8ed70cf6c3db18b33f5d77c17cd54bffb1b5c99f16190263c724764be6ec8	designs/elevaiti/gallery/index.html	2026-09-18

@@ -1,0 +1,9 @@
+<!doctype html><html lang=es><head><meta charset=utf-8><title>GD-05 bueno</title>
+<style>
+  @keyframes flotar { from { transform: translateY(0); } to { transform: translateY(-20px); } }
+  .orbe { animation: flotar 3s ease-in-out infinite; }
+  .tarjeta { transition: transform .4s ease; }
+  @media (prefers-reduced-motion: reduce) {
+    .orbe, .tarjeta { animation: none !important; transition: none !important; }
+  }
+</style></head><body><div class="orbe"></div><div class="tarjeta">Respeta a quien pide quietud</div></body></html>

@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Config Builder — genera el prompt de creación de agente</title>
+<style>
+  :root{--ink:#1b1b1f;--muted:#6b6b76;--faint:#9a9aa4;--paper:#f6f4ef;--card:#fff;--line:#e4e0d7;
+    --navy:#1b2a4a;--accent:#c2410c;--green:#15803d;--amber:#b45309;--red:#b42318;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.5}
+  .top{border-bottom:1px solid var(--line);padding:26px 22px 18px;background:radial-gradient(900px 240px at 85% -40%,#fff,transparent 70%),var(--paper)}
+  .top .wrap{max-width:1180px;margin:0 auto}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600;margin:0 0 8px}
+  h1{font-size:clamp(22px,3.2vw,32px);margin:0 0 8px;letter-spacing:-.02em}
+  .lead{color:var(--muted);max-width:80ch;margin:0;font-size:14.5px}
+  .nav{font-family:var(--mono);font-size:12px;margin-top:10px}.nav a{color:var(--navy);margin-right:14px;text-decoration:none}
+  .layout{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:1fr 420px;gap:0}
+  .panel{padding:22px}
+  .out{border-left:1px solid var(--line);background:#fbfaf7;position:sticky;top:0;align-self:start;height:100vh;overflow:auto}
+  fieldset{border:1px solid var(--line);border-radius:12px;background:var(--card);margin:0 0 16px;padding:14px 16px}
+  legend{font-weight:700;font-size:14px;padding:0 8px;color:var(--navy)}
+  .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  label.opt{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:9px;padding:7px 11px;cursor:pointer;font-size:13.5px;background:#fff;user-select:none}
+  label.opt:hover{border-color:var(--navy)}
+  label.opt input{accent-color:var(--navy)}
+  label.opt.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+  select,input[type=text]{font-family:var(--sans);font-size:14px;padding:8px 11px;border:1px solid var(--line);border-radius:9px;background:#fff}
+  .grp{margin:10px 0}.grp .gl{font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:6px}
+  .dep{font-size:12px;color:var(--amber);margin-top:7px}
+  .out h2{font-size:13px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin:0 0 8px}
+  .out .sec{padding:16px 18px;border-bottom:1px solid var(--line)}
+  pre{background:#1b2330;color:#e7ecf3;border-radius:10px;padding:13px 14px;overflow:auto;font-family:var(--mono);font-size:12px;line-height:1.5;margin:0;white-space:pre-wrap;max-height:42vh}
+  button{font-family:var(--sans);font-weight:600;font-size:13px;cursor:pointer;border:1px solid var(--navy);background:var(--navy);color:#fff;padding:8px 13px;border-radius:9px;margin:8px 6px 0 0}
+  button.ghost{background:#fff;color:var(--navy)} button.copied{background:var(--green);border-color:var(--green)}
+  code{font-family:var(--mono);font-size:.88em;background:#efece4;color:var(--navy);padding:1px 6px;border-radius:5px}
+  .hint{font-size:12px;color:var(--faint);margin-top:6px}
+  .badge{font-family:var(--mono);font-size:11px;background:#dcfce7;color:var(--green);border-radius:999px;padding:2px 8px;margin-left:6px}
+  @media(max-width:900px){.layout{grid-template-columns:1fr}.out{position:static;height:auto;border-left:none;border-top:1px solid var(--line)}}
+  #toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:8px 16px;border-radius:10px;font-size:13px;opacity:0;transition:.2s;pointer-events:none}
+  #toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div class="top"><div class="wrap">
+  <p class="eyebrow">Config Builder · ejemplo interactivo</p>
+  <h1>Construye la configuración del agente y exporta el prompt</h1>
+  <p class="lead">Marca opciones → se genera en vivo (a) un <strong>prompt</strong> para pegar a <code>/create-agent</code> y
+    (b) un <strong>config.json</strong>. Tus decisiones se guardan en el navegador (localStorage). Patrón del demo
+    <code>19-editor-feature-flags</code>. Este es el HTML que se crea <strong>por proyecto</strong> para configurar de forma interactiva.</p>
+  <div class="nav"><a href="../../../documentation/estado.html">← estado del template</a><a href="../../../documentation/cheatsheet-extended.html">chuleta de Claude Code</a><a href="README.md">plantillas html/</a></div>
+</div></div>
+
+<div class="layout">
+  <div class="panel" id="form">
+    <fieldset><legend>1 · Agente</legend>
+      <div class="row">
+        <label>Tipo&nbsp;<select id="type"><option>backend-dev</option><option>frontend-dev</option><option>fullstack</option><option>qa-engineer</option><option>data-engineer</option><option>devops</option><option>content-writer</option><option>research-analyst</option><option>custom</option></select></label>
+        <label>Stack&nbsp;<select id="stack"><option>Django+React</option><option>Next.js</option><option>FastAPI+Vue</option><option>Node/TS</option><option>WordPress+Gutenberg</option><option>Rust</option><option>otro</option></select></label>
+        <label>Tier&nbsp;<select id="tier"><option value="1">1 · básico</option><option value="2">2 · sandboxed (GDPR/PII)</option></select></label>
+        <label class="opt"><input type="checkbox" id="ui"> Tiene UI / usuarios finales</label>
+      </div>
+      <div class="row" style="margin-top:8px"><label>Ruta destino&nbsp;<input type="text" id="path" placeholder="/home/proyecto/" size="26"></label></div>
+    </fieldset>
+
+    <fieldset><legend>2 · Skills</legend>
+      <div class="grp"><div class="gl">Universales (siempre)</div><div class="row" id="skills-univ"></div></div>
+      <div class="grp"><div class="gl">Bundle de auditoría (default si hay UI)</div><div class="row" id="skills-audit"></div><div class="dep" id="dep-audit"></div></div>
+      <div class="grp"><div class="gl">Por rol / stack</div><div class="row" id="skills-role"></div></div>
+    </fieldset>
+
+    <fieldset><legend>3 · MCPs &amp; Plugins</legend>
+      <div class="grp"><div class="gl">MCP servers</div><div class="row" id="mcps"></div></div>
+      <div class="grp"><div class="gl">Plugins (name@marketplace)</div><div class="row" id="plugins"></div><div class="dep" id="dep-plug"></div></div>
+    </fieldset>
+
+    <fieldset><legend>4 · Permisos &amp; autonomía</legend>
+      <div class="row">
+        <label>Preset settings&nbsp;<select id="perm"><option value="minimal">minimal</option><option value="backend">backend</option><option value="frontend">frontend</option><option value="tier2-sandboxed">tier2-sandboxed</option><option value="sdd">sdd</option></select></label>
+        <label class="opt"><input type="checkbox" id="teams"> Agent teams (<code>CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1</code>)</label>
+      </div>
+      <div class="hint">El preset se copia de <code>documentation/settings-examples/</code>. tier2 fuerza preset sandboxed.</div>
+    </fieldset>
+  </div>
+
+  <div class="out">
+    <div class="sec">
+      <h2>Prompt para /create-agent <span class="badge" id="cnt"></span></h2>
+      <pre id="prompt"></pre>
+      <button id="cpPrompt">📋 Copiar prompt</button>
+      <button class="ghost" id="cpJson">📄 Copiar config.json</button>
+      <button class="ghost" id="dlJson">⬇ Descargar .json</button>
+      <button class="ghost" id="reset">↺ Reset</button>
+    </div>
+    <div class="sec">
+      <h2>config.json</h2>
+      <pre id="json"></pre>
+    </div>
+    <div class="sec hint">
+      Flujo: ajusta aquí → <b>Copiar prompt</b> → pégalo a <code>/create-agent</code> (o a Claude).
+      El <code>config.json</code> se puede guardar como <code>.claude/agent-config.json</code> del proyecto.
+      Las decisiones persisten en este navegador.
+    </div>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script>
+const LS="tlt-config-builder-v1";
+// Nombres comprobados contra disco por check_mechanisms.py (indices_sin_mentiras): una pieza archivada
+// aquí se ofrecía como vigente (boris-plan-mode, boris-insights, codex-adversarial-review… hasta el 2026-10-20).
+// Las 2 boris universales (boris-claude-md, boris-worktrees) salieron el 2026-10-20 (sub-ola 2.08): lo suyo
+// viaja en las rules del núcleo harness-gotchas.md y parallelization.md, que no se eligen aquí.
+const SKILLS_UNIV=["verification-loops","auto-dream-memory","prompt-contracts","html-suelto"];
+const SKILLS_AUDIT=["lidia-naive-tester","vera-art-director","ignacio-roig"];
+const SKILLS_ROLE=["code-review-gate","naive-user-playthrough","workflow-creator","skill-authoring","django-orm","escribir-tests"];
+const MCPS=["context7","playwright","github","postgresql"];
+const PLUGINS=["playground@claude-plugins-official","ralph-loop@claude-plugins-official","spec-kit@dev-gom-plugins","pyright-lsp@claude-plugins-official","typescript-lsp@claude-plugins-official"];
+const UNIV_ON=new Set(["verification-loops","prompt-contracts","html-suelto","auto-dream-memory"]);
+
+const state = load() || { type:"backend-dev", stack:"Django+React", tier:"1", ui:false, path:"",
+  skills:[...UNIV_ON], mcps:["context7"], plugins:["ralph-loop@claude-plugins-official","spec-kit@dev-gom-plugins"], perm:"backend", teams:false };
+
+function load(){ try{return JSON.parse(localStorage.getItem(LS))}catch(e){return null} }
+function save(){ localStorage.setItem(LS, JSON.stringify(state)); }
+
+function chip(group,name,checked){
+  const id=group+"::"+name;
+  const l=document.createElement("label"); l.className="opt"+(checked?" on":"");
+  l.innerHTML=`<input type="checkbox" ${checked?"checked":""}> ${name}`;
+  l.querySelector("input").addEventListener("change",e=>{
+    toggle(group,name,e.target.checked); l.classList.toggle("on",e.target.checked);
+  });
+  return l;
+}
+function toggle(group,name,on){
+  const arr = group==="mcp"?state.mcps : group==="plugin"?state.plugins : state.skills;
+  const i=arr.indexOf(name);
+  if(on && i<0) arr.push(name); if(!on && i>=0) arr.splice(i,1);
+  render();
+}
+function fill(elId,names,arr,group){
+  const el=document.getElementById(elId); el.innerHTML="";
+  names.forEach(n=>el.appendChild(chip(group,n,arr.includes(n))));
+}
+function renderForm(){
+  document.getElementById("type").value=state.type;
+  document.getElementById("stack").value=state.stack;
+  document.getElementById("tier").value=state.tier;
+  document.getElementById("ui").checked=state.ui;
+  document.getElementById("path").value=state.path;
+  document.getElementById("perm").value=state.perm;
+  document.getElementById("teams").checked=state.teams;
+  fill("skills-univ",SKILLS_UNIV,state.skills,"skill");
+  fill("skills-audit",SKILLS_AUDIT,state.skills,"skill");
+  fill("skills-role",SKILLS_ROLE,state.skills,"skill");
+  fill("mcps",MCPS,state.mcps,"mcp");
+  fill("plugins",PLUGINS,state.plugins,"plugin");
+  // dependencias
+  const depA=document.getElementById("dep-audit");
+  const auditOn=SKILLS_AUDIT.every(s=>state.skills.includes(s));
+  depA.textContent = state.ui && !auditOn ? "⚠ Hay UI: se recomienda el bundle completo Lidia+Vera+Ignacio (Ignacio es el que más se olvida)." : "";
+  const depP=document.getElementById("dep-plug");
+  depP.textContent = (state.stack.includes("TS")||state.stack==="Next.js"||state.stack==="Node/TS") && !state.plugins.includes("typescript-lsp@claude-plugins-official") ? "💡 Stack TS: considera typescript-lsp." :
+    (state.stack.includes("Django")||state.stack==="FastAPI+Vue") && !state.plugins.includes("pyright-lsp@claude-plugins-official") ? "💡 Stack Python: considera pyright-lsp." : "";
+}
+function genPrompt(){
+  const audit = SKILLS_AUDIT.filter(s=>state.skills.includes(s));
+  return `/create-agent
+
+Crea un agente Claude Code con esta configuración:
+
+- Path destino: ${state.path||"[indicar ruta]"}
+- Tipo: ${state.type}
+- Stack: ${state.stack}
+- Tier: ${state.tier}${state.tier==="2"?" (sandboxed — preset tier2)":""}
+- UI/usuarios finales: ${state.ui?"sí":"no"}
+- Bundle de auditoría: ${audit.length?audit.join(" + "):(state.ui?"(recomendado, falta)":"no aplica")}
+- Skills: ${state.skills.join(", ")}
+- MCPs: ${state.mcps.join(", ")||"ninguno"}
+- Plugins: ${state.plugins.join(", ")||"ninguno"}
+- settings preset: ${state.tier==="2"?"tier2-sandboxed":state.perm} (ver documentation/settings-examples/)
+- env: ${[state.teams?"CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1":null].filter(Boolean).join(", ")||"—"}  (workflows son nativos, sin env var)
+
+Sigue la skill create-agent (staging, hooks cableados, /check-agent al final).`;
+}
+function genJSON(){
+  return JSON.stringify({
+    type:state.type, stack:state.stack, tier:Number(state.tier), ui:state.ui, path:state.path||null,
+    skills:state.skills, auditBundle:SKILLS_AUDIT.filter(s=>state.skills.includes(s)),
+    mcps:state.mcps, plugins:state.plugins,
+    settingsPreset: state.tier==="2"?"tier2-sandboxed":state.perm,
+    env:{ CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS: state.teams?"1":undefined }
+  }, null, 2);
+}
+function render(){
+  save();
+  document.getElementById("prompt").textContent=genPrompt();
+  document.getElementById("json").textContent=genJSON();
+  document.getElementById("cnt").textContent=state.skills.length+" skills";
+  // re-evaluar dependencias sin reconstruir todos los chips
+  renderDeps();
+}
+function renderDeps(){
+  const auditOn=SKILLS_AUDIT.every(s=>state.skills.includes(s));
+  document.getElementById("dep-audit").textContent = state.ui && !auditOn ? "⚠ Hay UI: se recomienda el bundle completo Lidia+Vera+Ignacio." : "";
+}
+// inputs simples
+["type","stack","tier","perm"].forEach(id=>document.getElementById(id).addEventListener("change",e=>{state[id]=e.target.value;render()}));
+["ui","teams"].forEach(id=>document.getElementById(id).addEventListener("change",e=>{state[id]=e.target.checked;render()}));
+document.getElementById("path").addEventListener("input",e=>{state.path=e.target.value;render()});
+// botones
+function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1500)}
+function copy(txt,btn){navigator.clipboard?.writeText(txt).then(()=>ok(btn)).catch(()=>{const t=document.createElement("textarea");t.value=txt;document.body.appendChild(t);t.select();document.execCommand("copy");t.remove();ok(btn)})}
+function ok(btn){btn.classList.add("copied");const o=btn.textContent;btn.textContent="✓ Copiado";toast("Copiado");setTimeout(()=>{btn.classList.remove("copied");btn.textContent=o},1500)}
+document.getElementById("cpPrompt").onclick=e=>copy(genPrompt(),e.target);
+document.getElementById("cpJson").onclick=e=>copy(genJSON(),e.target);
+document.getElementById("dlJson").onclick=()=>{const b=new Blob([genJSON()],{type:"application/json"});const a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="agent-config.json";a.click();toast("Descargado agent-config.json")};
+document.getElementById("reset").onclick=()=>{if(confirm("¿Reset a valores por defecto?")){localStorage.removeItem(LS);location.reload()}};
+
+renderForm(); render();
+</script>
+</body>
+</html>

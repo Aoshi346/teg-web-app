@@ -45,13 +45,28 @@ PCT_MB=$(( TOTAL_MB * 10 / 100 ))    # 10% de la RAM total
 THRESHOLD_MB=$(( PCT_MB > MIN_MB ? PCT_MB : MIN_MB ))
 
 MB_PER_SESSION=4096                  # 4 GB por Tech Lead / worktree
+# Agentes a la vez DENTRO de una sesión (subagentes y agentes de workflow corren en su proceso): el
+# reparto de los 4 GB a 512 MB por agente, que es criterio y no medida (lo que ocupa un comando
+# típico: un pytest por módulo, un build). Sale 8 y va a CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS y
+# CLAUDE_CODE_WORKFLOW_MAX_CONCURRENT_AGENTS de settings.json; check_mechanisms.py exige que cuadre
+# (sub-ola 2.01, CL-7). Son UN TOPE POR MECANISMO: los agentes de un workflow no cuentan en el de
+# subagentes, así que una sesión con subagentes y un workflow a la vez puede pasar de 8. Cambiar uno
+# de los dos números obliga a cambiar el settings.
+MB_PER_AGENT=512
+AGENTS_PER_SESSION=$(( MB_PER_SESSION / MB_PER_AGENT ))
 HEADROOM_MB=$(( AVAIL_MB - THRESHOLD_MB ))
 MAX_SESSIONS=$(( HEADROOM_MB / MB_PER_SESSION ))
 [ "$MAX_SESSIONS" -lt 1 ] && MAX_SESSIONS=1   # suelo: siempre cabe la sesión que está preguntando
 
-# Sesiones REALES = procesos de Claude Code que consumen RAM de verdad (>200 MB RSS).
-# No sirve `grep -c claude`: engloba el daemon, los bg-pty-host/bg-spare, los `tmux new … claude`
-# y hasta shells cuyo PATH contiene /root/.claude/ — con eso salían 13 "instancias".
+# Sesiones REALES = procesos del BINARIO de Claude Code que consumen RAM de sesión (>200 MB RSS).
+# Se reconocen por el ejecutable que corre (argv[0], o el script que corre node/bun), NO por que la
+# línea de comandos diga «claude» en algún sitio. Buscando la palabra salían el daemon, los
+# bg-pty-host/bg-spare, los `tmux new … claude`, shells cuyo PATH contiene /root/.claude/ (13
+# «instancias» donde había 3) y, lo último, los workers de Vite/Vitest de `.claude/worktrees/…`: llevan
+# «claude» en la ruta, pasan de 200 MB y su directorio es el repo, así que el gate bloqueó el pytest
+# de un TL con «9 sesiones» que eran Vitest (fitapp, 2026-10-07; MO-23, sub-ola 2.04). Cuenta: el
+# `claude` nativo (por PATH, por ruta, la extensión del IDE o `…/claude/versions/<v>`) y el node/bun
+# que corre `…/claude` o el paquete `@anthropic-ai/claude-code`; sus procesos de servicio, no.
 REPO_ROOT=$(git -C "$(dirname "${BASH_SOURCE[0]}")" rev-parse --show-toplevel 2>/dev/null || pwd)
 
 SESSIONS_MACHINE=0
@@ -63,10 +78,12 @@ while read -r rss pid; do
   case "$cwd" in
     "$REPO_ROOT"|"$REPO_ROOT"/*) SESSIONS_REPO=$(( SESSIONS_REPO + 1 )) ;;
   esac
-done < <(ps -eo rss=,pid=,cmd= \
-  | grep "[c]laude" \
-  | grep -vE "bg-pty-host|bg-spare|daemon run|/bin/bash -c|tmux " \
-  | awk '{print $1, $2}')
+done < <(ps -eo rss=,pid=,args= | awk '
+  $3 ~ /(^|\/)claude$/ || $3 ~ /\/claude\/versions\/[^\/]+$/ ||
+  ($3 ~ /(^|\/)(node|bun)$/ && ($4 ~ /(^|\/)claude$/ || $4 ~ /@anthropic-ai\/claude-code\//)) {
+    if ($0 ~ / (bg-pty-host|bg-spare)( |$)| daemon run( |$)/) next
+    print $1, $2
+  }')
 
 if [ "${1:-}" = "--explain" ]; then
   cat <<EXPLAIN
@@ -80,23 +97,32 @@ Límites de RAM vigentes en esta máquina (fuente: .claude/hooks/check-ram.sh)
   Tope de sesiones/repo     ${MAX_SESSIONS}       = (libre − umbral) ÷ $(( MB_PER_SESSION / 1024 )) GB, mínimo 1
   Sesiones ahora            ${SESSIONS_REPO} en este repo · ${SESSIONS_MACHINE} en la máquina
 
+  Agentes a la vez          ${AGENTS_PER_SESSION}       = $(( MB_PER_SESSION / 1024 )) GB ÷ ${MB_PER_AGENT} MB por agente (criterio) → tope de subagentes
+                                      de la sesión y, aparte, de cada workflow (se suman)
+
   Agentes con NAVEGADOR: cuentan ~doble y siguen topados en 3 (criterio, no derivado).
   Workers de pytest: máximo 2. Nunca 'pytest' entero, ni -n auto, ni --cov.
 EXPLAIN
   exit 0
 fi
 
+# El motivo va por stderr: es lo que se ve cuando el bloqueo llega a través de un hook (gate-ram-pytest.sh
+# lo reenvía) y también a mano, en la salida de la tool Bash.
 if [ "$AVAIL_MB" -lt "$THRESHOLD_MB" ]; then
-  echo "BLOCKED: $(( AVAIL_MB / 1024 ))GB RAM libre — mínimo $(( THRESHOLD_MB / 1024 ))GB (10% de $(( TOTAL_MB / 1024 ))GB, suelo 3GB)."
-  echo "Espera a que se libere RAM, cierra agentes con navegador, o reduce el scope del test."
+  {
+    echo "BLOCKED: $(( AVAIL_MB / 1024 ))GB RAM libre — mínimo $(( THRESHOLD_MB / 1024 ))GB (10% de $(( TOTAL_MB / 1024 ))GB, suelo 3GB)."
+    echo "Espera a que se libere RAM, cierra agentes con navegador, o reduce el scope del test."
+  } >&2
   exit 1
 fi
 
 if [ "$SESSIONS_REPO" -gt "$MAX_SESSIONS" ]; then
-  echo "BLOCKED: ${SESSIONS_REPO} sesiones de Claude Code en este repo — el tope es ${MAX_SESSIONS}."
-  echo "Repo: $REPO_ROOT"
-  echo "El tope sale de la RAM libre: ($(( AVAIL_MB / 1024 ))GB − $(( THRESHOLD_MB / 1024 ))GB umbral) ÷ $(( MB_PER_SESSION / 1024 ))GB por sesión."
-  echo "Espera a que termine alguna, o libera RAM."
+  {
+    echo "BLOCKED: ${SESSIONS_REPO} sesiones de Claude Code en este repo — el tope es ${MAX_SESSIONS}."
+    echo "Repo: $REPO_ROOT"
+    echo "El tope sale de la RAM libre: ($(( AVAIL_MB / 1024 ))GB − $(( THRESHOLD_MB / 1024 ))GB umbral) ÷ $(( MB_PER_SESSION / 1024 ))GB por sesión."
+    echo "Espera a que termine alguna, o libera RAM."
+  } >&2
   exit 1
 fi
 

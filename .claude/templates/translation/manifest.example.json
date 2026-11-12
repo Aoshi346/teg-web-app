@@ -1,0 +1,14 @@
+{
+  "_comment": "Inventario de unidades traducibles. Lo genera el adaptador del stack (WordPress/Django/genérico) y lo consume translate-pages.js, el motor de la skill translate-content. Una entrada por string traducible.",
+  "source": "es",
+  "stack": "wordpress",
+  "units": [
+    { "id": "home.hero.badge", "page": "home", "file": "theme/inc/populate_page_home.php", "key": "hero.badge",
+      "source": "BCNLIP · Centro Acreditado Instituto Cervantes", "context": "badge superior del hero" },
+    { "id": "home.hero.heading", "page": "home", "file": "theme/inc/populate_page_home.php", "key": "hero.heading",
+      "source": "Aprende español en el <span class=\"bcnlip-accent\">corazón</span> de Barcelona",
+      "context": "H1 del hero — contiene HTML, preservar el <span>" },
+    { "id": "home.hero.ctaPrimaryText", "page": "home", "file": "theme/inc/populate_page_home.php", "key": "hero.ctaPrimaryText",
+      "source": "SOLICITAR INFORMACIÓN", "context": "CTA primario (ver glossary.terms)" }
+  ]
+}

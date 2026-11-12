@@ -1,0 +1,3242 @@
+{
+ "meta": {
+  "source": "gen_inventario_stack.py — AST para Python, expresiones regulares para TS/TSX",
+  "metodo": {
+   "python": "AST (exacto)",
+   "typescript": "regex (inventaria y cuenta; NO afirma nada fino sobre tipos)"
+  },
+  "proyecto": "deepagents",
+  "sha": "aad9aa9",
+  "date": "2026-08-26",
+  "totales": {
+   "aristas": 11,
+   "componentes": 0,
+   "hooks": 0,
+   "modelos": 0,
+   "nodos": 8,
+   "paginas": 0,
+   "serializers": 0,
+   "state": 6,
+   "tareas": 0,
+   "tools": 182,
+   "vistas": 1
+  },
+  "apps": {
+   "libs": {
+    "vistas": 1
+   }
+  }
+ },
+ "tools": [
+  {
+   "nombre": "_ask_user",
+   "file": "libs/code/deepagents_code/ask_user.py",
+   "line": 368,
+   "descripcion": "Ask the user one or more questions. Returns: `Command` containing the parsed user answers as a `ToolMessage`. Raises: RuntimeError: If the tool body raises a `ValidationError` after the arguments have been validated. Re-raised as a type `ToolNode` will not con",
+   "args": [
+    {
+     "nombre": "questions",
+     "tipo": "Annotated[list[ValidatedQuestion], AfterValidator(_validate_"
+    },
+    {
+     "nombre": "tool_call_id",
+     "tipo": "Annotated[str, InjectedToolCallId]"
+    },
+    {
+     "nombre": "runtime",
+     "tipo": "ToolRuntime[Any, Any]"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": true
+  },
+  {
+   "nombre": "_inner",
+   "file": "libs/deepagents/tests/unit_tests/test_deep_agent_streaming.py",
+   "line": 67,
+   "descripcion": "Echo the input with a prefix.",
+   "args": [
+    {
+     "nombre": "x",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "add",
+   "file": "libs/deepagents/tests/benchmarks/test_benchmark_create_deep_agent.py",
+   "line": 45,
+   "descripcion": "Add a and b.",
+   "args": [
+    {
+     "nombre": "a",
+     "tipo": "int"
+    },
+    {
+     "nombre": "b",
+     "tipo": "int"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "adelete_path",
+   "file": "libs/deepagents/tests/unit_tests/test_end_to_end.py",
+   "line": 2941,
+   "descripcion": "Delete a file via StateBackend's async path.",
+   "args": [
+    {
+     "nombre": "path",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "always_fails",
+   "file": "libs/partners/quickjs/tests/unit_tests/test_end_to_end.py",
+   "line": 67,
+   "descripcion": "Raise to verify host-call failures surface to the model.",
+   "args": [
+    {
+     "nombre": "value",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": true
+  },
+  {
+   "nombre": "always_fails",
+   "file": "libs/partners/quickjs/tests/unit_tests/test_end_to_end_async.py",
+   "line": 54,
+   "descripcion": "Raise to verify host-call failures surface to the model.",
+   "args": [
+    {
+     "nombre": "value",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": true
+  },
+  {
+   "nombre": "ask_user",
+   "file": "libs/acp/tests/test_agent.py",
+   "line": 986,
+   "descripcion": "Ask the user a question via interrupt.",
+   "args": [
+    {
+     "nombre": "question",
+     "tipo": "str"
+    },
+    {
+     "nombre": "runtime",
+     "tipo": "ToolRuntime"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "async_label_tool",
+   "file": "libs/partners/quickjs/tests/unit_tests/test_end_to_end.py",
+   "line": 54,
+   "descripcion": "Return a labeled value from an asynchronous LangChain tool.",
+   "args": [
+    {
+     "nombre": "value",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "async_label_tool",
+   "file": "libs/partners/quickjs/tests/unit_tests/test_end_to_end_async.py",
+   "line": 41,
+   "descripcion": "Return a labeled value from an asynchronous LangChain tool.",
+   "args": [
+    {
+     "nombre": "value",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "big_tool",
+   "file": "libs/deepagents/tests/unit_tests/test_end_to_end.py",
+   "line": 3032,
+   "descripcion": "Return a large string to trigger eviction.",
+   "args": [],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "big_tool",
+   "file": "libs/deepagents/tests/unit_tests/test_end_to_end.py",
+   "line": 3084,
+   "descripcion": "Return a large string to trigger eviction.",
+   "args": [],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "big_tool",
+   "file": "libs/deepagents/tests/unit_tests/test_end_to_end.py",
+   "line": 3337,
+   "descripcion": "Return a large string to trigger eviction.",
+   "args": [],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "calendar_create_event",
+   "file": "libs/evals/tests/evals/test_tool_selection.py",
+   "line": 88,
+   "descripcion": "Create a calendar event.",
+   "args": [
+    {
+     "nombre": "title",
+     "tipo": "str"
+    },
+    {
+     "nombre": "date",
+     "tipo": "str"
+    },
+    {
+     "nombre": "attendees",
+     "tipo": "list[str]"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "call_agent1",
+   "file": "libs/acp/tests/test_agent.py",
+   "line": 917,
+   "descripcion": "Invoke subagent1 with the provided question.",
+   "args": [
+    {
+     "nombre": "question",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "call_agent1",
+   "file": "libs/acp/tests/test_agent.py",
+   "line": 1012,
+   "descripcion": "Invoke subagent1 with the provided question.",
+   "args": [
+    {
+     "nombre": "question",
+     "tipo": "str"
+    },
+    {
+     "nombre": "runtime",
+     "tipo": "ToolRuntime"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "capture_context",
+   "file": "libs/deepagents/tests/unit_tests/test_subagents.py",
+   "line": 2123,
+   "descripcion": "Captures runtime context.",
+   "args": [
+    {
+     "nombre": "query",
+     "tipo": "str"
+    },
+    {
+     "nombre": "runtime",
+     "tipo": "ToolRuntime"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "capture_gp_state",
+   "file": "libs/deepagents/tests/unit_tests/test_subagents.py",
+   "line": 2463,
+   "descripcion": "Captures runtime state from the general-purpose subagent.",
+   "args": [
+    {
+     "nombre": "query",
+     "tipo": "str"
+    },
+    {
+     "nombre": "runtime",
+     "tipo": "ToolRuntime"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "capture_leader_state",
+   "file": "libs/deepagents/tests/unit_tests/test_subagents.py",
+   "line": 2457,
+   "descripcion": "Captures runtime state from the leader agent.",
+   "args": [
+    {
+     "nombre": "query",
+     "tipo": "str"
+    },
+    {
+     "nombre": "runtime",
+     "tipo": "ToolRuntime"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "capture_metadata",
+   "file": "libs/deepagents/tests/unit_tests/test_subagents.py",
+   "line": 975,
+   "descripcion": "Capture the runtime config from inside the subagent.",
+   "args": [
+    {
+     "nombre": "runtime",
+     "tipo": "ToolRuntime"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "capture_recursion_limit",
+   "file": "libs/deepagents/tests/unit_tests/test_subagents.py",
+   "line": 876,
+   "descripcion": "Capture the recursion limit from runtime config.",
+   "args": [
+    {
+     "nombre": "runtime",
+     "tipo": "ToolRuntime"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "capture_state",
+   "file": "libs/deepagents/tests/unit_tests/test_subagents.py",
+   "line": 2686,
+   "descripcion": "Captures runtime state from the subagent.",
+   "args": [
+    {
+     "nombre": "query",
+     "tipo": "str"
+    },
+    {
+     "nombre": "runtime",
+     "tipo": "ToolRuntime"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "capture_state",
+   "file": "libs/deepagents/tests/unit_tests/test_subagents.py",
+   "line": 2781,
+   "descripcion": "Captures runtime state from the subagent.",
+   "args": [
+    {
+     "nombre": "query",
+     "tipo": "str"
+    },
+    {
+     "nombre": "runtime",
+     "tipo": "ToolRuntime"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "capture_subagent_state",
+   "file": "libs/deepagents/tests/unit_tests/test_subagents.py",
+   "line": 515,
+   "descripcion": "Capture subagent state.",
+   "args": [
+    {
+     "nombre": "query",
+     "tipo": "str"
+    },
+    {
+     "nombre": "runtime",
+     "tipo": "ToolRuntime"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "capture_subagent_state",
+   "file": "libs/deepagents/tests/unit_tests/test_subagents.py",
+   "line": 2269,
+   "descripcion": "Captures runtime state from the subagent.",
+   "args": [
+    {
+     "nombre": "query",
+     "tipo": "str"
+    },
+    {
+     "nombre": "runtime",
+     "tipo": "ToolRuntime"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "capture_subagent_state",
+   "file": "libs/deepagents/tests/unit_tests/test_subagents.py",
+   "line": 2570,
+   "descripcion": "Captures runtime state from the subagent.",
+   "args": [
+    {
+     "nombre": "query",
+     "tipo": "str"
+    },
+    {
+     "nombre": "runtime",
+     "tipo": "ToolRuntime"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "count_words",
+   "file": "libs/evals/tests/evals/test_iterative_constraint_satisfaction.py",
+   "line": 41,
+   "descripcion": "Return the number of whitespace-separated words in `text`. Use this whenever the rubric asks for an exact word count — do not trust word-count claims that appear in the transcript itself.",
+   "args": [
+    {
+     "nombre": "text",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "create_job",
+   "file": "libs/talon/deepagents_talon/cron/tools.py",
+   "line": 135,
+   "descripcion": "Schedule a background task that will later deliver to this conversation. Args: prompt: Self-contained prompt to run when the job fires. schedule: Schedule text such as `in 30m` or `every 15m`. name: Optional human-readable label for the job. repeat_times: Opti",
+   "args": [
+    {
+     "nombre": "prompt",
+     "tipo": "str"
+    },
+    {
+     "nombre": "schedule",
+     "tipo": "str"
+    },
+    {
+     "nombre": "name",
+     "tipo": "str"
+    },
+    {
+     "nombre": "repeat_times",
+     "tipo": "int | None"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "create_temp_artifact",
+   "file": "libs/code/deepagents_code/auto_mode.py",
+   "line": 2061,
+   "descripcion": "Create a private OS-temp text file for this request. Use this instead of `write_file` when a command needs a temporary input file, such as a pull-request body passed with `--body-file`. Dcode chooses and exclusively allocates the path; callers cannot select or",
+   "args": [
+    {
+     "nombre": "content",
+     "tipo": "Annotated[str, Field(description='UTF-8 text to write once t"
+    },
+    {
+     "nombre": "runtime",
+     "tipo": "ToolRuntime[Any, AutoModeState]"
+    },
+    {
+     "nombre": "suffix",
+     "tipo": "Annotated[str, Field(description='Optional short extension s"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "current_loop_id",
+   "file": "libs/partners/quickjs/tests/unit_tests/test_thread_affinity.py",
+   "line": 80,
+   "descripcion": "Return the running loop id for loop-affinity assertions.",
+   "args": [],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "danger",
+   "file": "libs/code/tests/unit_tests/hooks/test_server_lifecycle.py",
+   "line": 348,
+   "descripcion": "Do something that hooks should be able to block.",
+   "args": [
+    {
+     "nombre": "target",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "delete",
+   "file": "libs/code/tests/unit_tests/test_agent.py",
+   "line": 6462,
+   "descripcion": "Delete.",
+   "args": [
+    {
+     "nombre": "path",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "delete_path",
+   "file": "libs/deepagents/tests/unit_tests/test_end_to_end.py",
+   "line": 2894,
+   "descripcion": "Delete a file via StateBackend.",
+   "args": [
+    {
+     "nombre": "path",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "delete_temp_artifact",
+   "file": "libs/code/deepagents_code/auto_mode.py",
+   "line": 2122,
+   "descripcion": "Delete one exact OS-temp artifact created for this request. Returns: A tool message reporting exact cleanup or a fail-closed denial.",
+   "args": [
+    {
+     "nombre": "file_path",
+     "tipo": "Annotated[str, Field(description='Exact path returned by `cr"
+    },
+    {
+     "nombre": "runtime",
+     "tipo": "ToolRuntime[Any, AutoModeState]"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "dynamic_tool",
+   "file": "libs/deepagents/tests/benchmarks/test_benchmark_summarization_middleware.py",
+   "line": 63,
+   "descripcion": "Echo the query a number of times.",
+   "args": [
+    {
+     "nombre": "query",
+     "tipo": "str"
+    },
+    {
+     "nombre": "count",
+     "tipo": "int"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "dynamic_tool",
+   "file": "libs/deepagents/tests/benchmarks/test_benchmark_create_deep_agent.py",
+   "line": 66,
+   "descripcion": "",
+   "args": [
+    {
+     "nombre": "x",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": true,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "echo",
+   "file": "libs/deepagents/tests/benchmarks/test_benchmark_create_deep_agent.py",
+   "line": 57,
+   "descripcion": "Return text unchanged.",
+   "args": [
+    {
+     "nombre": "text",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "echo_call_id",
+   "file": "libs/partners/quickjs/tests/unit_tests/test_end_to_end.py",
+   "line": 111,
+   "descripcion": "Return the synthetic tool_call_id back to the caller.",
+   "args": [
+    {
+     "nombre": "value",
+     "tipo": "str"
+    },
+    {
+     "nombre": "tool_call_id",
+     "tipo": "Annotated[str, InjectedToolCallId]"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "echo_foo",
+   "file": "libs/partners/quickjs/tests/unit_tests/test_end_to_end.py",
+   "line": 75,
+   "descripcion": "Echo the value of `foo`.",
+   "args": [
+    {
+     "nombre": "foo",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "echo_payload",
+   "file": "libs/partners/quickjs/tests/benchmarks/_common.py",
+   "line": 47,
+   "descripcion": "Echo an input payload for PTC benchmark calls.",
+   "args": [
+    {
+     "nombre": "value",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "edit_job",
+   "file": "libs/talon/deepagents_talon/cron/tools.py",
+   "line": 175,
+   "descripcion": "Update one or more settings on a scheduled job from this conversation. Args: job_id: Job id returned by the create or list tool. name: Optional replacement label. prompt: Optional replacement prompt. schedule: Optional replacement schedule text. enabled: Optio",
+   "args": [
+    {
+     "nombre": "job_id",
+     "tipo": "str"
+    },
+    {
+     "nombre": "name",
+     "tipo": "str | None"
+    },
+    {
+     "nombre": "prompt",
+     "tipo": "str | None"
+    },
+    {
+     "nombre": "schedule",
+     "tipo": "str | None"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "execute",
+   "file": "libs/code/tests/unit_tests/test_auto_mode.py",
+   "line": 2717,
+   "descripcion": "Record a command without invoking a subprocess.",
+   "args": [
+    {
+     "nombre": "command",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "fetch_url",
+   "file": "libs/code/tests/unit_tests/test_agent.py",
+   "line": 6672,
+   "descripcion": "Fetch a URL (a custom, non-built-in tool).",
+   "args": [
+    {
+     "nombre": "url",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "fetch_weather",
+   "file": "libs/partners/quickjs/tests/unit_tests/smoke_tests/test_system_prompt.py",
+   "line": 87,
+   "descripcion": "Fetch the current weather for a city.",
+   "args": [
+    {
+     "nombre": "city",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "filler",
+   "file": "libs/deepagents/tests/unit_tests/test_end_to_end.py",
+   "line": 3275,
+   "descripcion": "",
+   "args": [],
+   "sin_doc": true,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "find_engineers_by_name",
+   "file": "libs/evals/tests/evals/test_tool_usage_incident_graph.py",
+   "line": 390,
+   "descripcion": "Find engineers with a similar name. Args: name: The engineer name to search for.",
+   "args": [
+    {
+     "nombre": "name",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "find_foods_by_name",
+   "file": "libs/evals/tests/evals/test_tool_usage_relational.py",
+   "line": 291,
+   "descripcion": "Find foods with the given name. Args: food: The food name to search for.",
+   "args": [
+    {
+     "nombre": "food",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "find_incidents_by_title",
+   "file": "libs/evals/tests/evals/test_tool_usage_incident_graph.py",
+   "line": 370,
+   "descripcion": "Find incidents with a similar title. Args: title: The incident title to search for.",
+   "args": [
+    {
+     "nombre": "title",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "find_locations_by_name",
+   "file": "libs/evals/tests/evals/test_tool_usage_relational.py",
+   "line": 281,
+   "descripcion": "Find locations with the given city name. Args: city: The city name to search for.",
+   "args": [
+    {
+     "nombre": "city",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "find_services_by_name",
+   "file": "libs/evals/tests/evals/test_tool_usage_incident_graph.py",
+   "line": 380,
+   "descripcion": "Find services with a similar name. Args: name: The service name to search for.",
+   "args": [
+    {
+     "nombre": "name",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "find_teams_by_name",
+   "file": "libs/evals/tests/evals/test_tool_usage_incident_graph.py",
+   "line": 400,
+   "descripcion": "Find teams with a similar name. Args: name: The team name to search for.",
+   "args": [
+    {
+     "nombre": "name",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "find_users_by_name",
+   "file": "libs/partners/quickjs/tests/unit_tests/smoke_tests/test_system_prompt.py",
+   "line": 51,
+   "descripcion": "Find users with the given name. Args: name: The user name to search for.",
+   "args": [
+    {
+     "nombre": "name",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "find_users_by_name",
+   "file": "libs/evals/tests/evals/test_tool_usage_relational.py",
+   "line": 271,
+   "descripcion": "Find users with the given name. Args: name: The name to search for.",
+   "args": [
+    {
+     "nombre": "name",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "foo",
+   "file": "libs/deepagents/tests/unit_tests/test_end_to_end.py",
+   "line": 284,
+   "descripcion": "Capture runtime config.",
+   "args": [
+    {
+     "nombre": "runtime",
+     "tipo": "ToolRuntime"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "generate_cover",
+   "file": "examples/content-builder-agent/content_writer.py",
+   "line": 74,
+   "descripcion": "Generate a cover image for a blog post. Args: prompt: Detailed description of the image to generate. slug: Blog post slug. Image saves to blogs/<slug>/hero.png",
+   "args": [
+    {
+     "nombre": "prompt",
+     "tipo": "str"
+    },
+    {
+     "nombre": "slug",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "generate_social_image",
+   "file": "examples/content-builder-agent/content_writer.py",
+   "line": 104,
+   "descripcion": "Generate an image for a social media post. Args: prompt: Detailed description of the image to generate. platform: Either \"linkedin\" or \"tweets\" slug: Post slug. Image saves to <platform>/<slug>/image.png",
+   "args": [
+    {
+     "nombre": "prompt",
+     "tipo": "str"
+    },
+    {
+     "nombre": "platform",
+     "tipo": "str"
+    },
+    {
+     "nombre": "slug",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_alert_name",
+   "file": "libs/evals/tests/evals/test_tool_usage_incident_graph.py",
+   "line": 670,
+   "descripcion": "Get the alert name for an alert ID. Args: alert_id: The alert ID.",
+   "args": [
+    {
+     "nombre": "alert_id",
+     "tipo": "int"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_alert_status",
+   "file": "libs/evals/tests/evals/test_tool_usage_incident_graph.py",
+   "line": 680,
+   "descripcion": "Get the alert status for an alert ID. Args: alert_id: The alert ID.",
+   "args": [
+    {
+     "nombre": "alert_id",
+     "tipo": "int"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_city_for_location",
+   "file": "libs/partners/quickjs/tests/unit_tests/smoke_tests/test_system_prompt.py",
+   "line": 71,
+   "descripcion": "Get the city for a location. Args: location_id: The location identifier.",
+   "args": [
+    {
+     "nombre": "location_id",
+     "tipo": "int"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_city_for_location",
+   "file": "libs/evals/tests/evals/test_tool_usage_relational.py",
+   "line": 351,
+   "descripcion": "Get the city for the location with the given location ID. Args: location_id: The location's ID.",
+   "args": [
+    {
+     "nombre": "location_id",
+     "tipo": "int"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_current_incident_id",
+   "file": "libs/evals/tests/evals/test_tool_usage_incident_graph.py",
+   "line": 358,
+   "descripcion": "Get the current incident ID.",
+   "args": [],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_current_thread_id",
+   "file": "libs/code/deepagents_code/tools.py",
+   "line": 307,
+   "descripcion": "Get the current Deep Agents thread ID for LangSmith or MCP tooling. Returns: The current `configurable.thread_id`, or an explanatory message if missing.",
+   "args": [],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_current_time_for_location",
+   "file": "libs/evals/tests/evals/test_tool_usage_relational.py",
+   "line": 361,
+   "descripcion": "Get the current time for the location with the given location ID. Args: location_id: The location's ID.",
+   "args": [
+    {
+     "nombre": "location_id",
+     "tipo": "int"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_current_user_id",
+   "file": "libs/evals/tests/evals/test_tool_usage_relational.py",
+   "line": 401,
+   "descripcion": "Get the current user's ID.",
+   "args": [],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_deploy_timestamp",
+   "file": "libs/evals/tests/evals/test_tool_usage_incident_graph.py",
+   "line": 700,
+   "descripcion": "Get the deployment timestamp for a deploy. Args: deploy_id: The deploy ID.",
+   "args": [
+    {
+     "nombre": "deploy_id",
+     "tipo": "int"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_deploy_version",
+   "file": "libs/evals/tests/evals/test_tool_usage_incident_graph.py",
+   "line": 690,
+   "descripcion": "Get the version string for a deploy. Args: deploy_id: The deploy ID.",
+   "args": [
+    {
+     "nombre": "deploy_id",
+     "tipo": "int"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_engineer_email",
+   "file": "libs/evals/tests/evals/test_tool_usage_incident_graph.py",
+   "line": 590,
+   "descripcion": "Get the email of an engineer. Args: engineer_id: The engineer ID.",
+   "args": [
+    {
+     "nombre": "engineer_id",
+     "tipo": "int"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_engineer_name",
+   "file": "libs/evals/tests/evals/test_tool_usage_incident_graph.py",
+   "line": 580,
+   "descripcion": "Get the name of an engineer. Args: engineer_id: The engineer ID.",
+   "args": [
+    {
+     "nombre": "engineer_id",
+     "tipo": "int"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_engineer_team",
+   "file": "libs/evals/tests/evals/test_tool_usage_incident_graph.py",
+   "line": 600,
+   "descripcion": "Get the team ID for an engineer. Args: engineer_id: The engineer ID.",
+   "args": [
+    {
+     "nombre": "engineer_id",
+     "tipo": "int"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_environment_name",
+   "file": "libs/evals/tests/evals/test_tool_usage_incident_graph.py",
+   "line": 650,
+   "descripcion": "Get the environment name. Args: environment_id: The environment ID.",
+   "args": [
+    {
+     "nombre": "environment_id",
+     "tipo": "int"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_environment_region",
+   "file": "libs/evals/tests/evals/test_tool_usage_incident_graph.py",
+   "line": 660,
+   "descripcion": "Get the environment region. Args: environment_id: The environment ID.",
+   "args": [
+    {
+     "nombre": "environment_id",
+     "tipo": "int"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_food_allergic_ingredients",
+   "file": "libs/evals/tests/evals/test_tool_usage_relational.py",
+   "line": 391,
+   "descripcion": "Get the list of allergic ingredients for the food with the given food ID. Args: food_id: The food's ID.",
+   "args": [
+    {
+     "nombre": "food_id",
+     "tipo": "int"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_food_calories",
+   "file": "libs/evals/tests/evals/test_tool_usage_relational.py",
+   "line": 381,
+   "descripcion": "Get the calories per serving for the food with the given food ID. Args: food_id: The food's ID.",
+   "args": [
+    {
+     "nombre": "food_id",
+     "tipo": "int"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_food_name",
+   "file": "libs/evals/tests/evals/test_tool_usage_relational.py",
+   "line": 371,
+   "descripcion": "Get the name of the food with the given food ID. Args: food_id: The food's ID.",
+   "args": [
+    {
+     "nombre": "food_id",
+     "tipo": "int"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_incident_service",
+   "file": "libs/evals/tests/evals/test_tool_usage_incident_graph.py",
+   "line": 420,
+   "descripcion": "Get the affected service ID for an incident. Args: incident_id: The incident ID.",
+   "args": [
+    {
+     "nombre": "incident_id",
+     "tipo": "int"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_incident_severity",
+   "file": "libs/evals/tests/evals/test_tool_usage_incident_graph.py",
+   "line": 430,
+   "descripcion": "Get the severity for an incident. Args: incident_id: The incident ID.",
+   "args": [
+    {
+     "nombre": "incident_id",
+     "tipo": "int"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_incident_started_at",
+   "file": "libs/evals/tests/evals/test_tool_usage_incident_graph.py",
+   "line": 450,
+   "descripcion": "Get the start timestamp for an incident. Args: incident_id: The incident ID.",
+   "args": [
+    {
+     "nombre": "incident_id",
+     "tipo": "int"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_incident_status",
+   "file": "libs/evals/tests/evals/test_tool_usage_incident_graph.py",
+   "line": 440,
+   "descripcion": "Get the status for an incident. Args: incident_id: The incident ID.",
+   "args": [
+    {
+     "nombre": "incident_id",
+     "tipo": "int"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_incident_title",
+   "file": "libs/evals/tests/evals/test_tool_usage_incident_graph.py",
+   "line": 410,
+   "descripcion": "Get the title for an incident. Args: incident_id: The incident ID.",
+   "args": [
+    {
+     "nombre": "incident_id",
+     "tipo": "int"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_la_liga_standings",
+   "file": "libs/deepagents/tests/utils.py",
+   "line": 39,
+   "descripcion": "",
+   "args": [
+    {
+     "nombre": "runtime",
+     "tipo": "ToolRuntime"
+    }
+   ],
+   "sin_doc": true,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_latest_deploy_for_service",
+   "file": "libs/evals/tests/evals/test_tool_usage_incident_graph.py",
+   "line": 530,
+   "descripcion": "Get the most recent deploy ID for a service. Args: service_id: The service ID.",
+   "args": [
+    {
+     "nombre": "service_id",
+     "tipo": "int"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": true
+  },
+  {
+   "nombre": "get_metric_value",
+   "file": "libs/evals/tests/evals/test_tool_usage_incident_graph.py",
+   "line": 545,
+   "descripcion": "Get the current value of a named metric for a service. Args: service_id: The service ID. metric_name: The metric name.",
+   "args": [
+    {
+     "nombre": "service_id",
+     "tipo": "int"
+    },
+    {
+     "nombre": "metric_name",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": true
+  },
+  {
+   "nombre": "get_nba_standings",
+   "file": "libs/deepagents/tests/utils.py",
+   "line": 49,
+   "descripcion": "",
+   "args": [],
+   "sin_doc": true,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_nfl_standings",
+   "file": "libs/deepagents/tests/utils.py",
+   "line": 54,
+   "descripcion": "",
+   "args": [],
+   "sin_doc": true,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_premier_league_standings",
+   "file": "libs/deepagents/tests/utils.py",
+   "line": 27,
+   "descripcion": "",
+   "args": [
+    {
+     "nombre": "runtime",
+     "tipo": "ToolRuntime"
+    }
+   ],
+   "sin_doc": true,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_repo_default_branch",
+   "file": "libs/evals/tests/evals/test_tool_usage_incident_graph.py",
+   "line": 620,
+   "descripcion": "Get the default branch for a repo. Args: repo_id: The repo ID.",
+   "args": [
+    {
+     "nombre": "repo_id",
+     "tipo": "int"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_repo_name",
+   "file": "libs/evals/tests/evals/test_tool_usage_incident_graph.py",
+   "line": 610,
+   "descripcion": "Get the repository name for a repo ID. Args: repo_id: The repo ID.",
+   "args": [
+    {
+     "nombre": "repo_id",
+     "tipo": "int"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_runbook_title",
+   "file": "libs/evals/tests/evals/test_tool_usage_incident_graph.py",
+   "line": 630,
+   "descripcion": "Get the title of a runbook. Args: runbook_id: The runbook ID.",
+   "args": [
+    {
+     "nombre": "runbook_id",
+     "tipo": "int"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_runbook_url",
+   "file": "libs/evals/tests/evals/test_tool_usage_incident_graph.py",
+   "line": 640,
+   "descripcion": "Get the URL of a runbook. Args: runbook_id: The runbook ID.",
+   "args": [
+    {
+     "nombre": "runbook_id",
+     "tipo": "int"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_service_environment",
+   "file": "libs/evals/tests/evals/test_tool_usage_incident_graph.py",
+   "line": 500,
+   "descripcion": "Get the environment ID for a service. Args: service_id: The service ID.",
+   "args": [
+    {
+     "nombre": "service_id",
+     "tipo": "int"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_service_name",
+   "file": "libs/evals/tests/evals/test_tool_usage_incident_graph.py",
+   "line": 460,
+   "descripcion": "Get the name of a service. Args: service_id: The service ID.",
+   "args": [
+    {
+     "nombre": "service_id",
+     "tipo": "int"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_service_repo",
+   "file": "libs/evals/tests/evals/test_tool_usage_incident_graph.py",
+   "line": 480,
+   "descripcion": "Get the repo ID for a service. Args: service_id: The service ID.",
+   "args": [
+    {
+     "nombre": "service_id",
+     "tipo": "int"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_service_runbook",
+   "file": "libs/evals/tests/evals/test_tool_usage_incident_graph.py",
+   "line": 490,
+   "descripcion": "Get the runbook ID for a service. Args: service_id: The service ID.",
+   "args": [
+    {
+     "nombre": "service_id",
+     "tipo": "int"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_service_team",
+   "file": "libs/evals/tests/evals/test_tool_usage_incident_graph.py",
+   "line": 470,
+   "descripcion": "Get the owner team ID for a service. Args: service_id: The service ID.",
+   "args": [
+    {
+     "nombre": "service_id",
+     "tipo": "int"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_soccer_scores",
+   "file": "libs/deepagents/tests/utils.py",
+   "line": 64,
+   "descripcion": "",
+   "args": [
+    {
+     "nombre": "team",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": true,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_soccer_scores",
+   "file": "libs/deepagents/tests/integration_tests/test_hitl.py",
+   "line": 34,
+   "descripcion": "",
+   "args": [
+    {
+     "nombre": "team",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": true,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_team_name",
+   "file": "libs/evals/tests/evals/test_tool_usage_incident_graph.py",
+   "line": 560,
+   "descripcion": "Get the team name for a team ID. Args: team_id: The team ID.",
+   "args": [
+    {
+     "nombre": "team_id",
+     "tipo": "int"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_team_oncall_engineer",
+   "file": "libs/evals/tests/evals/test_tool_usage_incident_graph.py",
+   "line": 570,
+   "descripcion": "Get the on-call engineer ID for a team. Args: team_id: The team ID.",
+   "args": [
+    {
+     "nombre": "team_id",
+     "tipo": "int"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_user_count",
+   "file": "libs/partners/quickjs/tests/unit_tests/test_end_to_end.py",
+   "line": 81,
+   "descripcion": "Return a count of users.",
+   "args": [],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_user_email",
+   "file": "libs/evals/tests/evals/test_tool_usage_relational.py",
+   "line": 301,
+   "descripcion": "Get the email of the user with the given user ID. Args: user_id: The user's ID.",
+   "args": [
+    {
+     "nombre": "user_id",
+     "tipo": "int"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_user_email_or_none",
+   "file": "libs/partners/quickjs/tests/unit_tests/test_end_to_end.py",
+   "line": 105,
+   "descripcion": "Return an email if the user has one, otherwise None.",
+   "args": [
+    {
+     "nombre": "user_id",
+     "tipo": "int"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_user_favorite_color",
+   "file": "libs/evals/tests/evals/test_tool_usage_relational.py",
+   "line": 321,
+   "descripcion": "Get the favorite color of the user with the given user ID. Args: user_id: The user's ID.",
+   "args": [
+    {
+     "nombre": "user_id",
+     "tipo": "int"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_user_favorite_foods",
+   "file": "libs/evals/tests/evals/test_tool_usage_relational.py",
+   "line": 331,
+   "descripcion": "Get the list of favorite food IDs of the user with the given user ID. Args: user_id: The user's ID.",
+   "args": [
+    {
+     "nombre": "user_id",
+     "tipo": "int"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_user_location",
+   "file": "libs/partners/quickjs/tests/unit_tests/smoke_tests/test_system_prompt.py",
+   "line": 61,
+   "descripcion": "Get the location id for a user. Args: user_id: The user identifier.",
+   "args": [
+    {
+     "nombre": "user_id",
+     "tipo": "int"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_user_location",
+   "file": "libs/evals/tests/evals/test_tool_usage_relational.py",
+   "line": 311,
+   "descripcion": "Get the location ID of the user with the given user ID. Args: user_id: The user's ID.",
+   "args": [
+    {
+     "nombre": "user_id",
+     "tipo": "int"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_user_name",
+   "file": "libs/evals/tests/evals/test_tool_usage_relational.py",
+   "line": 255,
+   "descripcion": "Get the name of the user with the given user ID. Args: user_id: The user's ID.",
+   "args": [
+    {
+     "nombre": "user_id",
+     "tipo": "int"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_user_profile",
+   "file": "libs/partners/quickjs/tests/unit_tests/test_end_to_end.py",
+   "line": 87,
+   "descripcion": "Return a small user profile object.",
+   "args": [],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_user_profile_with_dates",
+   "file": "libs/partners/quickjs/tests/unit_tests/test_end_to_end.py",
+   "line": 93,
+   "descripcion": "Return a user profile containing nested datetimes (non JS-native values).",
+   "args": [],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_weather",
+   "file": "libs/deepagents/tests/utils.py",
+   "line": 59,
+   "descripcion": "",
+   "args": [
+    {
+     "nombre": "location",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": true,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_weather",
+   "file": "libs/deepagents/tests/integration_tests/test_hitl.py",
+   "line": 29,
+   "descripcion": "",
+   "args": [
+    {
+     "nombre": "location",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": true,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_weather",
+   "file": "libs/deepagents/tests/integration_tests/test_subagent_middleware.py",
+   "line": 20,
+   "descripcion": "Get the weather in a city.",
+   "args": [
+    {
+     "nombre": "city",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_weather",
+   "file": "libs/deepagents/tests/unit_tests/middleware/test_subagent_middleware_init.py",
+   "line": 29,
+   "descripcion": "Get the weather in a city.",
+   "args": [
+    {
+     "nombre": "city",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_weather_at_location",
+   "file": "libs/evals/tests/evals/test_tool_usage_relational.py",
+   "line": 341,
+   "descripcion": "Get the current weather at the location with the given location ID. Args: location_id: The location's ID.",
+   "args": [
+    {
+     "nombre": "location_id",
+     "tipo": "int"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_weather_fake",
+   "file": "libs/evals/tests/evals/test_subagents.py",
+   "line": 33,
+   "descripcion": "Return a fixed weather response for eval scenarios.",
+   "args": [
+    {
+     "nombre": "location",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "github_create_issue",
+   "file": "libs/evals/tests/evals/test_tool_selection.py",
+   "line": 53,
+   "descripcion": "Create a new GitHub issue.",
+   "args": [
+    {
+     "nombre": "repo",
+     "tipo": "str"
+    },
+    {
+     "nombre": "title",
+     "tipo": "str"
+    },
+    {
+     "nombre": "body",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "github_create_pr",
+   "file": "libs/evals/tests/evals/test_tool_selection.py",
+   "line": 59,
+   "descripcion": "Create a pull request on GitHub.",
+   "args": [
+    {
+     "nombre": "repo",
+     "tipo": "str"
+    },
+    {
+     "nombre": "title",
+     "tipo": "str"
+    },
+    {
+     "nombre": "head",
+     "tipo": "str"
+    },
+    {
+     "nombre": "base",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "glob",
+   "file": "libs/code/deepagents_code/agent.py",
+   "line": 681,
+   "descripcion": "Find working-directory files matching a glob pattern. Returns: The bounded matches, or an error message when the path/pattern is disallowed or the inspection budget is exhausted.",
+   "args": [
+    {
+     "nombre": "pattern",
+     "tipo": "str"
+    },
+    {
+     "nombre": "runtime",
+     "tipo": "ToolRuntime[None, Any]"
+    },
+    {
+     "nombre": "path",
+     "tipo": "str | None"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "glob",
+   "file": "libs/code/tests/unit_tests/test_agent.py",
+   "line": 6540,
+   "descripcion": "Glob.",
+   "args": [
+    {
+     "nombre": "pattern",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "gmail_send_email",
+   "file": "libs/evals/tests/evals/test_tool_selection.py",
+   "line": 71,
+   "descripcion": "Send an email via Gmail.",
+   "args": [
+    {
+     "nombre": "to",
+     "tipo": "str"
+    },
+    {
+     "nombre": "subject",
+     "tipo": "str"
+    },
+    {
+     "nombre": "body",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "grep",
+   "file": "libs/code/deepagents_code/agent.py",
+   "line": 722,
+   "descripcion": "Search working-directory file contents to verify criteria. Returns: The bounded search output, or an error message when the path/pattern is disallowed or the inspection budget is exhausted.",
+   "args": [
+    {
+     "nombre": "pattern",
+     "tipo": "str"
+    },
+    {
+     "nombre": "runtime",
+     "tipo": "ToolRuntime[None, Any]"
+    },
+    {
+     "nombre": "path",
+     "tipo": "str | None"
+    },
+    {
+     "nombre": "glob",
+     "tipo": "str | None"
+    },
+    {
+     "nombre": "output_mode",
+     "tipo": "str"
+    },
+    {
+     "nombre": "max_count",
+     "tipo": "int | None"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "grep",
+   "file": "libs/code/tests/unit_tests/test_agent.py",
+   "line": 6311,
+   "descripcion": "Search for a pattern.",
+   "args": [
+    {
+     "nombre": "pattern",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "grep",
+   "file": "libs/code/tests/unit_tests/test_agent.py",
+   "line": 6357,
+   "descripcion": "Search.",
+   "args": [
+    {
+     "nombre": "pattern",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "grep",
+   "file": "libs/code/tests/unit_tests/test_agent.py",
+   "line": 6399,
+   "descripcion": "Search.",
+   "args": [
+    {
+     "nombre": "pattern",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "grep",
+   "file": "libs/code/tests/unit_tests/test_agent.py",
+   "line": 6467,
+   "descripcion": "Search.",
+   "args": [
+    {
+     "nombre": "pattern",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "grep",
+   "file": "libs/code/tests/unit_tests/test_agent.py",
+   "line": 6545,
+   "descripcion": "Search.",
+   "args": [
+    {
+     "nombre": "pattern",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "inspect_external",
+   "file": "libs/code/tests/unit_tests/test_reliable_rubric.py",
+   "line": 529,
+   "descripcion": "Inspect an external resource without modifying it.",
+   "args": [
+    {
+     "nombre": "resource_id",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "linear_create_issue",
+   "file": "libs/evals/tests/evals/test_tool_selection.py",
+   "line": 65,
+   "descripcion": "Create a new issue in Linear.",
+   "args": [
+    {
+     "nombre": "team",
+     "tipo": "str"
+    },
+    {
+     "nombre": "title",
+     "tipo": "str"
+    },
+    {
+     "nombre": "description",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "list_incident_ids",
+   "file": "libs/evals/tests/evals/test_tool_usage_incident_graph.py",
+   "line": 364,
+   "descripcion": "List all incident IDs.",
+   "args": [],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "list_jobs",
+   "file": "libs/talon/deepagents_talon/cron/tools.py",
+   "line": 163,
+   "descripcion": "List scheduled jobs created from this conversation. Returns: Scoped job details, or an error dictionary when no origin is active.",
+   "args": [],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "list_service_alert_ids",
+   "file": "libs/evals/tests/evals/test_tool_usage_incident_graph.py",
+   "line": 520,
+   "descripcion": "List alert IDs for a service. Args: service_id: The service ID.",
+   "args": [
+    {
+     "nombre": "service_id",
+     "tipo": "int"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "list_service_dependencies",
+   "file": "libs/evals/tests/evals/test_tool_usage_incident_graph.py",
+   "line": 510,
+   "descripcion": "List dependency service IDs for a service. Args: service_id: The service ID.",
+   "args": [
+    {
+     "nombre": "service_id",
+     "tipo": "int"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "list_user_ids",
+   "file": "libs/partners/quickjs/tests/unit_tests/test_end_to_end.py",
+   "line": 42,
+   "descripcion": "List user IDs.",
+   "args": [],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "list_user_ids",
+   "file": "libs/partners/quickjs/tests/unit_tests/test_end_to_end_async.py",
+   "line": 29,
+   "descripcion": "Return example user identifiers for QuickJS bridging tests.",
+   "args": [],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "list_user_ids",
+   "file": "libs/evals/tests/evals/test_tool_usage_relational.py",
+   "line": 265,
+   "descripcion": "List all the user IDs.",
+   "args": [],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "lookup_area_km2",
+   "file": "libs/evals/tests/evals/test_langchain_middleware_todo.py",
+   "line": 68,
+   "descripcion": "Return the area of a city in square kilometers as a string.",
+   "args": [
+    {
+     "nombre": "city",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "lookup_population",
+   "file": "libs/evals/tests/evals/test_goal_tools.py",
+   "line": 36,
+   "descripcion": "Return the population of a city as a string.",
+   "args": [
+    {
+     "nombre": "city",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "lookup_population",
+   "file": "libs/evals/tests/evals/test_langchain_middleware_todo.py",
+   "line": 56,
+   "descripcion": "Return the population of a city as a string.",
+   "args": [
+    {
+     "nombre": "city",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "ls",
+   "file": "libs/code/deepagents_code/agent.py",
+   "line": 653,
+   "descripcion": "List a working-directory path to verify criteria against files. Returns: The bounded listing, or an error message when the path is disallowed or the inspection budget is exhausted.",
+   "args": [
+    {
+     "nombre": "path",
+     "tipo": "str"
+    },
+    {
+     "nombre": "runtime",
+     "tipo": "ToolRuntime[None, Any]"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "multiply",
+   "file": "libs/deepagents/tests/benchmarks/test_benchmark_create_deep_agent.py",
+   "line": 51,
+   "descripcion": "Multiply a and b.",
+   "args": [
+    {
+     "nombre": "a",
+     "tipo": "int"
+    },
+    {
+     "nombre": "b",
+     "tipo": "int"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "my_tool",
+   "file": "libs/deepagents/tests/unit_tests/middleware/test_rubric_middleware.py",
+   "line": 213,
+   "descripcion": "A tool.",
+   "args": [
+    {
+     "nombre": "query",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "normalize_name",
+   "file": "libs/partners/quickjs/tests/unit_tests/smoke_tests/test_system_prompt.py",
+   "line": 81,
+   "descripcion": "Normalize a user name for matching.",
+   "args": [
+    {
+     "nombre": "name",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "read_file",
+   "file": "libs/code/deepagents_code/agent.py",
+   "line": 574,
+   "descripcion": "Read an offloaded tool result or a working-directory file. Returns: The tool result, or an error message when the path is outside the grader's allowed directories or the inspection budget is exhausted.",
+   "args": [
+    {
+     "nombre": "file_path",
+     "tipo": "str"
+    },
+    {
+     "nombre": "runtime",
+     "tipo": "ToolRuntime[None, Any]"
+    },
+    {
+     "nombre": "offset",
+     "tipo": "int"
+    },
+    {
+     "nombre": "limit",
+     "tipo": "int"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "read_file",
+   "file": "libs/code/tests/unit_tests/test_agent.py",
+   "line": 6404,
+   "descripcion": "Read.",
+   "args": [
+    {
+     "nombre": "path",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "read_file",
+   "file": "libs/code/tests/unit_tests/test_agent.py",
+   "line": 6452,
+   "descripcion": "Read.",
+   "args": [
+    {
+     "nombre": "path",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "read_file",
+   "file": "libs/code/tests/unit_tests/test_agent.py",
+   "line": 6535,
+   "descripcion": "Read.",
+   "args": [
+    {
+     "nombre": "path",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "remove_job",
+   "file": "libs/talon/deepagents_talon/cron/tools.py",
+   "line": 210,
+   "descripcion": "Delete a scheduled job from this conversation. Args: job_id: Job id returned by the create or list tool. Returns: Removed job details, or an error dictionary when no scoped job matches.",
+   "args": [
+    {
+     "nombre": "job_id",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "requires_approval",
+   "file": "libs/deepagents/tests/unit_tests/test_subagents.py",
+   "line": 1063,
+   "descripcion": "A tool that should trigger HITL.",
+   "args": [],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "requires_approval",
+   "file": "libs/deepagents/tests/unit_tests/test_subagents.py",
+   "line": 1142,
+   "descripcion": "A tool that should not trigger HITL when overridden.",
+   "args": [],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "research_basketball",
+   "file": "libs/deepagents/tests/utils.py",
+   "line": 82,
+   "descripcion": "",
+   "args": [
+    {
+     "nombre": "topic",
+     "tipo": "str"
+    },
+    {
+     "nombre": "runtime",
+     "tipo": "ToolRuntime"
+    }
+   ],
+   "sin_doc": true,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "runtime_configurable",
+   "file": "libs/partners/quickjs/tests/unit_tests/test_end_to_end.py",
+   "line": 61,
+   "descripcion": "Return configurable runtime data for testing ToolRuntime context propagation.",
+   "args": [
+    {
+     "nombre": "value",
+     "tipo": "str"
+    },
+    {
+     "nombre": "runtime",
+     "tipo": "ToolRuntime"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "runtime_configurable",
+   "file": "libs/partners/quickjs/tests/unit_tests/test_end_to_end_async.py",
+   "line": 48,
+   "descripcion": "Return configurable runtime data for testing ToolRuntime context propagation.",
+   "args": [
+    {
+     "nombre": "value",
+     "tipo": "str"
+    },
+    {
+     "nombre": "runtime",
+     "tipo": "ToolRuntime"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "sample_tool",
+   "file": "libs/deepagents/tests/utils.py",
+   "line": 69,
+   "descripcion": "",
+   "args": [
+    {
+     "nombre": "sample_input",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": true,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "sample_tool",
+   "file": "libs/deepagents/tests/integration_tests/test_hitl.py",
+   "line": 39,
+   "descripcion": "",
+   "args": [
+    {
+     "nombre": "sample_input",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": true,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "sample_tool",
+   "file": "libs/deepagents/tests/unit_tests/test_end_to_end.py",
+   "line": 74,
+   "descripcion": "A sample tool that returns the input string.",
+   "args": [
+    {
+     "nombre": "sample_input",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "sample_tool",
+   "file": "libs/code/tests/unit_tests/test_end_to_end.py",
+   "line": 28,
+   "descripcion": "A sample tool that returns the input string.",
+   "args": [
+    {
+     "nombre": "sample_input",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "sample_tool_with_injected_state",
+   "file": "libs/deepagents/tests/utils.py",
+   "line": 74,
+   "descripcion": "",
+   "args": [
+    {
+     "nombre": "sample_input",
+     "tipo": "str"
+    },
+    {
+     "nombre": "runtime",
+     "tipo": "ToolRuntime"
+    }
+   ],
+   "sin_doc": true,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "seed_parent_state",
+   "file": "libs/deepagents/tests/unit_tests/test_subagents.py",
+   "line": 504,
+   "descripcion": "Seed parent state.",
+   "args": [
+    {
+     "nombre": "runtime",
+     "tipo": "ToolRuntime"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "shell",
+   "file": "libs/deepagents/tests/unit_tests/middleware/test_rubric_middleware.py",
+   "line": 557,
+   "descripcion": "Run a shell command.",
+   "args": [
+    {
+     "nombre": "cmd",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "side_effect",
+   "file": "libs/code/tests/unit_tests/hooks/test_server_lifecycle.py",
+   "line": 427,
+   "descripcion": "Record one visible side effect.",
+   "args": [
+    {
+     "nombre": "value",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "slack_post_channel",
+   "file": "libs/evals/tests/evals/test_tool_selection.py",
+   "line": 47,
+   "descripcion": "Post a message to a Slack channel.",
+   "args": [
+    {
+     "nombre": "channel",
+     "tipo": "str"
+    },
+    {
+     "nombre": "message",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "slack_send_dm",
+   "file": "libs/evals/tests/evals/test_tool_selection.py",
+   "line": 41,
+   "descripcion": "Send a direct message to a user on Slack.",
+   "args": [
+    {
+     "nombre": "user_id",
+     "tipo": "str"
+    },
+    {
+     "nombre": "message",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "sync_label_tool",
+   "file": "libs/partners/quickjs/tests/unit_tests/test_end_to_end.py",
+   "line": 48,
+   "descripcion": "Return a labeled value from a synchronous LangChain tool.",
+   "args": [
+    {
+     "nombre": "value",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "sync_label_tool",
+   "file": "libs/partners/quickjs/tests/unit_tests/test_end_to_end_async.py",
+   "line": 35,
+   "descripcion": "Return a labeled value from a synchronous LangChain tool.",
+   "args": [
+    {
+     "nombre": "value",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "task",
+   "file": "libs/code/tests/unit_tests/test_agent.py",
+   "line": 6550,
+   "descripcion": "Dispatch a subagent.",
+   "args": [
+    {
+     "nombre": "prompt",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "task",
+   "file": "libs/code/tests/unit_tests/test_cost_tracking.py",
+   "line": 3607,
+   "descripcion": "Run a nested agent.",
+   "args": [
+    {
+     "nombre": "query",
+     "tipo": "str"
+    },
+    {
+     "nombre": "runtime",
+     "tipo": "ToolRuntime"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "task",
+   "file": "libs/code/tests/unit_tests/test_cost_tracking.py",
+   "line": 3728,
+   "descripcion": "Run a nested agent.",
+   "args": [
+    {
+     "nombre": "query",
+     "tipo": "str"
+    },
+    {
+     "nombre": "runtime",
+     "tipo": "ToolRuntime"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "task",
+   "file": "libs/code/tests/unit_tests/test_cost_tracking.py",
+   "line": 3950,
+   "descripcion": "Run a nested agent.",
+   "args": [
+    {
+     "nombre": "query",
+     "tipo": "str"
+    },
+    {
+     "nombre": "runtime",
+     "tipo": "ToolRuntime"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "task_a",
+   "file": "libs/code/tests/unit_tests/test_cost_tracking.py",
+   "line": 3653,
+   "descripcion": "Run the first nested agent.",
+   "args": [
+    {
+     "nombre": "query",
+     "tipo": "str"
+    },
+    {
+     "nombre": "runtime",
+     "tipo": "ToolRuntime"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "task_b",
+   "file": "libs/code/tests/unit_tests/test_cost_tracking.py",
+   "line": 3659,
+   "descripcion": "Run the second nested agent.",
+   "args": [
+    {
+     "nombre": "query",
+     "tipo": "str"
+    },
+    {
+     "nombre": "runtime",
+     "tipo": "ToolRuntime"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "tavily_search",
+   "file": "examples/deep_research/research_agent/tools.py",
+   "line": 39,
+   "descripcion": "Search the web for information on a given query. Uses Tavily to discover relevant URLs, then fetches and returns full webpage content as markdown. Args: query: Search query to execute max_results: Maximum number of results to return (default: 1) topic: Topic f",
+   "args": [
+    {
+     "nombre": "query",
+     "tipo": "str"
+    },
+    {
+     "nombre": "max_results",
+     "tipo": "Annotated[int, InjectedToolArg]"
+    },
+    {
+     "nombre": "topic",
+     "tipo": "Annotated[Literal['general', 'news', 'finance'], InjectedToo"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "tavily_search",
+   "file": "examples/nvidia_deep_agent/src/tools.py",
+   "line": 39,
+   "descripcion": "Search the web for information on a given query. Uses Tavily to discover relevant URLs, then fetches and returns full webpage content as markdown. Args: query: Search query to execute max_results: Maximum number of results to return (default: 1) topic: Topic f",
+   "args": [
+    {
+     "nombre": "query",
+     "tipo": "str"
+    },
+    {
+     "nombre": "max_results",
+     "tipo": "Annotated[int, InjectedToolArg]"
+    },
+    {
+     "nombre": "topic",
+     "tipo": "Annotated[Literal['general', 'news', 'finance'], InjectedToo"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "think_tool",
+   "file": "examples/deep_research/research_agent/tools.py",
+   "line": 92,
+   "descripcion": "Tool for strategic reflection on research progress and decision-making. Use this tool after each search to analyze results and plan next steps systematically. This creates a deliberate pause in the research workflow for quality decision-making. When to use: - ",
+   "args": [
+    {
+     "nombre": "reflection",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "transfer_to_b",
+   "file": "libs/deepagents/tests/unit_tests/test_end_to_end.py",
+   "line": 4087,
+   "descripcion": "Transfer to agent_b.",
+   "args": [
+    {
+     "nombre": "runtime",
+     "tipo": "ToolRuntime"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "update_goal",
+   "file": "libs/code/deepagents_code/goal_tools.py",
+   "line": 301,
+   "descripcion": "Update a goal only when the latest state notice says it is actionable. Read the current objective and any acceptance criteria from the latest goal/rubric state notice in context, or — right after a goal whose save failed — from the objective and criteria quote",
+   "args": [
+    {
+     "nombre": "status",
+     "tipo": "Annotated[Literal['complete', 'blocked'], Field(description="
+    },
+    {
+     "nombre": "note",
+     "tipo": "Annotated[str, Field(max_length=GOAL_STATUS_NOTE_CHAR_LIMIT,"
+    },
+    {
+     "nombre": "tool_call_id",
+     "tipo": "Annotated[str, InjectedToolCallId]"
+    },
+    {
+     "nombre": "state",
+     "tipo": "Annotated[dict[str, Any], InjectedState]"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "web_search",
+   "file": "examples/async-subagent-server/server.py",
+   "line": 120,
+   "descripcion": "Search the web for information. Use this to find current data, news, and analysis. Args: query: The search query.",
+   "args": [
+    {
+     "nombre": "query",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "web_search",
+   "file": "examples/content-builder-agent/content_writer.py",
+   "line": 45,
+   "descripcion": "Search the web for current information. Args: query: The search query (be specific and detailed) max_results: Number of results to return (default: 5) topic: \"general\" for most queries, \"news\" for current events Returns: Search results with titles, URLs, and c",
+   "args": [
+    {
+     "nombre": "query",
+     "tipo": "str"
+    },
+    {
+     "nombre": "max_results",
+     "tipo": "int"
+    },
+    {
+     "nombre": "topic",
+     "tipo": "Literal['general', 'news']"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "web_search",
+   "file": "libs/evals/tests/evals/test_tool_selection.py",
+   "line": 77,
+   "descripcion": "Search the web for information.",
+   "args": [
+    {
+     "nombre": "query",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "web_search",
+   "file": "libs/evals/deepagents_harbor/langgraph_project/langgraph_agent.py",
+   "line": 381,
+   "descripcion": "Search the web for current or public information. Args: query: The search query. Be specific. max_results: Number of results to return, capped at 10. Returns: Ranked results as title, URL, and extract.",
+   "args": [
+    {
+     "nombre": "query",
+     "tipo": "str"
+    },
+    {
+     "nombre": "max_results",
+     "tipo": "int"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "write_file",
+   "file": "libs/code/tests/unit_tests/test_agent.py",
+   "line": 6457,
+   "descripcion": "Write.",
+   "args": [
+    {
+     "nombre": "path",
+     "tipo": "str"
+    },
+    {
+     "nombre": "content",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "write_file",
+   "file": "libs/code/tests/unit_tests/test_cost_tracking.py",
+   "line": 3695,
+   "descripcion": "Pretend to write a file.",
+   "args": [
+    {
+     "nombre": "path",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "write_file",
+   "file": "libs/code/tests/unit_tests/test_cost_tracking.py",
+   "line": 3806,
+   "descripcion": "Pretend to write a file.",
+   "args": [
+    {
+     "nombre": "path",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "write_file_tool",
+   "file": "libs/acp/tests/test_agent.py",
+   "line": 473,
+   "descripcion": "",
+   "args": [
+    {
+     "nombre": "file_path",
+     "tipo": "str"
+    },
+    {
+     "nombre": "content",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": true,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "write_then_read",
+   "file": "libs/deepagents/tests/unit_tests/test_end_to_end.py",
+   "line": 2808,
+   "descripcion": "Write a file via StateBackend, then immediately read it back.",
+   "args": [
+    {
+     "nombre": "path",
+     "tipo": "str"
+    },
+    {
+     "nombre": "content",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  }
+ ],
+ "state": [
+  {
+   "nombre": "CustomState",
+   "file": "libs/deepagents/tests/unit_tests/test_subagents.py",
+   "line": 2192,
+   "campos": [
+    {
+     "nombre": "custom_field",
+     "tipo": "str",
+     "reducer": ""
+    }
+   ],
+   "n_campos": 1,
+   "doc": ""
+  },
+  {
+   "nombre": "GoalStateNoticeInfo",
+   "file": "libs/code/deepagents_code/goal_state_notice.py",
+   "line": 127,
+   "campos": [
+    {
+     "nombre": "event_id",
+     "tipo": "str",
+     "reducer": ""
+    },
+    {
+     "nombre": "state_fingerprint",
+     "tipo": "str",
+     "reducer": ""
+    },
+    {
+     "nombre": "schema_version",
+     "tipo": "int",
+     "reducer": ""
+    }
+   ],
+   "n_campos": 3,
+   "doc": "Metadata extracted from a canonical goal-state notice."
+  },
+  {
+   "nombre": "GoalStateProjection",
+   "file": "libs/code/deepagents_code/goal_state_notice.py",
+   "line": 100,
+   "campos": [
+    {
+     "nombre": "goal_objective",
+     "tipo": "str | None",
+     "reducer": ""
+    },
+    {
+     "nombre": "goal_status",
+     "tipo": "GoalStatus | None",
+     "reducer": ""
+    },
+    {
+     "nombre": "goal_actionable",
+     "tipo": "bool",
+     "reducer": ""
+    },
+    {
+     "nombre": "goal_rubric",
+     "tipo": "str | None",
+     "reducer": ""
+    },
+    {
+     "nombre": "goal_status_note",
+     "tipo": "str | None",
+     "reducer": ""
+    },
+    {
+     "nombre": "rubric_criteria",
+     "tipo": "str | None",
+     "reducer": ""
+    },
+    {
+     "nombre": "rubric_source",
+     "tipo": "RubricSource | None",
+     "reducer": ""
+    }
+   ],
+   "n_campos": 7,
+   "doc": "Canonical goal/rubric fields used for notices and fingerprints."
+  },
+  {
+   "nombre": "MemoryStateUpdate",
+   "file": "libs/deepagents/deepagents/middleware/memory.py",
+   "line": 99,
+   "campos": [
+    {
+     "nombre": "memory_contents",
+     "tipo": "dict[str, str]",
+     "reducer": ""
+    }
+   ],
+   "n_campos": 1,
+   "doc": "State update for `MemoryMiddleware`."
+  },
+  {
+   "nombre": "OffloadStateUpdate",
+   "file": "libs/code/deepagents_code/offload_middleware.py",
+   "line": 107,
+   "campos": [
+    {
+     "nombre": "_summarization_event",
+     "tipo": "dict[str, Any]",
+     "reducer": ""
+    },
+    {
+     "nombre": "_summarization_session_id",
+     "tipo": "str",
+     "reducer": ""
+    },
+    {
+     "nombre": "_session_cost_usd",
+     "tipo": "float",
+     "reducer": ""
+    }
+   ],
+   "n_campos": 3,
+   "doc": "The only checkpoint channels a server-owned operation may write."
+  },
+  {
+   "nombre": "SkillsStateUpdate",
+   "file": "libs/deepagents/deepagents/middleware/skills.py",
+   "line": 303,
+   "campos": [
+    {
+     "nombre": "skills_metadata",
+     "tipo": "list[SkillMetadata]",
+     "reducer": ""
+    },
+    {
+     "nombre": "skills_load_errors",
+     "tipo": "NotRequired[list[str]]",
+     "reducer": ""
+    }
+   ],
+   "n_campos": 2,
+   "doc": "State update for the skills middleware."
+  }
+ ],
+ "nodos": [
+  {
+   "nombre": "agent",
+   "file": "libs/deepagents/tests/unit_tests/test_messages_reducer.py",
+   "line": 35
+  },
+  {
+   "nombre": "agent_a",
+   "file": "libs/deepagents/tests/unit_tests/test_end_to_end.py",
+   "line": 4118
+  },
+  {
+   "nombre": "agent_b",
+   "file": "libs/deepagents/tests/unit_tests/test_end_to_end.py",
+   "line": 4119
+  },
+  {
+   "nombre": "echo",
+   "file": "libs/deepagents/tests/unit_tests/middleware/test_subagent_middleware_init.py",
+   "line": 319
+  },
+  {
+   "nombre": "hook",
+   "file": "libs/code/tests/unit_tests/hooks/test_server_lifecycle.py",
+   "line": 709
+  },
+  {
+   "nombre": "model",
+   "file": "libs/deepagents/tests/unit_tests/test_subagents.py",
+   "line": 1923
+  },
+  {
+   "nombre": "model",
+   "file": "libs/deepagents/tests/unit_tests/test_subagents.py",
+   "line": 1983
+  },
+  {
+   "nombre": "process",
+   "file": "libs/deepagents/tests/unit_tests/test_subagents.py",
+   "line": 2200
+  }
+ ],
+ "aristas": [
+  {
+   "de": "START",
+   "a": "agent_a",
+   "tipo": "fija",
+   "file": "libs/deepagents/tests/unit_tests/test_end_to_end.py",
+   "line": 4120
+  },
+  {
+   "de": "agent_a",
+   "a": "END",
+   "tipo": "fija",
+   "file": "libs/deepagents/tests/unit_tests/test_end_to_end.py",
+   "line": 4121
+  },
+  {
+   "de": "agent_b",
+   "a": "END",
+   "tipo": "fija",
+   "file": "libs/deepagents/tests/unit_tests/test_end_to_end.py",
+   "line": 4122
+  },
+  {
+   "de": "agent",
+   "a": "END",
+   "tipo": "fija",
+   "file": "libs/deepagents/tests/unit_tests/test_messages_reducer.py",
+   "line": 35
+  },
+  {
+   "de": "START",
+   "a": "agent",
+   "tipo": "fija",
+   "file": "libs/deepagents/tests/unit_tests/test_messages_reducer.py",
+   "line": 35
+  },
+  {
+   "de": "START",
+   "a": "model",
+   "tipo": "fija",
+   "file": "libs/deepagents/tests/unit_tests/test_subagents.py",
+   "line": 1924
+  },
+  {
+   "de": "START",
+   "a": "model",
+   "tipo": "fija",
+   "file": "libs/deepagents/tests/unit_tests/test_subagents.py",
+   "line": 1984
+  },
+  {
+   "de": "START",
+   "a": "process",
+   "tipo": "fija",
+   "file": "libs/deepagents/tests/unit_tests/test_subagents.py",
+   "line": 2201
+  },
+  {
+   "de": "process",
+   "a": "END",
+   "tipo": "fija",
+   "file": "libs/deepagents/tests/unit_tests/test_subagents.py",
+   "line": 2202
+  },
+  {
+   "de": "START",
+   "a": "echo",
+   "tipo": "fija",
+   "file": "libs/deepagents/tests/unit_tests/middleware/test_subagent_middleware_init.py",
+   "line": 320
+  },
+  {
+   "de": "START",
+   "a": "hook",
+   "tipo": "fija",
+   "file": "libs/code/tests/unit_tests/hooks/test_server_lifecycle.py",
+   "line": 710
+  }
+ ],
+ "vistas": [
+  {
+   "nombre": "_DebugLogView",
+   "app": "libs",
+   "file": "libs/code/deepagents_code/tui/widgets/debug_console.py",
+   "line": 247,
+   "bases": [
+    "ScrollView"
+   ],
+   "doc": "Scrollable styled log view with logical-record hover and click handling."
+  }
+ ],
+ "componentes": [],
+ "hooks": [],
+ "paginas": [],
+ "modelos": [],
+ "serializers": [],
+ "tareas": []
+}

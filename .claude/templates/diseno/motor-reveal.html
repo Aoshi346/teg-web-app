@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Motor de reveal — pegable</title>
+<!--
+  motor-reveal.html — el motor de entrada por defecto. Se PEGA, no se reinventa.
+
+  Precedente: resources/referencias-diseno/bien/elevaiti-v53.html:92-94 y :526-527.
+  Contraejemplo: resources/referencias-diseno/mal/attomo-digital.html:1006 y :1441 — declara
+  `.reveal{opacity:0}` SIN condición y define `initGSAP()` que nunca llama. Resultado: la página
+  entera invisible, publicada así. Ningún test del harness lo cazaba.
+
+  LA REGLA QUE HACE QUE ESTO FUNCIONE, y es la única que no se puede tocar:
+      el `opacity:0` cuelga de `body.js-ready`, NO del elemento.
+  Sin JS esa clase nunca se añade, la regla nunca aplica y el contenido se ve sin más. La
+  animación es lo que se AÑADE cuando hay JS, no lo que hay que rescatar cuando no lo hay.
+
+  Doctrina completa: patterns/diseno/movimiento.md §3
+-->
+<style>
+  :root{
+    --dur-reveal: 1400ms;
+    --ease-soft: cubic-bezier(.25,.46,.45,.94);  /* medido en 2 diseños del corpus */
+    --stagger: 120ms;
+  }
+
+  /* 1. El estado FINAL se declara siempre: es lo que se ve sin JS. */
+  .reveal{ transition: opacity var(--dur-reveal) var(--ease-soft),
+                       transform var(--dur-reveal) var(--ease-soft); }
+
+  /* 2. El estado inicial SOLO existe si el JS ha corrido. */
+  body.js-ready .reveal{ opacity:0; transform: translateY(35px); }
+  body.js-ready .reveal.visible{ opacity:1; transform:none; }
+
+  /* 3. El escalonado va por variable, no por veinte reglas nth-child. */
+  body.js-ready .reveal{ transition-delay: calc(var(--i, 0) * var(--stagger)); }
+
+  /* 4. Reduced motion: aquí, y TAMBIÉN en el JS (ver abajo). */
+  @media (prefers-reduced-motion: reduce){
+    .reveal, body.js-ready .reveal{
+      opacity:1 !important; transform:none !important; transition:none !important;
+    }
+  }
+
+  /* — demo — */
+  body{font-family:system-ui,sans-serif;max-width:52ch;margin:0 auto;padding:4rem 1.5rem;line-height:1.7}
+  section{margin-block:6rem;padding:2rem;border:1px solid #ddd;border-radius:8px}
+</style>
+</head>
+<body>
+  <h1 class="reveal">Este titular se ve aunque el JS falle</h1>
+  <section class="reveal" style="--i:1"><p>Bloque uno.</p></section>
+  <section class="reveal" style="--i:2"><p>Bloque dos, con 120 ms de retraso.</p></section>
+  <section class="reveal" style="--i:3"><p>Bloque tres.</p></section>
+
+<script>
+(function () {
+  'use strict';
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Si la persona pidió menos movimiento, NO se marca js-ready: nada se esconde nunca.
+  // Es la mitad en JS de la regla — solo con el @media, lo que anime una librería se lo salta.
+  if (reduce) return;
+
+  document.body.classList.add('js-ready');
+
+  var io = new IntersectionObserver(function (entradas) {
+    entradas.forEach(function (e) {
+      if (!e.isIntersecting) return;
+      e.target.classList.add('visible');
+      io.unobserve(e.target);          // una vez y se suelta: no se re-anima al volver a subir
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
+
+  document.querySelectorAll('.reveal').forEach(function (el) { io.observe(el); });
+})();
+</script>
+</body>
+</html>

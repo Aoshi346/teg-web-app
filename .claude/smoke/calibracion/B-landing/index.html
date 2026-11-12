@@ -1,0 +1,1713 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kalina Yoga — Luxury Editorial</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500;1,600&family=Montserrat:wght@200;300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    /* ── RESET & BASE ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --ivory: #FFFFF0;
+      --ivory-warm: #FAF8F0;
+      --gold-light: #C9A96E;
+      --gold-dark: #B8924F;
+      --gold-pale: #E8D5B7;
+      --charcoal: #2C2C2C;
+      --charcoal-light: #4A4A4A;
+      --blush: #E8C4B8;
+      --blush-pale: #F5EAE5;
+      --white: #FFFFFF;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--ivory);
+      color: var(--charcoal);
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 300;
+      font-size: 16px;
+      line-height: 1.225;
+      overflow-x: hidden;
+    }
+    img { display: block; width: 100%; object-fit: cover; }
+    a { text-decoration: none; color: inherit; }
+
+    /* ── TYPOGRAPHY SYSTEM ── */
+    .editorial-h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-weight: 300;
+      /* historical: la escala la fijó el cliente en su manual de 2019, no se toca sin su OK */
+      font-size: clamp(4rem, 10vw, 9rem);
+      line-height: 0.92;
+      letter-spacing: -0.02em;
+      color: var(--charcoal);
+    }
+    .editorial-h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-weight: 300;
+      font-size: clamp(3rem, 6vw, 6rem);
+      line-height: 0.95;
+      letter-spacing: -0.01em;
+    }
+    .editorial-h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-weight: 400;
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      line-height: 1.1;
+    }
+    .pull-quote {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-weight: 300;
+      font-size: clamp(1.8rem, 3.5vw, 3rem);
+      line-height: 1.3;
+      color: #d8cbb0;
+    }
+    .label-text {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 400;
+      font-size: 0.65rem;
+      letter-spacing: 1.4em;
+      text-transform: uppercase;
+      color: var(--gold-dark);
+    }
+    .body-text {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 300;
+      font-size: 0.9rem;
+      line-height: 1.85;
+      color: var(--charcoal-light);
+    }
+
+    /* ── GOLD SEPARATORS ── */
+    .gold-line {
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold-light), transparent);
+    }
+    .gold-line-solid {
+      width: 60px;
+      height: 1px;
+      background: var(--gold-dark);
+    }
+    .ornament {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      color: var(--gold-dark);
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.2rem;
+    }
+    .ornament::before, .ornament::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--gold-light);
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes slideInLeft {
+      from { opacity: 0; transform: translateX(-60px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes slideInRight {
+      from { opacity: 0; transform: translateX(60px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(40px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    @keyframes lineExpand {
+      from { width: 0; }
+      to   { width: 60px; }
+    }
+    .reveal {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                  transform 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+    .reveal.revealed {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .reveal-left {
+      opacity: 0;
+      transform: translateX(-60px);
+      transition: opacity 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                  transform 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+    .reveal-left.revealed { opacity: 1; transform: translateX(0); }
+    .reveal-right {
+      opacity: 0;
+      transform: translateX(60px);
+      transition: opacity 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                  transform 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+    .reveal-right.revealed { opacity: 1; transform: translateX(0); }
+    .delay-1 { transition-delay: 0.1s; }
+    .delay-2 { transition-delay: 0.2s; }
+    .delay-3 { transition-delay: 0.3s; }
+    .delay-4 { transition-delay: 0.4s; }
+    .delay-5 { transition-delay: 0.5s; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .reveal, .reveal-left, .reveal-right {
+        opacity: 1; transform: none; transition: none;
+      }
+    }
+
+    /* ══════════════════════════════════════════
+       NAVIGATION
+    ══════════════════════════════════════════ */
+    .nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 23px 48px;
+      transition: background 0.5s ease, padding 0.4s ease;
+    }
+    .nav.scrolled {
+      background: rgba(255, 255, 240, 0.95);
+      backdrop-filter: blur(12px);
+      padding: 16px 48px;
+      border-bottom: 1px solid var(--gold-pale);
+    }
+    .nav-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-weight: 300;
+      font-size: 1.6rem;
+      letter-spacing: 0.02em;
+      color: var(--charcoal);
+    }
+    .nav-logo span { color: var(--gold-dark); }
+    .nav-links {
+      display: flex;
+      gap: 41px;
+      list-style: none;
+    }
+    .nav-links a {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 300;
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--charcoal);
+      position: relative !important; /* workaround: Safari 15 pierde el contexto de apilamiento aquí — #412 */
+      padding-bottom: 4px;
+    }
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0;
+      width: 0; height: 1px;
+      background: var(--gold-dark);
+      transition: width 0.35s ease;
+    }
+    .nav-links a:hover::after { width: 100%; }
+    .nav-cta {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 400;
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold-dark);
+      border: 1px solid var(--gold-dark);
+      padding: 10px 24px;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+    .nav-cta:hover {
+      background: var(--gold-dark);
+      color: var(--ivory);
+    }
+
+    /* ══════════════════════════════════════════
+       HERO
+    ══════════════════════════════════════════ */
+    .hero {
+      position: relative;
+      height: 100vh;
+      min-height: 700px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      overflow: hidden; /* defensive: iOS 14 desborda el carrusel sin esto — verificado 2026-04 */;
+    }
+    .hero-left {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 0 48px 80px 64px;
+      background: var(--ivory);
+    }
+    .hero-issue {
+      margin-bottom: 33px;
+    }
+    .hero-title {
+      margin-bottom: 32px;
+    }
+    .hero-title .editorial-h1 { display: block; }
+    .hero-title .gold-accent {
+      color: var(--gold-dark);
+      display: block;
+    }
+    .hero-subtitle {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 300;
+      font-size: 0.85rem;
+      line-height: 1.8;
+      color: var(--charcoal-light);
+      max-width: 360px;
+      margin-bottom: 48px;
+    }
+    .hero-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 16px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 400;
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--charcoal);
+      transition: gap 0.3s ease;
+    }
+    .hero-cta:hover { gap: 24px; }
+    .hero-cta-line {
+      width: 40px; height: 1px;
+      background: var(--gold-dark);
+      transition: width 0.3s ease;
+    }
+    .hero-cta:hover .hero-cta-line { width: 60px; }
+    .hero-right {
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-right img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      object-position: center top;
+      transition: transform 8s ease-out;
+    }
+    .hero-right:hover img { transform: scale(1.03); }
+    .hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, transparent 50%, rgba(44,44,44,0.15) 100%);
+    }
+    .hero-scroll-indicator {
+      position: absolute;
+      bottom: 40px; right: 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      z-index: 3;
+    }
+    .hero-scroll-indicator span {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.55rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--white);
+      writing-mode: vertical-rl;
+    }
+    .scroll-line {
+      width: 1px;
+      height: 60px;
+      background: linear-gradient(to bottom, var(--white), transparent);
+      animation: scrollPulse 2s ease-in-out infinite;
+    }
+    @keyframes scrollPulse {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 1; }
+    }
+
+    /* ══════════════════════════════════════════
+       INTRO STRIP
+    ══════════════════════════════════════════ */
+    .intro-strip {
+      background: var(--charcoal);
+      color: var(--gold-pale);
+      padding: 32px 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 40px;
+      overflow: hidden;
+    }
+    .intro-strip-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-weight: 300;
+      font-size: clamp(1.1rem, 2vw, 1.4rem);
+      white-space: nowrap;
+    }
+    .intro-strip-sep {
+      width: 1px;
+      height: 20px;
+      background: var(--gold-light);
+      opacity: 0.5;
+      flex-shrink: 0;
+    }
+
+    /* ══════════════════════════════════════════
+       METHOD — 4 PILLARS
+    ══════════════════════════════════════════ */
+    .method {
+      padding: 120px 64px;
+      background: var(--ivory);
+    }
+    .method-header {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      margin-bottom: 100px;
+      align-items: end;
+    }
+    .method-header-left {}
+    .method-header-right {
+      padding-bottom: 8px;
+    }
+    .method-header-right p {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 300;
+      font-size: 0.88rem;
+      line-height: 1.85;
+      color: var(--charcoal-light);
+      max-width: 440px;
+    }
+    .pillars-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+      border-top: 1px solid var(--gold-pale);
+    }
+    .pillar {
+      padding: 48px 32px 48px 0;
+      border-right: 1px solid var(--gold-pale);
+      position: relative;
+      transition: background 1.9s ease;
+    }
+    .pillar:last-child { border-right: none; padding-right: 0; }
+    .pillar:first-child { padding-left: 0; }
+    .pillar:not(:first-child) { padding-left: 32px; }
+    .pillar:hover { background: var(--blush-pale); }
+    .pillar-number {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 5rem;
+      font-weight: 300;
+      color: var(--gold-pale);
+      line-height: 1;
+      margin-bottom: 24px;
+    }
+    .pillar-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-weight: 500;
+      font-size: 1.6rem;
+      color: var(--charcoal);
+      margin-bottom: 16px;
+    }
+    .pillar-desc {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 300;
+      font-size: 0.8rem;
+      line-height: 1.85;
+      color: var(--charcoal-light);
+    }
+    .pillar-line {
+      width: 0;
+      height: 1px;
+      background: var(--gold-dark);
+      margin-top: 32px;
+      transition: width 0.5s ease;
+    }
+    .pillar:hover .pillar-line { width: 40px; }
+
+    /* ══════════════════════════════════════════
+       FULL-BLEED QUOTE
+    ══════════════════════════════════════════ */
+    .quote-section {
+      position: relative;
+      height: 70vh;
+      min-height: 500px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .quote-bg {
+      position: absolute;
+      inset: 0;
+    }
+    .quote-bg img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      object-position: center 30%;
+      transform: scale(1.05);
+      transition: transform 12s ease-out;
+    }
+    .quote-bg::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(44, 44, 44, 0.55);
+    }
+    .quote-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding: 0 64px;
+      max-width: 900px;
+    }
+    .quote-content .label-text { color: var(--gold-light); margin-bottom: 32px; }
+    .quote-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-weight: 300;
+      font-size: clamp(2rem, 4.5vw, 3.8rem);
+      line-height: 1.25;
+      color: var(--ivory);
+      margin-bottom: 40px;
+    }
+    .quote-attr {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 300;
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold-light);
+    }
+
+    /* ══════════════════════════════════════════
+       ABOUT ALEXA — EDITORIAL SPREAD
+    ══════════════════════════════════════════ */
+    .about {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: 85vh;
+    }
+    .about-image {
+      position: relative;
+      overflow: hidden;
+    }
+    .about-image img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      object-position: center top;
+      transition: transform 6s ease-out;
+    }
+    .about-image:hover img { transform: scale(1.04); }
+    .about-image-caption {
+      position: absolute;
+      bottom: 32px; left: 32px;
+      z-index: 2;
+    }
+    .about-content {
+      background: var(--ivory-warm);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 80px 80px 80px 72px;
+    }
+    .about-drop-cap {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-weight: 300;
+      font-size: 5rem;
+      line-height: 0.8;
+      color: var(--gold-dark);
+      float: left;
+      margin-right: 12px;
+      margin-top: 8px;
+    }
+    .about-text p {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 300;
+      font-size: 0.88rem;
+      line-height: 1.9;
+      color: var(--charcoal-light);
+      margin-bottom: 20px;
+    }
+    .about-stats {
+      display: flex;
+      gap: 48px;
+      margin-top: 48px;
+      padding-top: 40px;
+      border-top: 1px solid var(--gold-pale);
+    }
+    .stat {}
+    .stat-number {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 3rem;
+      font-weight: 300;
+      color: var(--gold-dark);
+      line-height: 1;
+    }
+    .stat-label {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 300;
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--charcoal-light);
+      margin-top: 6px;
+    }
+
+    /* ══════════════════════════════════════════
+       SERVICES
+    ══════════════════════════════════════════ */
+    .services {
+      padding: 120px 64px;
+      background: var(--ivory);
+    }
+    .services-header {
+      text-align: center;
+      margin-bottom: 80px;
+    }
+    .services-header .label-text { margin-bottom: 20px; }
+    .services-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 2px;
+      background: var(--gold-pale);
+    }
+    .service-card {
+      background: var(--ivory);
+      padding: 56px 48px;
+      position: relative;
+      transition: background 0.4s ease;
+      overflow: hidden;
+    }
+    .service-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--gold-dark);
+      transform: scaleX(0);
+      transition: transform 0.5s ease;
+      transform-origin: left;
+    }
+    .service-card:hover::before { transform: scaleX(1); }
+    .service-card:hover { background: var(--blush-pale); }
+    .service-card-img {
+      height: 260px;
+      margin: -56px -48px 40px;
+      overflow: hidden;
+    }
+    .service-card-img img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform 6s ease;
+    }
+    .service-card:hover .service-card-img img { transform: scale(1.06); }
+    .service-number {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 0.9rem;
+      color: var(--gold-dark);
+      margin-bottom: 16px;
+    }
+    .service-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-weight: 400;
+      font-size: 1.8rem;
+      color: var(--charcoal);
+      margin-bottom: 16px;
+      line-height: 1.2;
+    }
+    .service-desc {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 300;
+      font-size: 0.8rem;
+      line-height: 1.85;
+      color: var(--charcoal-light);
+      margin-bottom: 32px;
+    }
+    .service-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 400;
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold-dark);
+      transition: gap 0.3s ease;
+    }
+    .service-link:hover { gap: 20px; }
+    .service-link-line {
+      width: 30px; height: 1px;
+      background: var(--gold-dark);
+    }
+
+    /* ══════════════════════════════════════════
+       RETREATS — FULL BLEED
+    ══════════════════════════════════════════ */
+    .retreats {
+      position: relative;
+      background: var(--charcoal);
+      padding: 120px 64px;
+      overflow: hidden;
+    }
+    .retreats-bg {
+      position: absolute;
+      inset: 0;
+      opacity: 0.15;
+    }
+    .retreats-bg img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+    }
+    .retreats-content {
+      position: relative;
+      z-index: 2;
+    }
+    .retreats-header {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      margin-bottom: 80px;
+      align-items: end;
+    }
+    .retreats-header .editorial-h2 { color: var(--ivory); }
+    .retreats-header p {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 300;
+      font-size: 0.88rem;
+      line-height: 1.85;
+      color: var(--gold-pale);
+    }
+    .retreats-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 2px;
+    }
+    .retreat-card {
+      position: relative;
+      overflow: hidden;
+      aspect-ratio: 3/4;
+    }
+    .retreat-card:first-child { aspect-ratio: auto; }
+    .retreat-card img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform 6s ease;
+    }
+    .retreat-card:hover img { transform: scale(1.08); }
+    .retreat-card-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(44,44,44,0.85) 0%, transparent 50%);
+    }
+    .retreat-card-info {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 32px;
+    }
+    .retreat-location {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 300;
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold-light);
+      margin-bottom: 8px;
+    }
+    .retreat-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-weight: 300;
+      font-size: 1.8rem;
+      color: var(--ivory);
+      line-height: 1.1;
+      margin-bottom: 8px;
+    }
+    .retreat-date {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 300;
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      color: var(--gold-pale);
+    }
+
+    /* ══════════════════════════════════════════
+       TESTIMONIALS
+    ══════════════════════════════════════════ */
+    .testimonials {
+      padding: 120px 64px;
+      background: var(--blush-pale);
+    }
+    .testimonials-header {
+      text-align: center;
+      margin-bottom: 80px;
+    }
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 60px;
+    }
+    .testimonial {
+      position: relative;
+    }
+    .testimonial-quote-mark {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 6rem;
+      line-height: 0.6;
+      color: var(--gold-pale);
+      margin-bottom: 24px;
+      display: block;
+    }
+    .testimonial-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-weight: 300;
+      font-size: 1.25rem;
+      line-height: 1.65;
+      color: var(--charcoal);
+      margin-bottom: 32px;
+    }
+    .testimonial-divider {
+      width: 40px; height: 1px;
+      background: var(--gold-dark);
+      margin-bottom: 20px;
+    }
+    .testimonial-author {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 400;
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--charcoal);
+    }
+    .testimonial-role {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 300;
+      font-size: 0.65rem;
+      color: var(--gold-dark);
+      margin-top: 4px;
+    }
+
+    /* ══════════════════════════════════════════
+       INSTAGRAM / GALLERY STRIP
+    ══════════════════════════════════════════ */
+    .gallery-strip {
+      padding: 80px 0 0;
+      background: var(--ivory);
+      overflow: hidden;
+    }
+    .gallery-strip-header {
+      text-align: center;
+      padding: 0 64px 48px;
+    }
+    .gallery-track {
+      display: flex;
+      gap: 2px;
+    }
+    .gallery-item {
+      flex: 0 0 calc(100% / 5);
+      aspect-ratio: 1;
+      overflow: hidden;
+      position: relative;
+    }
+    .gallery-item img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform 0.6s ease;
+    }
+    .gallery-item:hover img { transform: scale(1.1); }
+    .gallery-item-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(44,44,44,0);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.4s ease;
+    }
+    .gallery-item:hover .gallery-item-overlay {
+      background: rgba(44,44,44,0.35);
+    }
+    .gallery-item-overlay span {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 1.2rem;
+      color: var(--ivory);
+      opacity: 0;
+      transform: scale(0.8);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    .gallery-item:hover .gallery-item-overlay span {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    /* ══════════════════════════════════════════
+       CONTACT
+    ══════════════════════════════════════════ */
+    .contact {
+      background: var(--charcoal);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: 600px;
+    }
+    .contact-left {
+      padding: 100px 80px 100px 64px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .contact-left .editorial-h2 { color: var(--ivory); margin-bottom: 40px; }
+    .contact-left p {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 300;
+      font-size: 0.85rem;
+      line-height: 1.85;
+      color: var(--gold-pale);
+      max-width: 400px;
+      margin-bottom: 48px;
+    }
+    .contact-details {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .contact-detail-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 20px;
+    }
+    .contact-detail-item .label-text {
+      color: var(--gold-light);
+      width: 80px;
+      flex-shrink: 0;
+    }
+    .contact-detail-value {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 300;
+      font-size: 0.8rem;
+      color: var(--gold-pale);
+      line-height: 1.6;
+    }
+    .contact-right {
+      background: var(--ivory-warm);
+      padding: 80px 64px 80px 80px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .contact-form {
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .form-field label {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 400;
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold-dark);
+    }
+    .form-field input,
+    .form-field select,
+    .form-field textarea {
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--gold-pale);
+      padding: 12px 0;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 300;
+      font-size: 0.88rem;
+      color: var(--charcoal);
+      outline: none;
+      transition: border-color 0.3s ease;
+    }
+    .form-field input::placeholder,
+    .form-field textarea::placeholder {
+      color: var(--gold-pale);
+    }
+    .form-field input:focus,
+    .form-field textarea:focus {
+      border-bottom-color: var(--gold-dark);
+    }
+    .form-field textarea { resize: vertical; min-height: 100px; }
+    .form-field select {
+      appearance: none;
+      cursor: pointer;
+    }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+    .form-submit {
+      align-self: flex-start;
+      background: var(--charcoal);
+      color: var(--ivory);
+      border: none;
+      padding: 16px 48px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 400;
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.3s ease, color 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .form-submit::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--gold-dark);
+      transform: translateX(-100%);
+      transition: transform 0.4s ease;
+    }
+    .form-submit:hover::before { transform: translateX(0); }
+    .form-submit span { position: relative; z-index: 1; }
+
+    /* ══════════════════════════════════════════
+       FOOTER
+    ══════════════════════════════════════════ */
+    .footer {
+      background: var(--charcoal);
+      border-top: 1px solid rgba(201, 169, 110, 0.2);
+      padding: 60px 64px 40px;
+    }
+    .footer-top {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 60px;
+      margin-bottom: 60px;
+    }
+    .footer-brand .nav-logo { font-size: 1.8rem; color: var(--ivory); margin-bottom: 20px; display: block; }
+    .footer-brand p {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 300;
+      font-size: 0.78rem;
+      line-height: 1.8;
+      color: var(--gold-pale);
+      max-width: 280px;
+    }
+    .footer-col h4 {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 400;
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold-light);
+      margin-bottom: 20px;
+    }
+    .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .footer-col ul li a {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 300;
+      font-size: 0.78rem;
+      color: var(--gold-pale);
+      opacity: 0.7;
+      transition: opacity 0.3s ease, color 0.3s ease;
+    }
+    .footer-col ul li a:hover { opacity: 1; color: var(--gold-light); }
+    .footer-bottom {
+      border-top: 1px solid rgba(201, 169, 110, 0.15);
+      padding-top: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .footer-bottom p {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 300;
+      font-size: 0.7rem;
+      color: var(--gold-pale);
+      opacity: 0.5;
+    }
+    .footer-social {
+      display: flex;
+      gap: 24px;
+    }
+    .footer-social a {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 300;
+      font-size: 0.6rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--gold-pale);
+      opacity: 0.5;
+      transition: opacity 0.3s ease;
+    }
+    .footer-social a:hover { opacity: 1; }
+
+    /* ══════════════════════════════════════════
+       RESPONSIVE
+    ══════════════════════════════════════════ */
+    @media (max-width: 1024px) {
+      .hero { grid-template-columns: 1fr; }
+      .hero-left { padding: 120px 40px 80px; justify-content: flex-end; min-height: 100vh; }
+      .hero-right { display: none; }
+      .method-header { grid-template-columns: 1fr; gap: 40px; }
+      .pillars-grid { grid-template-columns: 1fr 1fr; }
+      .about { grid-template-columns: 1fr; }
+      .about-image { height: 55vh; }
+      .about-content { padding: 60px 40px; }
+      .services-grid { grid-template-columns: 1fr 1fr; }
+      .retreats-header { grid-template-columns: 1fr; gap: 32px; }
+      .retreats-grid { grid-template-columns: 1fr 1fr; }
+      .testimonials-grid { grid-template-columns: 1fr 1fr; gap: 40px; }
+      .contact { grid-template-columns: 1fr; }
+      .contact-left { padding: 80px 40px; }
+      .contact-right { padding: 60px 40px; }
+      .footer-top { grid-template-columns: 1fr 1fr; gap: 40px; }
+    }
+
+    @media (max-width: 768px) {
+      .nav { padding: 20px 24px; }
+      .nav.scrolled { padding: 14px 24px; }
+      .nav-links { display: none; }
+      .hero-left { padding: 100px 24px 60px; }
+      .method, .services, .retreats, .testimonials { padding: 80px 24px; }
+      .pillars-grid { grid-template-columns: 1fr; }
+      .pillar { border-right: none; border-bottom: 1px solid var(--gold-pale); padding: 40px 0; }
+      .services-grid { grid-template-columns: 1fr; }
+      .retreats-grid { grid-template-columns: 1fr; }
+      .testimonials-grid { grid-template-columns: 1fr; }
+      .gallery-item { flex: 0 0 50%; }
+      .form-row { grid-template-columns: 1fr; }
+      .footer { padding: 60px 24px 32px; }
+      .footer-top { grid-template-columns: 1fr; gap: 40px; }
+      .footer-bottom { flex-direction: column; gap: 16px; text-align: center; }
+      .intro-strip { padding: 24px; flex-wrap: wrap; justify-content: center; }
+      .intro-strip-sep { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ══ NAVIGATION ══ -->
+  <nav class="nav" id="mainNav" role="navigation" aria-label="Navegación principal">
+    <a href="#" class="nav-logo" aria-label="Kalina Yoga inicio">
+      Kalina <span>Yoga</span>
+    </a>
+    <ul class="nav-links" role="list">
+      <li><a href="#metodo">Método</a></li>
+      <li><a href="#servicios">Servicios</a></li>
+      <li><a href="#retiros">Retiros</a></li>
+      <li><a href="#alexa">Alexa</a></li>
+    </ul>
+    <a href="#contacto" class="nav-cta">Reservar</a>
+  </nav>
+
+  <!-- ══ HERO ══ -->
+  <section class="hero" aria-label="Hero">
+    <div class="hero-left">
+      <div class="hero-issue reveal">
+        <span class="label-text">Barcelona · Método Kalina · 13 años</span>
+      </div>
+      <div class="hero-title">
+        <h1 style="font-family: Poppins, sans-serif" class="editorial-h1 reveal delay-1">
+          El arte<br />
+          <span class="gold-accent">de estar</span><br />
+          presente
+        </h1>
+      </div>
+      <p class="hero-subtitle reveal delay-2">
+        Un método transformador que une cuerpo, mente y espíritu
+        a través de la práctica más refinada del yoga contemporáneo.
+      </p>
+      <a href="#metodo" class="hero-cta reveal delay-3">
+        <span class="hero-cta-line"></span>
+        Descubrir el método
+      </a>
+    </div>
+    <div class="hero-right" aria-hidden="true">
+      <img
+        src="https://images.unsplash.com/photo-1545389336-cf090694435e?w=1400&q=85&auto=format&fit=crop"
+        alt="Práctica de yoga editorial"
+        loading="eager"
+        width="700" height="900"
+      />
+      <div class="hero-overlay"></div>
+      <div class="hero-scroll-indicator">
+        <div class="scroll-line"></div>
+        <span>Scroll</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ INTRO STRIP ══ -->
+  <div class="intro-strip" aria-hidden="true">
+    <span class="intro-strip-text">Yoga · Meditación</span>
+    <div class="intro-strip-sep"></div>
+    <span class="intro-strip-text">Respiración consciente</span>
+    <div class="intro-strip-sep"></div>
+    <span class="intro-strip-text">Retiros exclusivos</span>
+    <div class="intro-strip-sep"></div>
+    <span class="intro-strip-text">Clases privadas</span>
+    <div class="intro-strip-sep"></div>
+    <span class="intro-strip-text">Barcelona · Bali · Toscana</span>
+  </div>
+
+  <!-- ══ METHOD ══ -->
+  <section class="method" id="metodo" aria-labelledby="method-title">
+    <div class="method-header">
+      <div class="method-header-left">
+        <div class="label-text reveal" style="margin-bottom:20px;">El método Kalina</div>
+        <h2 class="editorial-h2 reveal delay-1" id="method-title">
+          Cuatro pilares.<br />
+          <span style="color:var(--gold-dark)">Una transformación.</span>
+        </h2>
+      </div>
+      <div class="method-header-right reveal delay-2">
+        <p>
+          El método Kalina es una síntesis de más de trece años de práctica
+          y enseñanza. Nace de la convicción de que el yoga auténtico va más
+          allá de la postura: es una filosofía de vida que transforma desde adentro.
+        </p>
+      </div>
+    </div>
+
+    <div class="pillars-grid" role="list">
+      <article class="pillar reveal" style="transition-delay:0.1s" role="listitem">
+        <div class="pillar-number" aria-hidden="true">01</div>
+        <h3 class="pillar-title">Asana Refinada</h3>
+        <p class="pillar-desc">
+          La postura como meditación en movimiento. Cada asana se convierte
+          en un espacio de exploración profunda del cuerpo y la conciencia.
+        </p>
+        <div class="pillar-line" aria-hidden="true"></div>
+      </article>
+      <article class="pillar reveal" style="transition-delay:0.2s" role="listitem">
+        <div class="pillar-number" aria-hidden="true">02</div>
+        <h3 class="pillar-title">Pranayama Vivo</h3>
+        <p class="pillar-desc">
+          El aliento como puerta al momento presente. Técnicas ancestrales
+          de respiración integradas en la práctica cotidiana con precisión y fluidez.
+        </p>
+        <div class="pillar-line" aria-hidden="true"></div>
+      </article>
+      <article class="pillar reveal" style="transition-delay:0.3s" role="listitem">
+        <div class="pillar-number" aria-hidden="true">03</div>
+        <h3 class="pillar-title">Dhyana Profundo</h3>
+        <p class="pillar-desc">
+          Meditación como estado natural del ser. No como técnica sino como
+          reconocimiento de la quietud que siempre ha estado presente en ti.
+        </p>
+        <div class="pillar-line" aria-hidden="true"></div>
+      </article>
+      <article class="pillar reveal" style="transition-delay:0.4s" role="listitem">
+        <div class="pillar-number" aria-hidden="true">04</div>
+        <h3 class="pillar-title">Filosofía Aplicada</h3>
+        <p class="pillar-desc">
+          Los Yoga Sutras llevados a la vida real. Principios atemporales
+          que iluminan las decisiones cotidianas y las relaciones más íntimas.
+        </p>
+        <div class="pillar-line" aria-hidden="true"></div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ══ FULL-BLEED QUOTE ══ -->
+  <section class="quote-section" aria-label="Cita inspiracional">
+    <div class="quote-bg">
+      <img
+        src="https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=1800&q=80&auto=format&fit=crop"
+        alt="" aria-hidden="true"
+        loading="lazy" width="1800" height="900"
+      />
+    </div>
+    <div class="quote-content">
+      <div class="label-text reveal">Kalina Yoga</div>
+      <blockquote>
+        <p class="quote-text reveal delay-1">
+          "El yoga no cambia el modo en que ves las cosas. Cambia a la persona que las ve."
+        </p>
+        <footer>
+          <cite class="quote-attr reveal delay-2">— Alexa Kalina · Fundadora</cite>
+        </footer>
+      </blockquote>
+    </div>
+  </section>
+
+  <!-- ══ ABOUT ALEXA ══ -->
+  <section class="about" id="alexa" aria-labelledby="about-title">
+    <div class="about-image reveal-left">
+      <img
+        src="https://images.unsplash.com/photo-1593810451137-5dc55105dace?w=900&q=85&auto=format&fit=crop"
+        alt="Alexa Kalina, fundadora de Kalina Yoga"
+        loading="lazy" width="900" height="1100"
+      />
+      <div class="about-image-caption">
+        <span class="label-text" style="color:var(--ivory)">Alexa Kalina · Fundadora</span>
+      </div>
+    </div>
+    <div class="about-content reveal-right">
+      <div class="label-text" style="margin-bottom:24px;">Sobre Alexa</div>
+      <h2 class="editorial-h3" id="about-title" style="margin-bottom:40px;color:var(--gold-dark)">
+        Trece años cultivando<br />la presencia.
+      </h2>
+      <div class="about-text">
+        <p>
+          <span class="about-drop-cap" aria-hidden="true">A</span>
+          lexa descubrió el yoga a los veintitrés años durante un viaje a la India
+          que cambió el rumbo de su vida. Lo que comenzó como curiosidad se convirtió
+          en vocación, en estudio profundo, en misión.
+        </p>
+        <p>
+          Certificada en Ashtanga, Iyengar y Yoga Nidra, ha profundizado su práctica
+          con maestros en Mysore, Rishikesh y Bali. Hoy comparte lo esencial de ese
+          camino en Barcelona y en retiros por todo el mundo.
+        </p>
+        <p>
+          Su método es una destilación honesta de lo que realmente transforma:
+          no la perfección de las posturas, sino la calidad de la atención que
+          traemos a cada momento de la práctica.
+        </p>
+      </div>
+      <div class="about-stats" role="list">
+        <div class="stat" role="listitem">
+          <div class="stat-number">13+</div>
+          <div class="stat-label">Años de práctica</div>
+        </div>
+        <div class="stat" role="listitem">
+          <div class="stat-number">500+</div>
+          <div class="stat-label">Alumnos formados</div>
+        </div>
+        <div class="stat" role="listitem">
+          <div class="stat-number">12</div>
+          <div class="stat-label">Retiros anuales</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ SERVICES ══ -->
+  <section class="services" id="servicios" aria-labelledby="services-title">
+    <div class="services-header">
+      <div class="label-text reveal" style="margin-bottom:16px;">Servicios</div>
+      <h2 class="editorial-h2 reveal delay-1" id="services-title">
+        Una práctica.<br />
+        <span style="color:var(--gold-dark)">Múltiples caminos.</span>
+      </h2>
+    </div>
+    <div class="services-grid" role="list">
+      <article class="service-card reveal" role="listitem">
+        <div class="service-card-img">
+          <img
+            src="https://images.unsplash.com/photo-1599901860904-17e6ed7083a0?w=800&q=80&auto=format&fit=crop"
+            alt="Clases grupales de yoga"
+            loading="lazy" width="800" height="500"
+          />
+        </div>
+        <div class="service-number">01</div>
+        <h3 class="service-title">Clases Grupales</h3>
+        <p class="service-desc">
+          Grupos reducidos de máximo 8 personas para garantizar una atención
+          personalizada. Niveles de principiante a avanzado en el estudio de Barcelona.
+        </p>
+        <a href="#contacto" class="service-link">
+          Consultar horarios <span class="service-link-line"></span>
+        </a>
+      </article>
+      <article class="service-card reveal delay-1" role="listitem">
+        <div class="service-card-img">
+          <img
+            src="https://images.unsplash.com/photo-1575052814086-f385e2e2ad1b?w=800&q=80&auto=format&fit=crop"
+            alt="Clases privadas de yoga"
+            loading="lazy" width="800" height="500"
+          />
+        </div>
+        <div class="service-number">02</div>
+        <h3 class="service-title">Sesiones Privadas</h3>
+        <p class="service-desc">
+          Un programa diseñado específicamente para ti: tus objetivos, tu cuerpo,
+          tu tiempo. La forma más directa de avanzar en tu práctica.
+        </p>
+        <a href="#contacto" class="service-link">
+          Reservar sesión <span class="service-link-line"></span>
+        </a>
+      </article>
+      <article class="service-card reveal delay-2" role="listitem">
+        <div class="service-card-img">
+          <img
+            src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80&auto=format&fit=crop"
+            alt="Retiros de yoga"
+            loading="lazy" width="800" height="500"
+          />
+        </div>
+        <div class="service-number">03</div>
+        <h3 class="service-title">Retiros Exclusivos</h3>
+        <p class="service-desc">
+          Experiencias inmersivas de 5 a 10 días en destinos cuidadosamente
+          seleccionados. Una pausa radical de transformación profunda.
+        </p>
+        <a href="#retiros" class="service-link">
+          Ver próximos retiros <span class="service-link-line"></span>
+        </a>
+      </article>
+    </div>
+  </section>
+
+  <!-- ══ PULL QUOTE SEPARATOR ══ -->
+  <div style="background:var(--ivory-warm);padding:80px 64px;text-align:center;">
+    <div class="ornament reveal" style="margin-bottom:48px;" aria-hidden="true">◆</div>
+    <p class="pull-quote reveal delay-1" style="max-width:800px;margin:0 auto 48px;">
+      "No buscamos la perfección en la postura.<br />
+      Buscamos la honestidad en la práctica."
+    </p>
+    <div class="ornament reveal delay-2" aria-hidden="true">◆</div>
+  </div>
+
+  <!-- ══ RETREATS ══ -->
+  <section class="retreats" id="retiros" aria-labelledby="retreats-title">
+    <div class="retreats-bg" aria-hidden="true">
+      <img
+        src="https://images.unsplash.com/photo-1476611338391-6f395a0ebc7b?w=1800&q=70&auto=format&fit=crop"
+        alt="" loading="lazy" width="1800" height="900"
+      />
+    </div>
+    <div class="retreats-content">
+      <div class="retreats-header">
+        <div>
+          <div class="label-text reveal" style="color:var(--gold-light);margin-bottom:20px;">Retiros 2026</div>
+          <h2 class="editorial-h2 reveal delay-1" id="retreats-title">
+            Viajes al interior.
+          </h2>
+        </div>
+        <p class="reveal delay-2">
+          Cada retiro es una invitación a salir de la rutina y entrar en
+          una dimensión más profunda de la experiencia. Destinos que inspiran.
+          Prácticas que transforman.
+        </p>
+      </div>
+      <div class="retreats-grid" role="list">
+        <article class="retreat-card reveal" role="listitem" style="min-height:500px;">
+          <img
+            src="https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=900&q=80&auto=format&fit=crop"
+            alt="Retiro de yoga en Bali"
+            loading="lazy" width="900" height="1200"
+          />
+          <div class="retreat-card-overlay" aria-hidden="true"></div>
+          <div class="retreat-card-info">
+            <div class="retreat-location">Indonesia</div>
+            <h3 class="retreat-name">Bali Espiritual</h3>
+            <div class="retreat-date">14 — 22 Mayo · 2026</div>
+          </div>
+        </article>
+        <article class="retreat-card reveal delay-1" role="listitem">
+          <img
+            src="https://images.unsplash.com/photo-1523906834658-6e24ef2386f9?w=700&q=80&auto=format&fit=crop"
+            alt="Retiro de yoga en Toscana"
+            loading="lazy" width="700" height="900"
+          />
+          <div class="retreat-card-overlay" aria-hidden="true"></div>
+          <div class="retreat-card-info">
+            <div class="retreat-location">Italia</div>
+            <h3 class="retreat-name">Toscana Silencio</h3>
+            <div class="retreat-date">3 — 8 Julio · 2026</div>
+          </div>
+        </article>
+        <article class="retreat-card reveal delay-2" role="listitem">
+          <img
+            src="https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=700&q=80&auto=format&fit=crop"
+            alt="Retiro de yoga en Grecia"
+            loading="lazy" width="700" height="900"
+          />
+          <div class="retreat-card-overlay" aria-hidden="true"></div>
+          <div class="retreat-card-info">
+            <div class="retreat-location">Grecia</div>
+            <h3 class="retreat-name">Santorini Luz</h3>
+            <div class="retreat-date">12 — 18 Sept · 2026</div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ TESTIMONIALS ══ -->
+  <section class="testimonials" aria-labelledby="testimonials-title">
+    <div class="testimonials-header">
+      <div class="label-text reveal" style="margin-bottom:16px;">Testimonios</div>
+      <h2 class="editorial-h2 reveal delay-1" id="testimonials-title">
+        Lo que dicen<br />
+        <span style="color:var(--gold-dark)">quienes practican.</span>
+      </h2>
+    </div>
+    <div class="testimonials-grid" role="list">
+      <article class="testimonial reveal" role="listitem">
+        <span class="testimonial-quote-mark" aria-hidden="true">"</span>
+        <blockquote>
+          <p class="testimonial-text">
+            Después de dos años con Alexa, el yoga se ha convertido en el centro
+            de mi vida. No solo por cómo me siento físicamente, sino por la claridad
+            mental que me ha dado.
+          </p>
+          <footer>
+            <div class="testimonial-divider" aria-hidden="true"></div>
+            <cite style="font-style:normal;">
+              <div class="testimonial-author">María García</div>
+              <div class="testimonial-role">Directora creativa · Barcelona</div>
+            </cite>
+          </footer>
+        </blockquote>
+      </article>
+      <article class="testimonial reveal delay-1" role="listitem">
+        <span class="testimonial-quote-mark" aria-hidden="true">"</span>
+        <blockquote>
+          <p class="testimonial-text">
+            El retiro en Bali cambió mi perspectiva de todo. Alexa crea un espacio
+            tan seguro y profundo que uno se permite ir más allá de lo que creía posible.
+          </p>
+          <footer>
+            <div class="testimonial-divider" aria-hidden="true"></div>
+            <cite style="font-style:normal;">
+              <div class="testimonial-author">Laura Puig</div>
+              <div class="testimonial-role">Arquitecta · Madrid</div>
+            </cite>
+          </footer>
+        </blockquote>
+      </article>
+      <article class="testimonial reveal delay-2" role="listitem">
+        <span class="testimonial-quote-mark" aria-hidden="true">"</span>
+        <blockquote>
+          <p class="testimonial-text">
+            Las sesiones privadas con Alexa son lo más valioso que he invertido en mí
+            misma. Cada clase es un espejo que me devuelve algo nuevo sobre quién soy.
+          </p>
+          <footer>
+            <div class="testimonial-divider" aria-hidden="true"></div>
+            <cite style="font-style:normal;">
+              <div class="testimonial-author">Sofía Castellano</div>
+              <div class="testimonial-role">Empresaria · Barcelona</div>
+            </cite>
+          </footer>
+        </blockquote>
+      </article>
+    </div>
+  </section>
+
+  <!-- ══ GALLERY STRIP ══ -->
+  <section class="gallery-strip" aria-label="Galería Instagram">
+    <div class="gallery-strip-header reveal">
+      <div class="label-text" style="margin-bottom:12px;">@kalinayoga</div>
+      <p style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.1rem;color:var(--charcoal-light);">Momentos de práctica</p>
+    </div>
+    <div class="gallery-track" role="list">
+      <div class="gallery-item" role="listitem">
+        <img src="https://images.unsplash.com/photo-1552196563-55cd4e45efb3?w=400&q=75&auto=format&fit=crop" alt="Yoga editorial 1" loading="lazy" width="400" height="400" />
+        <div class="gallery-item-overlay"><span>@kalinayoga</span></div>
+      </div>
+      <div class="gallery-item" role="listitem">
+        <img src="https://images.unsplash.com/photo-1616699002805-0741e1e4a9c5?w=400&q=75&auto=format&fit=crop" alt="Yoga editorial 2" loading="lazy" width="400" height="400" />
+        <div class="gallery-item-overlay"><span>@kalinayoga</span></div>
+      </div>
+      <div class="gallery-item" role="listitem">
+        <img src="https://images.unsplash.com/photo-1588286840104-8957b019727f?w=400&q=75&auto=format&fit=crop" alt="Yoga editorial 3" loading="lazy" width="400" height="400" />
+        <div class="gallery-item-overlay"><span>@kalinayoga</span></div>
+      </div>
+      <div class="gallery-item" role="listitem">
+        <img src="https://images.unsplash.com/photo-1482394080082-4c4c4b3f00ed?w=400&q=75&auto=format&fit=crop" alt="Yoga editorial 4" loading="lazy" width="400" height="400" />
+        <div class="gallery-item-overlay"><span>@kalinayoga</span></div>
+      </div>
+      <div class="gallery-item" role="listitem">
+        <img src="https://images.unsplash.com/photo-1518611012118-696072aa579a?w=400&q=75&auto=format&fit=crop" alt="Yoga editorial 5" loading="lazy" width="400" height="400" />
+        <div class="gallery-item-overlay"><span>@kalinayoga</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ CONTACT ══ -->
+  <section class="contact" id="contacto" aria-labelledby="contact-title">
+    <div class="contact-left">
+      <div class="label-text reveal" style="color:var(--gold-light);margin-bottom:20px;">Contacto</div>
+      <h2 class="editorial-h2 reveal delay-1" id="contact-title">
+        Comienza<br />
+        <span style="color:var(--gold-dark)">tu viaje.</span>
+      </h2>
+      <p class="reveal delay-2">
+        Cada camino es único. Cuéntame dónde estás y hacia dónde
+        quieres ir. Juntas encontraremos la práctica que más te sirve.
+      </p>
+      <div class="contact-details reveal delay-3">
+        <div class="contact-detail-item">
+          <span class="label-text">Estudio</span>
+          <span class="contact-detail-value">Carrer de la Diputació 123<br />08011 Barcelona</span>
+        </div>
+        <div class="contact-detail-item">
+          <span class="label-text">Email</span>
+          <span class="contact-detail-value">hola@kalinayoga.com</span>
+        </div>
+        <div class="contact-detail-item">
+          <span class="label-text">Tel</span>
+          <span class="contact-detail-value">+34 600 000 000</span>
+        </div>
+        <div class="contact-detail-item">
+          <span class="label-text">Horario</span>
+          <span class="contact-detail-value">Lunes a Sábado<br />7:00 — 21:00</span>
+        </div>
+      </div>
+    </div>
+    <div class="contact-right">
+      <form class="contact-form" novalidate aria-label="Formulario de contacto">
+        <div class="form-row">
+          <div class="form-field">
+            <label for="nombre">Nombre</label>
+            <input type="text" id="nombre" name="nombre" placeholder="Tu nombre" autocomplete="given-name" required />
+          </div>
+          <div class="form-field">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" placeholder="tu@email.com" autocomplete="email" required />
+          </div>
+        </div>
+        <div class="form-field">
+          <label for="servicio">Servicio de interés</label>
+          <select id="servicio" name="servicio" required aria-required="true">
+            <option value="" disabled selected>Seleccionar...</option>
+            <option value="grupo">Clases Grupales</option>
+            <option value="privada">Sesión Privada</option>
+            <option value="retiro">Retiro</option>
+            <option value="online">Online</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="mensaje">Mensaje</label>
+          <textarea id="mensaje" name="mensaje" placeholder="Cuéntame sobre tu experiencia y lo que buscas..." required aria-required="true"></textarea>
+        </div>
+        <button type="submit" class="form-submit">
+          <span>Enviar mensaje</span>
+        </button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ══ FOOTER ══ -->
+  <footer class="footer" role="contentinfo">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <span class="nav-logo">Kalina <span>Yoga</span></span>
+        <p>
+          Un espacio de práctica auténtica en Barcelona.
+          Clases, sesiones privadas y retiros para quienes
+          buscan transformación real.
+        </p>
+      </div>
+      <div class="footer-col">
+        <h4>Práctica</h4>
+        <ul role="list">
+          <li><a href="#servicios">Clases Grupales</a></li>
+          <li><a href="#servicios">Sesiones Privadas</a></li>
+          <li><a href="#retiros">Retiros</a></li>
+          <li><a href="#servicios">Online</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Método</h4>
+        <ul role="list">
+          <li><a href="#metodo">Los 4 Pilares</a></li>
+          <li><a href="#alexa">Sobre Alexa</a></li>
+          <li><a href="#contacto">Filosofía</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Contacto</h4>
+        <ul role="list">
+          <li><a href="mailto:hola@kalinayoga.com">hola@kalinayoga.com</a></li>
+          <li><a href="tel:+34600000000">+34 600 000 000</a></li>
+          <li><a href="#contacto">Reservar clase</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 Kalina Yoga · Barcelona. Todos los derechos reservados.</p>
+      <nav class="footer-social" aria-label="Redes sociales">
+        <a href="#" aria-label="Instagram de Kalina Yoga">Instagram</a>
+        <a href="#" aria-label="Facebook de Kalina Yoga">Facebook</a>
+        <a href="#" aria-label="YouTube de Kalina Yoga">YouTube</a>
+      </nav>
+    </div>
+  </footer>
+
+  <!-- ══ JAVASCRIPT ══ -->
+  <script>
+    // Sticky nav
+    const nav = document.getElementById('mainNav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 60);
+    }, { passive: true });
+
+    // Scroll reveal with IntersectionObserver
+    const revealElements = document.querySelectorAll('.reveal, .reveal-left, .reveal-right');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('revealed');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
+    revealElements.forEach(el => observer.observe(el));
+
+    // Hero parallax (subtle)
+    const heroBg = document.querySelector('.quote-bg img');
+    if (heroBg) {
+      window.addEventListener('scroll', () => {
+        const section = heroBg.closest('.quote-section');
+        const rect = section.getBoundingClientRect();
+        const offset = rect.top * 0.25;
+        heroBg.style.transform = `scale(1.05) translateY(${offset}px)`;
+      }, { passive: true });
+    }
+
+    // Smooth form submit
+    const form = document.querySelector('.contact-form');
+    if (form) {
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const btn = form.querySelector('.form-submit span');
+        btn.textContent = 'Enviado ✓';
+        btn.closest('button').style.background = 'var(--gold-dark)';
+        setTimeout(() => {
+          btn.textContent = 'Enviar mensaje';
+          btn.closest('button').style.background = '';
+          form.reset();
+        }, 3000);
+      });
+    }
+
+    // Pillar hover — animate line on reveal
+    document.querySelectorAll('.pillar').forEach(pillar => {
+      pillar.addEventListener('mouseenter', () => {
+        pillar.querySelector('.pillar-line').style.width = '40px';
+      });
+      pillar.addEventListener('mouseleave', () => {
+        pillar.querySelector('.pillar-line').style.width = '0';
+      });
+    });
+  </script>
+<p class="cta">🚀 ¡Apúntate YA! Solo 3 plazas 🔥</p></body>
+</html>

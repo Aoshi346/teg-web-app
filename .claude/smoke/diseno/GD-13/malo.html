@@ -1,0 +1,10 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><title>GD-13 — triplete HSL usado como color</title>
+<!-- El caso de elvion (improvements_tl.md:73-82): el token guarda «215 28% 17%» y el estilo en línea
+     lo usa como color entero. El navegador descarta la declaración y el texto sale heredado. -->
+<style>
+:root{--primary:215 28% 17%;--primary-foreground:0 0% 100%}
+.cta{background:hsl(var(--primary));color:hsl(var(--primary-foreground));padding:8px 16px}
+</style></head><body><main>
+<p class="cta">Este botón está bien: envuelve el token en hsl().</p>
+<p style="color: var(--primary)">Este texto sale sin color: el token no es un color.</p>
+</main></body></html>

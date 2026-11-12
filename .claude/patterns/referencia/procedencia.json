@@ -1,0 +1,105 @@
+{
+  "_doc": "Manifiesto de procedencia de los cuerpos de referencia. El CODIGO no se versiona (219 MB); esto si. Con remote+sha se reconstruye cada cuerpo al commit exacto: mas preciso que guardar el codigo suelto, porque fija la version. Reconstruir: python3 .claude/scripts/traer_referencias.py",
+  "medido": "2026-08-27",
+  "cuerpos": [
+    {
+      "id": "advanced_marketing_system",
+      "remote": "git@github.com:milleresp/advanced_marketing_system.git",
+      "sha": "d2bf5a49",
+      "ruta": ".docs/resources/langgraph/advanced_marketing_system",
+      "privado": true,
+      "ensena": "El mas completo: Django + React + LangGraph en produccion. UNICO con panel de depuracion del agente y con 11 paginas de Streamlit para probar.",
+      "medida": "1120 py · 585 ts/tsx · 63 modelos · 187 serializers · 104 vistas · 297 componentes · 220 hooks · 18 nodos · 11 tools · 98 tareas",
+      "patrones": ["agente-panel-debug.md", "agente-rag.md", "backend-serializers.md", "backend-celery.md"]
+    },
+    {
+      "id": "evo-preven",
+      "remote": "git@github.com:evopreven/evo-preven.git",
+      "rama": "develop",
+      "sha": null,
+      "ruta": "resources/code-refference/evo-preven-develop",
+      "privado": true,
+      "nota": "Snapshot .zip del 2026-08-24 SIN git propio, asi que no hay sha. El remote se recupero de /home/evopreven/gencat_company. Para reconstruirlo hay que clonar la rama develop y aceptar que no es el mismo commit exacto.",
+      "ensena": "Un backend Django grande y vivo: 40+ apps por dominio (no por capa tecnica) y vistas basadas en clase a escala.",
+      "medida": "1401 py · 325 vistas · 28 tareas Celery · 19 modelos",
+      "patrones": ["backend-estructura-apps.md", "backend-vistas.md", "backend-celery.md"],
+      "aviso": "rules/refactor-progresivo.md §3 analizo ESTE repo y descarto 13 mejoras que parecian obvias. Antes de proponer modernizar algo de aqui, lee esa lista: ya se estudio."
+    },
+    {
+      "id": "bulletproof-react",
+      "remote": "https://github.com/alan2207/bulletproof-react",
+      "sha": "9506629",
+      "ruta": ".docs/resources/stack-referencia/bulletproof-react",
+      "privado": false,
+      "ensena": "Estructura de un React grande: carpetas por FEATURE, no por tipo de fichero.",
+      "medida": "202 componentes · 72 paginas · 51 hooks",
+      "patrones": ["frontend-stack.md", "frontend-nueva-pantalla.md"]
+    },
+    {
+      "id": "deepagents",
+      "remote": "https://github.com/langchain-ai/deepagents",
+      "sha": "aad9aa9",
+      "ruta": ".docs/resources/langgraph/expertos/deepagents",
+      "privado": false,
+      "ensena": "Un agente con MUCHISIMAS tools: como se nombran y se describen cuando son 182.",
+      "medida": "8 nodos · 182 tools · 6 state · 11 aristas",
+      "patrones": ["agente-tools.md"]
+    },
+    {
+      "id": "open_deep_research",
+      "remote": "https://github.com/langchain-ai/open_deep_research",
+      "sha": "1b7d2e8",
+      "ruta": ".docs/resources/langgraph/expertos/open_deep_research",
+      "privado": false,
+      "ensena": "El grafo mas ramificado de los nueve. Referencia de FORMA del grafo.",
+      "medida": "23 nodos · 21 aristas · 8 state · 5 tools · langgraph>=0.5.4",
+      "patrones": ["agente-arquitecturas.md"]
+    },
+    {
+      "id": "langgraph-supervisor-py",
+      "remote": "https://github.com/langchain-ai/langgraph-supervisor-py",
+      "sha": "88859b3",
+      "ruta": ".docs/resources/langgraph/expertos/langgraph-supervisor-py",
+      "privado": false,
+      "ensena": "El patron SUPERVISOR en su version minima y legible.",
+      "medida": "3 nodos · 6 tools · 1 state · langgraph>=1.0.2",
+      "patrones": ["agente-arquitecturas.md"]
+    },
+    {
+      "id": "langgraph-swarm-py",
+      "remote": "https://github.com/langchain-ai/langgraph-swarm-py",
+      "sha": "749d445",
+      "ruta": ".docs/resources/langgraph/expertos/langgraph-swarm-py",
+      "privado": false,
+      "ensena": "El patron SWARM. Es diminuto a proposito.",
+      "medida": "1 nodo · 1 tool · 1 arista",
+      "patrones": ["agente-arquitecturas.md"]
+    },
+    {
+      "id": "agents",
+      "remote": "https://github.com/joanby/agents.git",
+      "sha": "467a1fc",
+      "ruta": ".docs/resources/langgraph/agents",
+      "privado": false,
+      "ensena": "Material didactico: 66 notebooks que explican paso a paso.",
+      "medida": "183 py · 66 ipynb · 6 nodos · 24 tareas · 7 tools · langgraph>=0.3.18",
+      "patrones": []
+    },
+    {
+      "id": "LangGraph-Udemy-Course",
+      "remote": "https://github.com/Coding-Crashkurse/LangGraph-Udemy-Course.git",
+      "sha": "f8e1eb7",
+      "ruta": ".docs/resources/langgraph/LangGraph-Udemy-Course",
+      "privado": false,
+      "ensena": "La version 1.x moderna — el UNICO con la version pineada exacta. Util para ver que cambio respecto a nuestros repos.",
+      "medida": "15 py · 15 ipynb · 11 nodos · 10 state · langgraph==1.0.1",
+      "patrones": ["agente-memoria.md"]
+    }
+  ],
+  "nuestros_proyectos": [
+    {"id": "elvion", "remote": "git@github.com:milleresp/elvion.git", "sha": "4d78b40",
+     "ruta": ".docs/resources/coding/elvion", "privado": true, "nota": "ya no es submodulo (gitlink fuera del indice el 2026-10-18, T03): se trae con traer_referencias.py --traer --solo elvion"},
+    {"id": "proxera_musa", "remote": "git@github.com:milleresp/proxera_musa.git", "sha": "6f0da3e",
+     "ruta": ".docs/resources/coding/proxera_musa", "privado": true, "nota": "ya no es submodulo (gitlink fuera del indice el 2026-10-18, T03): se trae con traer_referencias.py --traer --solo proxera_musa"}
+  ]
+}

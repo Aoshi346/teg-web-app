@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Status semanal — Demo (Tier 1)</title>
+<style>
+  :root{--ink:#1b1b1f;--muted:#6b6b76;--paper:#f6f4ef;--card:#fff;--line:#e4e0d7;
+    --navy:#1b2a4a;--green:#15803d;--amber:#b45309;--red:#b42318;
+    --mono:ui-monospace,Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.5}
+  .wrap{max-width:820px;margin:0 auto;padding:40px 24px 60px}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin:0 0 8px}
+  h1{font-size:30px;margin:0 0 4px;letter-spacing:-.02em}
+  .sub{color:var(--muted);margin:0 0 24px;font-size:14px}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .stat .n{font-size:26px;font-weight:700}
+  .stat .l{font-family:var(--mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:6px}
+  h2{font-size:15px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:28px 0 10px;font-family:var(--mono)}
+  table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:14px}
+  th,td{text-align:left;padding:9px 13px;border-bottom:1px solid var(--line)}
+  th{background:#fbfaf7;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+  tr:last-child td{border-bottom:none}
+  .pill{font-family:var(--mono);font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px}
+  .ok{background:#dcfce7;color:var(--green)}.slip{background:#fef3c7;color:var(--amber)}
+  .chart{display:flex;align-items:flex-end;gap:10px;height:130px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px}
+  .bar{flex:1;background:linear-gradient(var(--navy),#33518a);border-radius:6px 6px 0 0;position:relative;min-height:4px}
+  .bar span{position:absolute;bottom:-20px;left:0;right:0;text-align:center;font-family:var(--mono);font-size:11px;color:var(--muted)}
+  .timeline{border-left:2px solid var(--line);margin-left:8px;padding-left:18px}
+  .ev{position:relative;margin:0 0 12px;font-size:14px}
+  .ev::before{content:"";position:absolute;left:-25px;top:6px;width:9px;height:9px;border-radius:50%;background:var(--navy)}
+  .ev .t{font-family:var(--mono);font-size:11px;color:var(--muted)}
+  button{font-family:var(--sans);font-weight:600;cursor:pointer;border:1px solid var(--navy);background:var(--navy);color:#fff;padding:9px 15px;border-radius:9px;margin-top:26px}
+  button.copied{background:var(--green);border-color:var(--green)}
+  footer{margin-top:30px;color:#9a9aa4;font-size:12px;font-family:var(--mono)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <p class="eyebrow">Status semanal · demo Tier 1</p>
+  <h1>Acme — Ingeniería · Semana 22</h1>
+  <p class="sub">Datos ficticios de demostración. Optimizado para escaneo de lunes por la mañana.</p>
+
+  <div class="stats">
+    <div class="stat"><div class="n">12</div><div class="l">PRs merged</div></div>
+    <div class="stat"><div class="n">4</div><div class="l">Deploys</div></div>
+    <div class="stat"><div class="n">1</div><div class="l">Incidente</div></div>
+    <div class="stat"><div class="n">3</div><div class="l">En riesgo</div></div>
+  </div>
+
+  <h2>Qué shipeó / qué se atrasó</h2>
+  <table>
+    <thead><tr><th>Item</th><th>Owner</th><th>Estado</th></tr></thead>
+    <tbody>
+      <tr><td>Onboarding rediseñado</td><td>Mara</td><td><span class="pill ok">shipped</span></td></tr>
+      <tr><td>API de facturación v2</td><td>Dev</td><td><span class="pill ok">shipped</span></td></tr>
+      <tr><td>Migración de búsqueda</td><td>Sam</td><td><span class="pill slip">slip → S23</span></td></tr>
+      <tr><td>Panel de métricas</td><td>Júlia</td><td><span class="pill slip">slip → S23</span></td></tr>
+    </tbody>
+  </table>
+
+  <h2>Velocidad (PRs/día)</h2>
+  <div class="chart">
+    <div class="bar" style="height:40%"><span>L</span></div>
+    <div class="bar" style="height:70%"><span>M</span></div>
+    <div class="bar" style="height:55%"><span>X</span></div>
+    <div class="bar" style="height:90%"><span>J</span></div>
+    <div class="bar" style="height:30%"><span>V</span></div>
+  </div>
+
+  <h2>Timeline del incidente</h2>
+  <div class="timeline">
+    <div class="ev"><div class="t">Mar 14:02</div>Pico de 5xx en checkout tras deploy.</div>
+    <div class="ev"><div class="t">Mar 14:09</div>Rollback iniciado; tráfico estabilizándose.</div>
+    <div class="ev"><div class="t">Mar 14:21</div>Resuelto. Follow-up: añadir canary en checkout.</div>
+  </div>
+
+  <button id="copy">📋 Copiar status como markdown</button>
+  <footer>Un solo archivo .html autocontenido · sin dependencias · convención rules/html-output.md</footer>
+</div>
+<script>
+  const MD = `# Acme — Ingeniería · Semana 22
+- 12 PRs merged · 4 deploys · 1 incidente · 3 en riesgo
+## Shipped
+- Onboarding rediseñado (Mara), API facturación v2 (Dev)
+## Slipped → S23
+- Migración de búsqueda (Sam), Panel de métricas (Júlia)
+## Incidente (Mar)
+- 14:02 pico 5xx checkout → 14:09 rollback → 14:21 resuelto (follow-up: canary checkout)`;
+  const b=document.getElementById('copy');
+  b.addEventListener('click',async()=>{
+    try{await navigator.clipboard.writeText(MD)}catch(e){const t=document.createElement('textarea');t.value=MD;document.body.appendChild(t);t.select();document.execCommand('copy');t.remove()}
+    b.classList.add('copied');b.textContent='✓ Copiado';setTimeout(()=>{b.classList.remove('copied');b.textContent='📋 Copiar status como markdown'},1600);
+  });
+</script>
+</body>
+</html>

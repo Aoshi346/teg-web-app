@@ -1,0 +1,531 @@
+{
+  "_doc": "Fuente ÚNICA de la topnav de un set de informe/plan. render_nav.py la materializa en cada página entre <!-- NAV:BEGIN --> y <!-- NAV:END --> (idempotente, prefijo ../ según profundidad, active por página). PROHIBIDO editar la nav a mano en los HTML — era la causa de la divergencia 8-vs-10 items en ~19 ficheros (TPL-1 W1 scout). Los items cuyo fichero NO existe en el plan se omiten automáticamente (render_nav.py): una pestaña que da 404 es peor que no tenerla.",
+  "items": [
+    {
+      "id": "index",
+      "label": "Resumen",
+      "href": "index.html"
+    },
+    {
+      "id": "requisitos",
+      "label": "Requisitos y uso",
+      "href": "requisitos.html"
+    },
+    {
+      "id": "proceso",
+      "label": "El proceso",
+      "href": "proceso.html"
+    },
+    {
+      "id": "core",
+      "label": "Las 5 capas",
+      "href": "core.html"
+    },
+    {
+      "id": "core-overview",
+      "label": "Qué hace",
+      "href": "core-overview.html"
+    },
+    {
+      "id": "core-arquitectura",
+      "label": "Cómo está construido",
+      "href": "core-arquitectura.html"
+    },
+    {
+      "id": "core-datos",
+      "label": "Qué datos maneja",
+      "href": "core-datos.html"
+    },
+    {
+      "id": "core-equipo",
+      "label": "El equipo",
+      "href": "core-equipo.html"
+    },
+    {
+      "id": "core-arranque",
+      "label": "Cómo se monta",
+      "href": "core-arranque.html"
+    },
+    {
+      "id": "manual",
+      "label": "Manual",
+      "href": "manual.html"
+    },
+    {
+      "id": "core-patrones",
+      "label": "Cómo se escribe",
+      "href": "core-patrones.html"
+    },
+    {
+      "id": "core-sistema",
+      "label": "Las piezas",
+      "href": "core-sistema.html"
+    },
+    {
+      "id": "core-flujo",
+      "label": "Cómo se trabaja",
+      "href": "core-flujo.html"
+    },
+    {
+      "id": "core-decisiones",
+      "label": "Qué se decidió",
+      "href": "core-decisiones.html"
+    },
+    {
+      "id": "stack",
+      "label": "El stack",
+      "href": "stack.html"
+    },
+    {
+      "id": "codigo",
+      "label": "Cómo está montado",
+      "href": "codigo.html"
+    },
+    {
+      "id": "structure",
+      "label": "Estructura",
+      "href": "structure.html"
+    },
+    {
+      "id": "patron",
+      "label": "Patrón",
+      "href": "patron.html"
+    },
+    {
+      "id": "architecture",
+      "label": "Arquitectura",
+      "href": "architecture.html"
+    },
+    {
+      "id": "data",
+      "label": "Datos",
+      "href": "data-model.html"
+    },
+    {
+      "id": "trazas",
+      "label": "Recorridos",
+      "href": "trazas.html"
+    },
+    {
+      "id": "flows",
+      "label": "Flujos",
+      "href": "user-flows.html"
+    },
+    {
+      "id": "schemas",
+      "label": "Esquemas",
+      "href": "schemas/schemas.html"
+    },
+    {
+      "id": "diseno",
+      "label": "Diseño",
+      "href": "diseno.html"
+    },
+    {
+      "id": "dashboard",
+      "label": "Dashboard",
+      "href": "dashboard.html"
+    },
+    {
+      "id": "flujo",
+      "label": "Flujo de acción",
+      "href": "flujo.html"
+    },
+    {
+      "id": "sesiones",
+      "label": "Sesiones",
+      "href": "sesiones.html"
+    },
+    {
+      "id": "results",
+      "label": "Resultados",
+      "href": "results.html"
+    },
+    {
+      "id": "pruebas",
+      "label": "Pruebas",
+      "href": "pruebas.html"
+    },
+    {
+      "id": "feedback",
+      "label": "Personas",
+      "href": "feedback/personas.html"
+    },
+    {
+      "id": "auditoria",
+      "label": "Auditoría",
+      "href": "auditoria.html"
+    },
+    {
+      "id": "entregas",
+      "label": "Entregas",
+      "href": "entregas.html"
+    },
+    {
+      "id": "entregables",
+      "label": "Entregables",
+      "href": "entregables.html"
+    },
+    {
+      "id": "fuentes",
+      "label": "Fuentes",
+      "href": "fuentes.html",
+      "owns_dir": "sources"
+    },
+    {
+      "id": "otto",
+      "label": "Otto",
+      "href": "otto.html"
+    },
+    {
+      "id": "core-levels",
+      "label": "Por niveles",
+      "href": "core-levels.html"
+    },
+    {
+      "id": "informe",
+      "label": "Informe del issue",
+      "href": "informe.html"
+    }
+  ],
+  "profiles": {
+    "proyecto": [
+      "index",
+      "requisitos",
+      "proceso",
+      "core",
+      "core-overview",
+      "core-arquitectura",
+      "core-datos",
+      "core-equipo",
+      "core-arranque",
+      "manual",
+      "core-patrones",
+      "core-sistema",
+      "core-flujo",
+      "core-decisiones",
+      "stack",
+      "codigo",
+      "structure",
+      "patron",
+      "architecture",
+      "data",
+      "trazas",
+      "flows",
+      "schemas",
+      "diseno",
+      "dashboard",
+      "flujo",
+      "sesiones",
+      "results",
+      "pruebas",
+      "feedback",
+      "auditoria",
+      "entregas",
+      "entregables",
+      "fuentes",
+      "otto",
+      "core-levels"
+    ],
+    "diseño": [
+      "index",
+      "requisitos",
+      "proceso",
+      "core",
+      "core-overview",
+      "core-arquitectura",
+      "core-datos",
+      "core-equipo",
+      "core-arranque",
+      "manual",
+      "core-patrones",
+      "core-sistema",
+      "core-flujo",
+      "core-decisiones",
+      "stack",
+      "codigo",
+      "structure",
+      "patron",
+      "trazas",
+      "diseno",
+      "dashboard",
+      "flujo",
+      "results",
+      "pruebas",
+      "auditoria",
+      "entregas",
+      "entregables",
+      "fuentes",
+      "otto",
+      "core-levels"
+    ],
+    "incidencia": [
+      "index",
+      "dashboard",
+      "flujo",
+      "entregas",
+      "entregables",
+      "results",
+      "pruebas",
+      "auditoria",
+      "fuentes",
+      "otto"
+    ],
+    "minimo": [
+      "index",
+      "dashboard",
+      "results",
+      "pruebas",
+      "entregables",
+      "fuentes",
+      "otto"
+    ],
+    "issue": [
+      "index",
+      "informe",
+      "dashboard",
+      "results",
+      "pruebas",
+      "entregables",
+      "fuentes",
+      "otto"
+    ]
+  },
+  "_doc_perfiles": "proyecto = el set entero (código + plan + Core) · diseño = sin Arquitectura/Datos/Flujos/Esquemas (propuestas sin código) · incidencia = qué pasó y cómo se cerró · minimo (MO-78, sub-ola 2.15) = las 7 pestañas sin las que un informe no es un informe: Resumen (abre con «lo que pediste y dónde está»), Dashboard (donde se decide), Resultados y Pruebas (qué está hecho y cómo se comprueba), Entregables (lo que no aparece no está entregado), Fuentes y Otto. Para un plan pequeño, sin código propio o de un solo día: las 34 del perfil proyecto son una pared que nadie recorre. · issue (AN-6, sub-ola 3.09) = el trabajo de UN issue que irá a producción: el perfil minimo más «Informe del issue» (informe.html, ruta fija), donde render_impacto.py pinta los apartados de Pilar y Roberto que exige gate_impacto.py.",
+  "optional_pages": {
+    "_doc": "Páginas fuera de la topnav por defecto (se enlazan desde index.html si existen) — reconciliación del set antiguo de templates/html/",
+    "pages": [
+      {
+        "id": "scope",
+        "label": "Alcance",
+        "href": "scope-and-boundaries.html"
+      },
+      {
+        "id": "integrations",
+        "label": "Integraciones",
+        "href": "integrations.html"
+      },
+      {
+        "id": "parallel",
+        "label": "Paralelización",
+        "href": "parallelization.html"
+      },
+      {
+        "id": "diff",
+        "label": "Diff",
+        "href": "visual-diff.html"
+      },
+      {
+        "id": "configs",
+        "label": "Configs",
+        "href": "claudecode-configs.html"
+      },
+      {
+        "id": "modulos",
+        "label": "Módulos",
+        "href": "modulos.html"
+      }
+    ]
+  },
+  "groups": [
+    {
+      "id": "core",
+      "label": "Core",
+      "_por_que": "Lo PERMANENTE: qué ES este proyecto. Vive en .docs/core/ y sobrevive al plan.",
+      "children": [
+        "core",
+        "core-overview",
+        "core-arquitectura",
+        "core-datos",
+        "core-equipo",
+        "core-arranque",
+        "manual",
+        "core-patrones",
+        "core-sistema",
+        "core-flujo",
+        "core-decisiones",
+        "core-levels"
+      ]
+    },
+    {
+      "id": "mapas",
+      "label": "Mapas",
+      "_por_que": "Los dibujos de ESTE plan. Se congelan con él, por eso no están en Core.",
+      "children": [
+        "stack",
+        "codigo",
+        "structure",
+        "patron",
+        "architecture",
+        "data",
+        "flows",
+        "trazas",
+        "schemas",
+        "diseno"
+      ]
+    },
+    {
+      "id": "calidad",
+      "label": "Calidad",
+      "_por_que": "¿Está bien? Verificación, pruebas manuales, auditores-persona y auditoría.",
+      "children": [
+        "results",
+        "pruebas",
+        "feedback",
+        "auditoria"
+      ]
+    }
+  ],
+  "permanent": [
+    "core",
+    "core-overview",
+    "core-arquitectura",
+    "core-datos",
+    "core-equipo",
+    "core-flujo",
+    "core-decisiones",
+    "core-sistema",
+    "core-patrones",
+    "core-arranque",
+    "manual",
+    "core-levels"
+  ],
+  "_doc_permanent": "PV-3: estas paginas son del PROYECTO, no de un plan, y viven en .docs/core/. El resto vive en .docs/plans/<plan>/. render_nav.py resuelve el href segun desde donde se mire: desde un plan, ../../core/<x>; desde el core, ../plans/<activo>/<x>. Esas rutas son las MISMAS en disco y servidas, porque el navegador recorta los .. que se pasan de la raiz (RFC 3986 5.2.4) y server.py monta /core/ apuntando a .docs/core/. Sin esa coincidencia habria que mantener dos juegos de enlaces.",
+  "como_se_llena": {
+    "architecture": {
+      "que": "El diagrama de componentes y sus dependencias, con el camino caliente marcado.",
+      "cmd": "/visual-map",
+      "nota": "Lee el código real y emite architecture.html en el plan."
+    },
+    "data": {
+      "que": "El modelo entidad-relación: qué información se guarda y cómo se relaciona.",
+      "cmd": "/visual-map",
+      "nota": "En un repo de configuración como este NO aplica: no hay base de datos. Su estado vive en ficheros (report.json, PROGRESS.json)."
+    },
+    "flows": {
+      "que": "Los recorridos de una persona por el producto, paso a paso, con la pantalla y el endpoint de cada paso.",
+      "cmd": "/visual-map",
+      "nota": "Necesita que el proyecto TENGA pantallas."
+    },
+    "structure": {
+      "que": "El grafo real del código: módulos, quién llama a quién y candidatos a deuda.",
+      "cmd": "/code-graph",
+      "nota": "Para el .claude/ de un proyecto: python3 .claude/scripts/gen_harness_graph.py --root <proyecto> --out <plan>/graph-dataset.json · pre-flight de RAM obligatorio."
+    },
+    "schemas": {
+      "que": "Lean canvas, C4, casos de uso, historias — el diseño y el negocio, que NO salen del código.",
+      "cmd": "/schema <id>",
+      "nota": "Sugiere por etapa y decides tú qué crear; nunca genera el set entero."
+    },
+    "feedback": {
+      "que": "Las rondas de los auditores-persona (Lidia, Vera, Ignacio) sobre la interfaz.",
+      "cmd": "/qa-loop",
+      "nota": "Solo para waves CON interfaz. Congela el build antes de lanzar: tres auditores sobre builds distintos no se pueden promediar."
+    },
+    "auditoria": {
+      "que": "La salud del propio repositorio: deuda, ficheros que ya no dicen la verdad, duplicados.",
+      "cmd": "declarar meta.audit_prefixes en report.json",
+      "nota": "Se genera si el plan declara qué prefijos de item son salud del repo."
+    },
+    "entregables": {
+      "que": "Wireframes, mockups, mensajes y capturas que el plan produjo y no tienen pestaña propia.",
+      "cmd": "python3 .claude/templates/report_kit/gen_entregables.py <plan>",
+      "nota": "Recoge por convención de carpetas; no hace falta declarar nada."
+    },
+    "fuentes": {
+      "que": "Los informes de investigación que hay detrás de los items.",
+      "cmd": "guardar los .md en <plan>/sources/",
+      "nota": "Se descubren solos al construir. Se guardan literales, sin resumir."
+    },
+    "results": {
+      "que": "Los veredictos con doble evidencia (código y en vivo) y sus capturas.",
+      "cmd": "/feedback-audit",
+      "nota": "O rellenar verdict/why/evidence en los items del informe."
+    },
+    "pruebas": {
+      "que": "El manual para que una PERSONA pruebe a mano lo entregado.",
+      "cmd": "escribir test: y case: en dashboard.md",
+      "nota": "Sale de los criterios de aceptación. Sin ellos se deriva uno genérico y se marca como derivado."
+    },
+    "flujo": {
+      "que": "El orden de ejecución: qué va en paralelo, qué bloquea a qué y dónde para a esperarte.",
+      "cmd": "python3 .claude/templates/report_kit/gen_flujo.py <plan> <plan>/dashboard.md",
+      "nota": "Las dependencias salen de las líneas blocks: de dashboard.md."
+    },
+    "core-sistema": {
+      "que": "El inventario de TODAS las piezas del harness —comandos, workflows, skills, agentes, rules, hooks, patrones, scripts y plugins— con lo que hace cada una y, sobre todo, CÓMO llega a usarse: si la tecleas, si salta sola en un evento, o si el modelo tiene que encontrarla por su descripción. Buscable y filtrable.",
+      "cmd": "python3 .claude/scripts/gen_harness_graph.py\npython3 .claude/templates/report_kit/gen_core_capas.py <plan> --out .docs/core",
+      "nota": "Se lee de graph-dataset.full.json, no del enfocado: el enfocado colapsa comandos y plugins en un nodo «(+21 más)» para que el grafo se lea, y un inventario necesita lo contrario."
+    },
+    "patron": {
+      "que": "Qué reglas de estilo tiene el repo, cuáles bloquean de verdad y qué se incumple hoy.",
+      "cmd": "python3 .claude/templates/report_kit/gen_patron_dataset.py <plan>",
+      "nota": "Cruza catalog.yaml (estado y dominancia medida) con la salida --json de los pattern_check_*.py y la deuda congelada de baseline/. Si un comprobador no corre, la página lo dice en vez de callarlo."
+    },
+    "codigo": {
+      "que": "El esquema explicado: qué capas hay, qué hace cada una y qué la gobierna. La versión que se le enseña a quien decide y no programa.",
+      "cmd": "python3 .claude/templates/report_kit/gen_codigo_dataset.py <plan>",
+      "nota": "Necesita graph-dataset.json (de /code-graph o gen_harness_graph.py). Si además hay pattern-dataset.json, cuelga de cada capa el patrón que la gobierna."
+    },
+    "core-patrones": {
+      "que": "Cómo se escribe el código en esta casa: los documentos de patrón, sus reglas y cuáles bloquean de verdad. Permanente — no muere con el plan.",
+      "cmd": "se genera solo al construir el informe del plan activo",
+      "nota": "Misma plantilla que la pestaña Patrón, con el dataset del repo entero en vez del de un plan. Generador: gen_core_patrones.py."
+    },
+    "entregas": {
+      "que": "Qué se ha entregado: ramas vivas y su edad, commits con los ficheros que tocaron, y pull requests si hay gh.",
+      "cmd": "python3 .claude/templates/report_kit/gen_entregas_dataset.py <plan>",
+      "nota": "Funciona solo con git. Con `gh` instalado añade estado de revisión y checks de los PRs; sin él la página lo dice en vez de enseñar una lista vacía. Instalar gh es dependencia de sistema y se decide por proyecto."
+    },
+    "stack": {
+      "que": "El molde: cómo se monta un proyecto nuevo aquí, capa a capa, con el inventario completo de lo que hay (cada modelo con sus campos, cada tool con su descripción) y la comparación con repos de referencia.",
+      "cmd": "python3 .claude/scripts/gen_inventario_stack.py <proyecto> <plan>/proyectos/inventario/<n>.json && python3 .claude/templates/report_kit/gen_stack_dataset.py <plan>",
+      "nota": "Cruza patterns/stack (el molde) con el inventario extraído del código. Los repos de referencia van en <plan>/referencia/."
+    },
+    "core-arranque": {
+      "que": "Qué se crea al arrancar un proyecto nuevo: el árbol de una app Django fichero a fichero, la infraestructura con su decisión por defecto, el árbol de React y las decisiones de un agente LangGraph.",
+      "cmd": "se genera solo al construir el informe del plan activo",
+      "nota": "Se RENDERIZA desde patterns/stack/ARRANQUE.md, no se duplica: duplicarla la haría divergir del patrón. Generador: gen_core_arranque.py."
+    },
+    "requisitos": {
+      "que": "Cada requisito con su MÁQUINA DE ESTADOS de uso y los 11 apartados: qué deja en las manos del usuario · quién y cuándo · qué hace el usuario · su entrada · su salida · cómo se usa · ejemplos · beneficio · el recorrido como estados · por qué así · qué falta.",
+      "cmd": "skill `arrancar` (fase 1b) → `<plan>/arranque/requisitos.json` → `python3 .claude/templates/report_kit/gen_requisitos.py <plan>`",
+      "nota": "Nace del hueco que dejaba `flows`: /visual-map dibuja el RECORRIDO, no el ESTADO en que queda el trabajo. Cosechada de accounting_AMC, donde ya funcionaba."
+    },
+    "trazas": {
+      "que": "El viaje del dato de punta a punta: qué envía el usuario · qué recibe el frontend · qué pide al backend y con qué · qué procesa y qué guarda · qué devuelve · cómo lo transforma el store y qué se ve. Con cuatro zooms: global · módulo · requisito · bloque de pantalla.",
+      "cmd": "skill `arrancar` (fase 2) → `<plan>/arranque/trazas.json` → `python3 .claude/templates/report_kit/gen_trazas.py <plan>` · `--diff` cruza con /code-graph",
+      "nota": "NO es arquitectura (architecture.html) ni recorrido de pantallas (user-flows.html) ni orden de construcción (flujo.html): es el runtime capa por capa, para entenderlo sin abrir el código. Marca los saltos diseñados y aún NO construidos, y los botones duplicados (dos bloques al mismo endpoint y verbo)."
+    },
+    "proceso": {
+      "que": "El proceso entero como MÁQUINA DE ESTADOS: encuadre → PRD → requisitos → datos → stack → ética → superficie → marca → low-fi → high-fi → mockup → backend → QA. Cada estado se pulsa y abre SU documentación, con filtro y paginación si hay muchos.",
+      "cmd": "python3 .claude/templates/report_kit/gen_proceso.py <plan>",
+      "nota": "Los colores NO se declaran: los mide `gate_arranque.py` recalculando del disco. Un estado verde sin artefactos es imposible por construcción. Distinto de `flujo.html` (el orden en que ejecutamos lo aprobado) y de `requisitos.html` (la máquina de estados de UN requisito, de cara al usuario)."
+    },
+    "manual": {
+      "que": "El proceso entero explicado PASO A PASO para quien llega nuevo: los 13 pasos, y en cada uno qué es, por qué existe, qué haces tú, el comando exacto, qué deja escrito y cómo sabes que está bien. Con glosario y los módulos del curso AI4DEV.",
+      "cmd": "AI4DEV_DIR=ai4dev python3 .claude/templates/report_kit/gen_manual.py .docs/core/manual.html",
+      "nota": "Es PERMANENTE (.docs/core/) y no cambia según el proyecto: proceso.html dice por dónde va ESTE proyecto; el manual dice cómo se hace. `AI4DEV_DIR` apunta al material del curso relativo a .docs/core/ (en un derivado, `project-setup` lo copia a .docs/core/ai4dev/)."
+    },
+    "sesiones": {
+      "que": "Las sesiones de Claude que reparten el plan en frentes paralelos: nombre, worktree, rama, franja de datos, ficheros reclamados y el comando exacto para crear cada una.",
+      "cmd": "python3 .claude/templates/report_kit/gen_sesiones.py <plan> --vivo",
+      "nota": "Lee <plan>/sesiones.json (fuente única: el lanzador obtiene el comando con `gen_sesiones.py --comando <plan> <nombre>`). Sin fichero, la página explica cómo crearlo."
+    },
+    "diseno": {
+      "que": "El material visual del plan por fases: referencias, kit de marca, direcciones de arte, wireframes, bocetos de pantalla, mockups y las capturas que ningún item cita como evidencia.",
+      "cmd": "python3 .claude/templates/report_kit/gen_diseno.py <plan>",
+      "nota": "Recoge por convención de carpetas (referencias/, arranque/12-kit-marca/, direcciones/, wireframes/, bocetos/, mockups/, prototipos/, shots/): son las que escriben las skills de diseño. build.py la llama solo."
+    },
+    "core-levels": {
+      "que": "El harness entero en diagramas que se abren: la sesión, las capas, sus familias y cada pieza con lo que la cita y lo que usa; y un proyecto de ejemplo de «empieza» a producción.",
+      "cmd": "python3 .claude/scripts/gen_harness_graph.py\npython3 .claude/templates/report_kit/gen_core_levels.py <plan> --out .docs/core",
+      "nota": "Sale de graph-dataset.full.json y de los eventos de settings.json; las familias, de packs.yaml, gen_agent_index.FAMILIAS y gen_skill_index.GROUPS."
+    },
+    "informe": {
+      "que": "El informe del issue en una página: contexto, alcance literal, mapa, reproducción, hallazgos, plan, verificación, impacto en producción, auditoría de código y capturas (secciones 0-9).",
+      "cmd": "# el agente escribe <plan>/informe.json (informe/1) y:\npython3 .claude/templates/report_kit/gen_informe.py <plan>\npython3 .claude/scripts/render_impacto.py <plan> --inyectar <plan>/informe.html",
+      "nota": "Lo llama /cerrar-issue; build.py lo genera solo si existe informe.json. Formato de informe.json: docstring de gen_informe.py."
+    }
+  }
+}

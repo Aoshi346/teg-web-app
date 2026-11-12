@@ -1,0 +1,1729 @@
+{
+ "meta": {
+  "source": "gen_inventario_stack.py — AST para Python, expresiones regulares para TS/TSX",
+  "metodo": {
+   "python": "AST (exacto)",
+   "typescript": "regex (inventaria y cuenta; NO afirma nada fino sobre tipos)"
+  },
+  "proyecto": "bulletproof-react",
+  "sha": "9506629",
+  "date": "2026-08-26",
+  "totales": {
+   "componentes": 202,
+   "hooks": 51,
+   "modelos": 0,
+   "paginas": 72,
+   "serializers": 0,
+   "tareas": 0,
+   "vistas": 0
+  },
+  "apps": {}
+ },
+ "hooks": [
+  {
+   "nombre": "useAuthorization",
+   "file": "apps/react-vite/src/lib/authorization.tsx",
+   "line": 28
+  },
+  {
+   "nombre": "useAuthorization",
+   "file": "apps/nextjs-pages/src/lib/authorization.tsx",
+   "line": 29
+  },
+  {
+   "nombre": "useCreateComment",
+   "file": "apps/react-vite/src/features/comments/api/create-comment.ts",
+   "line": 30
+  },
+  {
+   "nombre": "useCreateComment",
+   "file": "apps/nextjs-pages/src/features/comments/api/create-comment.ts",
+   "line": 30
+  },
+  {
+   "nombre": "useCreateComment",
+   "file": "apps/nextjs-app/src/features/comments/api/create-comment.ts",
+   "line": 30
+  },
+  {
+   "nombre": "useCreateDiscussion",
+   "file": "apps/react-vite/src/features/discussions/api/create-discussion.ts",
+   "line": 29
+  },
+  {
+   "nombre": "useCreateDiscussion",
+   "file": "apps/nextjs-pages/src/features/discussions/api/create-discussion.ts",
+   "line": 30
+  },
+  {
+   "nombre": "useCreateDiscussion",
+   "file": "apps/nextjs-app/src/features/discussions/api/create-discussion.ts",
+   "line": 30
+  },
+  {
+   "nombre": "useDeleteComment",
+   "file": "apps/react-vite/src/features/comments/api/delete-comment.ts",
+   "line": 17
+  },
+  {
+   "nombre": "useDeleteComment",
+   "file": "apps/nextjs-pages/src/features/comments/api/delete-comment.ts",
+   "line": 17
+  },
+  {
+   "nombre": "useDeleteComment",
+   "file": "apps/nextjs-app/src/features/comments/api/delete-comment.ts",
+   "line": 17
+  },
+  {
+   "nombre": "useDeleteDiscussion",
+   "file": "apps/react-vite/src/features/discussions/api/delete-discussion.ts",
+   "line": 20
+  },
+  {
+   "nombre": "useDeleteDiscussion",
+   "file": "apps/nextjs-pages/src/features/discussions/api/delete-discussion.ts",
+   "line": 20
+  },
+  {
+   "nombre": "useDeleteDiscussion",
+   "file": "apps/nextjs-app/src/features/discussions/api/delete-discussion.ts",
+   "line": 20
+  },
+  {
+   "nombre": "useDeleteUser",
+   "file": "apps/react-vite/src/features/users/api/delete-user.ts",
+   "line": 20
+  },
+  {
+   "nombre": "useDeleteUser",
+   "file": "apps/nextjs-pages/src/features/users/api/delete-user.ts",
+   "line": 20
+  },
+  {
+   "nombre": "useDeleteUser",
+   "file": "apps/nextjs-app/src/features/users/api/delete-user.ts",
+   "line": 20
+  },
+  {
+   "nombre": "useDisclosure",
+   "file": "apps/react-vite/src/hooks/use-disclosure.ts",
+   "line": 3
+  },
+  {
+   "nombre": "useDisclosure",
+   "file": "apps/nextjs-pages/src/hooks/use-disclosure.ts",
+   "line": 3
+  },
+  {
+   "nombre": "useDisclosure",
+   "file": "apps/nextjs-app/src/hooks/use-disclosure.ts",
+   "line": 3
+  },
+  {
+   "nombre": "useDiscussion",
+   "file": "apps/react-vite/src/features/discussions/api/get-discussion.ts",
+   "line": 27
+  },
+  {
+   "nombre": "useDiscussion",
+   "file": "apps/nextjs-pages/src/features/discussions/api/get-discussion.ts",
+   "line": 34
+  },
+  {
+   "nombre": "useDiscussion",
+   "file": "apps/nextjs-app/src/features/discussions/api/get-discussion.ts",
+   "line": 27
+  },
+  {
+   "nombre": "useDiscussions",
+   "file": "apps/react-vite/src/features/discussions/api/get-discussions.ts",
+   "line": 34
+  },
+  {
+   "nombre": "useDiscussions",
+   "file": "apps/nextjs-pages/src/features/discussions/api/get-discussions.ts",
+   "line": 36
+  },
+  {
+   "nombre": "useDiscussions",
+   "file": "apps/nextjs-app/src/features/discussions/api/get-discussions.ts",
+   "line": 34
+  },
+  {
+   "nombre": "useFormField",
+   "file": "apps/react-vite/src/components/ui/form/form.tsx",
+   "line": 47
+  },
+  {
+   "nombre": "useFormField",
+   "file": "apps/nextjs-pages/src/components/ui/form/form.tsx",
+   "line": 47
+  },
+  {
+   "nombre": "useFormField",
+   "file": "apps/nextjs-app/src/components/ui/form/form.tsx",
+   "line": 49
+  },
+  {
+   "nombre": "useInfiniteComments",
+   "file": "apps/react-vite/src/features/comments/api/get-comments.ts",
+   "line": 43
+  },
+  {
+   "nombre": "useInfiniteComments",
+   "file": "apps/nextjs-pages/src/features/comments/api/get-comments.ts",
+   "line": 49
+  },
+  {
+   "nombre": "useInfiniteComments",
+   "file": "apps/nextjs-app/src/features/comments/api/get-comments.ts",
+   "line": 43
+  },
+  {
+   "nombre": "useLogin",
+   "file": "apps/nextjs-app/src/lib/auth.tsx",
+   "line": 33
+  },
+  {
+   "nombre": "useLogout",
+   "file": "apps/nextjs-app/src/lib/auth.tsx",
+   "line": 55
+  },
+  {
+   "nombre": "useNotifications",
+   "file": "apps/react-vite/src/components/ui/notifications/notifications-store.ts",
+   "line": 17
+  },
+  {
+   "nombre": "useNotifications",
+   "file": "apps/nextjs-pages/src/components/ui/notifications/notifications-store.ts",
+   "line": 17
+  },
+  {
+   "nombre": "useNotifications",
+   "file": "apps/nextjs-app/src/components/ui/notifications/notifications-store.ts",
+   "line": 17
+  },
+  {
+   "nombre": "useRegister",
+   "file": "apps/nextjs-app/src/lib/auth.tsx",
+   "line": 44
+  },
+  {
+   "nombre": "useTeams",
+   "file": "apps/react-vite/src/features/teams/api/get-teams.ts",
+   "line": 22
+  },
+  {
+   "nombre": "useTeams",
+   "file": "apps/nextjs-pages/src/features/teams/api/get-teams.ts",
+   "line": 22
+  },
+  {
+   "nombre": "useTeams",
+   "file": "apps/nextjs-app/src/features/teams/api/get-teams.ts",
+   "line": 22
+  },
+  {
+   "nombre": "useUpdateDiscussion",
+   "file": "apps/react-vite/src/features/discussions/api/update-discussion.ts",
+   "line": 31
+  },
+  {
+   "nombre": "useUpdateDiscussion",
+   "file": "apps/nextjs-pages/src/features/discussions/api/update-discussion.ts",
+   "line": 32
+  },
+  {
+   "nombre": "useUpdateDiscussion",
+   "file": "apps/nextjs-app/src/features/discussions/api/update-discussion.ts",
+   "line": 32
+  },
+  {
+   "nombre": "useUpdateProfile",
+   "file": "apps/react-vite/src/features/users/api/update-profile.ts",
+   "line": 25
+  },
+  {
+   "nombre": "useUpdateProfile",
+   "file": "apps/nextjs-pages/src/features/users/api/update-profile.ts",
+   "line": 25
+  },
+  {
+   "nombre": "useUpdateProfile",
+   "file": "apps/nextjs-app/src/features/users/api/update-profile.ts",
+   "line": 25
+  },
+  {
+   "nombre": "useUser",
+   "file": "apps/nextjs-app/src/lib/auth.tsx",
+   "line": 31
+  },
+  {
+   "nombre": "useUsers",
+   "file": "apps/react-vite/src/features/users/api/get-users.ts",
+   "line": 22
+  },
+  {
+   "nombre": "useUsers",
+   "file": "apps/nextjs-pages/src/features/users/api/get-users.ts",
+   "line": 22
+  },
+  {
+   "nombre": "useUsers",
+   "file": "apps/nextjs-app/src/features/users/api/get-users.ts",
+   "line": 22
+  }
+ ],
+ "componentes": [
+  {
+   "nombre": "AdminGuard",
+   "file": "apps/nextjs-app/src/app/app/users/_components/admin-guard.tsx",
+   "line": 7
+  },
+  {
+   "nombre": "AsFormDrawer",
+   "file": "apps/react-vite/src/components/ui/form/form.stories.tsx",
+   "line": 72
+  },
+  {
+   "nombre": "AsFormDrawer",
+   "file": "apps/nextjs-pages/src/components/ui/form/form.stories.tsx",
+   "line": 72
+  },
+  {
+   "nombre": "AsFormDrawer",
+   "file": "apps/nextjs-app/src/components/ui/form/form.stories.tsx",
+   "line": 72
+  },
+  {
+   "nombre": "AuthLayout",
+   "file": "apps/react-vite/src/components/layouts/auth-layout.tsx",
+   "line": 16
+  },
+  {
+   "nombre": "AuthLayout",
+   "file": "apps/nextjs-pages/src/components/layouts/auth-layout.tsx",
+   "line": 15
+  },
+  {
+   "nombre": "AuthLayout",
+   "file": "apps/nextjs-app/src/app/auth/_components/auth-layout.tsx",
+   "line": 14
+  },
+  {
+   "nombre": "Comments",
+   "file": "apps/react-vite/src/features/comments/components/comments.tsx",
+   "line": 8
+  },
+  {
+   "nombre": "Comments",
+   "file": "apps/nextjs-pages/src/features/comments/components/comments.tsx",
+   "line": 10
+  },
+  {
+   "nombre": "Comments",
+   "file": "apps/nextjs-app/src/features/comments/components/comments.tsx",
+   "line": 12
+  },
+  {
+   "nombre": "CommentsList",
+   "file": "apps/react-vite/src/features/comments/components/comments-list.tsx",
+   "line": 19
+  },
+  {
+   "nombre": "CommentsList",
+   "file": "apps/nextjs-pages/src/features/comments/components/comments-list.tsx",
+   "line": 20
+  },
+  {
+   "nombre": "CommentsList",
+   "file": "apps/nextjs-app/src/features/comments/components/comments-list.tsx",
+   "line": 21
+  },
+  {
+   "nombre": "ConfirmationDialog",
+   "file": "apps/react-vite/src/components/ui/dialog/confirmation-dialog/confirmation-dialog.tsx",
+   "line": 27
+  },
+  {
+   "nombre": "ConfirmationDialog",
+   "file": "apps/nextjs-pages/src/components/ui/dialog/confirmation-dialog/confirmation-dialog.tsx",
+   "line": 27
+  },
+  {
+   "nombre": "ConfirmationDialog",
+   "file": "apps/nextjs-app/src/components/ui/dialog/confirmation-dialog/confirmation-dialog.tsx",
+   "line": 29
+  },
+  {
+   "nombre": "ContentLayout",
+   "file": "apps/react-vite/src/components/layouts/content-layout.tsx",
+   "line": 10
+  },
+  {
+   "nombre": "ContentLayout",
+   "file": "apps/nextjs-pages/src/components/layouts/content-layout.tsx",
+   "line": 10
+  },
+  {
+   "nombre": "ContentLayout",
+   "file": "apps/nextjs-app/src/components/layouts/content-layout.tsx",
+   "line": 8
+  },
+  {
+   "nombre": "CreateComment",
+   "file": "apps/react-vite/src/features/comments/components/create-comment.tsx",
+   "line": 16
+  },
+  {
+   "nombre": "CreateComment",
+   "file": "apps/nextjs-pages/src/features/comments/components/create-comment.tsx",
+   "line": 16
+  },
+  {
+   "nombre": "CreateComment",
+   "file": "apps/nextjs-app/src/features/comments/components/create-comment.tsx",
+   "line": 18
+  },
+  {
+   "nombre": "CreateDiscussion",
+   "file": "apps/react-vite/src/features/discussions/components/create-discussion.tsx",
+   "line": 13
+  },
+  {
+   "nombre": "CreateDiscussion",
+   "file": "apps/nextjs-pages/src/features/discussions/components/create-discussion.tsx",
+   "line": 20
+  },
+  {
+   "nombre": "CreateDiscussion",
+   "file": "apps/nextjs-app/src/features/discussions/components/create-discussion.tsx",
+   "line": 23
+  },
+  {
+   "nombre": "Danger",
+   "file": "apps/react-vite/src/components/ui/dialog/confirmation-dialog/confirmation-dialog.stories.tsx",
+   "line": 15
+  },
+  {
+   "nombre": "Danger",
+   "file": "apps/nextjs-pages/src/components/ui/dialog/confirmation-dialog/confirmation-dialog.stories.tsx",
+   "line": 15
+  },
+  {
+   "nombre": "Danger",
+   "file": "apps/nextjs-app/src/components/ui/dialog/confirmation-dialog/confirmation-dialog.stories.tsx",
+   "line": 15
+  },
+  {
+   "nombre": "DashboardInfo",
+   "file": "apps/nextjs-app/src/app/app/_components/dashboard-info.tsx",
+   "line": 5
+  },
+  {
+   "nombre": "DashboardLayout",
+   "file": "apps/react-vite/src/components/layouts/dashboard-layout.tsx",
+   "line": 79
+  },
+  {
+   "nombre": "DashboardLayout",
+   "file": "apps/nextjs-pages/src/components/layouts/dashboard-layout.tsx",
+   "line": 220
+  },
+  {
+   "nombre": "DashboardLayout",
+   "file": "apps/nextjs-app/src/app/app/_components/dashboard-layout.tsx",
+   "line": 172
+  },
+  {
+   "nombre": "Default",
+   "file": "apps/react-vite/src/components/ui/button/button.stories.tsx",
+   "line": 12
+  },
+  {
+   "nombre": "Default",
+   "file": "apps/react-vite/src/components/ui/spinner/spinner.stories.tsx",
+   "line": 13
+  },
+  {
+   "nombre": "Default",
+   "file": "apps/react-vite/src/components/ui/dropdown/dropdown.stories.tsx",
+   "line": 27
+  },
+  {
+   "nombre": "Default",
+   "file": "apps/react-vite/src/components/ui/md-preview/md-preview.stories.tsx",
+   "line": 13
+  },
+  {
+   "nombre": "Default",
+   "file": "apps/react-vite/src/components/ui/link/link.stories.tsx",
+   "line": 13
+  },
+  {
+   "nombre": "Default",
+   "file": "apps/react-vite/src/components/ui/form/form.stories.tsx",
+   "line": 68
+  },
+  {
+   "nombre": "Default",
+   "file": "apps/react-vite/src/components/ui/drawer/drawer.stories.tsx",
+   "line": 62
+  },
+  {
+   "nombre": "Default",
+   "file": "apps/react-vite/src/components/ui/table/table.stories.tsx",
+   "line": 41
+  },
+  {
+   "nombre": "Default",
+   "file": "apps/nextjs-pages/src/components/ui/button/button.stories.tsx",
+   "line": 12
+  },
+  {
+   "nombre": "Default",
+   "file": "apps/nextjs-pages/src/components/ui/spinner/spinner.stories.tsx",
+   "line": 13
+  },
+  {
+   "nombre": "Default",
+   "file": "apps/nextjs-pages/src/components/ui/dropdown/dropdown.stories.tsx",
+   "line": 27
+  },
+  {
+   "nombre": "Default",
+   "file": "apps/nextjs-pages/src/components/ui/md-preview/md-preview.stories.tsx",
+   "line": 13
+  },
+  {
+   "nombre": "Default",
+   "file": "apps/nextjs-pages/src/components/ui/link/link.stories.tsx",
+   "line": 13
+  },
+  {
+   "nombre": "Default",
+   "file": "apps/nextjs-pages/src/components/ui/form/form.stories.tsx",
+   "line": 68
+  },
+  {
+   "nombre": "Default",
+   "file": "apps/nextjs-pages/src/components/ui/drawer/drawer.stories.tsx",
+   "line": 62
+  },
+  {
+   "nombre": "Default",
+   "file": "apps/nextjs-pages/src/components/ui/table/table.stories.tsx",
+   "line": 41
+  },
+  {
+   "nombre": "Default",
+   "file": "apps/nextjs-app/src/components/ui/button/button.stories.tsx",
+   "line": 12
+  },
+  {
+   "nombre": "Default",
+   "file": "apps/nextjs-app/src/components/ui/spinner/spinner.stories.tsx",
+   "line": 13
+  },
+  {
+   "nombre": "Default",
+   "file": "apps/nextjs-app/src/components/ui/dropdown/dropdown.stories.tsx",
+   "line": 27
+  },
+  {
+   "nombre": "Default",
+   "file": "apps/nextjs-app/src/components/ui/md-preview/md-preview.stories.tsx",
+   "line": 13
+  },
+  {
+   "nombre": "Default",
+   "file": "apps/nextjs-app/src/components/ui/link/link.stories.tsx",
+   "line": 13
+  },
+  {
+   "nombre": "Default",
+   "file": "apps/nextjs-app/src/components/ui/form/form.stories.tsx",
+   "line": 68
+  },
+  {
+   "nombre": "Default",
+   "file": "apps/nextjs-app/src/components/ui/drawer/drawer.stories.tsx",
+   "line": 62
+  },
+  {
+   "nombre": "Default",
+   "file": "apps/nextjs-app/src/components/ui/table/table.stories.tsx",
+   "line": 41
+  },
+  {
+   "nombre": "DeleteComment",
+   "file": "apps/react-vite/src/features/comments/components/delete-comment.tsx",
+   "line": 14
+  },
+  {
+   "nombre": "DeleteComment",
+   "file": "apps/nextjs-pages/src/features/comments/components/delete-comment.tsx",
+   "line": 14
+  },
+  {
+   "nombre": "DeleteComment",
+   "file": "apps/nextjs-app/src/features/comments/components/delete-comment.tsx",
+   "line": 16
+  },
+  {
+   "nombre": "DeleteDiscussion",
+   "file": "apps/react-vite/src/features/discussions/components/delete-discussion.tsx",
+   "line": 14
+  },
+  {
+   "nombre": "DeleteDiscussion",
+   "file": "apps/nextjs-pages/src/features/discussions/components/delete-discussion.tsx",
+   "line": 14
+  },
+  {
+   "nombre": "DeleteDiscussion",
+   "file": "apps/nextjs-app/src/features/discussions/components/delete-discussion.tsx",
+   "line": 17
+  },
+  {
+   "nombre": "DeleteUser",
+   "file": "apps/react-vite/src/features/users/components/delete-user.tsx",
+   "line": 12
+  },
+  {
+   "nombre": "DeleteUser",
+   "file": "apps/nextjs-pages/src/features/users/components/delete-user.tsx",
+   "line": 12
+  },
+  {
+   "nombre": "DeleteUser",
+   "file": "apps/nextjs-app/src/features/users/components/delete-user.tsx",
+   "line": 14
+  },
+  {
+   "nombre": "Demo",
+   "file": "apps/react-vite/src/components/ui/dialog/dialog.stories.tsx",
+   "line": 61
+  },
+  {
+   "nombre": "Demo",
+   "file": "apps/nextjs-pages/src/components/ui/dialog/dialog.stories.tsx",
+   "line": 61
+  },
+  {
+   "nombre": "Demo",
+   "file": "apps/nextjs-app/src/components/ui/dialog/dialog.stories.tsx",
+   "line": 61
+  },
+  {
+   "nombre": "DemoDialog",
+   "file": "apps/react-vite/src/components/ui/dialog/dialog.stories.tsx",
+   "line": 17
+  },
+  {
+   "nombre": "DemoDialog",
+   "file": "apps/nextjs-pages/src/components/ui/dialog/dialog.stories.tsx",
+   "line": 17
+  },
+  {
+   "nombre": "DemoDialog",
+   "file": "apps/nextjs-app/src/components/ui/dialog/dialog.stories.tsx",
+   "line": 17
+  },
+  {
+   "nombre": "DemoDrawer",
+   "file": "apps/react-vite/src/components/ui/drawer/drawer.stories.tsx",
+   "line": 25
+  },
+  {
+   "nombre": "DemoDrawer",
+   "file": "apps/nextjs-pages/src/components/ui/drawer/drawer.stories.tsx",
+   "line": 25
+  },
+  {
+   "nombre": "DemoDrawer",
+   "file": "apps/nextjs-app/src/components/ui/drawer/drawer.stories.tsx",
+   "line": 25
+  },
+  {
+   "nombre": "DialogFooter",
+   "file": "apps/react-vite/src/components/ui/dialog/dialog.tsx",
+   "line": 68
+  },
+  {
+   "nombre": "DialogFooter",
+   "file": "apps/nextjs-pages/src/components/ui/dialog/dialog.tsx",
+   "line": 68
+  },
+  {
+   "nombre": "DialogFooter",
+   "file": "apps/nextjs-app/src/components/ui/dialog/dialog.tsx",
+   "line": 70
+  },
+  {
+   "nombre": "DialogHeader",
+   "file": "apps/react-vite/src/components/ui/dialog/dialog.tsx",
+   "line": 54
+  },
+  {
+   "nombre": "DialogHeader",
+   "file": "apps/nextjs-pages/src/components/ui/dialog/dialog.tsx",
+   "line": 54
+  },
+  {
+   "nombre": "DialogHeader",
+   "file": "apps/nextjs-app/src/components/ui/dialog/dialog.tsx",
+   "line": 56
+  },
+  {
+   "nombre": "Discussion",
+   "file": "apps/nextjs-app/src/app/app/discussions/[discussionId]/_components/discussion.tsx",
+   "line": 10
+  },
+  {
+   "nombre": "DiscussionView",
+   "file": "apps/react-vite/src/features/discussions/components/discussion-view.tsx",
+   "line": 8
+  },
+  {
+   "nombre": "DiscussionView",
+   "file": "apps/nextjs-pages/src/features/discussions/components/discussion-view.tsx",
+   "line": 13
+  },
+  {
+   "nombre": "DiscussionView",
+   "file": "apps/nextjs-app/src/features/discussions/components/discussion-view.tsx",
+   "line": 15
+  },
+  {
+   "nombre": "Discussions",
+   "file": "apps/nextjs-app/src/app/app/discussions/_components/discussions.tsx",
+   "line": 10
+  },
+  {
+   "nombre": "DiscussionsList",
+   "file": "apps/react-vite/src/features/discussions/components/discussions-list.tsx",
+   "line": 19
+  },
+  {
+   "nombre": "DiscussionsList",
+   "file": "apps/nextjs-pages/src/features/discussions/components/discussions-list.tsx",
+   "line": 19
+  },
+  {
+   "nombre": "DiscussionsList",
+   "file": "apps/nextjs-app/src/features/discussions/components/discussions-list.tsx",
+   "line": 21
+  },
+  {
+   "nombre": "DrawerFooter",
+   "file": "apps/react-vite/src/components/ui/drawer/drawer.tsx",
+   "line": 90
+  },
+  {
+   "nombre": "DrawerFooter",
+   "file": "apps/nextjs-pages/src/components/ui/drawer/drawer.tsx",
+   "line": 90
+  },
+  {
+   "nombre": "DrawerFooter",
+   "file": "apps/nextjs-app/src/components/ui/drawer/drawer.tsx",
+   "line": 92
+  },
+  {
+   "nombre": "DrawerHeader",
+   "file": "apps/react-vite/src/components/ui/drawer/drawer.tsx",
+   "line": 76
+  },
+  {
+   "nombre": "DrawerHeader",
+   "file": "apps/nextjs-pages/src/components/ui/drawer/drawer.tsx",
+   "line": 76
+  },
+  {
+   "nombre": "DrawerHeader",
+   "file": "apps/nextjs-app/src/components/ui/drawer/drawer.tsx",
+   "line": 78
+  },
+  {
+   "nombre": "DropdownMenuShortcut",
+   "file": "apps/react-vite/src/components/ui/dropdown/dropdown.tsx",
+   "line": 174
+  },
+  {
+   "nombre": "DropdownMenuShortcut",
+   "file": "apps/nextjs-pages/src/components/ui/dropdown/dropdown.tsx",
+   "line": 174
+  },
+  {
+   "nombre": "DropdownMenuShortcut",
+   "file": "apps/nextjs-app/src/components/ui/dropdown/dropdown.tsx",
+   "line": 176
+  },
+  {
+   "nombre": "Entry",
+   "file": "apps/nextjs-app/src/app/app/profile/_components/profile.tsx",
+   "line": 10
+  },
+  {
+   "nombre": "Error",
+   "file": "apps/react-vite/src/components/ui/notifications/notification.stories.tsx",
+   "line": 53
+  },
+  {
+   "nombre": "Error",
+   "file": "apps/react-vite/src/components/ui/form/error.tsx",
+   "line": 5
+  },
+  {
+   "nombre": "Error",
+   "file": "apps/nextjs-pages/src/components/ui/notifications/notification.stories.tsx",
+   "line": 53
+  },
+  {
+   "nombre": "Error",
+   "file": "apps/nextjs-pages/src/components/ui/form/error.tsx",
+   "line": 5
+  },
+  {
+   "nombre": "Error",
+   "file": "apps/nextjs-app/src/components/ui/notifications/notification.stories.tsx",
+   "line": 53
+  },
+  {
+   "nombre": "Error",
+   "file": "apps/nextjs-app/src/components/ui/form/error.tsx",
+   "line": 5
+  },
+  {
+   "nombre": "FieldWrapper",
+   "file": "apps/react-vite/src/components/ui/form/field-wrapper.tsx",
+   "line": 19
+  },
+  {
+   "nombre": "FieldWrapper",
+   "file": "apps/nextjs-pages/src/components/ui/form/field-wrapper.tsx",
+   "line": 19
+  },
+  {
+   "nombre": "FieldWrapper",
+   "file": "apps/nextjs-app/src/components/ui/form/field-wrapper.tsx",
+   "line": 19
+  },
+  {
+   "nombre": "FormDrawer",
+   "file": "apps/react-vite/src/components/ui/form/form-drawer.tsx",
+   "line": 24
+  },
+  {
+   "nombre": "FormDrawer",
+   "file": "apps/nextjs-pages/src/components/ui/form/form-drawer.tsx",
+   "line": 24
+  },
+  {
+   "nombre": "FormDrawer",
+   "file": "apps/nextjs-app/src/components/ui/form/form-drawer.tsx",
+   "line": 26
+  },
+  {
+   "nombre": "Head",
+   "file": "apps/react-vite/src/components/seo/head.tsx",
+   "line": 10
+  },
+  {
+   "nombre": "Head",
+   "file": "apps/nextjs-pages/src/components/seo/head.tsx",
+   "line": 8
+  },
+  {
+   "nombre": "Info",
+   "file": "apps/react-vite/src/components/ui/notifications/notification.stories.tsx",
+   "line": 17
+  },
+  {
+   "nombre": "Info",
+   "file": "apps/react-vite/src/components/ui/dialog/confirmation-dialog/confirmation-dialog.stories.tsx",
+   "line": 25
+  },
+  {
+   "nombre": "Info",
+   "file": "apps/nextjs-pages/src/components/ui/notifications/notification.stories.tsx",
+   "line": 17
+  },
+  {
+   "nombre": "Info",
+   "file": "apps/nextjs-pages/src/components/ui/dialog/confirmation-dialog/confirmation-dialog.stories.tsx",
+   "line": 25
+  },
+  {
+   "nombre": "Info",
+   "file": "apps/nextjs-app/src/components/ui/notifications/notification.stories.tsx",
+   "line": 17
+  },
+  {
+   "nombre": "Info",
+   "file": "apps/nextjs-app/src/components/ui/dialog/confirmation-dialog/confirmation-dialog.stories.tsx",
+   "line": 25
+  },
+  {
+   "nombre": "Layout",
+   "file": "apps/nextjs-pages/src/components/layouts/dashboard-layout.tsx",
+   "line": 94
+  },
+  {
+   "nombre": "Layout",
+   "file": "apps/nextjs-app/src/app/app/_components/dashboard-layout.tsx",
+   "line": 39
+  },
+  {
+   "nombre": "Link",
+   "file": "apps/react-vite/src/components/ui/link/link.tsx",
+   "line": 5
+  },
+  {
+   "nombre": "Link",
+   "file": "apps/nextjs-pages/src/components/ui/link/link.tsx",
+   "line": 11
+  },
+  {
+   "nombre": "Link",
+   "file": "apps/nextjs-app/src/components/ui/link/link.tsx",
+   "line": 11
+  },
+  {
+   "nombre": "LoginForm",
+   "file": "apps/react-vite/src/features/auth/components/login-form.tsx",
+   "line": 12
+  },
+  {
+   "nombre": "LoginForm",
+   "file": "apps/nextjs-pages/src/features/auth/components/login-form.tsx",
+   "line": 13
+  },
+  {
+   "nombre": "LoginForm",
+   "file": "apps/nextjs-app/src/features/auth/components/login-form.tsx",
+   "line": 15
+  },
+  {
+   "nombre": "Logo",
+   "file": "apps/react-vite/src/components/layouts/dashboard-layout.tsx",
+   "line": 28
+  },
+  {
+   "nombre": "Logo",
+   "file": "apps/nextjs-pages/src/components/layouts/dashboard-layout.tsx",
+   "line": 30
+  },
+  {
+   "nombre": "Logo",
+   "file": "apps/nextjs-app/src/app/app/_components/dashboard-layout.tsx",
+   "line": 28
+  },
+  {
+   "nombre": "MDPreview",
+   "file": "apps/react-vite/src/components/ui/md-preview/md-preview.tsx",
+   "line": 10
+  },
+  {
+   "nombre": "MDPreview",
+   "file": "apps/nextjs-pages/src/components/ui/md-preview/md-preview.tsx",
+   "line": 8
+  },
+  {
+   "nombre": "MDPreview",
+   "file": "apps/nextjs-app/src/components/ui/md-preview/md-preview.tsx",
+   "line": 8
+  },
+  {
+   "nombre": "MainErrorFallback",
+   "file": "apps/react-vite/src/components/errors/main.tsx",
+   "line": 3
+  },
+  {
+   "nombre": "MainErrorFallback",
+   "file": "apps/nextjs-pages/src/components/errors/main.tsx",
+   "line": 3
+  },
+  {
+   "nombre": "MainErrorFallback",
+   "file": "apps/nextjs-app/src/components/errors/main.tsx",
+   "line": 3
+  },
+  {
+   "nombre": "MyForm",
+   "file": "apps/react-vite/src/components/ui/form/form.stories.tsx",
+   "line": 12
+  },
+  {
+   "nombre": "MyForm",
+   "file": "apps/nextjs-pages/src/components/ui/form/form.stories.tsx",
+   "line": 12
+  },
+  {
+   "nombre": "MyForm",
+   "file": "apps/nextjs-app/src/components/ui/form/form.stories.tsx",
+   "line": 12
+  },
+  {
+   "nombre": "Notification",
+   "file": "apps/react-vite/src/components/ui/notifications/notification.tsx",
+   "line": 22
+  },
+  {
+   "nombre": "Notification",
+   "file": "apps/nextjs-pages/src/components/ui/notifications/notification.tsx",
+   "line": 22
+  },
+  {
+   "nombre": "Notification",
+   "file": "apps/nextjs-app/src/components/ui/notifications/notification.tsx",
+   "line": 24
+  },
+  {
+   "nombre": "Notifications",
+   "file": "apps/react-vite/src/components/ui/notifications/notifications.tsx",
+   "line": 4
+  },
+  {
+   "nombre": "Notifications",
+   "file": "apps/nextjs-pages/src/components/ui/notifications/notifications.tsx",
+   "line": 4
+  },
+  {
+   "nombre": "Notifications",
+   "file": "apps/nextjs-app/src/components/ui/notifications/notifications.tsx",
+   "line": 6
+  },
+  {
+   "nombre": "Pagination",
+   "file": "apps/react-vite/src/components/ui/table/pagination.tsx",
+   "line": 13
+  },
+  {
+   "nombre": "Pagination",
+   "file": "apps/nextjs-pages/src/components/ui/table/pagination.tsx",
+   "line": 13
+  },
+  {
+   "nombre": "Pagination",
+   "file": "apps/nextjs-app/src/components/ui/table/pagination.tsx",
+   "line": 13
+  },
+  {
+   "nombre": "PaginationEllipsis",
+   "file": "apps/react-vite/src/components/ui/table/pagination.tsx",
+   "line": 105
+  },
+  {
+   "nombre": "PaginationEllipsis",
+   "file": "apps/nextjs-pages/src/components/ui/table/pagination.tsx",
+   "line": 105
+  },
+  {
+   "nombre": "PaginationEllipsis",
+   "file": "apps/nextjs-app/src/components/ui/table/pagination.tsx",
+   "line": 105
+  },
+  {
+   "nombre": "PaginationLink",
+   "file": "apps/react-vite/src/components/ui/table/pagination.tsx",
+   "line": 48
+  },
+  {
+   "nombre": "PaginationLink",
+   "file": "apps/nextjs-pages/src/components/ui/table/pagination.tsx",
+   "line": 48
+  },
+  {
+   "nombre": "PaginationLink",
+   "file": "apps/nextjs-app/src/components/ui/table/pagination.tsx",
+   "line": 48
+  },
+  {
+   "nombre": "PaginationNext",
+   "file": "apps/react-vite/src/components/ui/table/pagination.tsx",
+   "line": 89
+  },
+  {
+   "nombre": "PaginationNext",
+   "file": "apps/nextjs-pages/src/components/ui/table/pagination.tsx",
+   "line": 89
+  },
+  {
+   "nombre": "PaginationNext",
+   "file": "apps/nextjs-app/src/components/ui/table/pagination.tsx",
+   "line": 89
+  },
+  {
+   "nombre": "PaginationPrevious",
+   "file": "apps/react-vite/src/components/ui/table/pagination.tsx",
+   "line": 73
+  },
+  {
+   "nombre": "PaginationPrevious",
+   "file": "apps/nextjs-pages/src/components/ui/table/pagination.tsx",
+   "line": 73
+  },
+  {
+   "nombre": "PaginationPrevious",
+   "file": "apps/nextjs-app/src/components/ui/table/pagination.tsx",
+   "line": 73
+  },
+  {
+   "nombre": "Profile",
+   "file": "apps/nextjs-app/src/app/app/profile/_components/profile.tsx",
+   "line": 19
+  },
+  {
+   "nombre": "Progress",
+   "file": "apps/react-vite/src/components/layouts/dashboard-layout.tsx",
+   "line": 39
+  },
+  {
+   "nombre": "Progress",
+   "file": "apps/nextjs-pages/src/components/layouts/dashboard-layout.tsx",
+   "line": 41
+  },
+  {
+   "nombre": "RegisterForm",
+   "file": "apps/react-vite/src/features/auth/components/register-form.tsx",
+   "line": 17
+  },
+  {
+   "nombre": "RegisterForm",
+   "file": "apps/nextjs-pages/src/features/auth/components/register-form.tsx",
+   "line": 18
+  },
+  {
+   "nombre": "RegisterForm",
+   "file": "apps/nextjs-app/src/features/auth/components/register-form.tsx",
+   "line": 20
+  },
+  {
+   "nombre": "Select",
+   "file": "apps/react-vite/src/components/ui/form/select.tsx",
+   "line": 20
+  },
+  {
+   "nombre": "Select",
+   "file": "apps/nextjs-pages/src/components/ui/form/select.tsx",
+   "line": 20
+  },
+  {
+   "nombre": "Select",
+   "file": "apps/nextjs-app/src/components/ui/form/select.tsx",
+   "line": 22
+  },
+  {
+   "nombre": "Spinner",
+   "file": "apps/react-vite/src/components/ui/spinner/spinner.tsx",
+   "line": 21
+  },
+  {
+   "nombre": "Spinner",
+   "file": "apps/nextjs-pages/src/components/ui/spinner/spinner.tsx",
+   "line": 21
+  },
+  {
+   "nombre": "Spinner",
+   "file": "apps/nextjs-app/src/components/ui/spinner/spinner.tsx",
+   "line": 21
+  },
+  {
+   "nombre": "Success",
+   "file": "apps/react-vite/src/components/ui/notifications/notification.stories.tsx",
+   "line": 29
+  },
+  {
+   "nombre": "Success",
+   "file": "apps/nextjs-pages/src/components/ui/notifications/notification.stories.tsx",
+   "line": 29
+  },
+  {
+   "nombre": "Success",
+   "file": "apps/nextjs-app/src/components/ui/notifications/notification.stories.tsx",
+   "line": 29
+  },
+  {
+   "nombre": "Table",
+   "file": "apps/react-vite/src/components/ui/table/table.tsx",
+   "line": 138
+  },
+  {
+   "nombre": "Table",
+   "file": "apps/nextjs-pages/src/components/ui/table/table.tsx",
+   "line": 138
+  },
+  {
+   "nombre": "Table",
+   "file": "apps/nextjs-app/src/components/ui/table/table.tsx",
+   "line": 138
+  },
+  {
+   "nombre": "TablePagination",
+   "file": "apps/react-vite/src/components/ui/table/pagination.tsx",
+   "line": 136
+  },
+  {
+   "nombre": "TablePagination",
+   "file": "apps/nextjs-pages/src/components/ui/table/pagination.tsx",
+   "line": 136
+  },
+  {
+   "nombre": "TablePagination",
+   "file": "apps/nextjs-app/src/components/ui/table/pagination.tsx",
+   "line": 136
+  },
+  {
+   "nombre": "UpdateDiscussion",
+   "file": "apps/react-vite/src/features/discussions/components/update-discussion.tsx",
+   "line": 18
+  },
+  {
+   "nombre": "UpdateDiscussion",
+   "file": "apps/nextjs-pages/src/features/discussions/components/update-discussion.tsx",
+   "line": 25
+  },
+  {
+   "nombre": "UpdateDiscussion",
+   "file": "apps/nextjs-app/src/features/discussions/components/update-discussion.tsx",
+   "line": 28
+  },
+  {
+   "nombre": "UpdateProfile",
+   "file": "apps/react-vite/src/features/users/components/update-profile.tsx",
+   "line": 13
+  },
+  {
+   "nombre": "UpdateProfile",
+   "file": "apps/nextjs-pages/src/features/users/components/update-profile.tsx",
+   "line": 13
+  },
+  {
+   "nombre": "UpdateProfile",
+   "file": "apps/nextjs-app/src/features/users/components/update-profile.tsx",
+   "line": 15
+  },
+  {
+   "nombre": "Users",
+   "file": "apps/nextjs-app/src/app/app/users/_components/users.tsx",
+   "line": 10
+  },
+  {
+   "nombre": "UsersList",
+   "file": "apps/react-vite/src/features/users/components/users-list.tsx",
+   "line": 9
+  },
+  {
+   "nombre": "UsersList",
+   "file": "apps/nextjs-pages/src/features/users/components/users-list.tsx",
+   "line": 9
+  },
+  {
+   "nombre": "UsersList",
+   "file": "apps/nextjs-app/src/features/users/components/users-list.tsx",
+   "line": 11
+  },
+  {
+   "nombre": "Warning",
+   "file": "apps/react-vite/src/components/ui/notifications/notification.stories.tsx",
+   "line": 41
+  },
+  {
+   "nombre": "Warning",
+   "file": "apps/nextjs-pages/src/components/ui/notifications/notification.stories.tsx",
+   "line": 41
+  },
+  {
+   "nombre": "Warning",
+   "file": "apps/nextjs-app/src/components/ui/notifications/notification.stories.tsx",
+   "line": 41
+  },
+  {
+   "nombre": "WithCheckboxItems",
+   "file": "apps/react-vite/src/components/ui/dropdown/dropdown.stories.tsx",
+   "line": 41
+  },
+  {
+   "nombre": "WithCheckboxItems",
+   "file": "apps/nextjs-pages/src/components/ui/dropdown/dropdown.stories.tsx",
+   "line": 41
+  },
+  {
+   "nombre": "WithCheckboxItems",
+   "file": "apps/nextjs-app/src/components/ui/dropdown/dropdown.stories.tsx",
+   "line": 41
+  },
+  {
+   "nombre": "WithRadioItems",
+   "file": "apps/react-vite/src/components/ui/dropdown/dropdown.stories.tsx",
+   "line": 68
+  },
+  {
+   "nombre": "WithRadioItems",
+   "file": "apps/nextjs-pages/src/components/ui/dropdown/dropdown.stories.tsx",
+   "line": 68
+  },
+  {
+   "nombre": "WithRadioItems",
+   "file": "apps/nextjs-app/src/components/ui/dropdown/dropdown.stories.tsx",
+   "line": 68
+  },
+  {
+   "nombre": "WithSubmenus",
+   "file": "apps/react-vite/src/components/ui/dropdown/dropdown.stories.tsx",
+   "line": 91
+  },
+  {
+   "nombre": "WithSubmenus",
+   "file": "apps/nextjs-pages/src/components/ui/dropdown/dropdown.stories.tsx",
+   "line": 91
+  },
+  {
+   "nombre": "WithSubmenus",
+   "file": "apps/nextjs-app/src/components/ui/dropdown/dropdown.stories.tsx",
+   "line": 91
+  }
+ ],
+ "paginas": [
+  {
+   "nombre": "App",
+   "file": "apps/nextjs-pages/src/pages/_app.tsx",
+   "line": 18,
+   "rutas": []
+  },
+  {
+   "nombre": "AppProvider",
+   "file": "apps/nextjs-pages/src/app/provider.tsx",
+   "line": 15,
+   "rutas": []
+  },
+  {
+   "nombre": "AuthLayout",
+   "file": "apps/nextjs-pages/src/components/layouts/auth-layout.tsx",
+   "line": 15,
+   "rutas": []
+  },
+  {
+   "nombre": "Comments",
+   "file": "apps/nextjs-pages/src/features/comments/components/comments.tsx",
+   "line": 10,
+   "rutas": []
+  },
+  {
+   "nombre": "CommentsList",
+   "file": "apps/nextjs-pages/src/features/comments/components/comments-list.tsx",
+   "line": 20,
+   "rutas": []
+  },
+  {
+   "nombre": "ConfirmationDialog",
+   "file": "apps/nextjs-pages/src/components/ui/dialog/confirmation-dialog/confirmation-dialog.tsx",
+   "line": 27,
+   "rutas": []
+  },
+  {
+   "nombre": "ContentLayout",
+   "file": "apps/nextjs-pages/src/components/layouts/content-layout.tsx",
+   "line": 10,
+   "rutas": []
+  },
+  {
+   "nombre": "CreateComment",
+   "file": "apps/nextjs-pages/src/features/comments/components/create-comment.tsx",
+   "line": 16,
+   "rutas": []
+  },
+  {
+   "nombre": "CreateDiscussion",
+   "file": "apps/nextjs-pages/src/features/discussions/components/create-discussion.tsx",
+   "line": 20,
+   "rutas": []
+  },
+  {
+   "nombre": "Danger",
+   "file": "apps/nextjs-pages/src/components/ui/dialog/confirmation-dialog/confirmation-dialog.stories.tsx",
+   "line": 15,
+   "rutas": []
+  },
+  {
+   "nombre": "DashboardPage",
+   "file": "apps/nextjs-pages/src/app/pages/app/dashboard.tsx",
+   "line": 7,
+   "rutas": []
+  },
+  {
+   "nombre": "DashboardRoute",
+   "file": "apps/react-vite/src/app/routes/app/dashboard.tsx",
+   "line": 5,
+   "rutas": []
+  },
+  {
+   "nombre": "Default",
+   "file": "apps/react-vite/src/components/ui/md-preview/md-preview.stories.tsx",
+   "line": 13,
+   "rutas": []
+  },
+  {
+   "nombre": "Default",
+   "file": "apps/nextjs-pages/src/components/ui/button/button.stories.tsx",
+   "line": 12,
+   "rutas": []
+  },
+  {
+   "nombre": "Default",
+   "file": "apps/nextjs-pages/src/components/ui/spinner/spinner.stories.tsx",
+   "line": 13,
+   "rutas": []
+  },
+  {
+   "nombre": "Default",
+   "file": "apps/nextjs-pages/src/components/ui/dropdown/dropdown.stories.tsx",
+   "line": 27,
+   "rutas": []
+  },
+  {
+   "nombre": "Default",
+   "file": "apps/nextjs-pages/src/components/ui/md-preview/md-preview.stories.tsx",
+   "line": 13,
+   "rutas": []
+  },
+  {
+   "nombre": "Default",
+   "file": "apps/nextjs-pages/src/components/ui/link/link.stories.tsx",
+   "line": 13,
+   "rutas": []
+  },
+  {
+   "nombre": "Default",
+   "file": "apps/nextjs-pages/src/components/ui/table/table.stories.tsx",
+   "line": 41,
+   "rutas": []
+  },
+  {
+   "nombre": "Default",
+   "file": "apps/nextjs-app/src/components/ui/md-preview/md-preview.stories.tsx",
+   "line": 13,
+   "rutas": []
+  },
+  {
+   "nombre": "DeleteComment",
+   "file": "apps/nextjs-pages/src/features/comments/components/delete-comment.tsx",
+   "line": 14,
+   "rutas": []
+  },
+  {
+   "nombre": "DeleteDiscussion",
+   "file": "apps/nextjs-pages/src/features/discussions/components/delete-discussion.tsx",
+   "line": 14,
+   "rutas": []
+  },
+  {
+   "nombre": "DeleteUser",
+   "file": "apps/nextjs-pages/src/features/users/components/delete-user.tsx",
+   "line": 12,
+   "rutas": []
+  },
+  {
+   "nombre": "DemoDialog",
+   "file": "apps/nextjs-pages/src/components/ui/dialog/dialog.stories.tsx",
+   "line": 17,
+   "rutas": []
+  },
+  {
+   "nombre": "DemoDrawer",
+   "file": "apps/nextjs-pages/src/components/ui/drawer/drawer.stories.tsx",
+   "line": 25,
+   "rutas": []
+  },
+  {
+   "nombre": "DialogHeader",
+   "file": "apps/nextjs-pages/src/components/ui/dialog/dialog.tsx",
+   "line": 54,
+   "rutas": []
+  },
+  {
+   "nombre": "DiscussionPage",
+   "file": "apps/nextjs-pages/src/app/pages/app/discussions/discussion.tsx",
+   "line": 44,
+   "rutas": []
+  },
+  {
+   "nombre": "DiscussionRoute",
+   "file": "apps/react-vite/src/app/routes/app/discussions/discussion.tsx",
+   "line": 38,
+   "rutas": []
+  },
+  {
+   "nombre": "DiscussionView",
+   "file": "apps/nextjs-pages/src/features/discussions/components/discussion-view.tsx",
+   "line": 13,
+   "rutas": []
+  },
+  {
+   "nombre": "DiscussionsList",
+   "file": "apps/nextjs-pages/src/features/discussions/components/discussions-list.tsx",
+   "line": 19,
+   "rutas": []
+  },
+  {
+   "nombre": "DiscussionsPage",
+   "file": "apps/nextjs-pages/src/app/pages/app/discussions/discussions.tsx",
+   "line": 9,
+   "rutas": []
+  },
+  {
+   "nombre": "DiscussionsRoute",
+   "file": "apps/react-vite/src/app/routes/app/discussions/discussions.tsx",
+   "line": 25,
+   "rutas": []
+  },
+  {
+   "nombre": "DrawerHeader",
+   "file": "apps/nextjs-pages/src/components/ui/drawer/drawer.tsx",
+   "line": 76,
+   "rutas": []
+  },
+  {
+   "nombre": "DropdownMenuShortcut",
+   "file": "apps/nextjs-pages/src/components/ui/dropdown/dropdown.tsx",
+   "line": 174,
+   "rutas": []
+  },
+  {
+   "nombre": "Entry",
+   "file": "apps/react-vite/src/app/routes/app/profile.tsx",
+   "line": 9,
+   "rutas": []
+  },
+  {
+   "nombre": "Entry",
+   "file": "apps/nextjs-pages/src/app/pages/app/profile.tsx",
+   "line": 11,
+   "rutas": []
+  },
+  {
+   "nombre": "Error",
+   "file": "apps/nextjs-pages/src/components/ui/form/error.tsx",
+   "line": 5,
+   "rutas": []
+  },
+  {
+   "nombre": "ErrorBoundary",
+   "file": "apps/react-vite/src/app/routes/app/root.tsx",
+   "line": 5,
+   "rutas": []
+  },
+  {
+   "nombre": "FieldWrapper",
+   "file": "apps/nextjs-pages/src/components/ui/form/field-wrapper.tsx",
+   "line": 19,
+   "rutas": []
+  },
+  {
+   "nombre": "FormDrawer",
+   "file": "apps/nextjs-pages/src/components/ui/form/form-drawer.tsx",
+   "line": 24,
+   "rutas": []
+  },
+  {
+   "nombre": "Head",
+   "file": "apps/nextjs-pages/src/components/seo/head.tsx",
+   "line": 8,
+   "rutas": []
+  },
+  {
+   "nombre": "HomePage",
+   "file": "apps/nextjs-pages/src/pages/index.tsx",
+   "line": 8,
+   "rutas": []
+  },
+  {
+   "nombre": "Info",
+   "file": "apps/nextjs-pages/src/components/ui/notifications/notification.stories.tsx",
+   "line": 17,
+   "rutas": []
+  },
+  {
+   "nombre": "LandingRoute",
+   "file": "apps/react-vite/src/app/routes/landing.tsx",
+   "line": 9,
+   "rutas": []
+  },
+  {
+   "nombre": "Link",
+   "file": "apps/nextjs-pages/src/components/ui/link/link.tsx",
+   "line": 11,
+   "rutas": []
+  },
+  {
+   "nombre": "LoginForm",
+   "file": "apps/nextjs-pages/src/features/auth/components/login-form.tsx",
+   "line": 13,
+   "rutas": []
+  },
+  {
+   "nombre": "LoginPage",
+   "file": "apps/nextjs-pages/src/app/pages/auth/login.tsx",
+   "line": 8,
+   "rutas": []
+  },
+  {
+   "nombre": "LoginRoute",
+   "file": "apps/react-vite/src/app/routes/auth/login.tsx",
+   "line": 7,
+   "rutas": []
+  },
+  {
+   "nombre": "Logo",
+   "file": "apps/nextjs-pages/src/components/layouts/dashboard-layout.tsx",
+   "line": 30,
+   "rutas": []
+  },
+  {
+   "nombre": "MDPreview",
+   "file": "apps/react-vite/src/components/ui/md-preview/md-preview.tsx",
+   "line": 10,
+   "rutas": []
+  },
+  {
+   "nombre": "MDPreview",
+   "file": "apps/nextjs-pages/src/components/ui/md-preview/md-preview.tsx",
+   "line": 8,
+   "rutas": []
+  },
+  {
+   "nombre": "MDPreview",
+   "file": "apps/nextjs-app/src/components/ui/md-preview/md-preview.tsx",
+   "line": 8,
+   "rutas": []
+  },
+  {
+   "nombre": "MainErrorFallback",
+   "file": "apps/nextjs-pages/src/components/errors/main.tsx",
+   "line": 3,
+   "rutas": []
+  },
+  {
+   "nombre": "MyForm",
+   "file": "apps/nextjs-pages/src/components/ui/form/form.stories.tsx",
+   "line": 12,
+   "rutas": []
+  },
+  {
+   "nombre": "NotFoundPage",
+   "file": "apps/nextjs-pages/src/pages/404.tsx",
+   "line": 4,
+   "rutas": []
+  },
+  {
+   "nombre": "NotFoundRoute",
+   "file": "apps/react-vite/src/app/routes/not-found.tsx",
+   "line": 4,
+   "rutas": []
+  },
+  {
+   "nombre": "Notification",
+   "file": "apps/nextjs-pages/src/components/ui/notifications/notification.tsx",
+   "line": 22,
+   "rutas": []
+  },
+  {
+   "nombre": "Notifications",
+   "file": "apps/nextjs-pages/src/components/ui/notifications/notifications.tsx",
+   "line": 4,
+   "rutas": []
+  },
+  {
+   "nombre": "POLICIES",
+   "file": "apps/nextjs-pages/src/lib/authorization.tsx",
+   "line": 15,
+   "rutas": []
+  },
+  {
+   "nombre": "Pagination",
+   "file": "apps/nextjs-pages/src/components/ui/table/pagination.tsx",
+   "line": 13,
+   "rutas": []
+  },
+  {
+   "nombre": "ProtectedRoute",
+   "file": "apps/nextjs-pages/src/lib/auth.tsx",
+   "line": 79,
+   "rutas": []
+  },
+  {
+   "nombre": "RegisterForm",
+   "file": "apps/nextjs-pages/src/features/auth/components/register-form.tsx",
+   "line": 18,
+   "rutas": []
+  },
+  {
+   "nombre": "RegisterPage",
+   "file": "apps/nextjs-pages/src/app/pages/auth/register.tsx",
+   "line": 9,
+   "rutas": []
+  },
+  {
+   "nombre": "RegisterRoute",
+   "file": "apps/react-vite/src/app/routes/auth/register.tsx",
+   "line": 9,
+   "rutas": []
+  },
+  {
+   "nombre": "Select",
+   "file": "apps/nextjs-pages/src/components/ui/form/select.tsx",
+   "line": 20,
+   "rutas": []
+  },
+  {
+   "nombre": "Spinner",
+   "file": "apps/nextjs-pages/src/components/ui/spinner/spinner.tsx",
+   "line": 21,
+   "rutas": []
+  },
+  {
+   "nombre": "Table",
+   "file": "apps/nextjs-pages/src/components/ui/table/table.tsx",
+   "line": 138,
+   "rutas": []
+  },
+  {
+   "nombre": "UpdateDiscussion",
+   "file": "apps/nextjs-pages/src/features/discussions/components/update-discussion.tsx",
+   "line": 25,
+   "rutas": []
+  },
+  {
+   "nombre": "UpdateProfile",
+   "file": "apps/nextjs-pages/src/features/users/components/update-profile.tsx",
+   "line": 13,
+   "rutas": []
+  },
+  {
+   "nombre": "UsersList",
+   "file": "apps/nextjs-pages/src/features/users/components/users-list.tsx",
+   "line": 9,
+   "rutas": []
+  },
+  {
+   "nombre": "UsersPage",
+   "file": "apps/nextjs-pages/src/app/pages/app/users.tsx",
+   "line": 7,
+   "rutas": []
+  },
+  {
+   "nombre": "UsersRoute",
+   "file": "apps/react-vite/src/app/routes/app/users.tsx",
+   "line": 17,
+   "rutas": []
+  }
+ ],
+ "modelos": [],
+ "serializers": [],
+ "vistas": [],
+ "tareas": []
+}

@@ -1,0 +1,51 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>Demo · terminal</title>
+<!--
+  T22 · arquetipo 2 de 4 — la terminal que se escribe sola.
+  ⚠️ SIN PRECEDENTE EN EL CORPUS: es una PROPUESTA, no un patrón. Medido el 2026-09-18:
+  cero coincidencias de `typewriter` y de `terminal` en los 10 diseños. Se incluye porque el
+  arquetipo es conocido y útil para producto de línea de comandos, pero **no puede citarse como
+  «así lo hacemos aquí»** — aquí no lo ha hecho nadie todavía.
+  Doctrina: patterns/diseno/demo-de-producto.md
+
+  Cuándo usarlo: el producto ES una herramienta de línea de comandos o un flujo técnico. Si el
+  producto tiene interfaz gráfica, esto es cosplay — usa el arquetipo 1 o una captura real.
+
+  Sin JS se ve la sesión ENTERA ya escrita, que es la información. El tecleo es el adorno.
+-->
+<style>
+ :root{--fondo:#0b0f14;--txt:#d6e2ea;--verde:#6ecec0;--gris:#6b7c8a}
+ body{margin:0;min-height:100vh;display:grid;place-items:center;background:#05080b;font-family:system-ui}
+ .term{width:min(560px,92vw);background:var(--fondo);border:1px solid #ffffff14;border-radius:12px;overflow:hidden}
+ .barra{display:flex;gap:.4rem;padding:.7rem .9rem;border-bottom:1px solid #ffffff10}
+ .barra i{width:11px;height:11px;border-radius:50%;background:#ffffff1f}
+ pre{margin:0;padding:1.1rem;font:14px/1.7 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--txt);
+     white-space:pre-wrap;word-break:break-word}
+ .prompt{color:var(--verde)} .coment{color:var(--gris)}
+ .cursor{display:none;width:8px;height:1em;background:var(--verde);vertical-align:-2px}
+ body.js-ready .cursor{display:inline-block;animation:parpadeo 1s steps(2) infinite}
+ @keyframes parpadeo{50%{opacity:0}}
+ @media (prefers-reduced-motion:reduce){body.js-ready .cursor{display:none}}
+</style></head><body>
+ <div class="term">
+   <div class="barra" aria-hidden="true"><i></i><i></i><i></i></div>
+   <pre id="s" aria-live="polite" aria-label="Sesión de ejemplo"><span class="prompt">$</span> proyecto desplegar
+<span class="coment"># comprobando 42 pruebas…</span>
+<span class="coment"># todo en verde · 8,2 s</span>
+Publicado en https://ejemplo.test<span class="cursor"></span></pre>
+ </div>
+<script>
+(function(){
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches) return;  // se queda escrita entera
+  document.body.classList.add('js-ready');
+  var pre=document.getElementById('s'), nodos=[].slice.call(pre.childNodes), guardado=pre.innerHTML;
+  // Se vacía SOLO después de haber guardado el contenido: si algo falla a mitad, se restaura.
+  try{
+    pre.textContent=''; var i=0;
+    (function escribir(){
+      if(i>=nodos.length){ return; }
+      pre.appendChild(nodos[i++]); setTimeout(escribir, 420);
+    })();
+  }catch(e){ pre.innerHTML=guardado; }
+})();
+</script></body></html>

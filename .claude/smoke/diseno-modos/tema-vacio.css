@@ -1,0 +1,4 @@
+/* Un tema sin tokens: no hay nada que comparar, así que el gate NO puede decir «coinciden». */
+body {
+  margin: 0;
+}

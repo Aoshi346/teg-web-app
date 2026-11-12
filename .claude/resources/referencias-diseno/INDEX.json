@@ -1,0 +1,225 @@
+{
+  "version": 1,
+  "generado": "2026-09-18",
+  "que_es": "Índice del corpus de referencia de diseño. Lo consumen: skills/marca (paso 3) (set de referencias del proyecto), agents/vera-art-director (regla R-E: citar 2 referencias con fichero:línea antes de puntuar alto) y scripts/corpus_lint.py (caducidad, concentración, uso).",
+  "origen": {
+    "workspace": "/home/web_design",
+    "nota_de_ruta": "Estaba en /home/old/web_design; Miller lo movió a /home/web_design el 2026-09-18. El corpus se vendoriza igual: tiene que viajar con el template a cada proyecto derivado, esté donde esté el original.",
+    "autoria": "Diseños producidos por esta casa (Elev) para sus clientes entre feb y abr de 2026. No son de terceros: no hay problema de licencia, y por eso se pueden citar línea a línea.",
+    "commits": 53
+  },
+  "limites_honestos": [
+    "Diez diseños de UN solo equipo NO son dominancia (patterns/README.md §1 exige ≥85% medido). Este corpus es canon DECLARADO, y el precedente es GAP-1: las reglas ag-* siguen en sombra por estar medidas en dos repos propios.",
+    "Las FOTOS no viajan (habría costado 2,3 MB solo yessmassage). Estos ficheros son para LEER y CITAR, no para renderizar: abiertos en un navegador salen sin imágenes.",
+    "Los ficheros de bien/ tienen defectos reales, y van listados en `defectos_conocidos`. Un corpus sin esa columna se convierte en doctrina y se copia entero, defectos incluidos.",
+    "El ranking que ordena estas entradas es HUMANO (proceso/RANKING.csv). El ranking que hizo la IA sobre las mismas versiones (proceso/elevaiti-FINAL-RECOMMENDATION.md) eligió otras y el humano lo ignoró: se conserva a propósito, como recordatorio de que el auto-ranking no se usa.",
+    "El propio `proceso/galeria-elevaiti.html` trae el fallo de GD-10 en cinco sitios (`font-family:'X',system-ui;sans-serif;`, donde el punto y coma corta la declaración). Se conserva tal cual: es evidencia, y además es el fixture real de esa regla.",
+    "SOLO HAY UNA referencia de perfil `producto-panel` (consultorpro). Consecuencia directa: en un proyecto de panel, la regla R-E de Vera NO puede exigir citar dos referencias del corpus — o se citan las del proyecto (`set.json`), o se declara `referencias: ausentes` y no se puede puntuar por encima de 7,0. No se inventa una segunda: se dice. Lo detecta `scripts/corpus_lint.py`."
+  ],
+  "entradas": [
+    {
+      "id": "yessmassage-v7",
+      "ruta": "bien/yessmassage-v7.html",
+      "veredicto": "bien",
+      "sector": "bienestar · masaje",
+      "perfil": "web-cliente",
+      "direccion_de_arte": "Zen · Awwwards Edition",
+      "por_que_entra": "El sistema de tokens más completo del corpus y el mejor ejemplo de T18: el movimiento EXPRESA el sector (respiración, onda de agua, incienso). Nació de un brief de sensación: «animaciones relajantes como un masaje».",
+      "tecnicas": {
+        "T5": "18-81",
+        "T18": "527-544",
+        "T19": "538",
+        "T21": "real",
+        "T23": "reduced-motion"
+      },
+      "defectos_conocidos": [
+        "linea 40 · `--text-muted: #e8e8e8` (casi blanco) sobre fondo crema: fallo de contraste dentro de una referencia marcada como buena",
+        "linea 37 · `--bg: var(--beige)` apunta a un token que NO se define en ninguna parte (0 coincidencias de `--beige:`)",
+        "linea 28 · `--rose: #5a922d` es un VERDE: el nombre del token miente sobre su valor (semilla de GD-04)",
+        "36 usos de `!important` y dos bloques «CONTRAST FIXES» (2931, 2990): capa de parches (semilla de GD-03)",
+        "4636-4637 · loader forzado de 3,2 s (semilla de GD-02)",
+        "GD-06 · `cursor:none` en 10 sitios, incluido `body` (:105) y `button` (:114): si el JS del cursor propio falla, la página se queda sin puntero. Lo tiene el MEJOR diseño del corpus"
+      ],
+      "fecha_captura": "2026-03",
+      "caducidad_revision": "2027-09-18"
+    },
+    {
+      "id": "kalinayoga-v6",
+      "ruta": "bien/kalinayoga-v6.html",
+      "veredicto": "bien",
+      "sector": "bienestar · yoga",
+      "perfil": "web-cliente",
+      "direccion_de_arte": "Boho Chic Mediterráneo",
+      "por_que_entra": "La mejor ejecución de T1 (titular display de tres líneas con una en itálica) y del acento por tarjeta vía custom property.",
+      "tecnicas": {
+        "T1": "55-59, 326-329",
+        "T2": "DM Serif Display + DM Sans",
+        "T6": "553-562",
+        "T20": "marquesina",
+        "T21": "overlay teñido"
+      },
+      "defectos_conocidos": [
+        "sin bloque prefers-reduced-motion",
+        "el menú móvil es un alert() (semilla de GD-11)"
+      ],
+      "fecha_captura": "2026-03",
+      "caducidad_revision": "2027-09-18"
+    },
+    {
+      "id": "kalinayoga-v4",
+      "ruta": "bien/kalinayoga-v4.html",
+      "veredicto": "bien",
+      "sector": "bienestar · yoga",
+      "perfil": "web-cliente",
+      "direccion_de_arte": "Luxury Editorial",
+      "por_que_entra": "Prueba que el MISMO cliente admite dos mundos visuales distintos y coherentes: es el argumento de por qué se generan varias direcciones con nombre antes de elegir.",
+      "tecnicas": {
+        "T1": "39-47",
+        "T3": "escala fluida + tracking .25em",
+        "T4": "98-111"
+      },
+      "defectos_conocidos": [
+        "un <br> tras un span display:block deja una línea vacía de ~130px en el h1"
+      ],
+      "fecha_captura": "2026-03",
+      "caducidad_revision": "2027-09-18"
+    },
+    {
+      "id": "elevaiti-v53",
+      "ruta": "bien/elevaiti-v53.html",
+      "veredicto": "bien",
+      "sector": "agencia de IA · B2B",
+      "perfil": "web-cliente",
+      "direccion_de_arte": "Minimal (inspirada en minimal.es)",
+      "por_que_entra": "LA referencia del motor de reveal: `body.js-ready .fade-up{opacity:0}` en 92-94. El contenido se ve SIN JS por construcción — es el contraejemplo exacto de mal/attomo-digital.html.",
+      "tecnicas": {
+        "T11": "92-94",
+        "T10": "rejilla con filete"
+      },
+      "defectos_conocidos": [
+        "emojis usados como iconos, que el propio documento de marca del cliente prohíbe (semilla de GD-09)"
+      ],
+      "fecha_captura": "2026-03",
+      "caducidad_revision": "2027-09-18"
+    },
+    {
+      "id": "elevaiti-v5",
+      "ruta": "bien/elevaiti-v5.html",
+      "veredicto": "bien",
+      "sector": "agencia de IA · B2B",
+      "perfil": "web-cliente",
+      "direccion_de_arte": "AI Experience",
+      "por_que_entra": "PRIMERA del ranking humano. T22: en vez de ilustrar el producto, lo ENSEÑA funcionando (chat con indicador de escritura en 756-761).",
+      "tecnicas": {
+        "T22": "756-761",
+        "T8": "grano"
+      },
+      "defectos_conocidos": [
+        "paleta cian/púrpura, que es de los clusters de «look de IA» que lista frontend-design",
+        "**5 variables que NO se definen en ninguna parte** y se usan 31 veces: --white-25 (1), --white-40 (9), --white-50 (14), --white-70 (5), --white-80 (2). El color acaba resolviendo a nada. Lo encontró `gate_diseno.py` al correrse sobre el corpus el 2026-09-18 — leyendo el fichero no se ve"
+      ],
+      "fecha_captura": "2026-03",
+      "caducidad_revision": "2027-09-18"
+    },
+    {
+      "id": "elevaiti-v7",
+      "ruta": "bien/elevaiti-v7.html",
+      "veredicto": "bien",
+      "sector": "agencia de IA · B2B",
+      "perfil": "web-cliente",
+      "direccion_de_arte": "Interactive Showcase",
+      "por_que_entra": "TERCERA del ranking humano. El kit de demo B2B: calculadora de ROI y tarjetas que giran (1801, 1990).",
+      "tecnicas": {
+        "T22": "1801, 1990-1995"
+      },
+      "defectos_conocidos": [
+        "GD-05 · hay animación y CERO bloques `prefers-reduced-motion` (:45)",
+        "GD-09 · **193 emojis usados como icono** en 131 líneas, desde la :1718 — y el documento de marca de este mismo cliente los prohíbe (`proceso/elevaiti-BRANDING-VISUAL.md`)",
+        "GD-12 · `outline` quitado sin reponer el foco con `:focus-visible` (:59)",
+        "GD-07 · copy de relleno en :1759 («Transforma tu…») y un marcador «XXX» sin terminar en :2888"
+      ],
+      "fecha_captura": "2026-03",
+      "caducidad_revision": "2027-09-18"
+    },
+    {
+      "id": "elevaiti-v2",
+      "ruta": "bien/elevaiti-v2.html",
+      "veredicto": "bien",
+      "sector": "agencia de IA · B2B",
+      "perfil": "web-cliente",
+      "direccion_de_arte": "Premium Minimal",
+      "por_que_entra": "SEGUNDA del ranking humano, con su crítica escrita al lado en RANKING.csv («se ve un poco vacía»): sirve para calibrar qué separa un 2º de un 1º.",
+      "tecnicas": {
+        "T1": "subrayado dibujado bajo la palabra clave",
+        "T17": "relleno de botón por barrido"
+      },
+      "defectos_conocidos": [
+        "GD-05 · hay animación y CERO bloques `prefers-reduced-motion` (:32)",
+        "GD-06 · `cursor:none` GLOBAL en `body` (:40) y en otros 16 selectores (:217)",
+        "GD-09 · un emoji como icono (:1745)",
+        "GD-12 · `outline` quitado sin reponer el foco (:1544)"
+      ],
+      "fecha_captura": "2026-03",
+      "caducidad_revision": "2027-09-18"
+    },
+    {
+      "id": "dale-marketing-v4",
+      "ruta": "bien/dale-marketing-v4/index.html",
+      "veredicto": "bien",
+      "sector": "agencia de marketing",
+      "perfil": "web-cliente",
+      "direccion_de_arte": "DALE · carretera",
+      "por_que_entra": "LA referencia de accesibilidad del corpus (T23): skip link, aria-expanded, Escape, y reduced-motion en CSS Y en JS. Además T18 con el nombre del cliente convertido en movimiento (la carretera que se dibuja desde el horizonte).",
+      "tecnicas": {
+        "T23": "index:17 · styles:310-322 · styles:1423 · script:11",
+        "T13": "revelado por palabras",
+        "T18": "carretera"
+      },
+      "defectos_conocidos": [
+        "barra de progreso falsa de 1,6 s al cargar (semilla de GD-02)"
+      ],
+      "fecha_captura": "2026-03",
+      "caducidad_revision": "2027-09-18"
+    },
+    {
+      "id": "consultorpro",
+      "ruta": "bien/consultorpro.html",
+      "veredicto": "bien",
+      "sector": "consultoría · servicios profesionales",
+      "perfil": "producto-panel",
+      "direccion_de_arte": "Editorial numerada",
+      "por_que_entra": "Única entrada con perfil producto/panel y la única que comparte paleta con material impreso (el dosier A4 sale de los mismos tokens). Secciones numeradas en 1679.",
+      "tecnicas": {
+        "T4": "1679",
+        "T24": "misma paleta en web e impreso"
+      },
+      "defectos_conocidos": [
+        "escasez declarada («solo 7 plazas»): solo es aceptable si es verdad (semilla de GD-08)"
+      ],
+      "fecha_captura": "2026-03",
+      "caducidad_revision": "2027-09-18"
+    },
+    {
+      "id": "attomo-digital",
+      "ruta": "mal/attomo-digital.html",
+      "veredicto": "mal",
+      "sector": "agencia digital",
+      "perfil": "web-cliente",
+      "direccion_de_arte": "Dark editorial · Syne + DM Sans",
+      "por_que_entra": "FIXTURE. Visualmente es de lo mejor del corpus y está ROTO de la peor manera posible: `initGSAP()` se define en 1441 y NO SE LLAMA NUNCA (una sola aparición en todo el fichero), así que todo lo que lleva `.reveal` se queda en `opacity:0` (1006) y la página está DESPLEGADA así. Es el caso real que justifica GD-01 y la regla de mejora progresiva.",
+      "tecnicas": {
+        "T8": "97, 123",
+        "T15": "1403",
+        "T16": "1574",
+        "T9": "rejilla enmascarada + orbes"
+      },
+      "defectos_conocidos": [
+        "1441 · initGSAP() definido y nunca invocado → contenido invisible si el JS no corre (GD-01)",
+        "48, 315 · cursor:none global (GD-06)",
+        "sin bloque prefers-reduced-motion (GD-05)"
+      ],
+      "fecha_captura": "2026-04",
+      "caducidad_revision": "2027-09-18"
+    }
+  ]
+}

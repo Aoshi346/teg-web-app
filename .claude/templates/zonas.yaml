@@ -1,0 +1,30 @@
+# zonas.yaml — mapa de zonas verde / amarilla / roja de ESTE proyecto (EQ-D24, sub-ola 3.11)
+#
+# Lo dibuja una PERSONA, no el agente: que lo deduzca el agente sería más cómodo, pero es justo el juicio
+# que no se le quiere delegar. Se copia a `.claude/zonas.yaml` del proyecto, se rellena en una sesión y
+# se firma. Una zona solo cambia de color si se lo gana (tests nuevos, un incidente), y el cambio lo firma
+# también una persona. Lo leen `governance.md` §3.1 (cuánta autonomía) y el auditor de impacto.
+# Consulta: python3 .claude/scripts/zona.py <ruta> [<ruta>…]   ·   política: rules/audit-team.md §9
+#
+#   verde     bien testeada y aislada: el agente trabaja en bucle cerrado (autonomía de governance §3.1)
+#   amarilla  calidad mixta: tests de caracterización ANTES de tocar; plan corto primero
+#   roja      auth, facturación, permisos, datos de personas: humano en cada paso, o no se toca
+#
+# Lo que no casa con ninguna regla es AMARILLO. Sin firma, el mapa entero vale como amarillo.
+
+firmado_por: ""          # nombre de la persona que lo dibujó (obligatorio para que cuente)
+fecha: ""                # AAAA-MM-DD
+zonas:
+  # la PRIMERA regla que casa manda: de lo más concreto a lo más general
+  - ruta: "backend/apps/auth/**"
+    color: roja
+    porque: "autenticación y permisos"
+  - ruta: "backend/apps/billing/**"
+    color: roja
+    porque: "facturación: un error es dinero"
+  - ruta: "frontend/src/components/**"
+    color: verde
+    porque: "componentes con tests y storybook"
+  - ruta: "backend/apps/legacy/**"
+    color: amarilla
+    porque: "sin tests: caracterizar antes de tocar"

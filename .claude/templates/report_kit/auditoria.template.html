@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="es">
+<!--
+  report_kit/auditoria.template.html — la salud del PROPIO repo, aparte del plan de trabajo.
+  Reúne lo que la auditoría encontró (deuda, ficheros muertos, contradicciones, estructura) y los
+  items de refactorización, con su estado y su decisión. NO duplica la lógica de decisión del
+  dashboard: enlaza a él (`dashboard.html#ID` abre el detalle) para no tener dos sitios donde
+  decidir lo mismo. Se genera solo si el plan tiene items de auditoría (meta.audit_prefixes).
+  Self-contained: tokens de templates/html/base.html, sin CDN. Ver rules/report-kit.md.
+-->
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Auditoría</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Crect%20width='100'%20height='100'%20rx='22'%20fill='%231b2a4a'/%3E%3Ctext%20x='50'%20y='70'%20font-size='56'%20font-family='system-ui,sans-serif'%20font-weight='700'%20fill='%23fff'%20text-anchor='middle'%3EA%3C/text%3E%3C/svg%3E">
+<style>
+  /* SHARED:BEGIN */
+  :root{
+    --ink:#1b1b1f;--muted:#6b6b76;--faint:#6c6c78;--paper:#f6f4ef;--card:#fff;--line:#e4e0d7;
+    --navy:#1b2a4a;--accent:#c2410c;--green:#15803d;--amber:#b45309;--blue:#1d4ed8;--red:#b42318;
+    --radius-sm:6px;--radius-md:10px;--radius:14px;--radius-pill:999px;
+    --shadow-modal:0 20px 60px rgba(27,27,31,.28);
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --s-backlog:#6b6b76;--s-doing:#b45309;--s-review:#1d4ed8;--s-done:#15803d;--s-blocked:#b42318;
+    --d-aprobar:#15803d;--d-modificar:#1d4ed8;--d-aplazar:#b45309;--d-descartar:#b42318;
+  }
+  *{box-sizing:border-box}
+  h1{font-size:clamp(24px,3.6vw,38px);margin:0 0 10px;letter-spacing:-.02em;color:var(--ink)}
+  h1 em{font-style:italic;color:var(--navy)}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600;margin:0 0 10px}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px}
+  .kpi b{display:block;font-size:28px;font-weight:700;letter-spacing:-.02em;color:var(--navy);line-height:1.15}
+  .kpi span{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+  .kpi.warn b{color:var(--red)}
+  .badge{display:inline-block;font-size:11px;font-weight:700;padding:3px 10px;border-radius:var(--radius-pill);color:#fff;text-transform:uppercase;letter-spacing:.04em}
+  .nodata{max-width:560px;margin:80px auto;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:28px 32px;text-align:center}
+  .nodata code{font-family:var(--mono);font-size:.9em;background:#efece4;color:var(--navy);padding:2px 6px;border-radius:6px}
+  .icon{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px}
+  .demo-banner{display:flex;align-items:center;gap:8px;background:#fdf3e3;border:1px solid #eed9b0;border-radius:var(--radius-sm);padding:8px 14px;margin:14px 0 0;font-size:12.5px;color:#78350f}
+  .demo-banner .icon{flex:none}
+  .demo-banner[hidden]{display:none}  /* [hidden] pierde ante .demo-banner{display:flex} — sin esto el banner de demo sale SIEMPRE */
+  .audience-note{display:flex;align-items:center;gap:8px;background:#eef1f5;border:1px solid #d7dee8;border-radius:var(--radius-sm);padding:8px 14px;margin:12px 0 0;font-size:12.5px;color:var(--navy)}
+  .audience-note .icon{flex:none}
+  .scroll-hint{display:none;font-size:11px;color:var(--faint);text-align:right;margin:0 0 6px}
+  @media(max-width:767px){.scroll-hint{display:block}}
+  /* nav responsive: la gestiona el bloque que inyecta render_nav.py (fuente única) */
+  /* SHARED:END */
+  html,body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55}
+  body{background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.55;}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 22px}
+
+  /* ===== HERO ===== */
+  header.hero{border-bottom:1px solid var(--line);padding:28px 0 20px}
+  .lead{font-size:13.5px;color:var(--muted);margin:0;font-family:var(--mono)}
+  .vbar{display:flex;height:12px;border-radius:6px;overflow:hidden;margin-top:14px;border:1px solid var(--line);background:var(--card)}
+  .vbar > i{display:block;height:100%}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;font-size:11.5px;color:var(--muted)}
+  .legend .dot{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px;vertical-align:middle}
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:14px}
+  .btn{font-family:var(--sans);font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--navy);background:var(--navy);color:#fff;padding:7px 13px;border-radius:10px}
+  .btn.ghost{background:var(--card);color:var(--navy)}
+  .btn.ghost:hover{background:#efece4}
+
+
+  /* ===== AUDITORÍA ===== */
+  .kpis{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:10px 14px;min-width:104px}
+  .kpi b{display:block;font-size:21px;letter-spacing:-.02em;color:var(--navy)}
+  .kpi span{font-size:11.5px;color:var(--muted)}
+  .sec{margin:26px 0}
+  .sec h2{font-size:17px;margin:0 0 4px;color:var(--navy)}
+  .sec .lead2{margin:0 0 12px;color:var(--muted);font-size:13.5px}
+  .rep{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+  .rep a{display:flex;flex-direction:column;gap:2px;text-decoration:none;background:var(--card);
+    border:1px solid var(--line);border-radius:var(--radius);padding:11px 14px;min-width:230px;flex:1}
+  .rep a:hover{border-color:var(--navy)}
+  .rep .t{font-weight:650;color:var(--navy);font-size:14px}
+  .rep .d{font-size:12px;color:var(--muted)}
+  table.aud{width:100%;border-collapse:collapse;font-size:13.5px;background:var(--card);
+    border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+  table.aud th{background:#f4f1ea;text-align:left;padding:8px 11px;color:var(--navy);font-size:11.5px;
+    text-transform:uppercase;letter-spacing:.05em}
+  table.aud td{padding:9px 11px;border-top:1px solid var(--line);vertical-align:top}
+  table.aud tr:hover td{background:#faf8f3}
+  .aid{font-family:var(--mono);font-size:12px;font-weight:650;color:var(--navy);text-decoration:none;white-space:nowrap}
+  .aid:hover{text-decoration:underline}
+  .pill{display:inline-block;border-radius:var(--radius-pill);padding:2px 8px;font-size:11px;white-space:nowrap}
+  .pill.st{border:1px solid var(--line);background:var(--paper);color:var(--muted)}
+  .pill.dec{color:#fff}
+  .pill.sev{font-family:var(--mono);border:1px solid var(--line);background:var(--paper)}
+  .crit{background:#fdeaea;border-left:3px solid #b42318}
+  .goto{display:inline-block;margin-top:10px;font-size:13px;font-weight:600;text-decoration:none;
+    border:1px solid var(--navy);color:var(--navy);background:var(--card);border-radius:10px;padding:6px 12px}
+  .goto:hover{background:var(--navy);color:#fff}
+  .goto.big{background:var(--navy);color:#fff;font-size:14px;padding:9px 16px;margin-right:8px}
+  .goto.big:hover{background:#2c3f66}
+  footer{border-top:1px solid var(--line);margin-top:30px;padding:16px 0 44px;color:var(--muted);font-size:12.5px}
+</style>
+</head>
+<body>
+<!-- ICONS:BEGIN -->
+<svg style="display:none" aria-hidden="true">
+  <symbol id="ic-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></symbol>
+  <symbol id="ic-download" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></symbol>
+  <symbol id="ic-upload" viewBox="0 0 24 24"><path d="M12 21V9"/><path d="m7 14 5-5 5 5"/><path d="M5 21h14"/></symbol>
+  <symbol id="ic-refresh" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></symbol>
+  <symbol id="ic-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".6" fill="currentColor"/></symbol>
+  <symbol id="ic-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><circle cx="12" cy="8" r=".6" fill="currentColor"/></symbol>
+  <symbol id="ic-tool" viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 1 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.1 2.1-2-2z"/></symbol><symbol id="ic-search" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10.5 10.5 L14 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol><symbol id="ic-eye" viewBox="0 0 16 16"><path d="M1.5 8 C4 4.2 12 4.2 14.5 8 C12 11.8 4 11.8 1.5 8 Z" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="8" cy="8" r="2" fill="currentColor"/></symbol><symbol id="ic-arrow" viewBox="0 0 16 16"><path d="M2.5 8 H12 M8.6 4 L13 8 L8.6 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol><symbol id="ic-clip" viewBox="0 0 16 16"><rect x="4" y="2.6" width="8" height="11" rx="1.4" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6 2.6 V1.8 H10 V2.6" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6 6.4 H10 M6 9 H10 M6 11.4 H8.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></symbol>
+</svg>
+<!-- ICONS:END -->
+<!-- NAV:BEGIN -->
+<!-- NAV:END -->
+
+<div id="nodata" class="nodata" hidden>
+  <p class="eyebrow">Report-kit · Auditoría</p>
+  <p><b>Sin datos inyectados.</b></p>
+  <p>Genera el informe con <code>python3 build.py &lt;plan-dir&gt;</code>.</p>
+</div>
+
+<div id="app">
+  <header class="hero"><div class="wrap">
+    <p class="eyebrow">Report-kit · Auditoría</p>
+    <h1>La salud del propio repositorio</h1>
+    <p class="lead" id="hSub"></p>
+    <div class="kpis" id="kpis"></div>
+  </div></header>
+
+  <div class="wrap">
+    <div class="sec">
+      <h2>Qué es esta pestaña</h2>
+      <p class="lead2">El resto del informe trata de <b>lo que hay que construir</b>. Esta trata de
+      <b>lo que ya está construido y no está bien</b>: deuda del propio template, ficheros que
+      afirman cosas que ya no son ciertas, cosas duplicadas, y cómo está organizado el repositorio.
+      Es lo que hay que dejar sano <b>antes</b> de copiar el template a otros proyectos, porque cada
+      defecto que quede aquí se multiplica por cada proyecto que lo reciba.</p>
+      <div class="rep" id="reports"></div>
+    </div>
+
+    <div class="sec" id="decideWrap" style="display:none">
+      <h2>Decidir estos items</h2>
+      <p class="lead2" id="decideLead"></p>
+      <a class="goto big" id="gotoTag" href="dashboard.html">decidir los de auditoría en el dashboard →</a>
+      <a class="goto" id="gotoPend" href="dashboard.html">ver solo los que faltan por decidir →</a>
+    </div>
+
+    <div class="sec" id="critWrap" style="display:none">
+      <h2>Bloquea la propagación</h2>
+      <p class="lead2">Lo que hay que resolver antes de copiar nada a otro proyecto.</p>
+      <div id="crit"></div>
+    </div>
+
+    <div class="sec">
+      <h2>Deuda del template y refactorización</h2>
+      <p class="lead2">Pulsa cualquier identificador y se abre su ficha en el dashboard, con la
+      recomendación del revisor y los botones de decisión. <b>Aquí no se decide a propósito</b>: el
+      mismo item con dos sitios donde decidirlo acaba con dos respuestas distintas. Para verlos
+      todos juntos y decidir de corrido, usa el botón de abajo — filtra el dashboard por la
+      etiqueta <code id="tagName"></code>.</p>
+      <div id="tabla"></div>
+      <a class="goto" id="gotoDash" href="dashboard.html">abrir todos estos items en el dashboard →</a>
+    </div>
+
+    <footer id="foot"></footer>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const DB = /*__DATA__*/null;
+const META=(DB&&DB.meta)||{};
+(function(){if(META.project){const t=`${META.project} · ${META.plan_id||""} · ronda ${META.round||1} · ${META.generated||""}`.toUpperCase();document.querySelectorAll(".eyebrow").forEach(el=>el.textContent=t);}})();
+const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const STLABEL={backlog:"Backlog",doing:"En curso",review:"Revisión",done:"Hecho",blocked:"Bloqueado"};
+const DECHEX={aprobar:"#15803d",modificar:"#b45309",aplazar:"#6b6b76",descartar:"#b42318"};
+const DECLABEL={aprobar:"aprobado",modificar:"modificar",aplazar:"aplazado",descartar:"descartado"};
+const CRIT_TAG="🚨 ruta crítica";
+
+(function(){
+  if(!DB){document.getElementById("nodata").hidden=false;document.getElementById("app").style.display="none";return;}
+  const pref=(META.audit_prefixes||["TPL","RFC"]);
+  const items=DB.items.filter(i=>pref.includes(String(i.id).replace(/-[0-9]+$/,"")));
+  const hechos=items.filter(i=>i.status==="done").length;
+  const sinDec=items.filter(i=>!i.decision).length;
+  // la ruta crítica se mira sobre TODOS los items: hay bloqueantes fuera de estos prefijos
+  // (REF-1, por ejemplo) y esconderlos aquí sería justo lo contrario de lo que hace esta pestaña
+  const crit=DB.items.filter(i=>(i.tags||[]).includes(CRIT_TAG));
+
+  document.getElementById("hSub").textContent=
+    `${items.length} hallazgos y tareas sobre el propio repositorio · ${hechos} resueltos · ${sinDec} esperando decisión`;
+  document.getElementById("kpis").innerHTML=[
+    ["Hallazgos",items.length],["Resueltos",hechos],["Sin decidir",sinDec],
+    ["Bloquean propagar",crit.length]
+  ].map(([l,n])=>`<div class="kpi"><b>${n}</b><span>${l}</span></div>`).join("");
+
+  // informes largos que sustentan esto
+  // por prefijo de fichero declarado, no por coincidencia de texto: "infraestructura" contiene
+  // "estructura" y colaba informes que no son de auditoría
+  const AUD_SRC=(META.audit_sources||["I-","N-","O-"]);
+  const reps=(META.sources||[]).filter(s=>AUD_SRC.some(p=>s.file.startsWith(p)));
+  document.getElementById("reports").innerHTML = reps.length
+    ? reps.map(s=>`<a href="sources/${encodeURIComponent(s.page||s.file)}" target="_blank" rel="noopener">
+        <span class="t">${esc(s.titulo)}</span><span class="d">${esc(s.file)} · ${s.kb} KB · el análisis completo</span></a>`).join("")
+    : `<p style="color:var(--muted);font-size:13px">Todavía no hay informes de auditoría en <code>sources/</code>.</p>`;
+
+  const fila=i=>{
+    const dec=i.decision?`<span class="pill dec" style="background:${DECHEX[i.decision]}">${DECLABEL[i.decision]}</span>`
+                        :`<span class="pill st">sin decidir</span>`;
+    return `<tr class="${(i.tags||[]).includes(CRIT_TAG)?'crit':''}">
+      <td><a class="aid" href="dashboard.html#${encodeURIComponent(i.id)}">${esc(i.id)}</a></td>
+      <td>${esc(i.title)}</td>
+      <td><span class="pill sev">${esc(i.severity||"—")}/${esc(i.effort||"—")}</span></td>
+      <td><span class="pill st">${esc(STLABEL[i.status]||i.status||"—")}</span></td>
+      <td>${dec}</td></tr>`;};
+  const tabla=list=>`<table class="aud"><thead><tr><th>id</th><th>qué</th><th>sev/esf</th><th>estado</th><th>decisión</th></tr></thead><tbody>${list.map(fila).join("")}</tbody></table>`;
+
+  if(crit.length){document.getElementById("critWrap").style.display="";document.getElementById("crit").innerHTML=tabla(crit);}
+  const orden={P0:0,P1:1,P2:2,P3:3};
+  document.getElementById("tabla").innerHTML=tabla(
+    items.slice().sort((a,b)=>(orden[a.severity]??9)-(orden[b.severity]??9)||String(a.id).localeCompare(b.id,"es",{numeric:true})));
+  const TAG=META.audit_tag||"🔧 auditoría del repo";
+  const q=encodeURIComponent(TAG);
+  const conTag=DB.items.filter(i=>(i.tags||[]).includes(TAG));
+  const pendTag=conTag.filter(i=>!i.decision);
+  document.getElementById("tagName").textContent=TAG;
+  document.getElementById("decideWrap").style.display="";
+  document.getElementById("decideLead").textContent =
+    `${conTag.length} items llevan la etiqueta «${TAG}». ` +
+    (pendTag.length ? `${pendTag.length} siguen sin decidir.` : "Todos están decididos.");
+  document.getElementById("gotoTag").href="dashboard.html?tag="+q;
+  document.getElementById("gotoPend").href="dashboard.html?tag="+q+"&dec=_";
+  document.getElementById("gotoDash").href="dashboard.html?tag="+q;
+  document.getElementById("foot").textContent =
+    "Las decisiones se toman en el dashboard, no aquí: un mismo item decidido en dos sitios acaba con dos respuestas distintas.";
+})();
+</script>
+</body>
+</html>

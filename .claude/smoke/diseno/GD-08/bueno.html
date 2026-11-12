@@ -1,0 +1,17 @@
+<!doctype html><html lang=es><head><meta charset=utf-8><title>GD-08 bueno</title>
+</head><body>
+  <p class="aviso">Trabajamos con un número limitado de clientes a la vez. Escríbenos y te decimos
+     cuándo podemos empezar.</p>
+  <span id="estado">Consultar disponibilidad</span>
+  <!-- Trampa: un temporizador honrado (el descanso entre series de fitapp) usa las
+       mismas palabras que un contador de escasez y no vende nada. -->
+  <h2>Descanso</h2>
+  <span role="timer" id="descanso"></span>
+<script>
+  var hasta = Date.now() + 90000;
+  setInterval(function () {
+    var quedan = Math.max(0, Math.ceil((hasta - Date.now()) / 1000));
+    document.getElementById('descanso').textContent = quedan + ' s';
+  }, 250);
+</script>
+</body></html>

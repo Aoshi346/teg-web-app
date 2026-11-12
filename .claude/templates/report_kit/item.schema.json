@@ -1,0 +1,615 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "report-kit/item.schema.json",
+  "title": "Report-kit — schema unificado de informe (meta + items)",
+  "description": "Canon único del template (TPL-1 W3). Unión de speckit_dashboard + feedback_audit + goals/evidencias/historial. PROHIBIDO inventar otro schema de item: si falta un campo, se propone aquí. Vocabulario de status ÚNICO: backlog|doing|review|done|blocked (muere wip y pend). Campos editables desde el dashboard = lista KEEP (ver x-keep).",
+  "type": "object",
+  "required": [
+    "meta",
+    "items"
+  ],
+  "x-keep": [
+    "status",
+    "decision",
+    "note",
+    "severity",
+    "effort",
+    "evidence",
+    "tested",
+    "nocturno"
+  ],
+  "x-keep-nota": "KEEP = campos que el dashboard puede editar y que DEBEN persistir enteros (localStorage Y servidor). El bug histórico de speckit_dashboard era persistir solo status/decision/note en modo estático. `note` es del USUARIO: ningún agente escribe ahí. La recomendación del TL va en `tl_rec` (solo lectura). `tested` (US-3) es del USUARIO igual que `note`: lo marca la persona en pruebas.html. TODA página del set que escriba en localStorage debe serializar la lista COMPLETA — si una página omite un campo KEEP, la última en guardar lo borra.",
+  "x-localstorage-key": "tlr::<meta.project>::<meta.plan_id>::v1",
+  "properties": {
+    "meta": {
+      "type": "object",
+      "required": [
+        "project",
+        "plan_id",
+        "title",
+        "profile",
+        "generated",
+        "schema_version"
+      ],
+      "properties": {
+        "project": {
+          "type": "string",
+          "description": "slug del proyecto (namespacing de localStorage)"
+        },
+        "plan_id": {
+          "type": "string",
+          "description": "slug del plan, p.ej. 2026-08-07-tpl-batch-1"
+        },
+        "title": {
+          "type": "string"
+        },
+        "tasks_status": {
+          "type": "object",
+          "description": "MO-D5 (sub-ola 2.14) · el status que el FICHERO (tasks.md / dashboard.md) daba a cada item en la última regeneración, {id: status}. Lo escribe tasks_to_items.py y es suyo. Sirve para saber si un status lo cambió el Usuario a mano: si el guardado coincide con este, gana el fichero en la siguiente regeneración; si difiere, se conserva el del Usuario (salvo una casilla [x]/[!] nueva).",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "pedido": {
+          "type": "array",
+          "description": "MO-26 (sub-ola 2.15) · «Lo que pediste y dónde está»: lo que el Usuario pidió para ESTE informe, en el orden de SU prioridad (no el de lo más fácil de medir), cada petición con el sitio del informe que la responde. index.html abre con esta sección; si una petición no tiene `donde`, la sección la marca como que falta. Sin `pedido`, la sección sale igual y dice cómo declararlo. Lo escribe el agente (meta a mano: tasks_to_items.py no lo pisa).",
+          "items": {
+            "type": "object",
+            "required": [
+              "que"
+            ],
+            "properties": {
+              "que": {
+                "type": "string",
+                "description": "la petición, con sus palabras o casi"
+              },
+              "donde": {
+                "type": "string",
+                "description": "enlace relativo al plan: una página (sources/x.html), un item (dashboard.html#ID) o una sección (index.html#…)"
+              },
+              "estado": {
+                "type": "string",
+                "enum": [
+                  "hecho",
+                  "en curso",
+                  "falta"
+                ],
+                "description": "si se omite: «hecho» con `donde`, «falta» sin él"
+              },
+              "id": {
+                "type": "string",
+                "description": "opcional: el T-NNN de pending-tasks.md"
+              },
+              "nota": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "profile": {
+          "type": "string",
+          "enum": [
+            "proyecto",
+            "diseño",
+            "incidencia",
+            "minimo",
+            "issue"
+          ],
+          "description": "qué páginas lleva el set — ver nav.json#profiles"
+        },
+        "round": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 1,
+          "description": "ronda actual (multi-ronda)"
+        },
+        "generated": {
+          "type": "string",
+          "description": "ISO date de generación"
+        },
+        "closed_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "ISO date de cierre del plan — si está seteado, las páginas muestran banner 'plan cerrado (solo lectura)' y el dashboard deshabilita la edición (G3 de Pol r1)"
+        },
+        "schema_version": {
+          "type": "string",
+          "const": "1.0"
+        },
+        "site": {
+          "type": "string",
+          "description": "URL base del sitio auditado, si aplica"
+        },
+        "shots": {
+          "type": "string",
+          "description": "carpeta base de screenshots relativa al informe"
+        },
+        "epics": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "required": [
+              "name",
+              "color"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "color": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "pages": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "code",
+              "name"
+            ],
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "slug": {
+                "type": "string"
+              },
+              "url": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "statuses": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "backlog",
+              "doing",
+              "review",
+              "done",
+              "blocked"
+            ]
+          }
+        },
+        "decisions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "aprobar",
+              "modificar",
+              "aplazar",
+              "descartar"
+            ]
+          }
+        }
+      }
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "estable entre rondas — el merge idempotente casa por id"
+          },
+          "page": {
+            "type": "string",
+            "description": "code de meta.pages"
+          },
+          "epic": {
+            "type": "string",
+            "description": "clave de meta.epics (p.ej. W1)"
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "P0",
+              "P1",
+              "P2",
+              "P3"
+            ]
+          },
+          "effort": {
+            "type": "string",
+            "enum": [
+              "S",
+              "M",
+              "L",
+              "XL"
+            ]
+          },
+          "clarity": {
+            "type": "string",
+            "enum": [
+              "claro",
+              "duda"
+            ]
+          },
+          "title": {
+            "type": "string",
+            "description": "una línea (el antiguo 'text')"
+          },
+          "desc": {
+            "type": "string",
+            "description": "descripción larga, markdown permitido"
+          },
+          "goal": {
+            "type": "string",
+            "description": "qué se considera HECHO — criterio de aceptación en una frase"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "backlog",
+              "doing",
+              "review",
+              "done",
+              "blocked"
+            ]
+          },
+          "blocks": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "ids que este item bloquea"
+          },
+          "start": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "US-1 · fecha REAL de inicio (ISO YYYY-MM-DD). Opcional: si falta, el Gantt deriva la posición del item de effort + dependencias (calendario orientativo). Rellénalo solo cuando haya un compromiso de calendario de verdad."
+          },
+          "due": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "US-1 · fecha REAL de entrega comprometida (ISO YYYY-MM-DD). Opcional; ver `start`. Si `due` es posterior al fin derivado, la barra se estira hasta `due`."
+          },
+          "agent": {
+            "type": "string",
+            "description": "owner (agente o persona)"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "decision": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "aprobar",
+              "modificar",
+              "aplazar",
+              "descartar",
+              null
+            ]
+          },
+          "note": {
+            "type": "string",
+            "description": "nota libre del revisor"
+          },
+          "verdict": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "done",
+              "partial",
+              "notdone",
+              "blocked",
+              "review",
+              null
+            ],
+            "description": "veredicto de verificación — contrato rules/verdict-contract.md"
+          },
+          "confidence": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "alta",
+              "media",
+              "baja",
+              null
+            ]
+          },
+          "precision_pct": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 100
+          },
+          "why": {
+            "type": "string",
+            "description": "doble evidencia: 🔎 Código (file:line) + 👁 En vivo (DOM/screenshot)"
+          },
+          "howto": {
+            "type": "string",
+            "description": "qué falta para llegar a done (vacío si done)"
+          },
+          "evidence": {
+            "type": "array",
+            "description": "galería del item — en el HTML final las imágenes van EMBEBIDAS base64 (embed.py)",
+            "items": {
+              "type": "object",
+              "required": [
+                "kind",
+                "src"
+              ],
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "img",
+                    "data",
+                    "link"
+                  ]
+                },
+                "label": {
+                  "type": "string",
+                  "description": "ANTES | ACTUAL | DESPUÉS | dato | libre"
+                },
+                "src": {
+                  "type": "string",
+                  "description": "ruta relativa (img), texto/JSON breve (data) o URL (link)"
+                },
+                "caption": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "history": {
+            "type": "array",
+            "description": "una entrada por ronda — la evolución del item (multi-ronda)",
+            "items": {
+              "type": "object",
+              "required": [
+                "round",
+                "date"
+              ],
+              "properties": {
+                "round": {
+                  "type": "integer"
+                },
+                "date": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "verdict": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "note": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "created": {
+            "type": "string"
+          },
+          "updated": {
+            "type": "string"
+          },
+          "tl_rec": {
+            "type": "string",
+            "description": "Recomendación del Tech Lead: análisis y sugerencia. SOLO LECTURA en el dashboard — NO es el campo del Usuario. El campo del Usuario es `note`, que el agente NO debe ocupar."
+          },
+          "manual_test": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "description": "US-3 · guion de prueba MANUAL para una PERSONA, derivado de los criterios de aceptación (tasks.md en Dado/Cuando/Entonces — SPEC-3). Lo GENERA el agente: es solo lectura en el informe. Lo que la persona marca al probar vive en `tested`. Si falta, pruebas.html deriva un paso genérico desde `goal` y lo etiqueta como derivado.",
+            "properties": {
+              "prereq": {
+                "type": "string",
+                "description": "qué debe estar levantado/logueado antes de empezar"
+              },
+              "url": {
+                "type": "string",
+                "description": "dónde se prueba (URL o ruta de pantalla)"
+              },
+              "steps": {
+                "type": "array",
+                "description": "el guion paso a paso",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "id",
+                    "action"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "ESTABLE entre regeneraciones — es la clave de `tested`. Si cambia, la persona pierde lo que ya marcó"
+                    },
+                    "given": {
+                      "type": "string",
+                      "description": "Dado — contexto previo del paso"
+                    },
+                    "action": {
+                      "type": "string",
+                      "description": "Cuando — qué hace la persona (abrir, pulsar, escribir)"
+                    },
+                    "expect": {
+                      "type": "string",
+                      "description": "Entonces — qué debe ver para dar el paso por bueno"
+                    },
+                    "shot": {
+                      "type": "string",
+                      "description": "captura de referencia (ruta relativa o data: URI tras embed.py)"
+                    }
+                  }
+                }
+              },
+              "cases": {
+                "type": "array",
+                "description": "caso chatbot/agente conversacional: frase de entrada → respuesta esperada. La respuesta REAL la escribe la persona y va a `tested[id].actual`",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "id",
+                    "input"
+                  ],
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "input": {
+                      "type": "string",
+                      "description": "frase que se le escribe al bot"
+                    },
+                    "expected": {
+                      "type": "string",
+                      "description": "qué debería responder (o qué NO debe responder)"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "tested": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "description": "US-3 · resultado de la prueba MANUAL, marcado por la PERSONA en pruebas.html. Clave = `manual_test.steps[].id` o `cases[].id`. KEEP: persiste en localStorage Y en disco. Ningún agente escribe aquí (como `note`).",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "ok": {
+                  "type": [
+                    "boolean",
+                    "null"
+                  ],
+                  "description": "true = pasa · false = falla · null/ausente = pendiente"
+                },
+                "actual": {
+                  "type": "string",
+                  "description": "resultado real observado (columna «respuesta real» del caso chatbot)"
+                },
+                "note": {
+                  "type": "string",
+                  "description": "qué pasó exactamente cuando falla"
+                },
+                "at": {
+                  "type": "string",
+                  "description": "ISO datetime de la marca"
+                }
+              }
+            }
+          },
+          "nocturno": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "description": "¿Este item puede ejecutarse SIN SUPERVISIÓN (run nocturno con /goal o /loop)? Lo propone el autor en tasks.md (`nocturno: si — razón`) y lo decide el Usuario en el dashboard. KEEP: la marca del Usuario manda sobre la propuesta y sobrevive a las regeneraciones. Criterios de elegibilidad y lo que NUNCA es elegible: rules/goal-vs-loop.md §Modo noche. Objeto vacío = sin declarar, que NO es lo mismo que 'no': el filtro los distingue, porque tratar lo no declarado como apto es exactamente cómo se cuela de noche algo que nadie evaluó.",
+            "properties": {
+              "apto": {
+                "enum": [
+                  "si",
+                  "no",
+                  "revisar"
+                ],
+                "description": "si = meta verificable por el propio agente, gate determinista y reversible · no = necesita criterio humano, toca datos reales sin forma de verificar, o el error sería silencioso · revisar = podría serlo pero falta acotarlo"
+              },
+              "razon": {
+                "type": "string",
+                "description": "POR QUÉ es o no es apto, en una línea. Sin razón la marca no es auditable: al mes nadie recuerda si el 'si' fue una decisión o un descuido."
+              },
+              "gate": {
+                "type": "string",
+                "description": "opcional — el comando determinista que decide si terminó bien (p.ej. `python3 scripts/golden_eval.py --json out.json`). Es lo que hace la meta verificable por el agente sin humano delante."
+              }
+            }
+          },
+          "rec": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "description": "Sugerencia del REVISOR (quien analizó), NO la decisión del Usuario. Se declara en tasks.md (`rec: aprobar — razón`) y es CARRY, no KEEP: la escribe el agente y una regeneración la actualiza. Existe separada de `decision` a propósito: el valor del informe está en poder DISCREPAR, y si la recomendación se escribiera en `decision` no quedaría rastro de quién dijo qué. El dashboard permite filtrar por ella y aceptarla en bloque ('Aprobar lo que aprueba el revisor'), que solo toca items VISIBLES y SIN decidir — nunca pisa una decisión del Usuario. Objeto vacío = sin recomendación.",
+            "properties": {
+              "rec": {
+                "enum": [
+                  "aprobar",
+                  "duda",
+                  "no-aprobar"
+                ]
+              },
+              "razon": {
+                "type": "string",
+                "description": "Por qué. Sin razón la recomendación solo se puede obedecer, no contrastar."
+              }
+            }
+          },
+          "refs": {
+            "type": "array",
+            "description": "Referencias VERIFICADAS para entender el item: documentación oficial, la librería concreta, el fichero del repo. Nunca enlaces inventados — se comprueban con context7 o WebFetch antes de escribirlos.",
+            "items": {
+              "type": "object",
+              "required": [
+                "que",
+                "url"
+              ],
+              "properties": {
+                "que": {
+                  "type": "string",
+                  "description": "qué es, en una línea y sin jerga"
+                },
+                "url": {
+                  "type": "string"
+                },
+                "tipo": {
+                  "type": "string",
+                  "enum": [
+                    "doc-oficial",
+                    "libreria",
+                    "repo-interno",
+                    "articulo",
+                    "norma"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

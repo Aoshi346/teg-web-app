@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<!--
+  REPORT-KIT · otto.template.html — la página del COPILOTO de configuración.
+  ── Contrato ───────────────────────────────────────────────────────────────
+  build.py inyecta report.json {meta,items} en el placeholder DATA de `const DB`
+  (línea 1 del script; NO escribir el placeholder literal aquí: build.py reemplaza
+  TODAS las ocurrencias). La parte de Otto vive en DB.meta.otto (OPCIONAL):
+    { resumen:[{titulo,que_es,por_que_importa,estado}],   estado: ok|atencion|pendiente
+      config_map:[{k,v}],
+      suggestions:[{id,what,why,how,cost,status}],      status: nueva|aceptada|ignorada
+      permissions:[{id,what,why,scope}],                 (websearch / deep-research / ultracode…)
+      history:[{date,suggestion,outcome}] }              outcome: aplicado|ignorado|rechazado
+  Si meta.otto NO existe → estado vacío elegante ("Otto aún no ha analizado este plan").
+  render_nav.py materializa la topnav entre los marcadores NAV:BEGIN / NAV:END del body.
+  Loop humano: el botón "copiar aprobación" de cada permiso copia
+  `Otto: autorizo <what> para <scope>` — el usuario lo pega en el chat.
+  Tono visual: página del asesor — aire, tarjetas, sin tablas densas salvo el histórico.
+-->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Report-kit · Otto</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Crect%20width='100'%20height='100'%20rx='22'%20fill='%231b2a4a'/%3E%3Ctext%20x='50'%20y='70'%20font-size='56'%20font-family='system-ui,sans-serif'%20font-weight='700'%20fill='%23fff'%20text-anchor='middle'%3ER%3C/text%3E%3C/svg%3E">
+<style>
+  /* SHARED:BEGIN */
+  :root{
+    --ink:#1b1b1f;--muted:#6b6b76;--faint:#6c6c78;--paper:#f6f4ef;--card:#fff;--line:#e4e0d7;
+    --navy:#1b2a4a;--accent:#c2410c;--green:#15803d;--amber:#b45309;--blue:#1d4ed8;--red:#b42318;
+    --radius-sm:6px;--radius-md:10px;--radius:14px;--radius-pill:999px;
+    --shadow-modal:0 20px 60px rgba(27,27,31,.28);
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --s-backlog:#6b6b76;--s-doing:#b45309;--s-review:#1d4ed8;--s-done:#15803d;--s-blocked:#b42318;
+    --d-aprobar:#15803d;--d-modificar:#1d4ed8;--d-aplazar:#b45309;--d-descartar:#b42318;
+  }
+  *{box-sizing:border-box}
+  h1{font-size:clamp(24px,3.6vw,38px);margin:0 0 10px;letter-spacing:-.02em;color:var(--ink)}
+  h1 em{font-style:italic;color:var(--navy)}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600;margin:0 0 10px}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px}
+  .kpi b{display:block;font-size:28px;font-weight:700;letter-spacing:-.02em;color:var(--navy);line-height:1.15}
+  .kpi span{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+  .kpi.warn b{color:var(--red)}
+  .badge{display:inline-block;font-size:11px;font-weight:700;padding:3px 10px;border-radius:var(--radius-pill);color:#fff;text-transform:uppercase;letter-spacing:.04em}
+  .nodata{max-width:560px;margin:80px auto;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:28px 32px;text-align:center}
+  .nodata code{font-family:var(--mono);font-size:.9em;background:#efece4;color:var(--navy);padding:2px 6px;border-radius:6px}
+  .icon{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px}
+  .demo-banner{display:flex;align-items:center;gap:8px;background:#fdf3e3;border:1px solid #eed9b0;border-radius:var(--radius-sm);padding:8px 14px;margin:14px 0 0;font-size:12.5px;color:#78350f}
+  .demo-banner .icon{flex:none}
+  .demo-banner[hidden]{display:none}  /* [hidden] pierde ante .demo-banner{display:flex} — sin esto el banner de demo sale SIEMPRE */
+  .audience-note{display:flex;align-items:center;gap:8px;background:#eef1f5;border:1px solid #d7dee8;border-radius:var(--radius-sm);padding:8px 14px;margin:12px 0 0;font-size:12.5px;color:var(--navy)}
+  .audience-note .icon{flex:none}
+  .scroll-hint{display:none;font-size:11px;color:var(--faint);text-align:right;margin:0 0 6px}
+  @media(max-width:767px){.scroll-hint{display:block}}
+  /* nav responsive: la gestiona el bloque que inyecta render_nav.py (fuente única) */
+  /* SHARED:END */
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55}
+  .wrap{max-width:960px;margin:0 auto;padding:0 22px}
+  header.hero{border-bottom:1px solid var(--line);padding:44px 0 32px}
+  .lead{font-size:16.5px;color:var(--muted);max-width:72ch;margin:0}
+  section{padding:34px 0;border-bottom:1px solid var(--line)}
+  h2{font-size:20px;margin:0 0 6px;letter-spacing:-.01em}
+  .sub{font-size:14px;color:var(--muted);margin:0 0 18px}
+  footer{padding:28px 0 60px;color:var(--faint);font-size:13px}
+  .note{background:#fdebd9;border:1px solid #f3c9a8;border-left:4px solid var(--accent);border-radius:10px;padding:12px 16px;color:#7c2d12;font-size:14px;margin:18px 0}
+  /* ===== estado vacío ===== */
+  .empty{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:56px 28px;text-align:center;margin:34px 0}
+  .monogram{width:64px;height:64px;border-radius:50%;background:var(--navy);color:#fff;font-size:30px;font-weight:700;font-family:var(--mono);display:flex;align-items:center;justify-content:center;margin:0 auto 18px}
+  .empty h2{font-size:22px;margin:0 0 10px}
+  .empty p{color:var(--muted);max-width:56ch;margin:0 auto;font-size:15px}
+  /* ===== config map ===== */
+  table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:13.5px}
+  th,td{padding:8px 13px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+  th{background:#fbfaf7;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+  tr:last-child td{border-bottom:none}
+  td.k{font-family:var(--mono);font-size:12px;color:var(--navy);white-space:nowrap;width:34%}
+  /* ===== resumen del proyecto (mismas cards, con banda de estado) ===== */
+  .sug.res-ok{border-left:4px solid var(--green,#15803d)}
+  .sug.res-atencion{border-left:4px solid var(--amber,#b45309)}
+  .sug.res-pendiente{border-left:4px solid var(--line)}
+  .sug .porque{font-size:13.5px;color:var(--muted);border-top:1px dashed var(--line);padding-top:9px;margin-top:2px}
+  .sug .porque b{color:var(--ink)}
+  .pill.st-ok{background:#dcfce7;color:#14532d}
+  .pill.st-atencion{background:#fef3c7;color:#78350f}
+  .pill.st-pendiente{background:#eee9df;color:var(--muted)}
+  /* ===== sugerencias (cards con aire) ===== */
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+  .sug{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px 22px;display:flex;flex-direction:column;gap:10px}
+  .sug-head{display:flex;align-items:center;gap:10px}
+  .st-nueva{background:var(--blue)} .st-aceptada{background:var(--green)} .st-ignorada{background:#8b8b95}
+  .cost{margin-left:auto;font-family:var(--mono);font-size:11.5px;color:var(--muted);background:#fbfaf7;border:1px solid var(--line);border-radius:8px;padding:3px 9px}
+  .sug h3{margin:0;font-size:16.5px;color:var(--navy);letter-spacing:-.01em}
+  .sug p{margin:0;font-size:14px;color:var(--muted)}
+  .sug p b{color:var(--ink);font-weight:600}
+  .how{position:relative;margin-top:2px}
+  pre{background:#1b2330;color:#e7ecf3;border-radius:12px;padding:13px 76px 13px 15px;overflow:auto;font-family:var(--mono);font-size:12.5px;line-height:1.55;margin:0;white-space:pre-wrap;word-break:break-word}
+  .mini{position:absolute;top:8px;right:8px;font-family:var(--sans);font-size:12px;font-weight:600;cursor:pointer;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#e7ecf3;padding:4px 10px;border-radius:8px}
+  .mini.copied{background:var(--green);border-color:var(--green)}
+  .chat-hint{font-size:11.5px;color:var(--muted);margin:6px 2px 0}
+  .perm .chat-hint{color:#92600a}
+  /* ===== permisos pendientes (ámbar) ===== */
+  .perm{background:#fdf3e3;border:1px solid #eed9b0;border-left:4px solid var(--amber);border-radius:var(--radius);padding:18px 20px;display:flex;flex-direction:column;gap:8px}
+  .perm h3{margin:0;font-size:15.5px;color:#78350f}
+  .perm p{margin:0;font-size:13.5px;color:#92600a}
+  .perm .scope{font-family:var(--mono);font-size:12px;color:#78350f}
+  button.btn{font-family:var(--sans);font-size:13.5px;font-weight:600;cursor:pointer;border:1px solid var(--amber);background:var(--amber);color:#fff;padding:8px 14px;border-radius:10px;align-self:flex-start}
+  button.btn.copied{background:var(--green);border-color:var(--green)}
+  /* ===== histórico ===== */
+  .out{display:inline-block;font-size:11px;font-weight:700;padding:2px 9px;border-radius:var(--radius-pill);color:#fff}
+  .out-aplicado{background:var(--green)} .out-ignorado{background:#8b8b95} .out-rechazado{background:var(--red)}
+  code{font-family:var(--mono);font-size:.88em;background:#efece4;color:var(--navy);padding:1px 6px;border-radius:6px}
+  #toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:8px 16px;border-radius:10px;font-size:13px;opacity:0;transition:.2s;pointer-events:none;z-index:50}
+  #toast.show{opacity:1}
+</style>
+</head>
+<body>
+<!-- ICONS:BEGIN -->
+<svg style="display:none" aria-hidden="true">
+  <symbol id="ic-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></symbol>
+  <symbol id="ic-download" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></symbol>
+  <symbol id="ic-upload" viewBox="0 0 24 24"><path d="M12 21V9"/><path d="m7 14 5-5 5 5"/><path d="M5 21h14"/></symbol>
+  <symbol id="ic-refresh" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></symbol>
+  <symbol id="ic-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".6" fill="currentColor"/></symbol>
+  <symbol id="ic-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><circle cx="12" cy="8" r=".6" fill="currentColor"/></symbol>
+  <symbol id="ic-tool" viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 1 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.1 2.1-2-2z"/></symbol><symbol id="ic-search" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10.5 10.5 L14 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol><symbol id="ic-eye" viewBox="0 0 16 16"><path d="M1.5 8 C4 4.2 12 4.2 14.5 8 C12 11.8 4 11.8 1.5 8 Z" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="8" cy="8" r="2" fill="currentColor"/></symbol><symbol id="ic-arrow" viewBox="0 0 16 16"><path d="M2.5 8 H12 M8.6 4 L13 8 L8.6 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol><symbol id="ic-clip" viewBox="0 0 16 16"><rect x="4" y="2.6" width="8" height="11" rx="1.4" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6 2.6 V1.8 H10 V2.6" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6 6.4 H10 M6 9 H10 M6 11.4 H8.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></symbol>
+</svg>
+<!-- ICONS:END -->
+<!-- NAV:BEGIN -->
+<!-- NAV:END -->
+
+<div class="wrap"><div class="demo-banner" id="demoBanner" hidden><svg class="icon"><use href="#ic-info"></use></svg><span><b>Datos de demostración.</b> Este set usa un fixture de ejemplo, no un proyecto real.</span></div></div>
+
+<header class="hero"><div class="wrap">
+  <p class="eyebrow" id="h-eyebrow">otto · copiloto de configuración</p>
+  <h1>Otto — <em>el asesor del plan</em></h1>
+  <p class="lead">Qué configuración de Claude Code se usó en este plan, qué sugiere Otto para mejorarla, qué permisos espera del usuario y qué pasó con sus sugerencias anteriores.</p>
+</div></header>
+
+<main class="wrap">
+  <div class="nodata" id="nodata" hidden>
+    <p class="eyebrow">Report-kit · Otto</p>
+    <p><b>Sin datos inyectados.</b></p>
+    <p>Esta es la plantilla sin inyectar. Genera el informe con<br><code>python3 build.py &lt;plan-dir&gt;</code><br>para inyectar <code>report.json</code> en esta página.</p>
+  </div>
+
+  <div class="empty" id="empty" hidden>
+    <div class="monogram">O</div>
+    <h2>Otto aún no ha analizado este plan</h2>
+    <p>Otto es el copiloto de configuración del template: observa cómo se ha trabajado en este plan
+    y propone mejoras de la config de Claude Code (skills, permisos, workflows).
+    Cuando lo analice, aquí aparecerán su lectura de la configuración, sus sugerencias
+    con coste estimado, los permisos que necesita y el histórico de lo aplicado.</p>
+  </div>
+
+  <div id="content" hidden>
+    <section id="s-resumen">
+      <h2>Resumen del proyecto</h2>
+      <p class="sub">De qué va esto, en cristiano. Si solo lees una sección, que sea esta.</p>
+      <div class="cards" id="resumen"></div>
+    </section>
+
+    <section id="s-config">
+      <h2>Configuración usada en este plan</h2>
+      <p class="sub">La foto de la config con la que se trabajó — lo que Otto analiza.</p>
+      <table><tbody id="config-map"></tbody></table>
+    </section>
+
+    <section id="s-sug">
+      <h2>Sugerencias activas</h2>
+      <p class="sub">Qué propone Otto, por qué, cómo aplicarlo (copia el comando) y qué cuesta.</p>
+      <div class="cards" id="suggestions"></div>
+    </section>
+
+    <section id="s-perm">
+      <h2>Permisos pendientes</h2>
+      <p class="sub">Otto no auto-activa nada con coste (websearch · deep-research · ultracode).
+      Copia la aprobación y pégala en el chat para autorizarla.</p>
+      <div class="cards" id="permissions"></div>
+    </section>
+
+    <section id="s-hist">
+      <h2>Histórico</h2>
+      <p class="sub">Qué pasó con las sugerencias de rondas anteriores.</p>
+      <table><thead><tr><th>Fecha</th><th>Sugerencia</th><th>Outcome</th></tr></thead>
+      <tbody id="history"></tbody></table>
+    </section>
+  </div>
+</main>
+
+<footer class="wrap" id="foot">Report-kit · Otto · un .html autocontenido</footer>
+
+<script>
+const DB = /*__DATA__*/null;
+(function(){const m=DB&&DB.meta;if(m&&m.project){const t=`${m.project} · ${m.plan_id||""} · ronda ${m.round||1} · ${m.generated||""}`.toUpperCase();document.querySelectorAll(".eyebrow").forEach(el=>el.textContent=t);}})();
+
+/* ===== helpers ===== */
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function toast(m){const t=$("toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1500)}
+function copy(txt,btn){navigator.clipboard?.writeText(txt).then(()=>ok(btn)).catch(()=>{const t=document.createElement("textarea");t.value=txt;document.body.appendChild(t);t.select();document.execCommand("copy");t.remove();ok(btn)})}
+function ok(btn){if(!btn)return;btn.classList.add("copied");const o=btn.textContent;btn.textContent="✓ Copiado";toast("Copiado");setTimeout(()=>{btn.classList.remove("copied");btn.textContent=o},1500)}
+
+const TXT={}; /* textos a copiar, indexados por clave (evita inyectar strings en onclick) */
+window.copyKey=(k,btn)=>copy(TXT[k]??"",btn);
+
+if(!DB||!DB.meta){
+  $("nodata").hidden=false;
+}else{render();}
+
+function mdish(s){return esc(String(s||"")).replace(/`([^`]+)`/g,"<code>$1</code>").replace(/\*\*([^*]+)\*\*/g,"<b>$1</b>");}
+function render(){
+  const M=DB.meta,O=M.otto;
+  document.title=`${M.project||"plan"} · Otto`;
+  /* eyebrow: lo fija el snippet compartido de cabecera (QA iter-3 F1) */
+  $("foot").textContent=`Report-kit · Otto · ${M.project||""} · ${M.plan_id||""} · generado ${M.generated||"—"}`;
+  if(M.demo===true||(M.project==="tech-lead-template"&&M.plan_id==="report-kit-demo"))$("demoBanner").hidden=false;
+  if(!O){$("empty").hidden=false;return}
+  $("content").hidden=false;
+
+  /* 0 · resumen del proyecto — tarjetas explicativas, lo primero que se lee */
+  const res=O.resumen||[];
+  $("s-resumen").hidden=!res.length;
+  $("resumen").innerHTML=res.map(r=>{
+    const st=["ok","atencion","pendiente"].includes(r.estado)?r.estado:"pendiente";
+    const LBL={ok:"en marcha",atencion:"atención",pendiente:"pendiente"};
+    return `<div class="sug res-${st}">`+
+      `<div class="sug-head"><span class="pill st-${st}">${LBL[st]}</span><h3>${esc(r.titulo)}</h3></div>`+
+      `<p>${mdish(r.que_es)}</p>`+
+      (r.por_que_importa?`<p class="porque"><b>Por qué importa:</b> ${mdish(r.por_que_importa)}</p>`:"")+
+      `</div>`;
+  }).join("");
+
+  /* 1 · configuración usada */
+  const cfg=O.config_map||[];
+  $("s-config").hidden=!cfg.length;
+  $("config-map").innerHTML=cfg.map(r=>`<tr><td class="k">${esc(r.k)}</td><td>${esc(r.v)}</td></tr>`).join("");
+
+  /* 2 · sugerencias activas */
+  const sug=O.suggestions||[];
+  $("s-sug").hidden=!sug.length;
+  $("suggestions").innerHTML=sug.map((s,i)=>{
+    const st=["nueva","aceptada","ignorada"].includes(s.status)?s.status:"nueva";
+    TXT["sug"+i]=s.how||"";
+    return `<article class="sug">
+      <div class="sug-head"><span class="badge st-${st}">${st}</span>${s.cost?`<span class="cost">${esc(s.cost)}</span>`:""}</div>
+      <h3>${esc(s.what)}</h3>
+      ${s.why?`<p><b>Por qué:</b> ${esc(s.why)}</p>`:""}
+      ${s.how?`<div class="how"><pre>${esc(s.how)}</pre><button class="mini" onclick="copyKey('sug${i}',this)">copiar</button></div><p class="chat-hint">→ pégaselo a tu asistente (Claude) en el chat</p>`:""}
+    </article>`;
+  }).join("");
+
+  /* 3 · permisos pendientes (loop humano) */
+  const perms=O.permissions||[];
+  $("s-perm").hidden=!perms.length;
+  $("permissions").innerHTML=perms.map((p,i)=>{
+    TXT["perm"+i]=`Otto: autorizo ${p.what} para ${p.scope}`;
+    return `<article class="perm">
+      <h3>${esc(p.what)}</h3>
+      ${p.why?`<p>${esc(p.why)}</p>`:""}
+      <span class="scope">scope: ${esc(p.scope)}</span>
+      <button class="btn" onclick="copyKey('perm${i}',this)"><svg class="icon"><use href="#ic-copy"></use></svg> copiar aprobación</button>
+      <p class="chat-hint">→ pega la aprobación en el chat para autorizarlo</p>
+    </article>`;
+  }).join("");
+
+  /* 4 · histórico */
+  const hist=O.history||[];
+  $("s-hist").hidden=!hist.length;
+  $("history").innerHTML=hist.map(h=>{
+    const o=["aplicado","ignorado","rechazado"].includes(h.outcome)?h.outcome:"ignorado";
+    return `<tr><td style="font-family:var(--mono);font-size:12px;white-space:nowrap">${esc(h.date)}</td><td>${esc(h.suggestion)}</td><td><span class="out out-${o}">${esc(h.outcome)}</span></td></tr>`;
+  }).join("");
+
+  if(!cfg.length&&!sug.length&&!perms.length&&!hist.length){$("content").hidden=true;$("empty").hidden=false}
+}
+</script>
+<div id="toast"></div>
+</body>
+</html>

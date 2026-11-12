@@ -1,0 +1,506 @@
+{
+ "meta": {
+  "source": "gen_inventario_stack.py — AST para Python, expresiones regulares para TS/TSX",
+  "metodo": {
+   "python": "AST (exacto)",
+   "typescript": "regex (inventaria y cuenta; NO afirma nada fino sobre tipos)"
+  },
+  "proyecto": "agents",
+  "sha": "467a1fc",
+  "date": "2026-08-27",
+  "totales": {
+   "aristas": 8,
+   "componentes": 0,
+   "hooks": 0,
+   "modelos": 0,
+   "nodos": 6,
+   "paginas": 0,
+   "serializers": 0,
+   "state": 2,
+   "tareas": 24,
+   "tools": 7,
+   "vistas": 0
+  },
+  "apps": {
+   "3_crew": {
+    "tareas": 24
+   }
+  }
+ },
+ "tools": [
+  {
+   "nombre": "buy_shares",
+   "file": "6_mcp/accounts_server.py",
+   "line": 25,
+   "descripcion": "Compra acciones de una empresa. Args: name: El nombre del titular de la cuenta symbol: El símbolo de la acción quantity: La cantidad de acciones a comprar rationale: La razón de la compra y su relación con la estrategia de la cuenta",
+   "args": [
+    {
+     "nombre": "name",
+     "tipo": "str"
+    },
+    {
+     "nombre": "symbol",
+     "tipo": "str"
+    },
+    {
+     "nombre": "quantity",
+     "tipo": "int"
+    },
+    {
+     "nombre": "rationale",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "change_strategy",
+   "file": "6_mcp/accounts_server.py",
+   "line": 50,
+   "descripcion": "A tu discreción, si lo deseas, llama a esto para cambiar tu estrategia de inversión futura. Args: name: El nombre del titular de la cuenta strategy: La nueva estrategia para la cuenta",
+   "args": [
+    {
+     "nombre": "name",
+     "tipo": "str"
+    },
+    {
+     "nombre": "strategy",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_balance",
+   "file": "6_mcp/accounts_server.py",
+   "line": 7,
+   "descripcion": "Obtiene el saldo en efectivo de la cuenta indicada. Args: name: El nombre del titular de la cuenta",
+   "args": [
+    {
+     "nombre": "name",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "get_holdings",
+   "file": "6_mcp/accounts_server.py",
+   "line": 16,
+   "descripcion": "Obtiene las tenencias de la cuenta indicada. Args: name: El nombre del titular de la cuenta",
+   "args": [
+    {
+     "nombre": "name",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "lookup_share_price",
+   "file": "6_mcp/market_server.py",
+   "line": 7,
+   "descripcion": "Esta herramienta proporciona el precio actual del símbolo de acción dado. Argumentos: symbol: el símbolo de la acción",
+   "args": [
+    {
+     "nombre": "symbol",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "push",
+   "file": "6_mcp/push_server.py",
+   "line": 22,
+   "descripcion": "Envía una notificación push con este breve mensaje",
+   "args": [
+    {
+     "nombre": "args",
+     "tipo": "PushModelArgs"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "sell_shares",
+   "file": "6_mcp/accounts_server.py",
+   "line": 38,
+   "descripcion": "Vende acciones de una empresa. Args: name: El nombre del titular de la cuenta symbol: El símbolo de la acción quantity: La cantidad de acciones a vender rationale: La razón de la venta y su relación con la estrategia de la cuenta",
+   "args": [
+    {
+     "nombre": "name",
+     "tipo": "str"
+    },
+    {
+     "nombre": "symbol",
+     "tipo": "str"
+    },
+    {
+     "nombre": "quantity",
+     "tipo": "int"
+    },
+    {
+     "nombre": "rationale",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  }
+ ],
+ "state": [
+  {
+   "nombre": "State",
+   "file": "4_langgraph/sidekick.py",
+   "line": 19,
+   "campos": [
+    {
+     "nombre": "messages",
+     "tipo": "Annotated[List[Any], add_messages]",
+     "reducer": "add_messages"
+    },
+    {
+     "nombre": "success_criteria",
+     "tipo": "str",
+     "reducer": ""
+    },
+    {
+     "nombre": "feedback_on_work",
+     "tipo": "Optional[str]",
+     "reducer": ""
+    },
+    {
+     "nombre": "success_criteria_met",
+     "tipo": "bool",
+     "reducer": ""
+    },
+    {
+     "nombre": "user_input_needed",
+     "tipo": "bool",
+     "reducer": ""
+    }
+   ],
+   "n_campos": 5,
+   "doc": ""
+  },
+  {
+   "nombre": "State",
+   "file": "4_langgraph/community_contributions/SideKick(Ugraded)/sidekick.py",
+   "line": 20,
+   "campos": [
+    {
+     "nombre": "messages",
+     "tipo": "Annotated[List[Any], add_messages]",
+     "reducer": "add_messages"
+    },
+    {
+     "nombre": "success_criteria",
+     "tipo": "str",
+     "reducer": ""
+    },
+    {
+     "nombre": "feedback_on_work",
+     "tipo": "Optional[str]",
+     "reducer": ""
+    },
+    {
+     "nombre": "success_criteria_met",
+     "tipo": "bool",
+     "reducer": ""
+    },
+    {
+     "nombre": "user_input_needed",
+     "tipo": "bool",
+     "reducer": ""
+    },
+    {
+     "nombre": "subtasks",
+     "tipo": "Optional[List[str]]",
+     "reducer": ""
+    }
+   ],
+   "n_campos": 6,
+   "doc": ""
+  }
+ ],
+ "nodos": [
+  {
+   "nombre": "evaluator",
+   "file": "4_langgraph/sidekick.py",
+   "line": 171
+  },
+  {
+   "nombre": "evaluator",
+   "file": "4_langgraph/community_contributions/SideKick(Ugraded)/sidekick.py",
+   "line": 185
+  },
+  {
+   "nombre": "tools",
+   "file": "4_langgraph/sidekick.py",
+   "line": 170
+  },
+  {
+   "nombre": "tools",
+   "file": "4_langgraph/community_contributions/SideKick(Ugraded)/sidekick.py",
+   "line": 184
+  },
+  {
+   "nombre": "worker",
+   "file": "4_langgraph/sidekick.py",
+   "line": 169
+  },
+  {
+   "nombre": "worker",
+   "file": "4_langgraph/community_contributions/SideKick(Ugraded)/sidekick.py",
+   "line": 183
+  }
+ ],
+ "aristas": [
+  {
+   "de": "worker",
+   "a": "self.worker_router",
+   "tipo": "condicional",
+   "file": "4_langgraph/sidekick.py",
+   "line": 174
+  },
+  {
+   "de": "tools",
+   "a": "worker",
+   "tipo": "fija",
+   "file": "4_langgraph/sidekick.py",
+   "line": 175
+  },
+  {
+   "de": "evaluator",
+   "a": "self.route_based_on_evaluation",
+   "tipo": "condicional",
+   "file": "4_langgraph/sidekick.py",
+   "line": 176
+  },
+  {
+   "de": "START",
+   "a": "worker",
+   "tipo": "fija",
+   "file": "4_langgraph/sidekick.py",
+   "line": 177
+  },
+  {
+   "de": "worker",
+   "a": "self.worker_router",
+   "tipo": "condicional",
+   "file": "4_langgraph/community_contributions/SideKick(Ugraded)/sidekick.py",
+   "line": 188
+  },
+  {
+   "de": "tools",
+   "a": "worker",
+   "tipo": "fija",
+   "file": "4_langgraph/community_contributions/SideKick(Ugraded)/sidekick.py",
+   "line": 189
+  },
+  {
+   "de": "evaluator",
+   "a": "self.route_based_on_evaluation",
+   "tipo": "condicional",
+   "file": "4_langgraph/community_contributions/SideKick(Ugraded)/sidekick.py",
+   "line": 190
+  },
+  {
+   "de": "START",
+   "a": "worker",
+   "tipo": "fija",
+   "file": "4_langgraph/community_contributions/SideKick(Ugraded)/sidekick.py",
+   "line": 191
+  }
+ ],
+ "tareas": [
+  {
+   "nombre": "act1_development_task",
+   "app": "3_crew",
+   "file": "3_crew/community_contributions/ghost_writer/src/ghost_writer/crew.py",
+   "line": 131,
+   "doc": ""
+  },
+  {
+   "nombre": "act2_development_task",
+   "app": "3_crew",
+   "file": "3_crew/community_contributions/ghost_writer/src/ghost_writer/crew.py",
+   "line": 139,
+   "doc": ""
+  },
+  {
+   "nombre": "act3_development_task",
+   "app": "3_crew",
+   "file": "3_crew/community_contributions/ghost_writer/src/ghost_writer/crew.py",
+   "line": 147,
+   "doc": ""
+  },
+  {
+   "nombre": "analysis_task",
+   "app": "3_crew",
+   "file": "3_crew/financial_researcher/src/financial_researcher/crew.py",
+   "line": 32,
+   "doc": ""
+  },
+  {
+   "nombre": "artistic_vision_task",
+   "app": "3_crew",
+   "file": "3_crew/community_contributions/ghost_writer/src/ghost_writer/crew.py",
+   "line": 123,
+   "doc": ""
+  },
+  {
+   "nombre": "book_development_task",
+   "app": "3_crew",
+   "file": "3_crew/community_contributions/ghost_writer/src/ghost_writer/crew.py",
+   "line": 111,
+   "doc": ""
+  },
+  {
+   "nombre": "character_development_task",
+   "app": "3_crew",
+   "file": "3_crew/community_contributions/ghost_writer/src/ghost_writer/crew.py",
+   "line": 94,
+   "doc": ""
+  },
+  {
+   "nombre": "code_task",
+   "app": "3_crew",
+   "file": "3_crew/engineering_team/src/engineering_team/crew.py",
+   "line": 56,
+   "doc": ""
+  },
+  {
+   "nombre": "coding_task",
+   "app": "3_crew",
+   "file": "3_crew/coder/src/coder/crew.py",
+   "line": 29,
+   "doc": ""
+  },
+  {
+   "nombre": "decide",
+   "app": "3_crew",
+   "file": "3_crew/debater/src/debater/crew.py",
+   "line": 43,
+   "doc": ""
+  },
+  {
+   "nombre": "design_task",
+   "app": "3_crew",
+   "file": "3_crew/engineering_team/src/engineering_team/crew.py",
+   "line": 50,
+   "doc": ""
+  },
+  {
+   "nombre": "find_trending_companies",
+   "app": "3_crew",
+   "file": "3_crew/stock_pricer/src/stock_pricer/crew.py",
+   "line": 58,
+   "doc": ""
+  },
+  {
+   "nombre": "frontend_task",
+   "app": "3_crew",
+   "file": "3_crew/engineering_team/src/engineering_team/crew.py",
+   "line": 62,
+   "doc": ""
+  },
+  {
+   "nombre": "genre_research_task",
+   "app": "3_crew",
+   "file": "3_crew/community_contributions/Book_Researcher/src/book/crew.py",
+   "line": 46,
+   "doc": ""
+  },
+  {
+   "nombre": "ideation_task",
+   "app": "3_crew",
+   "file": "3_crew/community_contributions/ghost_writer/src/ghost_writer/crew.py",
+   "line": 80,
+   "doc": ""
+  },
+  {
+   "nombre": "oppose",
+   "app": "3_crew",
+   "file": "3_crew/debater/src/debater/crew.py",
+   "line": 37,
+   "doc": ""
+  },
+  {
+   "nombre": "pick_best_company",
+   "app": "3_crew",
+   "file": "3_crew/stock_pricer/src/stock_pricer/crew.py",
+   "line": 72,
+   "doc": ""
+  },
+  {
+   "nombre": "plot_development_task",
+   "app": "3_crew",
+   "file": "3_crew/community_contributions/ghost_writer/src/ghost_writer/crew.py",
+   "line": 87,
+   "doc": ""
+  },
+  {
+   "nombre": "propose",
+   "app": "3_crew",
+   "file": "3_crew/debater/src/debater/crew.py",
+   "line": 31,
+   "doc": ""
+  },
+  {
+   "nombre": "research_task",
+   "app": "3_crew",
+   "file": "3_crew/financial_researcher/src/financial_researcher/crew.py",
+   "line": 26,
+   "doc": ""
+  },
+  {
+   "nombre": "research_trending_companies",
+   "app": "3_crew",
+   "file": "3_crew/stock_pricer/src/stock_pricer/crew.py",
+   "line": 65,
+   "doc": ""
+  },
+  {
+   "nombre": "test_task",
+   "app": "3_crew",
+   "file": "3_crew/engineering_team/src/engineering_team/crew.py",
+   "line": 68,
+   "doc": ""
+  },
+  {
+   "nombre": "top_novelists_task",
+   "app": "3_crew",
+   "file": "3_crew/community_contributions/Book_Researcher/src/book/crew.py",
+   "line": 40,
+   "doc": ""
+  },
+  {
+   "nombre": "trending_topics_task",
+   "app": "3_crew",
+   "file": "3_crew/community_contributions/Book_Researcher/src/book/crew.py",
+   "line": 34,
+   "doc": ""
+  }
+ ],
+ "componentes": [],
+ "hooks": [],
+ "paginas": [],
+ "modelos": [],
+ "serializers": [],
+ "vistas": []
+}

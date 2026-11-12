@@ -1,0 +1,306 @@
+{
+ "meta": {
+  "source": "FIXTURE sintético (report_kit/graph_reduce.py --fixture)",
+  "sha": "fixture",
+  "date": "",
+  "nodes_total": 13,
+  "edges_total": 15,
+  "reduced": false
+ },
+ "nodes": [
+  {
+   "id": "apps/clients/api.py",
+   "label": "clients.api",
+   "group": "api",
+   "kind": "module",
+   "files": [
+    "apps/clients/api.py"
+   ],
+   "loc": 210,
+   "fan_in": 3,
+   "fan_out": 2,
+   "desc": "ViewSets y serializers de clientes"
+  },
+  {
+   "id": "apps/clients/models.py",
+   "label": "clients.models",
+   "group": "core",
+   "kind": "module",
+   "files": [
+    "apps/clients/models.py"
+   ],
+   "loc": 140,
+   "fan_in": 5,
+   "fan_out": 1,
+   "desc": "Modelo Client + managers"
+  },
+  {
+   "id": "apps/billing/api.py",
+   "label": "billing.api",
+   "group": "api",
+   "kind": "module",
+   "files": [
+    "apps/billing/api.py"
+   ],
+   "loc": 260,
+   "fan_in": 2,
+   "fan_out": 3,
+   "desc": "Endpoints de facturación"
+  },
+  {
+   "id": "apps/billing/models.py",
+   "label": "billing.models",
+   "group": "core",
+   "kind": "module",
+   "files": [
+    "apps/billing/models.py"
+   ],
+   "loc": 180,
+   "fan_in": 4,
+   "fan_out": 1,
+   "desc": "Invoice, Payment"
+  },
+  {
+   "id": "apps/billing/services.py",
+   "label": "billing.services",
+   "group": "core",
+   "kind": "module",
+   "files": [
+    "apps/billing/services.py"
+   ],
+   "loc": 320,
+   "fan_in": 3,
+   "fan_out": 4,
+   "desc": "Lógica de cobro e idempotencia"
+  },
+  {
+   "id": "apps/core/auth.py",
+   "label": "core.auth",
+   "group": "core",
+   "kind": "module",
+   "files": [
+    "apps/core/auth.py"
+   ],
+   "loc": 90,
+   "fan_in": 6,
+   "fan_out": 0,
+   "desc": "JWT + permisos"
+  },
+  {
+   "id": "apps/core/utils.py",
+   "label": "core.utils",
+   "group": "core",
+   "kind": "module",
+   "files": [
+    "apps/core/utils.py"
+   ],
+   "loc": 75,
+   "fan_in": 7,
+   "fan_out": 0,
+   "desc": "slugify, fechas, money"
+  },
+  {
+   "id": "frontend/src/store.ts",
+   "label": "store",
+   "group": "front",
+   "kind": "module",
+   "files": [
+    "frontend/src/store.ts"
+   ],
+   "loc": 150,
+   "fan_in": 4,
+   "fan_out": 2,
+   "desc": "Zustand store global"
+  },
+  {
+   "id": "frontend/src/api/client.ts",
+   "label": "api.client",
+   "group": "front",
+   "kind": "module",
+   "files": [
+    "frontend/src/api/client.ts"
+   ],
+   "loc": 110,
+   "fan_in": 5,
+   "fan_out": 1,
+   "desc": "Cliente HTTP tipado"
+  },
+  {
+   "id": "frontend/src/pages/Dashboard.tsx",
+   "label": "Dashboard",
+   "group": "front",
+   "kind": "module",
+   "files": [
+    "frontend/src/pages/Dashboard.tsx"
+   ],
+   "loc": 240,
+   "fan_in": 0,
+   "fan_out": 4,
+   "desc": "Página principal"
+  },
+  {
+   "id": "frontend/src/pages/Invoices.tsx",
+   "label": "Invoices",
+   "group": "front",
+   "kind": "module",
+   "files": [
+    "frontend/src/pages/Invoices.tsx"
+   ],
+   "loc": 190,
+   "fan_in": 0,
+   "fan_out": 3,
+   "desc": "Listado y detalle de facturas"
+  },
+  {
+   "id": "config/settings.py",
+   "label": "settings",
+   "group": "infra",
+   "kind": "module",
+   "files": [
+    "config/settings.py"
+   ],
+   "loc": 130,
+   "fan_in": 8,
+   "fan_out": 0,
+   "desc": "Django settings"
+  },
+  {
+   "id": "config/celery.py",
+   "label": "celery",
+   "group": "infra",
+   "kind": "module",
+   "files": [
+    "config/celery.py"
+   ],
+   "loc": 45,
+   "fan_in": 2,
+   "fan_out": 1,
+   "desc": "Tareas programadas"
+  }
+ ],
+ "edges": [
+  {
+   "from": "apps/clients/api.py",
+   "to": "apps/clients/models.py",
+   "kind": "import",
+   "weight": 1,
+   "evidence": "EXTRACTED"
+  },
+  {
+   "from": "apps/clients/api.py",
+   "to": "apps/core/auth.py",
+   "kind": "import",
+   "weight": 1,
+   "evidence": "EXTRACTED"
+  },
+  {
+   "from": "apps/billing/api.py",
+   "to": "apps/billing/services.py",
+   "kind": "call",
+   "weight": 1,
+   "evidence": "EXTRACTED"
+  },
+  {
+   "from": "apps/billing/services.py",
+   "to": "apps/billing/models.py",
+   "kind": "import",
+   "weight": 1,
+   "evidence": "EXTRACTED"
+  },
+  {
+   "from": "apps/billing/services.py",
+   "to": "apps/clients/models.py",
+   "kind": "import",
+   "weight": 1,
+   "evidence": "EXTRACTED"
+  },
+  {
+   "from": "apps/billing/services.py",
+   "to": "apps/core/utils.py",
+   "kind": "call",
+   "weight": 1,
+   "evidence": "EXTRACTED"
+  },
+  {
+   "from": "apps/billing/api.py",
+   "to": "apps/core/auth.py",
+   "kind": "import",
+   "weight": 1,
+   "evidence": "EXTRACTED"
+  },
+  {
+   "from": "config/celery.py",
+   "to": "apps/billing/services.py",
+   "kind": "call",
+   "weight": 1,
+   "evidence": "EXTRACTED"
+  },
+  {
+   "from": "frontend/src/pages/Dashboard.tsx",
+   "to": "frontend/src/store.ts",
+   "kind": "import",
+   "weight": 1,
+   "evidence": "EXTRACTED"
+  },
+  {
+   "from": "frontend/src/pages/Invoices.tsx",
+   "to": "frontend/src/store.ts",
+   "kind": "import",
+   "weight": 1,
+   "evidence": "EXTRACTED"
+  },
+  {
+   "from": "frontend/src/store.ts",
+   "to": "frontend/src/api/client.ts",
+   "kind": "import",
+   "weight": 1,
+   "evidence": "EXTRACTED"
+  },
+  {
+   "from": "frontend/src/api/client.ts",
+   "to": "apps/billing/api.py",
+   "kind": "http",
+   "weight": 1,
+   "evidence": "INFERRED"
+  },
+  {
+   "from": "frontend/src/api/client.ts",
+   "to": "apps/clients/api.py",
+   "kind": "http",
+   "weight": 1,
+   "evidence": "INFERRED"
+  },
+  {
+   "from": "apps/clients/models.py",
+   "to": "config/settings.py",
+   "kind": "import",
+   "weight": 1,
+   "evidence": "EXTRACTED"
+  },
+  {
+   "from": "apps/billing/models.py",
+   "to": "config/settings.py",
+   "kind": "import",
+   "weight": 1,
+   "evidence": "EXTRACTED"
+  }
+ ],
+ "communities": {
+  "api": {
+   "label": "Backend · API",
+   "color": "#1b2a4a"
+  },
+  "core": {
+   "label": "Backend · Core",
+   "color": "#15803d"
+  },
+  "front": {
+   "label": "Frontend",
+   "color": "#2563eb"
+  },
+  "infra": {
+   "label": "Infra / config",
+   "color": "#b45309"
+  }
+ }
+}

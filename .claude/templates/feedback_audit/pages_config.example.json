@@ -1,0 +1,21 @@
+{
+ "meta": {
+  "base": "http://127.0.0.1:8000/",
+  "title": "Mi proyecto — auditoría de feedback",
+  "epics": {
+   "A": {"name": "Global / a11y", "color": "#1d4ed8"},
+   "B": {"name": "Navegación", "color": "#15803d"},
+   "C": {"name": "Contenido / precios", "color": "#b45309"},
+   "F": {"name": "Media / assets", "color": "#6b3fa0"},
+   "G": {"name": "Copy / textos", "color": "#444"}
+  },
+  "statuses": ["backlog", "doing", "review", "done", "blocked"],
+  "decisions": ["aprobar", "modificar", "aplazar", "descartar"],
+  "clarities": ["claro", "duda"]
+ },
+ "pages": [
+  {"code": "HOME", "name": "Home", "slug": "", "url": "http://127.0.0.1:8000/", "populate_hint": "templates/home.html", "items_file": "work/HOME.items.json"},
+  {"code": "ABOUT", "name": "Sobre nosotros", "slug": "about", "populate_hint": "templates/about.html", "items_file": "work/ABOUT.items.json"},
+  {"code": "PRICE", "name": "Precios", "slug": "pricing", "populate_hint": "templates/pricing.html", "items_file": "work/PRICE.items.json"}
+ ]
+}
