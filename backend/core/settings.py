@@ -13,28 +13,36 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 import os
 from pathlib import Path
 
+from django.core.exceptions import ImproperlyConfigured
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
+def _env_bool(name, default):
+    return os.environ.get(name, str(default)).strip().lower() in {"1", "true", "yes", "on"}
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get(
-    "SECRET_KEY",
-    "django-insecure-+z)$dvs&p*bd1zvoylw&jew!9fxr2v$*or*@e2!^c4w=pm13e0",
-)
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("DEBUG", "True").lower() in {"1", "true", "yes", "on"}
+def _env_list(name, default=()):
+    raw = os.environ.get(name, "")
+    return [item.strip() for item in raw.split(",") if item.strip()] or list(default)
 
-_allowed_hosts_env = os.environ.get("ALLOWED_HOSTS", "")
-ALLOWED_HOSTS = (
-    [h.strip() for h in _allowed_hosts_env.split(",") if h.strip()]
-    if _allowed_hosts_env
-    else []
-)
+
+# DJANGO_ENV=production lo pone el servidor (deploy/windows-server). Sin él, el proyecto arranca
+# como siempre en desarrollo; con él, nada inseguro tiene valor por defecto.
+IS_PRODUCTION = os.environ.get("DJANGO_ENV", "development").strip().lower() == "production"
+
+SECRET_KEY = os.environ.get("SECRET_KEY", "")
+if IS_PRODUCTION and len(SECRET_KEY) < 50:
+    raise ImproperlyConfigured("En producción SECRET_KEY es obligatoria y de 50+ caracteres.")
+if not SECRET_KEY:
+    SECRET_KEY = "django-insecure-dev-only-+z)$dvs&p*bd1zvoylw&jew!9fxr2v$*or*@e2!^c4w=pm13e0"
+
+DEBUG = False if IS_PRODUCTION else _env_bool("DEBUG", True)
+
+ALLOWED_HOSTS = _env_list("ALLOWED_HOSTS")
+if IS_PRODUCTION and not ALLOWED_HOSTS:
+    raise ImproperlyConfigured("En producción ALLOWED_HOSTS es obligatorio.")
 
 
 # Application definition
@@ -89,11 +97,19 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": os.environ.get("DATABASE_PATH") or BASE_DIR / "db.sqlite3",
     }
 }
+if IS_PRODUCTION:
+    # Varios workers de gunicorn escriben a la vez: WAL deja leer mientras alguien escribe e
+    # IMMEDIATE evita el "database is locked" al promocionar una lectura a escritura.
+    DATABASES["default"]["OPTIONS"] = {
+        "timeout": 20,
+        "transaction_mode": "IMMEDIATE",
+        "init_command": "PRAGMA journal_mode=WAL; PRAGMA synchronous=NORMAL;",
+    }
 
 
 # Password validation
@@ -130,31 +146,22 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
-STATIC_ROOT = BASE_DIR / "staticfiles"
+STATIC_URL = os.environ.get("STATIC_URL", "static/")
+STATIC_ROOT = os.environ.get("STATIC_ROOT") or BASE_DIR / "staticfiles"
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = os.environ.get("MEDIA_ROOT") or BASE_DIR / "media"
 
 # Custom User Model
 AUTH_USER_MODEL = 'api.User'
 
 # CORS Settings
-_cors_env = os.environ.get("CORS_ALLOWED_ORIGINS", "")
-CORS_ALLOWED_ORIGINS = (
-    [o.strip() for o in _cors_env.split(",") if o.strip()]
-    if _cors_env
-    else ["http://localhost:3000"]
-)
+_dev_origins = () if IS_PRODUCTION else ("http://localhost:3000",)
+CORS_ALLOWED_ORIGINS = _env_list("CORS_ALLOWED_ORIGINS", _dev_origins)
 
 CORS_ALLOW_CREDENTIALS = True
 
-_csrf_env = os.environ.get("CSRF_TRUSTED_ORIGINS", "")
-CSRF_TRUSTED_ORIGINS = (
-    [o.strip() for o in _csrf_env.split(",") if o.strip()]
-    if _csrf_env
-    else ["http://localhost:3000"]
-)
+CSRF_TRUSTED_ORIGINS = _env_list("CSRF_TRUSTED_ORIGINS", _dev_origins)
 
 # Cookie settings for cross-origin frontend at localhost:3000
 CSRF_COOKIE_HTTPONLY = False      # Allow JS to read csrftoken cookie
@@ -162,10 +169,28 @@ CSRF_COOKIE_SAMESITE = "Lax"
 SESSION_COOKIE_SAMESITE = "Lax"
 SESSION_COOKIE_HTTPONLY = True
 
-_secure_cookies = os.environ.get("SECURE_COOKIES", "False").lower() in {"1", "true", "yes", "on"}
-if _secure_cookies:
+if IS_PRODUCTION or _env_bool("SECURE_COOKIES", False):
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
+
+if IS_PRODUCTION:
+    # El HTTPS lo termina Tailscale Funnel; Caddy (solo en 127.0.0.1) reenvía con
+    # X-Forwarded-Proto=https, que es la única vía de entrada a gunicorn.
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SECURE_SSL_REDIRECT = True
+    SECURE_HSTS_SECONDS = 31536000
+    DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024
+
+CACHES = {
+    "default": (
+        {
+            "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
+            "LOCATION": os.environ["CACHE_DIR"],
+        }
+        if os.environ.get("CACHE_DIR")
+        else {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}
+    )
+}
 
 # Email settings
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
@@ -173,7 +198,14 @@ DEFAULT_FROM_EMAIL = "noreply@tesisfar.local"
 
 # DRF settings
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.SessionAuthentication',
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.SessionAuthentication",
     ],
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
+    ],
+    "DEFAULT_THROTTLE_RATES": {
+        "login_account": os.environ.get("THROTTLE_LOGIN_ACCOUNT", "20/hour"),
+        "login_ip": os.environ.get("THROTTLE_LOGIN_IP", "60/min"),
+    },
 }

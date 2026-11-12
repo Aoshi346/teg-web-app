@@ -1,6 +1,7 @@
 from django.contrib.auth import login, logout, update_session_auth_hash
 from django.db import IntegrityError, transaction
-from django.db.models import Q
+from django.db.models import Count, OuterRef, Q, Subquery
+from django.db.models.functions import Coalesce
 from django.middleware.csrf import get_token
 from django.utils import timezone
 from rest_framework import mixins, permissions, status, views, viewsets
@@ -12,6 +13,7 @@ from rest_framework.permissions import BasePermission
 from rest_framework.response import Response
 
 from .lifecycle import InvalidTransition, next_state
+from .throttles import LoginAccountThrottle, LoginIPThrottle
 from .models import (
     AttachedFile,
     Comment,
@@ -53,6 +55,12 @@ from .serializers import (
 )
 
 
+def _truthy(value):
+    if isinstance(value, str):
+        return value.strip().lower() in {"1", "true", "yes", "on"}
+    return bool(value)
+
+
 class IsAdminUserRole(BasePermission):
     def has_permission(self, request, view):
         return bool(request.user and getattr(request.user, "role", None) == "Administrador")
@@ -60,7 +68,11 @@ class IsAdminUserRole(BasePermission):
 class AuthViewSet(viewsets.GenericViewSet):
     permission_classes = [permissions.AllowAny]
 
-    @action(detail=False, methods=['post'])
+    @action(
+        detail=False,
+        methods=["post"],
+        throttle_classes=[LoginAccountThrottle, LoginIPThrottle],
+    )
     def login(self, request):
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -86,7 +98,17 @@ class AuthViewSet(viewsets.GenericViewSet):
 
     @action(detail=False, methods=['post'])
     def register(self, request):
-        serializer = RegisterSerializer(data=request.data)
+        """Alta pública (auto-registro) o alta hecha por un Administrador (admin_create).
+
+        El endpoint es AllowAny para el auto-registro, así que el modo admin_create —que genera y
+        devuelve una contraseña temporal— exige un Administrador autenticado. El rol lo valida el
+        serializer: un anónimo solo puede darse de alta como Estudiante, Tutor o Jurado.
+        """
+        if _truthy(request.data.get("admin_create")) and not (
+            request.user.is_authenticated and getattr(request.user, "role", None) == "Administrador"
+        ):
+            raise PermissionDenied("Solo un Administrador puede crear cuentas desde el panel.")
+        serializer = RegisterSerializer(data=request.data, context={"request": request})
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
         data = UserSerializer(user).data
@@ -199,8 +221,8 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 _project_qs_opts = {
-    'select': ('student', 'partner'),
-    'prefetch': ('advisors', 'evaluations', 'files'),
+    'select': ('student', 'partner', 'reviewer'),
+    'prefetch': ('advisors', 'evaluations', 'files', 'state_overrides__admin'),
 }
 
 def _optimized_projects(qs):
@@ -569,6 +591,16 @@ class SemesterViewSet(viewsets.ModelViewSet):
     queryset = Semester.objects.all()
     serializer_class = SemesterSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        counts = (
+            Project.objects.filter(period=OuterRef('period'))
+            .order_by()
+            .values('period')
+            .annotate(total=Count('pk'))
+            .values('total')
+        )
+        return Semester.objects.annotate(_project_count=Coalesce(Subquery(counts[:1]), 0))
 
     def get_permissions(self):
         if self.action in ["create", "update", "partial_update", "destroy"]:

@@ -3,6 +3,7 @@ import string
 
 from django.contrib.auth import authenticate, get_user_model
 from rest_framework import serializers
+from rest_framework.exceptions import PermissionDenied
 
 from .models import (
     AttachedFile,
@@ -103,6 +104,14 @@ class CommentSerializer(serializers.ModelSerializer):
         return obj.author.full_name
 
 
+SELF_REGISTER_ROLES = {"Estudiante", "Tutor", "Jurado"}
+
+
+def _is_admin_request(request):
+    user = getattr(request, "user", None)
+    return bool(user and user.is_authenticated and getattr(user, "role", None) == "Administrador")
+
+
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=False)
     full_name = serializers.CharField(write_only=True, required=False, default="")
@@ -134,6 +143,11 @@ class RegisterSerializer(serializers.ModelSerializer):
         """
         if not attrs.get('admin_create') and not attrs.get('password'):
             raise serializers.ValidationError({'password': 'This field is required.'})
+        role = attrs.get("role", "Estudiante")
+        if role not in SELF_REGISTER_ROLES and not _is_admin_request(self.context.get("request")):
+            raise serializers.ValidationError(
+                {"role": "Solo un Administrador puede crear cuentas con este rol."}
+            )
         return attrs
 
     def create(self, validated_data):
@@ -183,10 +197,22 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
 
     def validate(self, data):
+        """Solo las cuentas aprobadas por un Administrador obtienen sesión.
+
+        El estado 'pending' antes solo lo comprobaba el frontend, así que con la API directa una
+        cuenta sin aprobar entraba igual. Se comprueba después de autenticar para no revelar el
+        estado de una cuenta a quien no conoce su contraseña.
+        """
         user = authenticate(email=data['email'], password=data['password'])
-        if user and user.is_active:
-            return user
-        raise serializers.ValidationError("Incorrect Credentials")
+        if not (user and user.is_active):
+            raise serializers.ValidationError("Incorrect Credentials")
+        if user.status == "pending":
+            raise PermissionDenied(
+                "Tu cuenta aún está pendiente de aprobación por un administrador."
+            )
+        if user.status != "active":
+            raise PermissionDenied("Tu cuenta no está habilitada. Contacta con la coordinación.")
+        return user
 
 
 class AttachedFileSerializer(serializers.ModelSerializer):
@@ -292,7 +318,9 @@ class ProjectSerializer(serializers.ModelSerializer):
     def get_failed_attempts(self, obj):
         if obj.project_type != 'proyecto':
             return 0
-        return obj.evaluations.filter(kind='review', pass_status='Fail').count()
+        return sum(
+            1 for e in obj.evaluations.all() if e.kind == 'review' and e.pass_status == 'Fail'
+        )
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
@@ -337,6 +365,9 @@ class SemesterSerializer(serializers.ModelSerializer):
         fields = ['id', 'period', 'is_active', 'start_month', 'end_month', 'label', 'created_at', 'project_count']
 
     def get_project_count(self, obj):
+        annotated = getattr(obj, '_project_count', None)
+        if annotated is not None:
+            return annotated
         return Project.objects.filter(period=obj.period).count()
 
 

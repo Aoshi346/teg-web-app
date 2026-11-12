@@ -11,6 +11,14 @@ def client():
     return APIClient()
 
 
+@pytest.fixture
+def admin_client(admin_user):
+    """admin_create exige un Administrador autenticado (ver test_registration_security)."""
+    api = APIClient()
+    api.force_authenticate(user=admin_user)
+    return api
+
+
 @pytest.mark.django_db
 def test_self_register_still_uses_client_password(client):
     payload = {
@@ -27,7 +35,8 @@ def test_self_register_still_uses_client_password(client):
 
 
 @pytest.mark.django_db
-def test_admin_create_generates_random_password(client):
+def test_admin_create_generates_random_password(admin_client):
+    client = admin_client
     payload = {
         "email": "new@test.local",
         "full_name": "New User",
@@ -47,7 +56,8 @@ def test_admin_create_generates_random_password(client):
 
 
 @pytest.mark.django_db
-def test_admin_create_ignores_client_supplied_password(client):
+def test_admin_create_ignores_client_supplied_password(admin_client):
+    client = admin_client
     payload = {
         "email": "new2@test.local",
         "password": "clientpass123",  # should be ignored
@@ -63,7 +73,8 @@ def test_admin_create_ignores_client_supplied_password(client):
 
 
 @pytest.mark.django_db
-def test_admin_create_returns_different_password_each_time(client):
+def test_admin_create_returns_different_password_each_time(admin_client):
+    client = admin_client
     passwords = set()
     for i in range(3):
         response = client.post("/api/auth/register/", {

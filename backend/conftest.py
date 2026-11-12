@@ -17,6 +17,16 @@ from api.models import Project
 User = get_user_model()
 
 
+@pytest.fixture(autouse=True)
+def _clear_cache():
+    """Los límites de login viven en la caché: sin vaciarla, un test hereda los intentos de otro."""
+    from django.core.cache import cache
+
+    cache.clear()
+    yield
+    cache.clear()
+
+
 @pytest.fixture
 def api_client():
     return APIClient()
