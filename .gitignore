@@ -64,3 +64,6 @@ backend/media/
 
 # Vite cache
 .vite/
+
+# Informes de avance (PDF locales, no se versionan)
+/informeavance2*.pdf

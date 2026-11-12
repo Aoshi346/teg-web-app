@@ -1,12 +1,37 @@
 {
-  "task": "Tech Lead instalado en teg-web-app — sin tarea de producto en curso",
+  "task": "T-006 Informe de avance al 100% (informeavance2.pdf), mismo formato, generado en local",
   "status": "completed",
-  "startedAt": "2026-09-21T21:15:00Z",
+  "startedAt": "2026-09-28T16:45:00Z",
   "checklist": [
-    {"id": 1, "item": "Nucleo: gate de RAM, PROGRESS.json, registro de peticiones, rules", "done": true}
+    {
+      "id": 1,
+      "item": "Leer el PDF original (4 paginas escaneadas)",
+      "done": true
+    },
+    {
+      "id": 2,
+      "item": "Levantar TesisFar en local (puertos libres, BD copiada) y hacer capturas",
+      "done": true
+    },
+    {
+      "id": 3,
+      "item": "Redactar texto al 100% con los cambios reales del git",
+      "done": true
+    },
+    {
+      "id": 4,
+      "item": "Generar PDF con Chrome headless y revisarlo visualmente",
+      "done": true
+    },
+    {
+      "id": 5,
+      "item": "Sustituir informeavance2.pdf conservando el original",
+      "done": true
+    }
   ],
-  "completedAt": "2026-09-21T21:15:00Z",
+  "completedAt": "2026-09-28T16:58:00Z",
   "notes": [
-    "Lo escribe y lo mantiene el TL en cada sesion. El aviso de Telegram lee 'status' para decidir si avisa al cerrar."
+    "Fechas: inicio 1/12/2025, terminacion 1/06/2026, 6 meses. Firmas en blanco.",
+    "Original conservado en informeavance2-original.pdf. Capturas con BD demo en scratchpad; reloj del navegador fijado al 29/05/2026."
   ]
 }
