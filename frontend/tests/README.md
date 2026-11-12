@@ -40,8 +40,8 @@ Describe behavior, not implementation:
 
 This repo enforces strict TDD via the orchestration system in `.claude/`:
 
-1. **RED** — `test-worker` writes a failing test.
-2. **GREEN** — `frontend-worker` implements the smallest change to make it pass.
+1. **RED** — Write a failing test first.
+2. **GREEN** — Implement the smallest change to make it pass.
 3. **REFACTOR** — only if the test is green and the refactor is in the brief's scope.
 
 ## Example: Mocking the API client
