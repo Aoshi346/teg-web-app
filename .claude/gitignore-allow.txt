@@ -4,3 +4,4 @@ docs/**
 frontend/docs/**
 .claude/_archive/2026-11-12-actualizar/local/state/**
 .superpowers/**
+frontend/next-env.d.ts
