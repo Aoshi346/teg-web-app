@@ -192,15 +192,24 @@ describe("ProfileMenu — keyboard and outside-click closing", () => {
   });
 
   it("clicking outside the menu calls onClose", () => {
-    const onClose = vi.fn();
-    render(
-      <div>
-        <ProfileMenu {...defaultProps} onClose={onClose} />
-        <button data-testid="outside">Outside</button>
-      </div>
-    );
-    fireEvent.mouseDown(screen.getByTestId("outside"));
-    expect(onClose).toHaveBeenCalledTimes(1);
+    // jsdom has no layout (offsetParent is always null), which the component reads as
+    // "hidden duplicate instance" and ignores. Simulate a visible menu.
+    const offsetParent = vi
+      .spyOn(HTMLElement.prototype, "offsetParent", "get")
+      .mockReturnValue(document.body);
+    try {
+      const onClose = vi.fn();
+      render(
+        <div>
+          <ProfileMenu {...defaultProps} onClose={onClose} />
+          <button data-testid="outside">Outside</button>
+        </div>
+      );
+      fireEvent.mouseDown(screen.getByTestId("outside"));
+      expect(onClose).toHaveBeenCalledTimes(1);
+    } finally {
+      offsetParent.mockRestore();
+    }
   });
 
   it("clicking inside the menu does NOT call onClose", () => {

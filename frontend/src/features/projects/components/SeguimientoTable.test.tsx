@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, within } from "@testing-library/react";
 import type { Project } from "@features/projects/types/project";
 import { cardAction } from "@features/projects/lib/cardAction";
 import { seguimientoColumnsFor } from "@features/projects/lib/seguimientoColumns";
@@ -101,6 +101,12 @@ function renderTable(
   );
 }
 
+// The component renders each row twice: mobile cards (.seg-cards) and the desktop
+// <table>; CSS shows one. Queries about columns/cells are scoped to the table.
+function inTable() {
+  return within(screen.getByRole("table"));
+}
+
 // ---------------------------------------------------------------------------
 // 1. Column visibility per role
 // ---------------------------------------------------------------------------
@@ -111,7 +117,7 @@ describe("SeguimientoTable — column visibility", () => {
     const cols = seguimientoColumnsFor("Administrador").filter((c) => c !== "action");
     for (const key of cols) {
       const header = COLUMN_HEADER[key];
-      expect(screen.getByText(header), `Expected header "${header}" to be present for admin`).toBeTruthy();
+      expect(inTable().getByText(header), `Expected header "${header}" to be present for admin`).toBeTruthy();
     }
   });
 
@@ -139,8 +145,8 @@ describe("SeguimientoTable — column visibility", () => {
 
   it("tutor sees 'Jurado' column header instead of 'Tutor / Jurado'", () => {
     renderTable([ptegPending], "Tutor");
-    expect(screen.getByText("Jurado")).toBeTruthy();
-    expect(screen.queryByText("Tutor / Jurado")).toBeNull();
+    expect(inTable().getByText("Jurado")).toBeTruthy();
+    expect(inTable().queryByText("Tutor / Jurado")).toBeNull();
   });
 
   it("tutor sees 'Última actividad' column header", () => {
@@ -167,12 +173,12 @@ describe("SeguimientoTable — column visibility", () => {
 describe("SeguimientoTable — StatePill per row", () => {
   it("renders one StatePill per item (single item)", () => {
     const { container } = renderTable([ptegPending], "Administrador");
-    expect(container.querySelectorAll(".spill")).toHaveLength(1);
+    expect(container.querySelectorAll("table .spill")).toHaveLength(1);
   });
 
   it("renders one StatePill per item (multiple items)", () => {
     const { container } = renderTable([ptegPending, tegNoReviewer, ptegApproved], "Administrador");
-    expect(container.querySelectorAll(".spill")).toHaveLength(3);
+    expect(container.querySelectorAll("table .spill")).toHaveLength(3);
   });
 });
 
@@ -207,20 +213,20 @@ describe("SeguimientoTable — action button label", () => {
     // cardAction("Administrador", ptegPending) → { label: "Revisar", ... }
     const expected = cardAction("Administrador", ptegPending).label;
     renderTable([ptegPending], "Administrador");
-    expect(screen.getByRole("link", { name: new RegExp(expected, "i") })).toBeTruthy();
+    expect(inTable().getByRole("link", { name: new RegExp(expected, "i") })).toBeTruthy();
   });
 
   it("jurado assigned to project sees their action label on that project", () => {
     const viewerId = 42;
     const expected = cardAction("Jurado", ptegPending, viewerId).label;
     renderTable([ptegPending], "Jurado", { viewerId });
-    expect(screen.getByRole("link", { name: new RegExp(expected, "i") })).toBeTruthy();
+    expect(inTable().getByRole("link", { name: new RegExp(expected, "i") })).toBeTruthy();
   });
 
   it("tutor sees 'Ver detalles' on any project", () => {
     const expected = cardAction("Tutor", ptegPending).label;
     renderTable([ptegPending], "Tutor");
-    expect(screen.getByRole("link", { name: new RegExp(expected, "i") })).toBeTruthy();
+    expect(inTable().getByRole("link", { name: new RegExp(expected, "i") })).toBeTruthy();
   });
 });
 
@@ -232,32 +238,32 @@ describe("SeguimientoTable — action button label", () => {
 describe("SeguimientoTable — Sin asignar fallback", () => {
   it("tutor view shows /sin asignar/i when reviewerName is null", () => {
     renderTable([makeProject({ reviewerName: null })], "Tutor");
-    expect(screen.getByText(/sin asignar/i)).toBeTruthy();
+    expect(inTable().getByText(/sin asignar/i)).toBeTruthy();
   });
 
   it("tutor view shows /sin asignar/i when reviewerName is undefined", () => {
     renderTable([makeProject({ reviewerName: undefined })], "Tutor");
-    expect(screen.getByText(/sin asignar/i)).toBeTruthy();
+    expect(inTable().getByText(/sin asignar/i)).toBeTruthy();
   });
 
   it("tutor view shows /sin asignar/i when reviewerName is empty string", () => {
     renderTable([makeProject({ reviewerName: "" })], "Tutor");
-    expect(screen.getByText(/sin asignar/i)).toBeTruthy();
+    expect(inTable().getByText(/sin asignar/i)).toBeTruthy();
   });
 
   it("admin view shows /sin asignar/i in tutorJurado cell when reviewerName is null", () => {
     renderTable([makeProject({ reviewerName: null })], "Administrador");
-    expect(screen.getByText(/sin asignar/i)).toBeTruthy();
+    expect(inTable().getByText(/sin asignar/i)).toBeTruthy();
   });
 
   it("admin view shows /sin asignar/i when reviewerName is undefined", () => {
     renderTable([makeProject({ reviewerName: undefined })], "Administrador");
-    expect(screen.getByText(/sin asignar/i)).toBeTruthy();
+    expect(inTable().getByText(/sin asignar/i)).toBeTruthy();
   });
 
   it("admin view shows /sin asignar/i when reviewerName is empty string", () => {
     renderTable([makeProject({ reviewerName: "" })], "Administrador");
-    expect(screen.getByText(/sin asignar/i)).toBeTruthy();
+    expect(inTable().getByText(/sin asignar/i)).toBeTruthy();
   });
 });
 

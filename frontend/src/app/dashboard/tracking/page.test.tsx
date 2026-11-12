@@ -1,6 +1,6 @@
 import React from "react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor, fireEvent } from "@testing-library/react";
+import { render, screen, waitFor, fireEvent, within } from "@testing-library/react";
 import type { Project } from "@features/projects/types/project";
 
 // ---------------------------------------------------------------------------
@@ -336,8 +336,12 @@ describe("TrackingPage — filter bar tutor dropdown", () => {
       .filter((el) => el.getAttribute("aria-label")?.toLowerCase().includes("tutor"));
     expect(tutorFilters).toHaveLength(0);
 
-    // Also assert no text node "Tutor:" (colon distinguishes filter label from column header).
-    expect(screen.queryByText(/^tutor\s*:?\s*$/i)).toBeNull();
+    // Also assert no "Tutor" label outside the data layout: the column header (th) and the
+    // mobile-card term (dt) legitimately carry that text, a filter label would not.
+    const tutorLabels = screen
+      .queryAllByText(/^tutor\s*:?\s*$/i)
+      .filter((el) => !["TH", "DT"].includes(el.tagName));
+    expect(tutorLabels).toHaveLength(0);
   });
 });
 
@@ -380,7 +384,9 @@ describe("TrackingPage — state filter via URL", () => {
       expect(screen.getByRole("table")).toBeTruthy();
     });
 
-    expect(screen.getByText("Proyecto en Defensa")).toBeTruthy();
+    // Rows render twice (mobile cards + desktop table), so scope to the table.
+    const table = within(screen.getByRole("table"));
+    expect(table.getByText("Proyecto en Defensa")).toBeTruthy();
     expect(screen.queryByText("Proyecto en Revisión")).toBeNull();
     expect(screen.queryByText("Tesis en Entrega")).toBeNull();
   });
@@ -414,9 +420,11 @@ describe("TrackingPage — search filter", () => {
       expect(screen.getByRole("table")).toBeTruthy();
     });
 
+    // Rows render twice (mobile cards + desktop table), so scope to the table.
+    const table = within(screen.getByRole("table"));
     // Both projects should be visible initially.
-    expect(screen.getByText("Sistema de gestión de inventario")).toBeTruthy();
-    expect(screen.getByText("Plataforma de aprendizaje platform")).toBeTruthy();
+    expect(table.getByText("Sistema de gestión de inventario")).toBeTruthy();
+    expect(table.getByText("Plataforma de aprendizaje platform")).toBeTruthy();
 
     // Type "platform" into the search input.
     const searchInput = screen.getByRole("textbox", { name: /buscar/i });
@@ -425,7 +433,7 @@ describe("TrackingPage — search filter", () => {
     await waitFor(() => {
       expect(screen.queryByText("Sistema de gestión de inventario")).toBeNull();
     });
-    expect(screen.getByText("Plataforma de aprendizaje platform")).toBeTruthy();
+    expect(table.getByText("Plataforma de aprendizaje platform")).toBeTruthy();
   });
 });
 
