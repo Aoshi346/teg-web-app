@@ -65,43 +65,23 @@ abajo. Archivado con la medición en `_archive/2026-08-22/`.
 
 ### La tabla (generada)
 
-**32 agentes** en `.claude/agents/*.md` con `name:` en el frontmatter · **32** declaran `error_cost` y `autonomy_phase` · **0** no declaran alguno de los dos.
+**12 agentes** en `.claude/agents/*.md` con `name:` en el frontmatter · **12** declaran `error_cost` y `autonomy_phase` · **0** no declaran alguno de los dos.
 
 `ec` = `error_cost` · `fase` = `autonomy_phase` · `—` = no declarado en el frontmatter. «Qué hace» es la primera frase de la `description`, que es lo que lee el harness para decidir cuándo lanzar el agente.
 
 | Agente | Familia | Qué hace | ec | fase |
 |---|---|---|:--:|:--:|
 | `aitor-a11y-auditor` | auditor-persona | auditor de accesibilidad WCAG 2.2 AA: contraste, teclado y foco, ARIA, target size, alternativa al arrastre, errores de formulario, encabezados | false-negative | 3 |
-| `analista-negocio` | negocio | SINTETIZA lo que otro recogió: supuestos priorizados por riesgo, personas, posicionamiento, DAFO y TOWS | false-positive | 2 |
-| `auditor-evidencia` | negocio | el escéptico del canon de negocio: corre `canon_lint.py` y da veredicto por bloque con doble evidencia | false-negative | 3 |
-| `auditor-modelos` | negocio | el escéptico de todo modelo predictivo antes de que lo use el dueño: fuga de datos, ganar al ingenuo, intervalo, deriva y licencia; corre `model_audit.py` | false-negative | 1 |
-| `bruno-perf-cop` | auditor-persona | rendimiento y operabilidad en tres modos: web (Core Web Vitals, budgets), bot (p95, coste por turno, ¿traza completa?) y reposo (qué gasta con cero usuarios) | false-negative | 3 |
-| `captacion-prospectos` | negocio | prepara prospección en frío B2B en borrador; nunca la envía sola y solo LEE el canon de negocio | false-positive | 1 |
-| `conrado-cro-auditor` | auditor-persona | auditor de CRO y conversión (7 Levels de Morys, LIFT, Hormozi, Cialdini): propuesta de valor, prueba social, fricción del CTA, precio oculto | false-positive | 3 |
-| `dario-commerce-guardrails` | IA conversacional | guardarraíles de comercio: ataca al bot donde cuesta dinero (precios, stock, plazos, descuentos, garantías inventadas) | false-negative | 2 |
 | `desarrollador-backend` | stack backend | Desarrollador backend senior en Django 5.2 LTS + DRF + PostgreSQL + Celery/Redis: modelos, serializers, ViewSets, migraciones, lógica de negocio y ORM | symmetric | 4 |
 | `desarrollador-frontend` | stack frontend | Constructor de pantallas React con nueva-pantalla, disenar-pantalla y escribir-tests precargadas, en su worktree y con pattern_check_frontend.py al parar | symmetric | 2 |
-| `especialista-widget-embebido` | IA conversacional | Constructor del widget de chat embebible de un bot: bundle IIFE con Shadow DOM, DOMPurify, solo public_token, <250 KB gzip | symmetric | 3 |
-| `hugo-vigilancia-diaria` | vigilancia | vigilante diario de superficie e indicios de compromiso en WordPress/Docker y apps Django (superusuarios, claves de API, picos de 401/403) | false-negative | 1 |
 | `ignacio-roig` | bundle visual | crítico visual adversarial: baseline 3.0, ≥10 hallazgos en 6 tipos (UGLY/AMATEUR/CLICKBAIT/INCONSISTENT/AI-SLOP/PLACEHOLDER), 8 tests y nota ≥1.0 bajo la de Vera | false-negative | 4 |
-| `ivan-agent-runtime` | IA conversacional | ingeniero de agentes LangGraph: construye el grafo (create_agent, tools, prompts versionados, estado) con tests de modelo falso; dueño de su estado | false-negative | 2 |
 | `lector-web` | tipo de workflow | Lector en cuarentena de los workflows de research: busca y lee la web y el repo, sin escribir, ejecutar ni usar MCP | false-positive | 3 |
-| `lena-i18n-auditor` | auditor-persona | auditora de i18n y voz de marca: strings sin traducir, locale de fecha, número y moneda, RTL, plurales, placeholders rotos, tono inconsistente | false-negative | 3 |
 | `lidia-naive-tester` | bundle visual | tester no técnica con atención <2s: si no entiende rápido, se va. Tres modos: su persona, una persona pasada al lanzarla y primer uso (onboarding, empty states, time-to-value) | false-negative | 4 |
 | `marco-qa-breaker` | bundle sec+QA | QA destructivo de la lógica de negocio, contra la API: estados ilegales, carreras en acciones únicas, idempotencia, límites, bordes temporales, estados zombi | false-negative | 3 |
-| `marta-revenue-attribution` | IA conversacional | cuánto vende un bot: pedido cobrado por comercio, originado frente a asistido con ventana declarada antes de medir, y grupo de control | false-positive | 1 |
-| `nadia-chatbot-evaluator` | IA conversacional | evaluadora de calidad conversacional de chatbots: resolución, alucinación, tono, compliance, handoff, coste por conversación y fugas del system prompt | false-negative | 3 |
-| `nora-ai-act-auditor` | cumplimiento | auditora del Reglamento europeo de IA (UE) 2024/1689: lo exigible hoy (arts. 5, 50, 4 y 53) | false-positive | 3 |
-| `nuria-aislamiento-tenant` | stack backend | auditora del aislamiento entre clientes multi-tenant (columna tenant_id, RLS o base por tenant): consultas, FK cruzadas, caché, Celery, tools, webhook y vectorial, con un test que ha visto fallar | false-negative | 1 |
-| `pilar-impacto-produccion` | verificación | auditora de impacto en producción: ANTES de programar saca la foto de cómo está todo (migraciones, quién usa lo que se va a tocar, flags, mediciones con ids fijos) y DESPUÉS comprueba si algún cliente verá un cambio que nadie… | false-negative | 1 |
 | `pol-product-advisor` | producto | asesor de producto y requisitos: propone qué mejorar, añadir o quitar, por valor×esfuerzo, y revisa planes y diseños antes de ejecutarlos | symmetric | 4 |
 | `priya-privacy-auditor` | cumplimiento | auditora de privacidad (RGPD) y trust-&-safety: base legal, derechos del interesado, PII en logs y embeddings, LLMs de terceros, LSSI y Lista Robinson | false-negative | 3 |
-| `rafa-retrieval-engineer` | IA / RAG | dueño del índice de un catálogo: retrieval híbrido, reranking, relaciones entre productos e integridad (embeddings, huérfanos, fuga entre tenants), medido | false-negative | 2 |
 | `rita-pattern-keeper` | patrones | guardiana del patrón de código del proyecto: juzga los candidatos de `pattern-check.sh` con ≥2 precedentes del repo, en modo sombra y sin bloquear | false-positive | 3 |
-| `roberto-clean-code` | patrones | auditor de mantenibilidad del cambio: ¿hacía falta escribirlo y está donde toca? | false-negative | 1 |
-| `sara-salud-datos` | cumplimiento | auditora de datos de SALUD en España (RGPD art. 9, LOPDGDD, Ley 41/2002, EIPD, EEDS) | false-positive | 3 |
 | `sofia-pentester` | bundle sec+QA | pentester ética (OWASP Top 10, WSTG, API Security): IDOR, auth y sesión, subida de ficheros, webhooks, inyección, secrets | false-negative | 3 |
-| `teo-llm-redteam` | IA conversacional | red team de los bots LLM que vendemos (OWASP LLM01/02/05/06/07/08/10 y ASI01-03/06/07): inyección, fugas, salida, tools, prompt de sistema, vectores y gasto | false-negative | 2 |
 | `vera-art-director` | bundle visual | crítica visual experta (estándar Awwwards/SiteInspire): tipografía, tokens de color, jerarquía, micro-interacciones y design system | false-positive | 3 |
 
 Regenerar: `python3 .claude/scripts/gen_agent_index.py` · comprobar: `--check` (exit 1 si un agente está en disco y no aquí, o al revés).
