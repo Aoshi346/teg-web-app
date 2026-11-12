@@ -179,8 +179,11 @@ log "OK: $SHORT en producción"
 notify ok "Publicado $SHORT" "Nueva versión en https://$PUBLIC_HOST
 $SHORT — $SUBJECT"
 
-# Limpieza: se guardan los $KEEP_RELEASES releases más recientes (incluido el actual).
-ls -1dt "$RELEASES"/*/ 2>/dev/null | tail -n +$((KEEP_RELEASES + 1)) | while read -r old; do
+# Limpieza: se guardan los $KEEP_RELEASES releases más recientes (incluido el actual) y las 10
+# últimas copias previas. Con `|| true`: en la primera instalación no hay copias y `ls` sale con 2,
+# lo que con pipefail convertía un despliegue correcto en un fallo.
+{ ls -1dt "$RELEASES"/*/ 2>/dev/null || true; } | tail -n +$((KEEP_RELEASES + 1)) | while read -r old; do
   [[ "$(readlink -f "$old")" == "$(readlink -f "$BASE/current")" ]] || rm -rf "$old"
 done
-ls -1t "$BACKUPS"/pre-deploy-*.sqlite3 2>/dev/null | tail -n +11 | xargs -r rm -f
+{ ls -1t "$BACKUPS"/pre-deploy-*.sqlite3 2>/dev/null || true; } | tail -n +11 | xargs -r rm -f
+exit 0
