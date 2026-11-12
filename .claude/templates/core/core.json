@@ -1,0 +1,187 @@
+{
+  "project": "[PERSONALIZAR — nombre del proyecto]",
+  "_doc": "Manifiesto de .docs/core/ — la documentación VIVA del proyecto. Declara QUÉ documentos forman el core, en qué capa van, quién los genera y dónde viven. NO contiene fechas: las fechas las resuelve gen_core.py del propio fichero (marcador core-meta / frontmatter reviewed), de git, o del mtime — para que el índice no pueda mentir. Regenerar: python3 .claude/scripts/gen_core.py",
+  "code_dirs": [
+    "backend",
+    "frontend",
+    "src",
+    "apps"
+  ],
+  "review_days": 90,
+  "layers": [
+    {
+      "id": "overview",
+      "title": "1 · Overview",
+      "question": "¿Qué es este sistema, para quién y qué problema resuelve?"
+    },
+    {
+      "id": "arquitectura",
+      "title": "2 · Arquitectura y estructura",
+      "question": "¿De qué piezas está hecho, cómo se comunican y cómo se despliega?"
+    },
+    {
+      "id": "datos",
+      "title": "3 · Modelo de datos",
+      "question": "¿Qué información se guarda y cómo se relaciona entre sí?"
+    },
+    {
+      "id": "ux",
+      "title": "4 · UX y flujos",
+      "question": "¿Cómo lo usa una persona real, paso a paso?"
+    },
+    {
+      "id": "decisiones",
+      "title": "5 · Decisiones tomadas",
+      "question": "¿Por qué está hecho así y qué se descartó por el camino?"
+    },
+    {
+      "id": "fundacional",
+      "title": "6 · Fundacionales",
+      "question": "¿Qué manda sobre lo que se construye, y qué está prohibido tocar?"
+    }
+  ],
+  "docs": [
+    {
+      "id": "overview",
+      "layer": "overview",
+      "title": "Overview de una pantalla",
+      "question": "Qué es el sistema, para quién y qué problema resuelve",
+      "origin": "escrito",
+      "file": "overview.md",
+      "via": "a mano · plantilla .claude/templates/core/overview.md"
+    },
+    {
+      "id": "prd",
+      "layer": "overview",
+      "title": "PRD — documento de requisitos de producto",
+      "question": "Qué se construye, para quién, y cómo sabremos que está bien",
+      "origin": "escrito",
+      "file": "producto/01-product-brief.md",
+      "via": "skill `arrancar` fase 1 · plantilla .claude/templates/prd-template.md",
+      "_origin_why": "No envejece porque cambie un fichero: envejece porque cambie el negocio."
+    },
+    {
+      "id": "requisitos",
+      "layer": "overview",
+      "title": "Requisitos y uso (11 apartados)",
+      "question": "Qué deja cada requisito en manos del usuario, cómo se usa y en qué estado queda",
+      "origin": "escrito",
+      "file": "requisitos.html",
+      "via": "skill `arrancar` fase 1b · gen_requisitos.py",
+      "_origin_why": "Sale de la entrevista con el Usuario, no del código."
+    },
+    {
+      "id": "lean-canvas",
+      "layer": "overview",
+      "title": "Lean Canvas",
+      "optional": true,
+      "question": "Modelo de negocio en una hoja: problema, solución, métricas",
+      "origin": "escrito",
+      "file": "lean-canvas.html",
+      "via": "/schema lean-canvas",
+      "_origin_why": "Los artefactos de /schema salen de DECISIONES, no del código: no envejecen porque cambie un fichero, sino porque cambie el negocio. Por eso 'escrito' (caduca por calendario y por planes cerrados) y no 'generado'."
+    },
+    {
+      "id": "architecture",
+      "layer": "arquitectura",
+      "title": "Arquitectura (runtime)",
+      "question": "Qué componentes hay, quién llama a quién y qué es externo",
+      "origin": "generado",
+      "file": "architecture.html",
+      "via": "/visual-map"
+    },
+    {
+      "id": "structure",
+      "layer": "arquitectura",
+      "title": "Estructura del código",
+      "question": "Qué módulos existen de verdad, su fan-in/fan-out y el blast radius de tocarlos",
+      "origin": "generado",
+      "file": "structure.html",
+      "via": "/code-graph"
+    },
+    {
+      "id": "c4-context",
+      "layer": "arquitectura",
+      "title": "C4 · Contexto",
+      "optional": true,
+      "question": "El sistema visto desde fuera: actores y sistemas externos",
+      "origin": "escrito",
+      "file": "c4-context.html",
+      "via": "/schema c4-context"
+    },
+    {
+      "id": "data-model",
+      "layer": "datos",
+      "title": "Modelo de datos (ER)",
+      "question": "Entidades, campos y relaciones del esquema real",
+      "origin": "generado",
+      "file": "data-model.html",
+      "via": "/visual-map",
+      "watch": [
+        "**/models.py",
+        "**/migrations/**",
+        "**/schema.prisma",
+        "**/*.sql"
+      ]
+    },
+    {
+      "id": "user-flows",
+      "layer": "ux",
+      "title": "Flujos de usuario",
+      "question": "Los recorridos principales, pantalla y endpoint por paso",
+      "origin": "generado",
+      "file": "user-flows.html",
+      "via": "/visual-map"
+    },
+    {
+      "id": "ux",
+      "layer": "ux",
+      "title": "UX — decisiones y principios",
+      "question": "Cómo debe sentirse el producto y qué patrones se han fijado",
+      "origin": "escrito",
+      "file": "ux.md",
+      "via": "a mano · plantilla .claude/templates/core/ux.md"
+    },
+    {
+      "id": "adr",
+      "layer": "decisiones",
+      "title": "Architecture Decision Records",
+      "question": "Cada decisión cara de revertir, con su contexto y sus consecuencias",
+      "origin": "escrito",
+      "kind": "adr",
+      "file": "../adr",
+      "via": "mkdir -p .docs/adr && cp .claude/templates/adr-template.md .docs/adr/0001-<slug>.md"
+    },
+    {
+      "id": "design-system",
+      "layer": "fundacional",
+      "title": "Sistema de diseño",
+      "question": "Dónde viven los tokens (color, tipografía, espaciado), qué es intocable y qué es libre",
+      "origin": "escrito",
+      "file": "design-system.md",
+      "via": "a mano · plantilla .claude/templates/core/design-system.md",
+      "_origin_why": "Los tokens salen de DECISIONES de marca y de producto, no del código: no envejecen porque cambie un fichero, sino porque cambie el criterio. Por eso 'escrito' (exige reviewed:) y no 'generado'.",
+      "_optional_why": "Va en ROJO si falta, a propósito: todo proyecto con interfaz debe declarar su origen único de tokens. Si el proyecto NO tiene interfaz (CLI, librería, backend puro), pon aquí \"optional\": true y un question que empiece por \"No aplica:\" — como data-model en un proyecto sin base de datos."
+    },
+    {
+      "id": "privacidad",
+      "layer": "fundacional",
+      "title": "Ética, privacidad y regulación",
+      "question": "Qué datos personales se tratan, con qué base legal, cuánto se conservan y quién los ve",
+      "origin": "escrito",
+      "file": "privacidad.md",
+      "via": "skill `arrancar` fase 4 · gate_datos_salud.py si hay datos de salud",
+      "_origin_why": "Se decide ANTES de construir. El gate comprueba que exista, esté fechado y firmado — NO que sea correcto: eso lo dicen priya/nora/sara y un humano."
+    },
+    {
+      "id": "manual",
+      "layer": "fundacional",
+      "title": "Manual del proceso — paso a paso, con sus comandos",
+      "question": "Qué se hace en cada uno de los 13 pasos, con qué comando, qué deja escrito y cómo se sabe que está bien",
+      "origin": "generado",
+      "file": "manual.html",
+      "via": "AI4DEV_DIR=ai4dev python3 .claude/templates/report_kit/gen_manual.py .docs/core/manual.html",
+      "_por_que": "Es la pieza para quien llega nuevo y no conoce ni el proceso ni la jerga. Va en el core porque el proceso es de lo más permanente que hay; proceso.html (por dónde va ESTE proyecto) vive en el plan."
+    }
+  ]
+}

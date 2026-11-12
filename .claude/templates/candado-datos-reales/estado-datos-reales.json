@@ -1,0 +1,23 @@
+{
+ "_comment": "Lo pone a día una PERSONA, con su evidencia. Ningún agente lo edita: Edit(.claude/estado-datos-reales.json) va en el deny de .claude/settings.json (un Write() no se consulta nunca: solo Edit y Read). Una condición cuenta como cerrada solo con ok: true, quién (una persona, no un agente), fecha (YYYY-MM-DD, no futura) y evidencia (una ruta del repo que exista o un enlace). Lo comprueba: python3 .claude/scripts/gate_datos_reales.py",
+ "variable": "DATOS_REALES",
+ "actualizado": "",
+ "condiciones": {
+  "encargo_firmado": {
+   "que": "Contrato de encargo de tratamiento (art. 28 RGPD) firmado por las dos partes",
+   "ok": false, "quien": "", "fecha": "", "evidencia": "", "ticket": ""
+  },
+  "subencargados_declarados": {
+   "que": "Subencargados declarados en el contrato, con su región: el proveedor del modelo de IA y el alojamiento",
+   "ok": false, "quien": "", "fecha": "", "evidencia": "", "ticket": ""
+  },
+  "acceso_minimo": {
+   "que": "Acceso mínimo aplicado y con evidencia: solo los buzones, carpetas o tablas acordados",
+   "ok": false, "quien": "", "fecha": "", "evidencia": "", "ticket": ""
+  },
+  "retencion_pactada": {
+   "que": "Retención y borrado pactados por escrito, también de copias, logs y trazas",
+   "ok": false, "quien": "", "fecha": "", "evidencia": "", "ticket": ""
+  }
+ }
+}

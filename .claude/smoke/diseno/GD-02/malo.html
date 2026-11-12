@@ -1,0 +1,15 @@
+<!doctype html><html lang=es><head><meta charset=utf-8><title>GD-02 malo</title>
+</head><body>
+  <div id="loader"><div id="barra"></div><span id="pct">0</span></div>
+  <main><h1>Contenido que espera 2,5 s sin motivo</h1></main>
+<script>
+  var loader = document.getElementById('loader');
+  setTimeout(function () {
+    loader.classList.add('hidden');
+  }, 2500);
+  var progress = 0;
+  setInterval(function () {
+    progress = Math.min(progress + 2 * (0.8 + Math.random() * 0.6), 100);
+    document.getElementById('barra').style.width = progress + '%';
+  }, 20);
+</script></body></html>

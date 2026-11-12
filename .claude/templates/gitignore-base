@@ -1,0 +1,75 @@
+# .gitignore base de un proyecto derivado del tech-lead-template (MO-56, sub-ola 2.14).
+#
+# LA REGLA: lo que es de UNA carpeta se ancla con `/` delante (`/media/`, no `media/`). Sin anclar,
+# casa a cualquier profundidad: `media/` puesto para la voz de la raíz se comió `backend/core/media/`
+# en cold_calling_coach y el commit salió en verde sin el código. Sin anclar solo va lo que es
+# basura en cualquier sitio (`__pycache__/`, `node_modules/`).
+#
+# Un patrón por extensión (`*.xlsx`, `*.n43`) lleva su excepción para fixtures y plantillas
+# (`!**/fixtures/**/*.n43`): en accounting_AMC dejó fuera una plantilla y los ficheros de prueba.
+#
+# Comprobarlo: python3 .claude/scripts/check_gitignore.py    (exit 1 = se está comiendo código)
+# Lo ignorado A PROPÓSITO que parezca código va a .claude/gitignore-allow.txt.
+
+# ── Secretos (en cualquier sitio, por eso sin anclar) ─────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+# `secrets.*` a secas se comía `backend/core/secrets.py` (verificador de la 2.14): solo extensiones de datos
+secrets.env
+secrets.json
+secrets.y*ml
+secrets.toml
+credentials.json
+*-credentials.json
+
+# ── Basura de herramientas (en cualquier sitio) ───────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+node_modules/
+.venv/
+venv/
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# ── Salidas de build y de tests (ancladas a la raíz; si el frontend vive en frontend/, añade la suya)
+/dist/
+/build/
+/test-results/
+/playwright-report/
+/frontend/dist/
+
+# ── Datos de la raíz que NO son código (anclados) ─────────────────────────────────────────────────
+/media/
+/tmp/
+*.log
+
+# ── El harness ────────────────────────────────────────────────────────────────────────────────────
+CLAUDE.local.md
+.claude/worktrees/
+.claude/PROGRESS.auto.log
+.claude/audit.jsonl
+.claude/sessions/*.tmp
+.docs/feedback/**/screenshots/
+.docs/plans/**/shots/**/*.png
+.docs/plans/*/.backups/
+# Fotos de Pilar (antes/después de un issue): llevan ids, que son datos seudónimos. A git solo
+# llega impacto.json con recuentos y hashes (decisión del Usuario, 18-10, EQ-D5).
+.docs/plans/**/impacto/fotos/
+.playwright-mcp/
+
+# ── Extensiones de datos con excepción para fixtures y plantillas (descomenta y ajusta) ──────────
+# *.xlsx
+# !**/fixtures/**/*.xlsx
+# !**/templates/**/*.xlsx

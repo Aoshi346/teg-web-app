@@ -36,9 +36,6 @@ env/
 *.bak-*
 *.backup
 
-# Claude Code task state (ephemeral, local only)
-.claude/state/
-
 # Superpowers skill scratch (brainstorm artifacts, mockups — local only)
 .superpowers/
 
@@ -52,12 +49,7 @@ start.prod.sh
 backend/staticfiles/
 
 # Redesign orchestration artifacts (not checked in)
-.claude/state/20260422-*/
 docs/superpowers/specs/2026-04-22-*
-.claude/state/**/*-result.md
-.claude/state/**/*-worker-result.md
-.claude/state/**/frontend-worker-result.md
-.claude/state/**/test-worker-result.md
 
 # User-uploaded media (runtime data, never checked in)
 backend/media/
@@ -67,3 +59,24 @@ backend/media/
 
 # Informes de avance (PDF locales, no se versionan)
 /informeavance2*.pdf
+
+# ── El harness (templates/gitignore-base del tech-lead-template) ──
+!.claude/PROGRESS.log
+CLAUDE.local.md
+.claude/worktrees/
+.claude/PROGRESS.auto.log
+.claude/audit.jsonl
+.claude/sessions/*.tmp
+.claude/.incoming-config.sha256
+.claude/.incoming-config-ejecutables.tsv
+.docs/feedback/**/screenshots/
+.docs/plans/**/shots/**/*.png
+.docs/plans/*/.backups/
+.docs/plans/**/impacto/fotos/
+.playwright-mcp/
+.claude/PROGRESS.log.tmp
+.claude/secretos-bloqueados.log
+.claude/config-changes.log
+.claude/.config-snapshot/
+.claude/graph-dataset.json
+.claude/graph-dataset.full.json

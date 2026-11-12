@@ -1,0 +1,2091 @@
+{
+ "meta": {
+  "source": "gen_proyecto_graph.py — imports + convención de framework · proyecto deepagents",
+  "proyecto": "deepagents",
+  "sha": "aad9aa9",
+  "date": "2026-08-26",
+  "nodes_total": 120,
+  "edges_total": 0,
+  "reduced": false,
+  "ficheros_por_capa": {
+   "test": 431,
+   "otro": 340,
+   "estado-fe": 31,
+   "agente-grafo": 20,
+   "config": 18,
+   "servicio": 14,
+   "cliente-api": 13,
+   "api": 2,
+   "agente-estado": 2,
+   "pagina": 1,
+   "agente-tool": 1
+  }
+ },
+ "nodes": [
+  {
+   "id": "libs/code/tests/unit_tests",
+   "label": "unit_tests",
+   "group": "agente-grafo",
+   "kind": "agente-grafo",
+   "files": [
+    "libs/code/tests/unit_tests/test_startup_fast_paths.py",
+    "libs/code/tests/unit_tests/test_threads_resume.py",
+    "libs/code/tests/unit_tests/test_goal_tools.py",
+    "libs/code/tests/unit_tests/test_cursor_blink.py",
+    "libs/code/tests/unit_tests/test_acp.py",
+    "libs/code/tests/unit_tests/test_install_script.py",
+    "libs/code/tests/unit_tests/test_input_parsing.py",
+    "libs/code/tests/unit_tests/test_mcp_login_service.py",
+    "libs/code/tests/unit_tests/conftest.py",
+    "libs/code/tests/unit_tests/test_reliable_rubric.py",
+    "libs/code/tests/unit_tests/test_auth_web_search_restart.py",
+    "libs/code/tests/unit_tests/test_ask_user_types.py"
+   ],
+   "loc": 168074,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Tests for lightweight CLI help-only paths. Each test runs `cli_main` in a subprocess so `sys.modules` reflects only what that invocation loaded, guarding the startup-perf contract documented in `CLAUD",
+   "n_ficheros": 126
+  },
+  {
+   "id": "libs/code/deepagents_code",
+   "label": "deepagents_code",
+   "group": "agente-estado",
+   "kind": "agente-estado",
+   "files": [
+    "libs/code/deepagents_code/tool_display.py",
+    "libs/code/deepagents_code/file_ops.py",
+    "libs/code/deepagents_code/json_types.py",
+    "libs/code/deepagents_code/mcp_tools.py",
+    "libs/code/deepagents_code/event_bus.py",
+    "libs/code/deepagents_code/goal_tools.py",
+    "libs/code/deepagents_code/_debug.py",
+    "libs/code/deepagents_code/main.py",
+    "libs/code/deepagents_code/mcp_oauth_ui.py",
+    "libs/code/deepagents_code/__init__.py",
+    "libs/code/deepagents_code/_terminal_stderr.py",
+    "libs/code/deepagents_code/media_utils.py"
+   ],
+   "loc": 81488,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Formatting utilities for tool call display in the app. This module handles rendering tool calls and tool messages for the TUI. Imported at module level by `textual_adapter` (itself deferred from the s",
+   "n_ficheros": 92
+  },
+  {
+   "id": "libs/code/tests/unit_tests/tui/widgets",
+   "label": "widgets",
+   "group": "test",
+   "kind": "test",
+   "files": [
+    "libs/code/tests/unit_tests/tui/widgets/test_approval.py",
+    "libs/code/tests/unit_tests/tui/widgets/test_restart_prompt.py",
+    "libs/code/tests/unit_tests/tui/widgets/test_links.py",
+    "libs/code/tests/unit_tests/tui/widgets/test_loading.py",
+    "libs/code/tests/unit_tests/tui/widgets/test_chat_input.py",
+    "libs/code/tests/unit_tests/tui/widgets/test_notification_center.py",
+    "libs/code/tests/unit_tests/tui/widgets/test_model_selector.py",
+    "libs/code/tests/unit_tests/tui/widgets/test_update_progress.py",
+    "libs/code/tests/unit_tests/tui/widgets/test_auto_mode_notice.py",
+    "libs/code/tests/unit_tests/tui/widgets/test_install_confirm.py",
+    "libs/code/tests/unit_tests/tui/widgets/test_launch_init.py",
+    "libs/code/tests/unit_tests/tui/widgets/test_startup_tip.py"
+   ],
+   "loc": 51735,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Unit tests for approval widget expandable command display.",
+   "n_ficheros": 40
+  },
+  {
+   "id": "libs/code/deepagents_code/tui/widgets",
+   "label": "widgets",
+   "group": "config",
+   "kind": "config",
+   "files": [
+    "libs/code/deepagents_code/tui/widgets/thread_agent_switch.py",
+    "libs/code/deepagents_code/tui/widgets/startup_tip.py",
+    "libs/code/deepagents_code/tui/widgets/__init__.py",
+    "libs/code/deepagents_code/tui/widgets/launch_init.py",
+    "libs/code/deepagents_code/tui/widgets/notification_settings.py",
+    "libs/code/deepagents_code/tui/widgets/theme_selector.py",
+    "libs/code/deepagents_code/tui/widgets/approval.py",
+    "libs/code/deepagents_code/tui/widgets/_inline_prompt.py",
+    "libs/code/deepagents_code/tui/widgets/autocomplete.py",
+    "libs/code/deepagents_code/tui/widgets/tool_widgets.py",
+    "libs/code/deepagents_code/tui/widgets/skill_trust.py",
+    "libs/code/deepagents_code/tui/widgets/_copy_spans.py"
+   ],
+   "loc": 39038,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Confirmation prompt for resuming a thread owned by another agent.",
+   "n_ficheros": 50
+  },
+  {
+   "id": "libs/deepagents/tests/unit_tests",
+   "label": "unit_tests",
+   "group": "agente-grafo",
+   "kind": "agente-grafo",
+   "files": [
+    "libs/deepagents/tests/unit_tests/chat_model.py",
+    "libs/deepagents/tests/unit_tests/test_todo_middleware.py",
+    "libs/deepagents/tests/unit_tests/conftest.py",
+    "libs/deepagents/tests/unit_tests/test_local_shell.py",
+    "libs/deepagents/tests/unit_tests/__init__.py",
+    "libs/deepagents/tests/unit_tests/test_graph.py",
+    "libs/deepagents/tests/unit_tests/test_deep_agent_streaming.py",
+    "libs/deepagents/tests/unit_tests/test_async_subagents.py",
+    "libs/deepagents/tests/unit_tests/test_harness_profiles.py",
+    "libs/deepagents/tests/unit_tests/test_timing.py",
+    "libs/deepagents/tests/unit_tests/test_version.py",
+    "libs/deepagents/tests/unit_tests/test_end_to_end.py"
+   ],
+   "loc": 26479,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Fake chat models for testing purposes.",
+   "n_ficheros": 25
+  },
+  {
+   "id": "libs/deepagents/tests/unit_tests/backends",
+   "label": "backends",
+   "group": "servicio",
+   "kind": "servicio",
+   "files": [
+    "libs/deepagents/tests/unit_tests/backends/test_langsmith_sandbox.py",
+    "libs/deepagents/tests/unit_tests/backends/__init__.py",
+    "libs/deepagents/tests/unit_tests/backends/test_filesystem_backend.py",
+    "libs/deepagents/tests/unit_tests/backends/test_protocol.py",
+    "libs/deepagents/tests/unit_tests/backends/test_glob_semantics.py",
+    "libs/deepagents/tests/unit_tests/backends/test_timeout_compat.py",
+    "libs/deepagents/tests/unit_tests/backends/test_sandbox_backend.py",
+    "libs/deepagents/tests/unit_tests/backends/test_context_hub_backend.py",
+    "libs/deepagents/tests/unit_tests/backends/test_composite_backend_async.py",
+    "libs/deepagents/tests/unit_tests/backends/test_filesystem_backend_async.py",
+    "libs/deepagents/tests/unit_tests/backends/test_composite_backend.py",
+    "libs/deepagents/tests/unit_tests/backends/test_local_shell_backend.py"
+   ],
+   "loc": 13985,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Tests for LangSmithSandbox backend.",
+   "n_ficheros": 18
+  },
+  {
+   "id": "libs/deepagents/tests/unit_tests/middleware",
+   "label": "middleware",
+   "group": "agente-grafo",
+   "kind": "agente-grafo",
+   "files": [
+    "libs/deepagents/tests/unit_tests/middleware/test_tool_schemas.py",
+    "libs/deepagents/tests/unit_tests/middleware/test_skills_middleware_async.py",
+    "libs/deepagents/tests/unit_tests/middleware/__init__.py",
+    "libs/deepagents/tests/unit_tests/middleware/test_filesystem_video.py",
+    "libs/deepagents/tests/unit_tests/middleware/test_filesystem_middleware_init.py",
+    "libs/deepagents/tests/unit_tests/middleware/test_memory_middleware.py",
+    "libs/deepagents/tests/unit_tests/middleware/test_summarization_middleware.py",
+    "libs/deepagents/tests/unit_tests/middleware/test_subagent_middleware_init.py",
+    "libs/deepagents/tests/unit_tests/middleware/test_rubric_middleware.py",
+    "libs/deepagents/tests/unit_tests/middleware/test_video.py",
+    "libs/deepagents/tests/unit_tests/middleware/test_tool_exclusion.py",
+    "libs/deepagents/tests/unit_tests/middleware/test_video_deps.py"
+   ],
+   "loc": 12884,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Unit tests for tool schema validation.",
+   "n_ficheros": 17
+  },
+  {
+   "id": "libs/code/tests/unit_tests/tui",
+   "label": "tui",
+   "group": "test",
+   "kind": "test",
+   "files": [
+    "libs/code/tests/unit_tests/tui/test_subagent_stream.py",
+    "libs/code/tests/unit_tests/tui/__init__.py",
+    "libs/code/tests/unit_tests/tui/test_key_hints.py",
+    "libs/code/tests/unit_tests/tui/test_textual_adapter.py",
+    "libs/code/tests/unit_tests/tui/test_modal_footer_layout.py"
+   ],
+   "loc": 12089,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Unit tests for the subagent custom-stream boundary filter. `_is_renderable_subagent_event` is the trust boundary between the agent's `custom` stream and the live panel: only well-formed subagent event",
+   "n_ficheros": 5
+  },
+  {
+   "id": "libs/deepagents/deepagents/middleware",
+   "label": "middleware",
+   "group": "agente-grafo",
+   "kind": "agente-grafo",
+   "files": [
+    "libs/deepagents/deepagents/middleware/__init__.py",
+    "libs/deepagents/deepagents/middleware/_message_eviction.py",
+    "libs/deepagents/deepagents/middleware/_fs_interrupt.py",
+    "libs/deepagents/deepagents/middleware/_prompt_caching.py",
+    "libs/deepagents/deepagents/middleware/_utils.py",
+    "libs/deepagents/deepagents/middleware/_state.py",
+    "libs/deepagents/deepagents/middleware/async_subagents.py",
+    "libs/deepagents/deepagents/middleware/_video.py",
+    "libs/deepagents/deepagents/middleware/_tool_exclusion.py",
+    "libs/deepagents/deepagents/middleware/summarization.py",
+    "libs/deepagents/deepagents/middleware/permissions.py",
+    "libs/deepagents/deepagents/middleware/skills.py"
+   ],
+   "loc": 11586,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Middleware for the Deep Agents agent. ## Overview The LLM receives tools through two paths: 1. **SDK middleware** (this package) -- tools, system-prompt injection, and request interception that any SD",
+   "n_ficheros": 18
+  },
+  {
+   "id": "libs/evals/tests/evals",
+   "label": "evals",
+   "group": "agente-grafo",
+   "kind": "agente-grafo",
+   "files": [
+    "libs/evals/tests/evals/test_memory_multiturn.py",
+    "libs/evals/tests/evals/test__reporter_sample.py",
+    "libs/evals/tests/evals/test_tool_usage_relational.py",
+    "libs/evals/tests/evals/test_goal_tools.py",
+    "libs/evals/tests/evals/conftest.py",
+    "libs/evals/tests/evals/__init__.py",
+    "libs/evals/tests/evals/test_file_operations.py",
+    "libs/evals/tests/evals/test_tool_selection.py",
+    "libs/evals/tests/evals/test_iterative_constraint_satisfaction.py",
+    "libs/evals/tests/evals/external_benchmarks.py",
+    "libs/evals/tests/evals/test_memory.py",
+    "libs/evals/tests/evals/llm_judge.py"
+   ],
+   "loc": 9593,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Eval tests for multi-turn memory behavior. Tests whether the agent: 1. Picks up on implicit user preferences revealed through conversation (not explicit \"remember this\" instructions). 2. Records expli",
+   "n_ficheros": 23
+  },
+  {
+   "id": "libs/deepagents/deepagents/backends",
+   "label": "backends",
+   "group": "servicio",
+   "kind": "servicio",
+   "files": [
+    "libs/deepagents/deepagents/backends/langsmith.py",
+    "libs/deepagents/deepagents/backends/__init__.py",
+    "libs/deepagents/deepagents/backends/protocol.py",
+    "libs/deepagents/deepagents/backends/context_hub.py",
+    "libs/deepagents/deepagents/backends/state.py",
+    "libs/deepagents/deepagents/backends/store.py",
+    "libs/deepagents/deepagents/backends/local_shell.py",
+    "libs/deepagents/deepagents/backends/utils.py",
+    "libs/deepagents/deepagents/backends/sandbox.py",
+    "libs/deepagents/deepagents/backends/composite.py",
+    "libs/deepagents/deepagents/backends/filesystem.py"
+   ],
+   "loc": 8843,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "LangSmith sandbox backend implementation.",
+   "n_ficheros": 11
+  },
+  {
+   "id": "libs/code/deepagents_code/hooks",
+   "label": "hooks",
+   "group": "estado-fe",
+   "kind": "estado-fe",
+   "files": [
+    "libs/code/deepagents_code/hooks/runner.py",
+    "libs/code/deepagents_code/hooks/__init__.py",
+    "libs/code/deepagents_code/hooks/tools.py",
+    "libs/code/deepagents_code/hooks/transcript.py",
+    "libs/code/deepagents_code/hooks/server_middleware.py",
+    "libs/code/deepagents_code/hooks/engine.py",
+    "libs/code/deepagents_code/hooks/snapshot.py",
+    "libs/code/deepagents_code/hooks/client.py",
+    "libs/code/deepagents_code/hooks/loading.py",
+    "libs/code/deepagents_code/hooks/envelope.py",
+    "libs/code/deepagents_code/hooks/trust.py",
+    "libs/code/deepagents_code/hooks/client_lifecycle.py"
+   ],
+   "loc": 8178,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Bounded asynchronous command execution for Hooks v2.",
+   "n_ficheros": 25
+  },
+  {
+   "id": "libs/evals/tests/unit_tests",
+   "label": "unit_tests",
+   "group": "test",
+   "kind": "test",
+   "files": [
+    "libs/evals/tests/unit_tests/test_assertions.py",
+    "libs/evals/tests/unit_tests/test_external_benchmark_helpers.py",
+    "libs/evals/tests/unit_tests/test_harbor_langsmith_integration.py",
+    "libs/evals/tests/unit_tests/test_cli.py",
+    "libs/evals/tests/unit_tests/__init__.py",
+    "libs/evals/tests/unit_tests/test_analyze_eval_failures.py",
+    "libs/evals/tests/unit_tests/test_drbench_adapter.py",
+    "libs/evals/tests/unit_tests/test_llm_judge.py",
+    "libs/evals/tests/unit_tests/test_contextbench_main.py",
+    "libs/evals/tests/unit_tests/test_eval_catalog.py",
+    "libs/evals/tests/unit_tests/test_run_trials.py",
+    "libs/evals/tests/unit_tests/test_generate_radar_script.py"
+   ],
+   "loc": 7510,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Deterministic unit tests for the tool-call trajectory assertions. Covers the `ToolNotCalled` hard-fail assertion (the negation of `ToolCall`) and the shared construction-time validation on both `ToolC",
+   "n_ficheros": 27
+  },
+  {
+   "id": "libs/code/tests/unit_tests/hooks",
+   "label": "hooks",
+   "group": "agente-grafo",
+   "kind": "agente-grafo",
+   "files": [
+    "libs/code/tests/unit_tests/hooks/__init__.py",
+    "libs/code/tests/unit_tests/hooks/test_client_lifecycle.py",
+    "libs/code/tests/unit_tests/hooks/test_presenter.py",
+    "libs/code/tests/unit_tests/hooks/test_execution.py",
+    "libs/code/tests/unit_tests/hooks/test_configuration.py",
+    "libs/code/tests/unit_tests/hooks/test_manager.py",
+    "libs/code/tests/unit_tests/hooks/test_server_lifecycle.py",
+    "libs/code/tests/unit_tests/hooks/test_trust.py",
+    "libs/code/tests/unit_tests/hooks/test_engine.py",
+    "libs/code/tests/unit_tests/hooks/test_transcript.py"
+   ],
+   "loc": 5755,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Hooks unit tests.",
+   "n_ficheros": 10
+  },
+  {
+   "id": "libs/code/deepagents_code/configuration",
+   "label": "configuration",
+   "group": "config",
+   "kind": "config",
+   "files": [
+    "libs/code/deepagents_code/configuration/__init__.py",
+    "libs/code/deepagents_code/configuration/paths.py",
+    "libs/code/deepagents_code/configuration/provider.py",
+    "libs/code/deepagents_code/configuration/providers.py",
+    "libs/code/deepagents_code/configuration/service.py",
+    "libs/code/deepagents_code/configuration/writer.py",
+    "libs/code/deepagents_code/configuration/types.py",
+    "libs/code/deepagents_code/configuration/resolver.py",
+    "libs/code/deepagents_code/configuration/theme_resolution.py"
+   ],
+   "loc": 4875,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Managed and user configuration: paths, providers, and merge. Writes live in `deepagents_code.configuration.writer` and are imported from there directly, so no writer symbol is re-exported here.",
+   "n_ficheros": 9
+  },
+  {
+   "id": "libs/partners/quickjs/tests/unit_tests",
+   "label": "unit_tests",
+   "group": "test",
+   "kind": "test",
+   "files": [
+    "libs/partners/quickjs/tests/unit_tests/__init__.py",
+    "libs/partners/quickjs/tests/unit_tests/test_snapshot.py",
+    "libs/partners/quickjs/tests/unit_tests/test_end_to_end.py",
+    "libs/partners/quickjs/tests/unit_tests/test_thread_affinity.py",
+    "libs/partners/quickjs/tests/unit_tests/test_repl_middleware.py",
+    "libs/partners/quickjs/tests/unit_tests/test_subagent_events.py",
+    "libs/partners/quickjs/tests/unit_tests/test_snapshot_persistence.py",
+    "libs/partners/quickjs/tests/unit_tests/test_prompt_modes.py",
+    "libs/partners/quickjs/tests/unit_tests/test_end_to_end_async.py",
+    "libs/partners/quickjs/tests/unit_tests/test_ptc.py"
+   ],
+   "loc": 4711,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Unit tests for the QuickJS snapshot patch-chain delta encoding. Covers the pure encoding helpers in ``langchain_quickjs._snapshot`` (``coerce_record``, ``replay_snapshot_chain``, the snap/patch/clear ",
+   "n_ficheros": 10
+  },
+  {
+   "id": "libs/talon/deepagents_talon",
+   "label": "deepagents_talon",
+   "group": "config",
+   "kind": "config",
+   "files": [
+    "libs/talon/deepagents_talon/host.py",
+    "libs/talon/deepagents_talon/__init__.py",
+    "libs/talon/deepagents_talon/data_lifecycle.py",
+    "libs/talon/deepagents_talon/interfaces.py",
+    "libs/talon/deepagents_talon/media.py",
+    "libs/talon/deepagents_talon/speech.py",
+    "libs/talon/deepagents_talon/async_subagents.py",
+    "libs/talon/deepagents_talon/__main__.py",
+    "libs/talon/deepagents_talon/runtime.py",
+    "libs/talon/deepagents_talon/config.py",
+    "libs/talon/deepagents_talon/mcp.py",
+    "libs/talon/deepagents_talon/observability.py"
+   ],
+   "loc": 4593,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Runtime host that coordinates Talon components in one event loop. Talon is an experimental runtime and is subject to change or removal at any time.",
+   "n_ficheros": 14
+  },
+  {
+   "id": "libs/code/tests/unit_tests/skills",
+   "label": "skills",
+   "group": "test",
+   "kind": "test",
+   "files": [
+    "libs/code/tests/unit_tests/skills/test_skill_trust.py",
+    "libs/code/tests/unit_tests/skills/test_load.py",
+    "libs/code/tests/unit_tests/skills/test_commands.py",
+    "libs/code/tests/unit_tests/skills/__init__.py",
+    "libs/code/tests/unit_tests/skills/test_skills_json.py",
+    "libs/code/tests/unit_tests/skills/test_merge.py",
+    "libs/code/tests/unit_tests/skills/test_thread_inspector.py"
+   ],
+   "loc": 4376,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Tests for the skill directory trust store.",
+   "n_ficheros": 7
+  },
+  {
+   "id": "libs/code/deepagents_code/tui",
+   "label": "tui",
+   "group": "otro",
+   "kind": "otro",
+   "files": [
+    "libs/code/deepagents_code/tui/__init__.py",
+    "libs/code/deepagents_code/tui/textual_adapter.py",
+    "libs/code/deepagents_code/tui/key_hints.py"
+   ],
+   "loc": 3949,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Textual user interface package for `deepagents-code`.",
+   "n_ficheros": 3
+  },
+  {
+   "id": "libs/deepagents/deepagents/profiles/harness",
+   "label": "harness",
+   "group": "otro",
+   "kind": "otro",
+   "files": [
+    "libs/deepagents/deepagents/profiles/harness/__init__.py",
+    "libs/deepagents/deepagents/profiles/harness/_anthropic_sonnet_4_6.py",
+    "libs/deepagents/deepagents/profiles/harness/_anthropic_opus_4_7.py",
+    "libs/deepagents/deepagents/profiles/harness/_nvidia_nemotron_3_ultra.py",
+    "libs/deepagents/deepagents/profiles/harness/_anthropic_haiku_4_5.py",
+    "libs/deepagents/deepagents/profiles/harness/_openai_codex.py",
+    "libs/deepagents/deepagents/profiles/harness/harness_profiles.py"
+   ],
+   "loc": 3428,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Harness profile package: `HarnessProfile` API and built-in registrations. Individual built-in modules expose a zero-arg `register()` callable; the lazy `_builtin_profiles` bootstrap invokes them once ",
+   "n_ficheros": 7
+  },
+  {
+   "id": "libs/code/deepagents_code/client",
+   "label": "client",
+   "group": "cliente-api",
+   "kind": "cliente-api",
+   "files": [
+    "libs/code/deepagents_code/client/__init__.py",
+    "libs/code/deepagents_code/client/remote_client.py",
+    "libs/code/deepagents_code/client/non_interactive.py"
+   ],
+   "loc": 3340,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Client-side transport and headless execution for Deep Agents Code.",
+   "n_ficheros": 3
+  },
+  {
+   "id": "libs/partners/quickjs/langchain_quickjs",
+   "label": "langchain_quickjs",
+   "group": "otro",
+   "kind": "otro",
+   "files": [
+    "libs/partners/quickjs/langchain_quickjs/_format.py",
+    "libs/partners/quickjs/langchain_quickjs/__init__.py",
+    "libs/partners/quickjs/langchain_quickjs/_subagent.py",
+    "libs/partners/quickjs/langchain_quickjs/_repl.py",
+    "libs/partners/quickjs/langchain_quickjs/_ptc.py",
+    "libs/partners/quickjs/langchain_quickjs/_snapshot.py",
+    "libs/partners/quickjs/langchain_quickjs/middleware.py",
+    "libs/partners/quickjs/langchain_quickjs/_prompt.py"
+   ],
+   "loc": 3208,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Formatting and output-coercion helpers for the QuickJS REPL.",
+   "n_ficheros": 8
+  },
+  {
+   "id": "libs/talon/tests",
+   "label": "tests",
+   "group": "test",
+   "kind": "test",
+   "files": [
+    "libs/talon/tests/conftest.py",
+    "libs/talon/tests/test_speech.py",
+    "libs/talon/tests/__init__.py",
+    "libs/talon/tests/test_fleet_import.py",
+    "libs/talon/tests/test_async_subagents.py",
+    "libs/talon/tests/test_runtime.py",
+    "libs/talon/tests/test_media.py",
+    "libs/talon/tests/test_config.py",
+    "libs/talon/tests/test_host.py",
+    "libs/talon/tests/test_observability.py",
+    "libs/talon/tests/test_mcp.py",
+    "libs/talon/tests/test_data_lifecycle.py"
+   ],
+   "loc": 3206,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Unit tests for `deepagents_talon`.",
+   "n_ficheros": 12
+  },
+  {
+   "id": "libs/code/deepagents_code/plugins",
+   "label": "plugins",
+   "group": "otro",
+   "kind": "otro",
+   "files": [
+    "libs/code/deepagents_code/plugins/substitution.py",
+    "libs/code/deepagents_code/plugins/models.py",
+    "libs/code/deepagents_code/plugins/__init__.py",
+    "libs/code/deepagents_code/plugins/manifest.py",
+    "libs/code/deepagents_code/plugins/discovery.py",
+    "libs/code/deepagents_code/plugins/marketplace.py",
+    "libs/code/deepagents_code/plugins/store.py",
+    "libs/code/deepagents_code/plugins/commands_cli.py",
+    "libs/code/deepagents_code/plugins/_json.py"
+   ],
+   "loc": 2937,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Variable substitution for plugin-provided configuration.",
+   "n_ficheros": 9
+  },
+  {
+   "id": "libs/code/tests/integration_tests",
+   "label": "integration_tests",
+   "group": "test",
+   "kind": "test",
+   "files": [
+    "libs/code/tests/integration_tests/test_goal_criteria_remote.py",
+    "libs/code/tests/integration_tests/conftest.py",
+    "libs/code/tests/integration_tests/test_auto_approve_remote.py",
+    "libs/code/tests/integration_tests/__init__.py",
+    "libs/code/tests/integration_tests/test_sandbox_operations.py",
+    "libs/code/tests/integration_tests/test_compact_resume.py",
+    "libs/code/tests/integration_tests/test_sandbox_factory.py",
+    "libs/code/tests/integration_tests/test_offload_server_side.py",
+    "libs/code/tests/integration_tests/test_acp_mode.py"
+   ],
+   "loc": 2930,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Integration coverage for server-side goal criteria on the main graph.",
+   "n_ficheros": 9
+  },
+  {
+   "id": "libs/evals/tests/evals/data/bfcl_apis",
+   "label": "bfcl_apis",
+   "group": "test",
+   "kind": "test",
+   "files": [
+    "libs/evals/tests/evals/data/bfcl_apis/ticket_api.py",
+    "libs/evals/tests/evals/data/bfcl_apis/long_context.py",
+    "libs/evals/tests/evals/data/bfcl_apis/__init__.py",
+    "libs/evals/tests/evals/data/bfcl_apis/message_api.py",
+    "libs/evals/tests/evals/data/bfcl_apis/trading_bot.py",
+    "libs/evals/tests/evals/data/bfcl_apis/vehicle_control.py",
+    "libs/evals/tests/evals/data/bfcl_apis/travel_booking.py"
+   ],
+   "loc": 2918,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "In a real system, you would validate the credentials against a database",
+   "n_ficheros": 7
+  },
+  {
+   "id": "libs/code/deepagents_code/client/commands",
+   "label": "commands",
+   "group": "cliente-api",
+   "kind": "cliente-api",
+   "files": [
+    "libs/code/deepagents_code/client/commands/__init__.py",
+    "libs/code/deepagents_code/client/commands/tools.py",
+    "libs/code/deepagents_code/client/commands/extras.py",
+    "libs/code/deepagents_code/client/commands/auth.py",
+    "libs/code/deepagents_code/client/commands/config.py",
+    "libs/code/deepagents_code/client/commands/mcp.py"
+   ],
+   "loc": 2836,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Client-facing CLI command implementations.",
+   "n_ficheros": 6
+  },
+  {
+   "id": "libs/talon/deepagents_talon/channels",
+   "label": "channels",
+   "group": "otro",
+   "kind": "otro",
+   "files": [
+    "libs/talon/deepagents_talon/channels/telegram.py",
+    "libs/talon/deepagents_talon/channels/base.py",
+    "libs/talon/deepagents_talon/channels/__init__.py",
+    "libs/talon/deepagents_talon/channels/whatsapp.py"
+   ],
+   "loc": 2681,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Telegram channel adapter backed by the Bot API over urllib. Talon is an experimental runtime and is subject to change or removal at any time.",
+   "n_ficheros": 4
+  },
+  {
+   "id": "libs/evals/scripts",
+   "label": "scripts",
+   "group": "otro",
+   "kind": "otro",
+   "files": [
+    "libs/evals/scripts/analyze.py",
+    "libs/evals/scripts/run_trials.py",
+    "libs/evals/scripts/generate_radar.py",
+    "libs/evals/scripts/composite_radar.py",
+    "libs/evals/scripts/generate_model_groups.py",
+    "libs/evals/scripts/generate_eval_catalog.py",
+    "libs/evals/scripts/harbor_langsmith.py"
+   ],
+   "loc": 2545,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Analyze job trials from a jobs directory. Scans through trial directories, extracts trajectory data and success metrics.",
+   "n_ficheros": 7
+  },
+  {
+   "id": "examples/better-harness/better_harness",
+   "label": "better_harness",
+   "group": "otro",
+   "kind": "otro",
+   "files": [
+    "examples/better-harness/better_harness/__init__.py",
+    "examples/better-harness/better_harness/patching.py",
+    "examples/better-harness/better_harness/core.py",
+    "examples/better-harness/better_harness/agent.py",
+    "examples/better-harness/better_harness/runners.py"
+   ],
+   "loc": 2437,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Public exports for better-harness.",
+   "n_ficheros": 5
+  },
+  {
+   "id": "libs/code/deepagents_code/integrations",
+   "label": "integrations",
+   "group": "config",
+   "kind": "config",
+   "files": [
+    "libs/code/deepagents_code/integrations/sandbox_registry.py",
+    "libs/code/deepagents_code/integrations/__init__.py",
+    "libs/code/deepagents_code/integrations/sandbox_provider.py",
+    "libs/code/deepagents_code/integrations/openai_codex.py",
+    "libs/code/deepagents_code/integrations/sandbox_factory.py",
+    "libs/code/deepagents_code/integrations/sandbox_config.py"
+   ],
+   "loc": 2423,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Discovery and instantiation of sandbox providers. Merges three provider sources into one registry: 1. Built-in providers curated in this repo (installed as `deepagents-code` extras). 2. Entry-point pr",
+   "n_ficheros": 6
+  },
+  {
+   "id": "libs/code/tests/unit_tests/plugins",
+   "label": "plugins",
+   "group": "test",
+   "kind": "test",
+   "files": [
+    "libs/code/tests/unit_tests/plugins/test_plugins_p0.py",
+    "libs/code/tests/unit_tests/plugins/__init__.py",
+    "libs/code/tests/unit_tests/plugins/test_marketplace.py",
+    "libs/code/tests/unit_tests/plugins/test_store.py",
+    "libs/code/tests/unit_tests/plugins/test_plugin_hooks.py"
+   ],
+   "loc": 2420,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Marketplace source tree is unchanged; agent loads from cache.",
+   "n_ficheros": 5
+  },
+  {
+   "id": "libs/code/tests/unit_tests/client/commands",
+   "label": "commands",
+   "group": "test",
+   "kind": "test",
+   "files": [
+    "libs/code/tests/unit_tests/client/commands/__init__.py",
+    "libs/code/tests/unit_tests/client/commands/test_auth.py",
+    "libs/code/tests/unit_tests/client/commands/test_tools.py",
+    "libs/code/tests/unit_tests/client/commands/test_extras.py",
+    "libs/code/tests/unit_tests/client/commands/test_mcp.py"
+   ],
+   "loc": 2357,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Client command unit tests.",
+   "n_ficheros": 5
+  },
+  {
+   "id": "libs/acp/tests",
+   "label": "tests",
+   "group": "agente-grafo",
+   "kind": "agente-grafo",
+   "files": [
+    "libs/acp/tests/chat_model.py",
+    "libs/acp/tests/__init__.py",
+    "libs/acp/tests/test_command_allowlist.py",
+    "libs/acp/tests/test_dangerous_patterns.py",
+    "libs/acp/tests/test_agent.py",
+    "libs/acp/tests/test_main.py",
+    "libs/acp/tests/test_model_switching.py",
+    "libs/acp/tests/test_utils.py"
+   ],
+   "loc": 2352,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Fake chat models for testing purposes.",
+   "n_ficheros": 8
+  },
+  {
+   "id": "libs/talon/tests/channels",
+   "label": "channels",
+   "group": "test",
+   "kind": "test",
+   "files": [
+    "libs/talon/tests/channels/__init__.py",
+    "libs/talon/tests/channels/test_telegram.py",
+    "libs/talon/tests/channels/test_base.py",
+    "libs/talon/tests/channels/test_whatsapp.py"
+   ],
+   "loc": 2257,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Channel tests.",
+   "n_ficheros": 4
+  },
+  {
+   "id": "libs/code/deepagents_code/skills",
+   "label": "skills",
+   "group": "otro",
+   "kind": "otro",
+   "files": [
+    "libs/code/deepagents_code/skills/commands.py",
+    "libs/code/deepagents_code/skills/__init__.py",
+    "libs/code/deepagents_code/skills/trust.py",
+    "libs/code/deepagents_code/skills/merge.py",
+    "libs/code/deepagents_code/skills/load.py",
+    "libs/code/deepagents_code/skills/invocation.py"
+   ],
+   "loc": 2241,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "CLI commands for skill management.",
+   "n_ficheros": 6
+  },
+  {
+   "id": "libs/code/deepagents_code/tui/modals/plugin_manager",
+   "label": "plugin_manager",
+   "group": "otro",
+   "kind": "otro",
+   "files": [
+    "libs/code/deepagents_code/tui/modals/plugin_manager/models.py",
+    "libs/code/deepagents_code/tui/modals/plugin_manager/__init__.py",
+    "libs/code/deepagents_code/tui/modals/plugin_manager/state.py",
+    "libs/code/deepagents_code/tui/modals/plugin_manager/tabs.py",
+    "libs/code/deepagents_code/tui/modals/plugin_manager/content.py"
+   ],
+   "loc": 2176,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Plugin manager view models.",
+   "n_ficheros": 5
+  },
+  {
+   "id": "libs/deepagents/tests/integration_tests",
+   "label": "integration_tests",
+   "group": "test",
+   "kind": "test",
+   "files": [
+    "libs/deepagents/tests/integration_tests/test_langsmith_sandbox.py",
+    "libs/deepagents/tests/integration_tests/test_hitl.py",
+    "libs/deepagents/tests/integration_tests/__init__.py",
+    "libs/deepagents/tests/integration_tests/test_filesystem_middleware.py",
+    "libs/deepagents/tests/integration_tests/test_deepagents.py",
+    "libs/deepagents/tests/integration_tests/test_context_hub_backend.py",
+    "libs/deepagents/tests/integration_tests/test_subagent_middleware.py"
+   ],
+   "loc": 1969,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Server-side filter keeps this quick even with many snapshots in the",
+   "n_ficheros": 7
+  },
+  {
+   "id": "libs/code/tests/unit_tests/tui/modals/plugin_manager",
+   "label": "plugin_manager",
+   "group": "test",
+   "kind": "test",
+   "files": [
+    "libs/code/tests/unit_tests/tui/modals/plugin_manager/__init__.py",
+    "libs/code/tests/unit_tests/tui/modals/plugin_manager/test_structure.py"
+   ],
+   "loc": 1957,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Plugin manager modal tests.",
+   "n_ficheros": 2
+  },
+  {
+   "id": "examples/llm-wiki",
+   "label": "llm-wiki",
+   "group": "otro",
+   "kind": "otro",
+   "files": [
+    "examples/llm-wiki/ingest.py",
+    "examples/llm-wiki/helpers.py",
+    "examples/llm-wiki/runner.py",
+    "examples/llm-wiki/models.py",
+    "examples/llm-wiki/log.py",
+    "examples/llm-wiki/index.py",
+    "examples/llm-wiki/query.py",
+    "examples/llm-wiki/lint.py",
+    "examples/llm-wiki/init.py"
+   ],
+   "loc": 1908,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Ingest-specific workflow for the LLM wiki.",
+   "n_ficheros": 9
+  },
+  {
+   "id": "libs/deepagents/deepagents",
+   "label": "deepagents",
+   "group": "agente-grafo",
+   "kind": "agente-grafo",
+   "files": [
+    "libs/deepagents/deepagents/_models.py",
+    "libs/deepagents/deepagents/_tools.py",
+    "libs/deepagents/deepagents/__init__.py",
+    "libs/deepagents/deepagents/_messages_reducer.py",
+    "libs/deepagents/deepagents/_excluded_middleware.py",
+    "libs/deepagents/deepagents/graph.py",
+    "libs/deepagents/deepagents/_version.py"
+   ],
+   "loc": 1806,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Shared helpers for resolving and inspecting chat models.",
+   "n_ficheros": 7
+  },
+  {
+   "id": "libs/code/deepagents_code/client/launch",
+   "label": "launch",
+   "group": "agente-estado",
+   "kind": "agente-estado",
+   "files": [
+    "libs/code/deepagents_code/client/launch/server_manager.py",
+    "libs/code/deepagents_code/client/launch/__init__.py",
+    "libs/code/deepagents_code/client/launch/server.py"
+   ],
+   "loc": 1763,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Server lifecycle orchestration for the app. Provides `start_server_and_get_agent` which handles the full flow of: 1. Building a `ServerConfig` from application arguments 2. Writing config to env vars ",
+   "n_ficheros": 3
+  },
+  {
+   "id": "libs/acp/deepagents_acp",
+   "label": "deepagents_acp",
+   "group": "agente-grafo",
+   "kind": "agente-grafo",
+   "files": [
+    "libs/acp/deepagents_acp/__init__.py",
+    "libs/acp/deepagents_acp/server.py",
+    "libs/acp/deepagents_acp/__main__.py",
+    "libs/acp/deepagents_acp/utils.py",
+    "libs/acp/deepagents_acp/_version.py"
+   ],
+   "loc": 1712,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Agent Client Protocol integration for Deep Agents.",
+   "n_ficheros": 5
+  },
+  {
+   "id": "libs/evals/tests/evals/tau2_airline",
+   "label": "tau2_airline",
+   "group": "agente-grafo",
+   "kind": "agente-grafo",
+   "files": [
+    "libs/evals/tests/evals/tau2_airline/runner.py",
+    "libs/evals/tests/evals/tau2_airline/__init__.py",
+    "libs/evals/tests/evals/tau2_airline/domain.py",
+    "libs/evals/tests/evals/tau2_airline/test_tau2_airline.py",
+    "libs/evals/tests/evals/tau2_airline/user_sim.py",
+    "libs/evals/tests/evals/tau2_airline/evaluation.py"
+   ],
+   "loc": 1689,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Multi-turn conversation orchestrator for tau2 airline evaluations. Drives a back-and-forth conversation between a deepagents agent and an LLM-powered user simulator, collecting the full transcript and",
+   "n_ficheros": 6
+  },
+  {
+   "id": "libs/evals/deepagents_evals",
+   "label": "deepagents_evals",
+   "group": "otro",
+   "kind": "otro",
+   "files": [
+    "libs/evals/deepagents_evals/cli.py",
+    "libs/evals/deepagents_evals/trial_summary.py",
+    "libs/evals/deepagents_evals/__init__.py",
+    "libs/evals/deepagents_evals/tau3_subset.py",
+    "libs/evals/deepagents_evals/radar.py"
+   ],
+   "loc": 1553,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Unified, agent-friendly CLI for the Deep Agents evaluation suite. Wraps the scattered `Makefile` targets and `scripts/*.py` entry points behind a single `deepagents-evals` console script with discover",
+   "n_ficheros": 5
+  },
+  {
+   "id": "examples/llm-wiki/tests/unit_tests",
+   "label": "unit_tests",
+   "group": "test",
+   "kind": "test",
+   "files": [
+    "examples/llm-wiki/tests/unit_tests/test_helpers.py"
+   ],
+   "loc": 1497,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Unit tests for LLM wiki setup and ingest helpers.",
+   "n_ficheros": 1
+  },
+  {
+   "id": "libs/evals/harbor_adapters/drbench",
+   "label": "drbench",
+   "group": "otro",
+   "kind": "otro",
+   "files": [
+    "libs/evals/harbor_adapters/drbench/main.py",
+    "libs/evals/harbor_adapters/drbench/adapter.py",
+    "libs/evals/harbor_adapters/drbench/__init__.py"
+   ],
+   "loc": 1472,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "CLI driver for generating DRBench Harbor tasks by id. Run as `python -m harbor_adapters.drbench.main`.",
+   "n_ficheros": 3
+  },
+  {
+   "id": "libs/talon/deepagents_talon/cron",
+   "label": "cron",
+   "group": "otro",
+   "kind": "otro",
+   "files": [
+    "libs/talon/deepagents_talon/cron/__init__.py",
+    "libs/talon/deepagents_talon/cron/tools.py",
+    "libs/talon/deepagents_talon/cron/scheduler.py",
+    "libs/talon/deepagents_talon/cron/jobs.py"
+   ],
+   "loc": 1198,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Cron scheduling support for Talon. Talon is an experimental runtime and is subject to change or removal at any time.",
+   "n_ficheros": 4
+  },
+  {
+   "id": "libs/code/deepagents_code/hooks/models",
+   "label": "models",
+   "group": "estado-fe",
+   "kind": "estado-fe",
+   "files": [
+    "libs/code/deepagents_code/hooks/models/__init__.py",
+    "libs/code/deepagents_code/hooks/models/domain.py",
+    "libs/code/deepagents_code/hooks/models/wire.py",
+    "libs/code/deepagents_code/hooks/models/adapters.py",
+    "libs/code/deepagents_code/hooks/models/config.py",
+    "libs/code/deepagents_code/hooks/models/transport.py"
+   ],
+   "loc": 1118,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Typed contracts for the hooks system.",
+   "n_ficheros": 6
+  },
+  {
+   "id": "libs/evals/deepagents_harbor",
+   "label": "deepagents_harbor",
+   "group": "otro",
+   "kind": "otro",
+   "files": [
+    "libs/evals/deepagents_harbor/langsmith.py",
+    "libs/evals/deepagents_harbor/__init__.py",
+    "libs/evals/deepagents_harbor/stats.py",
+    "libs/evals/deepagents_harbor/failure.py"
+   ],
+   "loc": 1058,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "LangSmith integration for Harbor: datasets, experiments, and feedback. Provides functions for: - Creating deterministic example IDs from task instructions - Creating and ensuring LangSmith datasets fr",
+   "n_ficheros": 4
+  },
+  {
+   "id": "libs/evals/harbor_adapters/drbench/templates",
+   "label": "templates",
+   "group": "otro",
+   "kind": "otro",
+   "files": [
+    "libs/evals/harbor_adapters/drbench/templates/extract_text.py",
+    "libs/evals/harbor_adapters/drbench/templates/judge.py"
+   ],
+   "loc": 1015,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Convert a DRBench corpus document to plain text on stdout. Installed in the task image as `extract-text`. DRBench's corpus is PDF, DOCX, XLSX, PPTX, and JSONL mailbox exports; the benchmark scores res",
+   "n_ficheros": 2
+  },
+  {
+   "id": "libs/evals/tests/evals/memory_agent_bench",
+   "label": "memory_agent_bench",
+   "group": "servicio",
+   "kind": "servicio",
+   "files": [
+    "libs/evals/tests/evals/memory_agent_bench/__init__.py",
+    "libs/evals/tests/evals/memory_agent_bench/eval_utils.py",
+    "libs/evals/tests/evals/memory_agent_bench/configs.py",
+    "libs/evals/tests/evals/memory_agent_bench/test_memory_agent_bench.py",
+    "libs/evals/tests/evals/memory_agent_bench/data_utils.py"
+   ],
+   "loc": 983,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "MemoryAgentBench eval test package.",
+   "n_ficheros": 5
+  },
+  {
+   "id": "libs/code/deepagents_code/tui/modals",
+   "label": "modals",
+   "group": "otro",
+   "kind": "otro",
+   "files": [
+    "libs/code/deepagents_code/tui/modals/model_switch.py",
+    "libs/code/deepagents_code/tui/modals/__init__.py",
+    "libs/code/deepagents_code/tui/modals/resume_compact.py",
+    "libs/code/deepagents_code/tui/modals/cold_cache.py",
+    "libs/code/deepagents_code/tui/modals/prompt_clipboard.py"
+   ],
+   "loc": 932,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Confirmation modal for switching models with a large context.",
+   "n_ficheros": 5
+  },
+  {
+   "id": "libs/code/deepagents_code/plugins/adapters",
+   "label": "adapters",
+   "group": "otro",
+   "kind": "otro",
+   "files": [
+    "libs/code/deepagents_code/plugins/adapters/__init__.py",
+    "libs/code/deepagents_code/plugins/adapters/hooks.py",
+    "libs/code/deepagents_code/plugins/adapters/skills_middleware.py",
+    "libs/code/deepagents_code/plugins/adapters/skills.py",
+    "libs/code/deepagents_code/plugins/adapters/mcp.py"
+   ],
+   "loc": 931,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Plugin subsystem adapters.",
+   "n_ficheros": 5
+  },
+  {
+   "id": "libs/code/tests/unit_tests/tui/modals",
+   "label": "modals",
+   "group": "test",
+   "kind": "test",
+   "files": [
+    "libs/code/tests/unit_tests/tui/modals/__init__.py",
+    "libs/code/tests/unit_tests/tui/modals/test_prompt_clipboard.py",
+    "libs/code/tests/unit_tests/tui/modals/test_cold_cache.py",
+    "libs/code/tests/unit_tests/tui/modals/test_model_switch.py"
+   ],
+   "loc": 908,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Modal UI tests.",
+   "n_ficheros": 4
+  },
+  {
+   "id": "libs/code/tests/integration_tests/benchmarks",
+   "label": "benchmarks",
+   "group": "test",
+   "kind": "test",
+   "files": [
+    "libs/code/tests/integration_tests/benchmarks/__init__.py",
+    "libs/code/tests/integration_tests/benchmarks/test_codspeed_import_benchmarks.py",
+    "libs/code/tests/integration_tests/benchmarks/test_startup_benchmarks.py",
+    "libs/code/tests/integration_tests/benchmarks/test_local_context_benchmarks.py"
+   ],
+   "loc": 841,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "CodSpeed-compatible import benchmarks for CLI startup performance. These tests use the pytest-benchmark fixture so CodSpeed can track import times across commits and flag regressions. Module caches ar",
+   "n_ficheros": 4
+  },
+  {
+   "id": "libs/code/tests/unit_tests/tools",
+   "label": "tools",
+   "group": "agente-tool",
+   "kind": "agente-tool",
+   "files": [
+    "libs/code/tests/unit_tests/tools/test_current_thread.py",
+    "libs/code/tests/unit_tests/tools/__init__.py",
+    "libs/code/tests/unit_tests/tools/test_tool_arg_schemas.py",
+    "libs/code/tests/unit_tests/tools/test_fetch_url.py"
+   ],
+   "loc": 778,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Tests for the `get_current_thread_id` tool.",
+   "n_ficheros": 4
+  },
+  {
+   "id": "examples/better-harness/tests",
+   "label": "tests",
+   "group": "test",
+   "kind": "test",
+   "files": [
+    "examples/better-harness/tests/__init__.py",
+    "examples/better-harness/tests/test_better_harness.py"
+   ],
+   "loc": 761,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Tests package for better-harness.",
+   "n_ficheros": 2
+  },
+  {
+   "id": "libs/deepagents/deepagents/profiles/provider",
+   "label": "provider",
+   "group": "api",
+   "kind": "api",
+   "files": [
+    "libs/deepagents/deepagents/profiles/provider/_openai.py",
+    "libs/deepagents/deepagents/profiles/provider/provider_profiles.py",
+    "libs/deepagents/deepagents/profiles/provider/__init__.py",
+    "libs/deepagents/deepagents/profiles/provider/_nvidia.py",
+    "libs/deepagents/deepagents/profiles/provider/_openrouter.py"
+   ],
+   "loc": 679,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Built-in OpenAI provider profile. Enables the OpenAI Responses API by default for all `openai:*` models via `use_responses_api=True`. Users may layer additional kwargs on top via `register_provider_pr",
+   "n_ficheros": 5
+  },
+  {
+   "id": "libs/acp/examples",
+   "label": "examples",
+   "group": "agente-grafo",
+   "kind": "agente-grafo",
+   "files": [
+    "libs/acp/examples/__init__.py",
+    "libs/acp/examples/local_context.py",
+    "libs/acp/examples/demo_agent.py"
+   ],
+   "loc": 672,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Initialize the examples module.",
+   "n_ficheros": 3
+  },
+  {
+   "id": "libs/code/deepagents_code/built_in_skills/deepagents-thread-inspector/scripts",
+   "label": "scripts",
+   "group": "otro",
+   "kind": "otro",
+   "files": [
+    "libs/code/deepagents_code/built_in_skills/deepagents-thread-inspector/scripts/inspect_sessions.py"
+   ],
+   "loc": 670,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Inspect conversations in the local Deep Agents Code session store.",
+   "n_ficheros": 1
+  },
+  {
+   "id": "examples/async-subagent-server",
+   "label": "async-subagent-server",
+   "group": "test",
+   "kind": "test",
+   "files": [
+    "examples/async-subagent-server/supervisor.py",
+    "examples/async-subagent-server/server.py",
+    "examples/async-subagent-server/test_server.py"
+   ],
+   "loc": 644,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Supervisor — Async Subagent Example. An interactive REPL that demonstrates the five async subagent operations against the FastAPI server in server.py. The supervisor delegates research tasks to the se",
+   "n_ficheros": 3
+  },
+  {
+   "id": "libs/talon/deepagents_talon/channels/whatsapp_bridge",
+   "label": "whatsapp_bridge",
+   "group": "otro",
+   "kind": "otro",
+   "files": [
+    "libs/talon/deepagents_talon/channels/whatsapp_bridge/bridge.js"
+   ],
+   "loc": 610,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Best effort cleanup only.",
+   "n_ficheros": 1
+  },
+  {
+   "id": "libs/evals/deepagents_harbor/langgraph_project",
+   "label": "langgraph_project",
+   "group": "otro",
+   "kind": "otro",
+   "files": [
+    "libs/evals/deepagents_harbor/langgraph_project/__init__.py",
+    "libs/evals/deepagents_harbor/langgraph_project/langgraph_agent.py"
+   ],
+   "loc": 556,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Self-contained LangGraph project staged into Harbor benchmark sandboxes.",
+   "n_ficheros": 2
+  },
+  {
+   "id": "libs/code/deepagents_code/built_in_skills/skill-creator/scripts",
+   "label": "scripts",
+   "group": "otro",
+   "kind": "otro",
+   "files": [
+    "libs/code/deepagents_code/built_in_skills/skill-creator/scripts/quick_validate.py",
+    "libs/code/deepagents_code/built_in_skills/skill-creator/scripts/init_skill.py"
+   ],
+   "loc": 527,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Quick validation script for skills - minimal version. For deepagents CLI, skills are located at: $DEEPAGENTS_HOME/<agent>/skills/<skill-name>/ Example: ```python python quick_validate.py \"${DEEPAGENTS",
+   "n_ficheros": 2
+  },
+  {
+   "id": "libs/code/tests/unit_tests/hooks/models",
+   "label": "models",
+   "group": "test",
+   "kind": "test",
+   "files": [
+    "libs/code/tests/unit_tests/hooks/models/__init__.py",
+    "libs/code/tests/unit_tests/hooks/models/test_models.py"
+   ],
+   "loc": 496,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Hooks model unit tests.",
+   "n_ficheros": 2
+  },
+  {
+   "id": "libs/deepagents/tests/unit_tests/smoke_tests",
+   "label": "smoke_tests",
+   "group": "test",
+   "kind": "test",
+   "files": [
+    "libs/deepagents/tests/unit_tests/smoke_tests/conftest.py",
+    "libs/deepagents/tests/unit_tests/smoke_tests/__init__.py",
+    "libs/deepagents/tests/unit_tests/smoke_tests/test_system_prompt.py"
+   ],
+   "loc": 482,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "The filesystem routing section is essential per-backend config, so it",
+   "n_ficheros": 3
+  },
+  {
+   "id": "libs/evals/harbor_adapters/contextbench",
+   "label": "contextbench",
+   "group": "otro",
+   "kind": "otro",
+   "files": [
+    "libs/evals/harbor_adapters/contextbench/main.py",
+    "libs/evals/harbor_adapters/contextbench/adapter.py",
+    "libs/evals/harbor_adapters/contextbench/__init__.py"
+   ],
+   "loc": 481,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "CLI driver for generating Context-Bench Harbor tasks by id. Run as `python -m harbor_adapters.contextbench.main`.",
+   "n_ficheros": 3
+  },
+  {
+   "id": "libs/code/deepagents_code/mcp_providers",
+   "label": "mcp_providers",
+   "group": "otro",
+   "kind": "otro",
+   "files": [
+    "libs/code/deepagents_code/mcp_providers/base.py",
+    "libs/code/deepagents_code/mcp_providers/__init__.py",
+    "libs/code/deepagents_code/mcp_providers/_registry.py",
+    "libs/code/deepagents_code/mcp_providers/slack.py",
+    "libs/code/deepagents_code/mcp_providers/github.py"
+   ],
+   "loc": 477,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Policy interface for provider-specific MCP OAuth quirks. Each concrete provider module (e.g. `slack`, `github`) subclasses `OAuthProvider` to encode its own URL match rule, client metadata, and any pr",
+   "n_ficheros": 5
+  },
+  {
+   "id": "libs/code/examples/skills/skill-creator/scripts",
+   "label": "scripts",
+   "group": "otro",
+   "kind": "otro",
+   "files": [
+    "libs/code/examples/skills/skill-creator/scripts/quick_validate.py",
+    "libs/code/examples/skills/skill-creator/scripts/init_skill.py"
+   ],
+   "loc": 465,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Quick validation script for skills - minimal version. For deepagents CLI, skills are located at: ~/.deepagents/<agent>/skills/<skill-name>/ Example: ```python python quick_validate.py ~/.deepagents/ag",
+   "n_ficheros": 2
+  },
+  {
+   "id": "libs/partners/vercel/tests/unit_tests",
+   "label": "unit_tests",
+   "group": "test",
+   "kind": "test",
+   "files": [
+    "libs/partners/vercel/tests/unit_tests/__init__.py",
+    "libs/partners/vercel/tests/unit_tests/test_sandbox.py",
+    "libs/partners/vercel/tests/unit_tests/test_import.py"
+   ],
+   "loc": 461,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Unit tests for langchain-vercel-sandbox.",
+   "n_ficheros": 3
+  },
+  {
+   "id": "examples/nvidia_deep_agent/src",
+   "label": "src",
+   "group": "otro",
+   "kind": "otro",
+   "files": [
+    "examples/nvidia_deep_agent/src/__init__.py",
+    "examples/nvidia_deep_agent/src/tools.py",
+    "examples/nvidia_deep_agent/src/prompts.py",
+    "examples/nvidia_deep_agent/src/backend.py",
+    "examples/nvidia_deep_agent/src/agent.py"
+   ],
+   "loc": 437,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Research Tools. This module provides search and content processing utilities for the research agent, using Tavily for URL discovery and fetching full webpage content.",
+   "n_ficheros": 5
+  },
+  {
+   "id": "libs/partners/runloop/tests/unit_tests",
+   "label": "unit_tests",
+   "group": "test",
+   "kind": "test",
+   "files": [
+    "libs/partners/runloop/tests/unit_tests/__init__.py",
+    "libs/partners/runloop/tests/unit_tests/test_provider.py",
+    "libs/partners/runloop/tests/unit_tests/test_import.py"
+   ],
+   "loc": 407,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Unit tests for RunloopProvider blueprint bootstrapping.",
+   "n_ficheros": 3
+  },
+  {
+   "id": "libs/partners/quickjs/tests/benchmarks",
+   "label": "benchmarks",
+   "group": "test",
+   "kind": "test",
+   "files": [
+    "libs/partners/quickjs/tests/benchmarks/test_quickjs_throughput.py",
+    "libs/partners/quickjs/tests/benchmarks/test_quickjs_memory.py",
+    "libs/partners/quickjs/tests/benchmarks/_common.py"
+   ],
+   "loc": 405,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Wall-time throughput benchmarks for QuickJS REPL middleware. Run locally: `make benchmark` Run with CodSpeed: `uv run --group test pytest ./tests -m benchmark --codspeed` These tests measure throughpu",
+   "n_ficheros": 3
+  },
+  {
+   "id": "libs/deepagents/tests/benchmarks",
+   "label": "benchmarks",
+   "group": "agente-grafo",
+   "kind": "agente-grafo",
+   "files": [
+    "libs/deepagents/tests/benchmarks/__init__.py",
+    "libs/deepagents/tests/benchmarks/test_benchmark_summarization_middleware.py",
+    "libs/deepagents/tests/benchmarks/test_benchmark_create_deep_agent.py"
+   ],
+   "loc": 392,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Wall-time benchmarks for `SummarizationMiddleware` per-model-call overhead. Run locally: `make -C libs/deepagents benchmark` Run with CodSpeed: `make -C libs/deepagents bench` These tests measure the ",
+   "n_ficheros": 3
+  },
+  {
+   "id": "libs/deepagents/deepagents/profiles",
+   "label": "profiles",
+   "group": "otro",
+   "kind": "otro",
+   "files": [
+    "libs/deepagents/deepagents/profiles/_keys.py",
+    "libs/deepagents/deepagents/profiles/__init__.py",
+    "libs/deepagents/deepagents/profiles/_builtin_profiles.py"
+   ],
+   "loc": 342,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Shared helpers for profile registry keys. Both `harness_profiles` and `provider_profiles` use the same `provider` or `provider:model` key shape, so the validation and lookup helpers live here to avoid",
+   "n_ficheros": 3
+  },
+  {
+   "id": "libs/partners/runloop/langchain_runloop",
+   "label": "langchain_runloop",
+   "group": "otro",
+   "kind": "otro",
+   "files": [
+    "libs/partners/runloop/langchain_runloop/__init__.py",
+    "libs/partners/runloop/langchain_runloop/provider.py",
+    "libs/partners/runloop/langchain_runloop/sandbox.py",
+    "libs/partners/runloop/langchain_runloop/_version.py"
+   ],
+   "loc": 339,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Runloop sandbox integration for Deep Agents.",
+   "n_ficheros": 4
+  },
+  {
+   "id": "libs/partners/quickjs/tests/integration_tests",
+   "label": "integration_tests",
+   "group": "test",
+   "kind": "test",
+   "files": [
+    "libs/partners/quickjs/tests/integration_tests/__init__.py",
+    "libs/partners/quickjs/tests/integration_tests/test_rlm.py",
+    "libs/partners/quickjs/tests/integration_tests/test_postgres.py"
+   ],
+   "loc": 336,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Integration tests for PTC against real deepagents middlewares. Uses a real model and a real `SubAgentMiddleware`-provided `task` tool. The assertion is coarse — \"the subagent actually ran\" — because t",
+   "n_ficheros": 3
+  },
+  {
+   "id": "examples/deep_research/research_agent",
+   "label": "research_agent",
+   "group": "otro",
+   "kind": "otro",
+   "files": [
+    "examples/deep_research/research_agent/__init__.py",
+    "examples/deep_research/research_agent/tools.py",
+    "examples/deep_research/research_agent/prompts.py"
+   ],
+   "loc": 311,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Deep Research Agent Example. This module demonstrates building a research agent using the deepagents package with custom tools for web search and strategic thinking.",
+   "n_ficheros": 3
+  },
+  {
+   "id": "libs/talon/tests/integration_tests",
+   "label": "integration_tests",
+   "group": "test",
+   "kind": "test",
+   "files": [
+    "libs/talon/tests/integration_tests/__init__.py",
+    "libs/talon/tests/integration_tests/test_telegram_host.py",
+    "libs/talon/tests/integration_tests/test_core_flows.py"
+   ],
+   "loc": 297,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Integration tests for Talon runtime flows.",
+   "n_ficheros": 3
+  },
+  {
+   "id": "libs/talon/tests/cron",
+   "label": "cron",
+   "group": "test",
+   "kind": "test",
+   "files": [
+    "libs/talon/tests/cron/__init__.py",
+    "libs/talon/tests/cron/test_jobs.py",
+    "libs/talon/tests/cron/test_scheduler.py"
+   ],
+   "loc": 294,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Cron tests.",
+   "n_ficheros": 3
+  },
+  {
+   "id": "libs/partners/vercel/langchain_vercel_sandbox",
+   "label": "langchain_vercel_sandbox",
+   "group": "otro",
+   "kind": "otro",
+   "files": [
+    "libs/partners/vercel/langchain_vercel_sandbox/__init__.py",
+    "libs/partners/vercel/langchain_vercel_sandbox/sandbox.py",
+    "libs/partners/vercel/langchain_vercel_sandbox/_version.py"
+   ],
+   "loc": 286,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Vercel Sandbox integration for Deep Agents.",
+   "n_ficheros": 3
+  },
+  {
+   "id": "examples/content-builder-agent",
+   "label": "content-builder-agent",
+   "group": "otro",
+   "kind": "otro",
+   "files": [
+    "examples/content-builder-agent/content_writer.py"
+   ],
+   "loc": 284,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "!/usr/bin/env python3",
+   "n_ficheros": 1
+  },
+  {
+   "id": "libs/partners/quickjs/tests/unit_tests/smoke_tests",
+   "label": "smoke_tests",
+   "group": "test",
+   "kind": "test",
+   "files": [
+    "libs/partners/quickjs/tests/unit_tests/smoke_tests/conftest.py",
+    "libs/partners/quickjs/tests/unit_tests/smoke_tests/__init__.py",
+    "libs/partners/quickjs/tests/unit_tests/smoke_tests/test_system_prompt.py"
+   ],
+   "loc": 262,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Snapshot smoke tests for the quickjs system prompt. These tests render the system prompt that `CodeInterpreterMiddleware` injects into a `create_deep_agent` agent and compare it against committed snap",
+   "n_ficheros": 3
+  },
+  {
+   "id": "libs/evals/deepagents_clbench/system",
+   "label": "system",
+   "group": "otro",
+   "kind": "otro",
+   "files": [
+    "libs/evals/deepagents_clbench/system/__init__.py",
+    "libs/evals/deepagents_clbench/system/system.py"
+   ],
+   "loc": 255,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Deep Agents continual-learning system (deployed into clbench src/systems/deepagents/).",
+   "n_ficheros": 2
+  },
+  {
+   "id": "examples/ralph_mode",
+   "label": "ralph_mode",
+   "group": "otro",
+   "kind": "otro",
+   "files": [
+    "examples/ralph_mode/ralph_mode.py"
+   ],
+   "loc": 248,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Ralph Mode - Autonomous looping for Deep Agents. Ralph is an autonomous looping pattern created by Geoff Huntley (https://ghuntley.com/ralph/). Each loop starts with fresh context. The filesystem and ",
+   "n_ficheros": 1
+  },
+  {
+   "id": "libs/code/tests/unit_tests/smoke_tests",
+   "label": "smoke_tests",
+   "group": "test",
+   "kind": "test",
+   "files": [
+    "libs/code/tests/unit_tests/smoke_tests/conftest.py",
+    "libs/code/tests/unit_tests/smoke_tests/__init__.py",
+    "libs/code/tests/unit_tests/smoke_tests/test_system_prompt.py"
+   ],
+   "loc": 241,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Shared fixtures for smoke-test snapshots.",
+   "n_ficheros": 3
+  },
+  {
+   "id": "libs/deepagents/tests/unit_tests/_api",
+   "label": "_api",
+   "group": "test",
+   "kind": "test",
+   "files": [
+    "libs/deepagents/tests/unit_tests/_api/__init__.py",
+    "libs/deepagents/tests/unit_tests/_api/test_deprecation.py"
+   ],
+   "loc": 235,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Tests for the `_api/deprecation` adapter.",
+   "n_ficheros": 2
+  },
+  {
+   "id": "libs/partners/daytona/langchain_daytona",
+   "label": "langchain_daytona",
+   "group": "otro",
+   "kind": "otro",
+   "files": [
+    "libs/partners/daytona/langchain_daytona/__init__.py",
+    "libs/partners/daytona/langchain_daytona/sandbox.py",
+    "libs/partners/daytona/langchain_daytona/_version.py"
+   ],
+   "loc": 216,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Daytona sandbox integration for Deep Agents.",
+   "n_ficheros": 3
+  },
+  {
+   "id": "examples/rubric_middleware",
+   "label": "rubric_middleware",
+   "group": "otro",
+   "kind": "otro",
+   "files": [
+    "examples/rubric_middleware/rubric_agent.py"
+   ],
+   "loc": 195,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Run `RubricMiddleware` against real models with LangSmith tracing. Mirrors `TestRubricMiddlewareEndToEnd` in the core test suite, but with real models instead of fakes: the agent drafts a document, a ",
+   "n_ficheros": 1
+  },
+  {
+   "id": "libs/code/scripts",
+   "label": "scripts",
+   "group": "otro",
+   "kind": "otro",
+   "files": [
+    "libs/code/scripts/generate_commands_catalog.py",
+    "libs/code/scripts/check_imports.py"
+   ],
+   "loc": 181,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Generate `COMMANDS.md` from the slash-command registry. Usage: python scripts/generate_commands_catalog.py # writes COMMANDS.md python scripts/generate_commands_catalog.py --check # exits 1 if stale",
+   "n_ficheros": 2
+  },
+  {
+   "id": "libs/evals/harbor_adapters/contextbench/templates",
+   "label": "templates",
+   "group": "otro",
+   "kind": "otro",
+   "files": [
+    "libs/evals/harbor_adapters/contextbench/templates/judge.py"
+   ],
+   "loc": 163,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "In-sandbox reimplementation of Letta letta-evals' ``RubricGrader``. Reproduces the upstream ``model_judge`` grader (`letta_evals/graders/rubric.py`, OpenAI provider) for one Context-Bench task, so our",
+   "n_ficheros": 1
+  },
+  {
+   "id": "examples/deep_research",
+   "label": "deep_research",
+   "group": "servicio",
+   "kind": "servicio",
+   "files": [
+    "examples/deep_research/utils.py",
+    "examples/deep_research/agent.py"
+   ],
+   "loc": 155,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Utility functions for displaying messages and prompts in Jupyter notebooks.",
+   "n_ficheros": 2
+  },
+  {
+   "id": "libs/deepagents/deepagents/_api",
+   "label": "_api",
+   "group": "cliente-api",
+   "kind": "cliente-api",
+   "files": [
+    "libs/deepagents/deepagents/_api/__init__.py",
+    "libs/deepagents/deepagents/_api/deprecation.py"
+   ],
+   "loc": 138,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Internal helpers for `deepagents`. Modules under this package are private. Their API is allowed to change between minor releases without deprecation.",
+   "n_ficheros": 2
+  },
+  {
+   "id": "libs/partners/daytona/tests/unit_tests",
+   "label": "unit_tests",
+   "group": "test",
+   "kind": "test",
+   "files": [
+    "libs/partners/daytona/tests/unit_tests/__init__.py",
+    "libs/partners/daytona/tests/unit_tests/test_import.py"
+   ],
+   "loc": 128,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "",
+   "n_ficheros": 2
+  },
+  {
+   "id": "libs/partners/modal/langchain_modal",
+   "label": "langchain_modal",
+   "group": "otro",
+   "kind": "otro",
+   "files": [
+    "libs/partners/modal/langchain_modal/__init__.py",
+    "libs/partners/modal/langchain_modal/sandbox.py",
+    "libs/partners/modal/langchain_modal/_version.py"
+   ],
+   "loc": 126,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Modal sandbox integration for Deep Agents.",
+   "n_ficheros": 3
+  },
+  {
+   "id": "libs/deepagents/tests",
+   "label": "tests",
+   "group": "servicio",
+   "kind": "servicio",
+   "files": [
+    "libs/deepagents/tests/__init__.py",
+    "libs/deepagents/tests/utils.py"
+   ],
+   "loc": 117,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "##########################",
+   "n_ficheros": 2
+  },
+  {
+   "id": "examples/text-to-sql-agent",
+   "label": "text-to-sql-agent",
+   "group": "otro",
+   "kind": "otro",
+   "files": [
+    "examples/text-to-sql-agent/agent.py"
+   ],
+   "loc": 111,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Load environment variables",
+   "n_ficheros": 1
+  },
+  {
+   "id": "examples/deploy-content-writer",
+   "label": "deploy-content-writer",
+   "group": "test",
+   "kind": "test",
+   "files": [
+    "examples/deploy-content-writer/test_user_memory.py"
+   ],
+   "loc": 105,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Test user memory persistence across threads.",
+   "n_ficheros": 1
+  },
+  {
+   "id": "examples/deploy-coding-agent/skills/code-review",
+   "label": "code-review",
+   "group": "pagina",
+   "kind": "pagina",
+   "files": [
+    "examples/deploy-coding-agent/skills/code-review/lint_check.py"
+   ],
+   "loc": 80,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Quick lint check helper for the code-review skill. Scans Python files for common issues that a full linter might miss or that are worth flagging during code review: - Files missing a module docstring ",
+   "n_ficheros": 1
+  },
+  {
+   "id": "libs/code",
+   "label": "code",
+   "group": "otro",
+   "kind": "otro",
+   "files": [
+    "libs/code/hatch_build.py"
+   ],
+   "loc": 68,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Hatchling build hook that stamps the release commit into the package. When `DEEPAGENTS_CODE_BUILD_COMMIT` is set (CI release builds), this writes `deepagents_code/_build_info.py` so `dcode doctor` can",
+   "n_ficheros": 1
+  },
+  {
+   "id": "libs/code/examples/skills/arxiv-search",
+   "label": "arxiv-search",
+   "group": "otro",
+   "kind": "otro",
+   "files": [
+    "libs/code/examples/skills/arxiv-search/arxiv_search.py"
+   ],
+   "loc": 62,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "arXiv Search. Searches the arXiv preprint repository for research papers.",
+   "n_ficheros": 1
+  },
+  {
+   "id": "libs/partners/modal/tests/integration_tests",
+   "label": "integration_tests",
+   "group": "test",
+   "kind": "test",
+   "files": [
+    "libs/partners/modal/tests/integration_tests/__init__.py",
+    "libs/partners/modal/tests/integration_tests/test_integration.py"
+   ],
+   "loc": 46,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "",
+   "n_ficheros": 2
+  },
+  {
+   "id": "libs/partners/runloop/tests/integration_tests",
+   "label": "integration_tests",
+   "group": "test",
+   "kind": "test",
+   "files": [
+    "libs/partners/runloop/tests/integration_tests/__init__.py",
+    "libs/partners/runloop/tests/integration_tests/test_integration.py"
+   ],
+   "loc": 44,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "",
+   "n_ficheros": 2
+  },
+  {
+   "id": "libs/partners/vercel/tests/integration_tests",
+   "label": "integration_tests",
+   "group": "test",
+   "kind": "test",
+   "files": [
+    "libs/partners/vercel/tests/integration_tests/__init__.py",
+    "libs/partners/vercel/tests/integration_tests/test_integration.py"
+   ],
+   "loc": 33,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Integration tests for langchain-vercel-sandbox.",
+   "n_ficheros": 2
+  },
+  {
+   "id": "libs/deepagents/tests/unit_tests/_typing_fixtures",
+   "label": "_typing_fixtures",
+   "group": "test",
+   "kind": "test",
+   "files": [
+    "libs/deepagents/tests/unit_tests/_typing_fixtures/__init__.py",
+    "libs/deepagents/tests/unit_tests/_typing_fixtures/context_aware_middleware.py"
+   ],
+   "loc": 32,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Type-checking fixture for context-aware middleware on `create_deep_agent`. This module is not executed; it is type-checked by `ty` from `test_graph.py::TestMiddlewareTyping` to guard against regressio",
+   "n_ficheros": 2
+  },
+  {
+   "id": "libs/deepagents/scripts",
+   "label": "scripts",
+   "group": "otro",
+   "kind": "otro",
+   "files": [
+    "libs/deepagents/scripts/check_imports.py"
+   ],
+   "loc": 31,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Check imports script. Quickly verify that a list of Python files can be loaded by the Python interpreter without raising any errors. Ran before running more expensive tests. Useful in Makefiles. If lo",
+   "n_ficheros": 1
+  },
+  {
+   "id": "libs/partners/quickjs/tests",
+   "label": "tests",
+   "group": "test",
+   "kind": "test",
+   "files": [
+    "libs/partners/quickjs/tests/__init__.py",
+    "libs/partners/quickjs/tests/_common.py"
+   ],
+   "loc": 31,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Shared test helpers for QuickJS test suites.",
+   "n_ficheros": 2
+  },
+  {
+   "id": "libs/partners/daytona/tests/integration_tests",
+   "label": "integration_tests",
+   "group": "test",
+   "kind": "test",
+   "files": [
+    "libs/partners/daytona/tests/integration_tests/__init__.py",
+    "libs/partners/daytona/tests/integration_tests/test_integration.py"
+   ],
+   "loc": 28,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "",
+   "n_ficheros": 2
+  },
+  {
+   "id": "libs/partners/modal/tests/unit_tests",
+   "label": "unit_tests",
+   "group": "test",
+   "kind": "test",
+   "files": [
+    "libs/partners/modal/tests/unit_tests/__init__.py",
+    "libs/partners/modal/tests/unit_tests/test_import.py"
+   ],
+   "loc": 9,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "",
+   "n_ficheros": 2
+  },
+  {
+   "id": "libs/partners/daytona/tests",
+   "label": "tests",
+   "group": "test",
+   "kind": "test",
+   "files": [
+    "libs/partners/daytona/tests/__init__.py",
+    "libs/partners/daytona/tests/test_import.py"
+   ],
+   "loc": 9,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "",
+   "n_ficheros": 2
+  },
+  {
+   "id": "libs/partners/runloop/tests",
+   "label": "tests",
+   "group": "test",
+   "kind": "test",
+   "files": [
+    "libs/partners/runloop/tests/__init__.py",
+    "libs/partners/runloop/tests/test_import.py"
+   ],
+   "loc": 7,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "",
+   "n_ficheros": 2
+  },
+  {
+   "id": "libs/partners/modal/tests",
+   "label": "tests",
+   "group": "test",
+   "kind": "test",
+   "files": [
+    "libs/partners/modal/tests/__init__.py",
+    "libs/partners/modal/tests/test_import.py"
+   ],
+   "loc": 7,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "",
+   "n_ficheros": 2
+  },
+  {
+   "id": "examples/better-harness",
+   "label": "better-harness",
+   "group": "otro",
+   "kind": "otro",
+   "files": [
+    "examples/better-harness/better_harness_plugin.py"
+   ],
+   "loc": 6,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Pytest plugin entrypoint for better-harness.",
+   "n_ficheros": 1
+  }
+ ],
+ "edges": [],
+ "communities": {
+  "agente-grafo": {
+   "label": "Agente · grafo",
+   "color": "#7c3aed"
+  },
+  "agente-tool": {
+   "label": "Agente · tools",
+   "color": "#a855f7"
+  },
+  "agente-estado": {
+   "label": "Agente · estado",
+   "color": "#c084fc"
+  },
+  "servicio": {
+   "label": "Backend · servicios",
+   "color": "#0d9488"
+  },
+  "api": {
+   "label": "Backend · rutas",
+   "color": "#0e7490"
+  },
+  "test": {
+   "label": "Tests",
+   "color": "#9aa1ad"
+  },
+  "pagina": {
+   "label": "Frontend · páginas",
+   "color": "#c2410c"
+  },
+  "estado-fe": {
+   "label": "Frontend · estado",
+   "color": "#f59e0b"
+  },
+  "cliente-api": {
+   "label": "Frontend · API",
+   "color": "#d97706"
+  },
+  "config": {
+   "label": "Configuración",
+   "color": "#4b5563"
+  },
+  "otro": {
+   "label": "Sin clasificar",
+   "color": "#9aa1ad"
+  }
+ }
+}

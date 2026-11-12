@@ -1,0 +1,637 @@
+{
+ "meta": {
+  "source": "gen_inventario_stack.py — AST para Python, expresiones regulares para TS/TSX",
+  "metodo": {
+   "python": "AST (exacto)",
+   "typescript": "regex (inventaria y cuenta; NO afirma nada fino sobre tipos)"
+  },
+  "proyecto": "open_deep_research",
+  "sha": "1b7d2e8",
+  "date": "2026-08-26",
+  "totales": {
+   "aristas": 21,
+   "componentes": 0,
+   "hooks": 0,
+   "modelos": 0,
+   "nodos": 23,
+   "paginas": 0,
+   "serializers": 0,
+   "state": 8,
+   "tareas": 0,
+   "tools": 5,
+   "vistas": 0
+  },
+  "apps": {}
+ },
+ "state": [
+  {
+   "nombre": "ReportState",
+   "file": "src/legacy/state.py",
+   "line": 49,
+   "campos": [
+    {
+     "nombre": "topic",
+     "tipo": "str",
+     "reducer": ""
+    },
+    {
+     "nombre": "feedback_on_report_plan",
+     "tipo": "Annotated[list[str], operator.add]",
+     "reducer": "operator.add"
+    },
+    {
+     "nombre": "sections",
+     "tipo": "list[Section]",
+     "reducer": ""
+    },
+    {
+     "nombre": "completed_sections",
+     "tipo": "Annotated[list, operator.add]",
+     "reducer": "operator.add"
+    },
+    {
+     "nombre": "report_sections_from_research",
+     "tipo": "str",
+     "reducer": ""
+    },
+    {
+     "nombre": "final_report",
+     "tipo": "str",
+     "reducer": ""
+    },
+    {
+     "nombre": "source_str",
+     "tipo": "Annotated[str, operator.add]",
+     "reducer": "operator.add"
+    }
+   ],
+   "n_campos": 7,
+   "doc": ""
+  },
+  {
+   "nombre": "ReportStateInput",
+   "file": "src/legacy/state.py",
+   "line": 40,
+   "campos": [
+    {
+     "nombre": "topic",
+     "tipo": "str",
+     "reducer": ""
+    }
+   ],
+   "n_campos": 1,
+   "doc": ""
+  },
+  {
+   "nombre": "ReportStateOutput",
+   "file": "src/legacy/state.py",
+   "line": 43,
+   "campos": [
+    {
+     "nombre": "final_report",
+     "tipo": "str",
+     "reducer": ""
+    },
+    {
+     "nombre": "source_str",
+     "tipo": "str",
+     "reducer": ""
+    }
+   ],
+   "n_campos": 2,
+   "doc": ""
+  },
+  {
+   "nombre": "ResearcherState",
+   "file": "src/open_deep_research/state.py",
+   "line": 83,
+   "campos": [
+    {
+     "nombre": "researcher_messages",
+     "tipo": "Annotated[list[MessageLikeRepresentation], operator.add]",
+     "reducer": "operator.add"
+    },
+    {
+     "nombre": "tool_call_iterations",
+     "tipo": "int",
+     "reducer": ""
+    },
+    {
+     "nombre": "research_topic",
+     "tipo": "str",
+     "reducer": ""
+    },
+    {
+     "nombre": "compressed_research",
+     "tipo": "str",
+     "reducer": ""
+    },
+    {
+     "nombre": "raw_notes",
+     "tipo": "Annotated[list[str], override_reducer]",
+     "reducer": "override_reducer"
+    }
+   ],
+   "n_campos": 5,
+   "doc": "State for individual researchers conducting research."
+  },
+  {
+   "nombre": "SectionOutputState",
+   "file": "src/legacy/state.py",
+   "line": 69,
+   "campos": [
+    {
+     "nombre": "completed_sections",
+     "tipo": "list[Section]",
+     "reducer": ""
+    },
+    {
+     "nombre": "source_str",
+     "tipo": "str",
+     "reducer": ""
+    }
+   ],
+   "n_campos": 2,
+   "doc": ""
+  },
+  {
+   "nombre": "SectionOutputState",
+   "file": "src/legacy/multi_agent.py",
+   "line": 123,
+   "campos": [
+    {
+     "nombre": "completed_sections",
+     "tipo": "list[Section]",
+     "reducer": ""
+    },
+    {
+     "nombre": "source_str",
+     "tipo": "str",
+     "reducer": ""
+    }
+   ],
+   "n_campos": 2,
+   "doc": ""
+  },
+  {
+   "nombre": "SectionState",
+   "file": "src/legacy/state.py",
+   "line": 60,
+   "campos": [
+    {
+     "nombre": "topic",
+     "tipo": "str",
+     "reducer": ""
+    },
+    {
+     "nombre": "section",
+     "tipo": "Section",
+     "reducer": ""
+    },
+    {
+     "nombre": "search_iterations",
+     "tipo": "int",
+     "reducer": ""
+    },
+    {
+     "nombre": "search_queries",
+     "tipo": "list[SearchQuery]",
+     "reducer": ""
+    },
+    {
+     "nombre": "source_str",
+     "tipo": "str",
+     "reducer": ""
+    },
+    {
+     "nombre": "report_sections_from_research",
+     "tipo": "str",
+     "reducer": ""
+    },
+    {
+     "nombre": "completed_sections",
+     "tipo": "list[Section]",
+     "reducer": ""
+    }
+   ],
+   "n_campos": 7,
+   "doc": ""
+  },
+  {
+   "nombre": "SupervisorState",
+   "file": "src/open_deep_research/state.py",
+   "line": 74,
+   "campos": [
+    {
+     "nombre": "supervisor_messages",
+     "tipo": "Annotated[list[MessageLikeRepresentation], override_reducer]",
+     "reducer": "override_reducer"
+    },
+    {
+     "nombre": "research_brief",
+     "tipo": "str",
+     "reducer": ""
+    },
+    {
+     "nombre": "notes",
+     "tipo": "Annotated[list[str], override_reducer]",
+     "reducer": "override_reducer"
+    },
+    {
+     "nombre": "research_iterations",
+     "tipo": "int",
+     "reducer": ""
+    },
+    {
+     "nombre": "raw_notes",
+     "tipo": "Annotated[list[str], override_reducer]",
+     "reducer": "override_reducer"
+    }
+   ],
+   "n_campos": 5,
+   "doc": "State for the supervisor that manages research tasks."
+  }
+ ],
+ "tools": [
+  {
+   "nombre": "azureaisearch_search",
+   "file": "src/legacy/utils.py",
+   "line": 1457,
+   "descripcion": "Fetches results from Azure AI Search API. Args: queries (List[str]): List of search queries Returns: str: A formatted string of search results",
+   "args": [
+    {
+     "nombre": "queries",
+     "tipo": "List[str]"
+    },
+    {
+     "nombre": "max_results",
+     "tipo": "int"
+    },
+    {
+     "nombre": "topic",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "duckduckgo_search",
+   "file": "src/legacy/utils.py",
+   "line": 1248,
+   "descripcion": "Perform searches using DuckDuckGo with retry logic to handle rate limits Args: search_queries (List[str]): List of search queries to process Returns: str: A formatted string of search results",
+   "args": [
+    {
+     "nombre": "search_queries",
+     "tipo": "List[str]"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "tavily_search",
+   "file": "src/legacy/utils.py",
+   "line": 1364,
+   "descripcion": "Fetches results from Tavily search API. Args: queries (List[str]): List of search queries max_results (int): Maximum number of results to return topic (Literal['general', 'news', 'finance']): Topic to filter results by Returns: str: A formatted string of searc",
+   "args": [
+    {
+     "nombre": "queries",
+     "tipo": "List[str]"
+    },
+    {
+     "nombre": "max_results",
+     "tipo": "Annotated[int, InjectedToolArg]"
+    },
+    {
+     "nombre": "topic",
+     "tipo": "Annotated[Literal['general', 'news', 'finance'], InjectedToo"
+    },
+    {
+     "nombre": "config",
+     "tipo": "RunnableConfig"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "tavily_search",
+   "file": "src/open_deep_research/utils.py",
+   "line": 44,
+   "descripcion": "Fetch and summarize search results from Tavily search API. Args: queries: List of search queries to execute max_results: Maximum number of results to return per query topic: Topic filter for search results (general, news, or finance) config: Runtime configurat",
+   "args": [
+    {
+     "nombre": "queries",
+     "tipo": "List[str]"
+    },
+    {
+     "nombre": "max_results",
+     "tipo": "Annotated[int, InjectedToolArg]"
+    },
+    {
+     "nombre": "topic",
+     "tipo": "Annotated[Literal['general', 'news', 'finance'], InjectedToo"
+    },
+    {
+     "nombre": "config",
+     "tipo": "RunnableConfig"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  },
+  {
+   "nombre": "think_tool",
+   "file": "src/open_deep_research/utils.py",
+   "line": 220,
+   "descripcion": "Tool for strategic reflection on research progress and decision-making. Use this tool after each search to analyze results and plan next steps systematically. This creates a deliberate pause in the research workflow for quality decision-making. When to use: - ",
+   "args": [
+    {
+     "nombre": "reflection",
+     "tipo": "str"
+    }
+   ],
+   "sin_doc": false,
+   "sin_tipos": false,
+   "lanza": false
+  }
+ ],
+ "nodos": [
+  {
+   "nombre": "build_section_with_web_research",
+   "file": "src/legacy/graph.py",
+   "line": 490
+  },
+  {
+   "nombre": "clarify_with_user",
+   "file": "src/open_deep_research/deep_researcher.py",
+   "line": 708
+  },
+  {
+   "nombre": "compile_final_report",
+   "file": "src/legacy/graph.py",
+   "line": 493
+  },
+  {
+   "nombre": "compress_research",
+   "file": "src/open_deep_research/deep_researcher.py",
+   "line": 598
+  },
+  {
+   "nombre": "final_report_generation",
+   "file": "src/open_deep_research/deep_researcher.py",
+   "line": 711
+  },
+  {
+   "nombre": "gather_completed_sections",
+   "file": "src/legacy/graph.py",
+   "line": 491
+  },
+  {
+   "nombre": "generate_queries",
+   "file": "src/legacy/graph.py",
+   "line": 475
+  },
+  {
+   "nombre": "generate_report_plan",
+   "file": "src/legacy/graph.py",
+   "line": 488
+  },
+  {
+   "nombre": "human_feedback",
+   "file": "src/legacy/graph.py",
+   "line": 489
+  },
+  {
+   "nombre": "research_agent",
+   "file": "src/legacy/multi_agent.py",
+   "line": 463
+  },
+  {
+   "nombre": "research_agent_tools",
+   "file": "src/legacy/multi_agent.py",
+   "line": 464
+  },
+  {
+   "nombre": "research_supervisor",
+   "file": "src/open_deep_research/deep_researcher.py",
+   "line": 710
+  },
+  {
+   "nombre": "research_team",
+   "file": "src/legacy/multi_agent.py",
+   "line": 477
+  },
+  {
+   "nombre": "researcher",
+   "file": "src/open_deep_research/deep_researcher.py",
+   "line": 596
+  },
+  {
+   "nombre": "researcher_tools",
+   "file": "src/open_deep_research/deep_researcher.py",
+   "line": 597
+  },
+  {
+   "nombre": "search_web",
+   "file": "src/legacy/graph.py",
+   "line": 476
+  },
+  {
+   "nombre": "supervisor",
+   "file": "src/legacy/multi_agent.py",
+   "line": 475
+  },
+  {
+   "nombre": "supervisor",
+   "file": "src/open_deep_research/deep_researcher.py",
+   "line": 356
+  },
+  {
+   "nombre": "supervisor_tools",
+   "file": "src/legacy/multi_agent.py",
+   "line": 476
+  },
+  {
+   "nombre": "supervisor_tools",
+   "file": "src/open_deep_research/deep_researcher.py",
+   "line": 357
+  },
+  {
+   "nombre": "write_final_sections",
+   "file": "src/legacy/graph.py",
+   "line": 492
+  },
+  {
+   "nombre": "write_research_brief",
+   "file": "src/open_deep_research/deep_researcher.py",
+   "line": 709
+  },
+  {
+   "nombre": "write_section",
+   "file": "src/legacy/graph.py",
+   "line": 477
+  }
+ ],
+ "aristas": [
+  {
+   "de": "START",
+   "a": "generate_queries",
+   "tipo": "fija",
+   "file": "src/legacy/graph.py",
+   "line": 480
+  },
+  {
+   "de": "generate_queries",
+   "a": "search_web",
+   "tipo": "fija",
+   "file": "src/legacy/graph.py",
+   "line": 481
+  },
+  {
+   "de": "search_web",
+   "a": "write_section",
+   "tipo": "fija",
+   "file": "src/legacy/graph.py",
+   "line": 482
+  },
+  {
+   "de": "START",
+   "a": "generate_report_plan",
+   "tipo": "fija",
+   "file": "src/legacy/graph.py",
+   "line": 496
+  },
+  {
+   "de": "generate_report_plan",
+   "a": "human_feedback",
+   "tipo": "fija",
+   "file": "src/legacy/graph.py",
+   "line": 497
+  },
+  {
+   "de": "build_section_with_web_research",
+   "a": "gather_completed_sections",
+   "tipo": "fija",
+   "file": "src/legacy/graph.py",
+   "line": 498
+  },
+  {
+   "de": "gather_completed_sections",
+   "a": "initiate_final_section_writing",
+   "tipo": "condicional",
+   "file": "src/legacy/graph.py",
+   "line": 499
+  },
+  {
+   "de": "write_final_sections",
+   "a": "compile_final_report",
+   "tipo": "fija",
+   "file": "src/legacy/graph.py",
+   "line": 500
+  },
+  {
+   "de": "compile_final_report",
+   "a": "END",
+   "tipo": "fija",
+   "file": "src/legacy/graph.py",
+   "line": 501
+  },
+  {
+   "de": "START",
+   "a": "research_agent",
+   "tipo": "fija",
+   "file": "src/legacy/multi_agent.py",
+   "line": 465
+  },
+  {
+   "de": "research_agent",
+   "a": "research_agent_should_continue",
+   "tipo": "condicional",
+   "file": "src/legacy/multi_agent.py",
+   "line": 466
+  },
+  {
+   "de": "research_agent_tools",
+   "a": "research_agent",
+   "tipo": "fija",
+   "file": "src/legacy/multi_agent.py",
+   "line": 471
+  },
+  {
+   "de": "START",
+   "a": "supervisor",
+   "tipo": "fija",
+   "file": "src/legacy/multi_agent.py",
+   "line": 480
+  },
+  {
+   "de": "supervisor",
+   "a": "supervisor_should_continue",
+   "tipo": "condicional",
+   "file": "src/legacy/multi_agent.py",
+   "line": 481
+  },
+  {
+   "de": "research_team",
+   "a": "supervisor",
+   "tipo": "fija",
+   "file": "src/legacy/multi_agent.py",
+   "line": 486
+  },
+  {
+   "de": "START",
+   "a": "supervisor",
+   "tipo": "fija",
+   "file": "src/open_deep_research/deep_researcher.py",
+   "line": 360
+  },
+  {
+   "de": "START",
+   "a": "researcher",
+   "tipo": "fija",
+   "file": "src/open_deep_research/deep_researcher.py",
+   "line": 601
+  },
+  {
+   "de": "compress_research",
+   "a": "END",
+   "tipo": "fija",
+   "file": "src/open_deep_research/deep_researcher.py",
+   "line": 602
+  },
+  {
+   "de": "START",
+   "a": "clarify_with_user",
+   "tipo": "fija",
+   "file": "src/open_deep_research/deep_researcher.py",
+   "line": 714
+  },
+  {
+   "de": "research_supervisor",
+   "a": "final_report_generation",
+   "tipo": "fija",
+   "file": "src/open_deep_research/deep_researcher.py",
+   "line": 715
+  },
+  {
+   "de": "final_report_generation",
+   "a": "END",
+   "tipo": "fija",
+   "file": "src/open_deep_research/deep_researcher.py",
+   "line": 716
+  }
+ ],
+ "componentes": [],
+ "hooks": [],
+ "paginas": [],
+ "modelos": [],
+ "serializers": [],
+ "vistas": [],
+ "tareas": []
+}

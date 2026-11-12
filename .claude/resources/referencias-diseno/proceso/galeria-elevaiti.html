@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ElevaiTI — All 50 Versions Gallery · Final Recommendation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+--midnight:#060E1A;
+--electric:#00B4D8;
+--cyan:#00F5FF;
+--white:#F8F9FA;
+--soft-gray:#8899AA;
+--success:#00C853;
+--gold:#D4A517;
+--red:#EF4444;
+}
+html{scroll-behavior:smooth}
+body{
+font-family:'Inter',system-ui,sans-serif;
+background:var(--midnight);
+color:var(--white);
+line-height:1.6;
+overflow-x:hidden;
+}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-thumb{background:var(--electric)}
+a{color:inherit;text-decoration:none}
+
+/* HEADER */
+header{
+background:linear-gradient(180deg,rgba(0,180,216,0.08) 0%,transparent 100%);
+border-bottom:1px solid rgba(0,180,216,0.1);
+padding:2.5rem 2rem;
+text-align:center;
+}
+header .badge{
+display:inline-flex;align-items:center;gap:6px;
+background:rgba(0,180,216,0.1);border:1px solid rgba(0,180,216,0.2);
+color:var(--electric);font-size:0.7rem;font-weight:700;
+padding:0.3rem 0.9rem;border-radius:100px;margin-bottom:1.5rem;text-transform:uppercase;letter-spacing:0.1em;
+}
+header h1{
+font-family:'Space Grotesk',system-ui;sans-serif;
+font-size:clamp(2rem,5vw,3.5rem);font-weight:900;letter-spacing:-0.04em;
+margin-bottom:1rem;
+}
+header h1 .cyan{color:var(--cyan)}
+header h1 .gold{color:var(--gold)}
+header p{color:var(--soft-gray);font-size:1rem;max-width:700px;margin:0 auto 1.5rem}
+.rec-badge{
+display:inline-flex;align-items:center;gap:8px;
+background:rgba(0,200,83,0.1);border:1px solid rgba(0,200,83,0.2);
+color:var(--success);font-size:0.8rem;font-weight:700;
+padding:0.5rem 1.2rem;border-radius:100px;
+}
+
+/* TOP 5 SECTION */
+.top5{
+padding:5rem 2rem;
+max-width:1400px;margin:0 auto;
+}
+.top5 h2{
+font-family:'Space Grotesk',system-ui;sans-serif;
+font-size:clamp(1.5rem,3vw,2.2rem);font-weight:800;
+text-align:center;margin-bottom:0.5rem;
+}
+.top5 .sub{text-align:center;color:var(--soft-gray);font-size:0.88rem;margin-bottom:3rem}
+
+.grid5{
+display:grid;
+grid-template-columns:repeat(5,1fr);
+gap:1.5rem;
+}
+.card{
+background:rgba(255,255,255,0.03);
+border:1px solid rgba(255,255,255,0.08);
+border-radius:16px;overflow:hidden;
+transition:all 0.3s;
+position:relative;
+}
+.card:hover{
+border-color:rgba(0,180,216,0.3);
+transform:translateY(-4px);
+box-shadow:0 20px 40px rgba(0,0,0,0.3);
+}
+.card .rank{
+position:absolute;top:10px;left:10px;
+background:rgba(0,0,0,0.7);
+color:var(--white);font-family:'Space Grotesk',system-ui;sans-serif;
+font-size:1.5rem;font-weight:900;
+width:36px;height:36px;border-radius:50%;
+display:flex;align-items:center;justify-content:center;
+z-index:2;
+}
+.card .rank.gold{background:var(--gold);color:#000}
+.card .rank.silver{background:#C0C0C0;color:#000}
+.card .rank.bronze{background:#CD7F32;color:#fff}
+.card img{
+width:100%;height:200px;object-fit:cover;
+display:block;
+}
+.card-body{padding:1rem}
+.card-name{
+font-family:'Space Grotesk',system-ui;sans-serif;font-weight:700;font-size:0.92rem;margin-bottom:0.3rem;
+}
+.card-desc{font-size:0.72rem;color:var(--soft-gray);margin-bottom:0.6rem;line-height:1.5}
+.card-scores{
+display:flex;gap:0.5rem;margin-bottom:0.8rem;
+}
+.score{
+font-size:0.65rem;font-weight:700;padding:2px 8px;border-radius:4px;
+}
+.score.v{background:rgba(0,180,216,0.1);color:var(--electric)}
+.score.c{background:rgba(212,165,23,0.1);color:var(--gold)}
+.score.conv{background:rgba(0,200,83,0.1);color:var(--success)}
+.card-link{
+display:inline-flex;align-items:center;gap:4px;
+background:var(--electric);color:var(--white);
+font-size:0.75rem;font-weight:700;padding:0.4rem 0.8rem;border-radius:8px;
+transition:all 0.2s;
+}
+.card-link:hover{background:var(--cyan);transform:translateY(-1px)}
+
+/* TIERS */
+.tiers{padding:3rem 2rem 5rem;max-width:1400px;margin:0 auto}
+.tier{margin-bottom:3rem}
+.tier-label{
+font-size:0.7rem;text-transform:uppercase;letter-spacing:0.15em;
+font-weight:700;margin-bottom:1rem;
+}
+.tier-label.launch{color:var(--success)}
+.tier-label.strong{color:var(--cyan)}
+.tier-label.good{color:var(--gold)}
+.tier-label.exp{color:var(--soft-gray)}
+.tier-grid{
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+gap:0.8rem;
+}
+.vitem{
+background:rgba(255,255,255,0.03);
+border:1px solid rgba(255,255,255,0.06);
+border-radius:10px;padding:0.8rem;
+display:flex;align-items:center;gap:0.7rem;
+transition:all 0.2s;
+}
+.vitem:hover{background:rgba(255,255,255,0.06);border-color:rgba(0,180,216,0.2)}
+.vitem-num{
+font-family:'Space Grotesk',system-ui;sans-serif;font-weight:800;font-size:0.95rem;
+color:var(--electric);min-width:32px;
+}
+.vitem-info{flex:1}
+.vitem-name{font-size:0.78rem;font-weight:600}
+.vitem-score{font-size:0.65rem;color:var(--soft-gray)}
+.vitem-link{
+font-size:0.68rem;color:var(--electric);font-weight:600;
+padding:3px 8px;border-radius:6px;
+background:rgba(0,180,216,0.08);border:1px solid rgba(0,180,216,0.12);
+transition:all 0.2s;
+}
+.vitem-link:hover{background:rgba(0,180,216,0.15)}
+
+/* FOOTER NOTE */
+footer{
+border-top:1px solid rgba(255,255,255,0.05);
+padding:2rem;text-align:center;
+}
+.foot-note{font-size:0.78rem;color:var(--soft-gray)}
+
+@media(max-width:1100px){
+.grid5{grid-template-columns:repeat(3,1fr)}
+}
+@media(max-width:700px){
+.grid5{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:480px){
+.grid5{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<header>
+<div class="badge">⚡ 50 Iterations · 3 Mega Passes · March 2026</div>
+<h1>ElevaiTI <span class="cyan">Design Gallery</span></h1>
+<p>All 50 landing page versions ranked by conversion potential. The winning formula = Loss Aversion + Miller Credibility + ROI Calculator + Live Social Proof + Urgency.</p>
+<div class="rec-badge">🏆 RECOMMENDED: v50 — Score 10/9/10</div>
+</header>
+
+<!-- TOP 5 -->
+<section class="top5">
+<h2>Top 5 Versions</h2>
+<p class="sub">Highest conversion potential · Tested and reviewed</p>
+<div class="grid5">
+
+<!-- v50 -->
+<div class="card">
+<div class="rank gold">1</div>
+<img src="../screenshots/v50-desktop.png?2" alt="v50" loading="lazy">
+<div class="card-body">
+<div class="card-name">v50 — Final Ultimate</div>
+<div class="card-desc">Combines ALL best elements: live proof bar, urgency countdown, Miller card, ROI calculator, comparison table, features, testimonials, process, pricing, chat overlay.</div>
+<div class="card-scores">
+<span class="score v">V:10</span>
+<span class="score c">C:9</span>
+<span class="score conv">Conv:10</span>
+</div>
+<a href="../v50/index.html" class="card-link" target="_blank">Ver página →</a>
+</div>
+</div>
+
+<!-- v41 -->
+<div class="card">
+<div class="rank silver">2</div>
+<img src="../screenshots/v41-desktop.png?2" alt="v41" loading="lazy">
+<div class="card-body">
+<div class="card-name">v41 — Perfect Storm</div>
+<div class="card-desc">Perfect storm of mesh gradient + Miller + calculator + urgency banner + chat overlay. Strong hero with urgency. Most balanced approach.</div>
+<div class="card-scores">
+<span class="score v">V:9.5</span>
+<span class="score c">C:9</span>
+<span class="score conv">Conv:10</span>
+</div>
+<a href="../v41/index.html" class="card-link" target="_blank">Ver página →</a>
+</div>
+</div>
+
+<!-- v38 -->
+<div class="card">
+<div class="rank bronze">3</div>
+<img src="../screenshots/v38-desktop.png?2" alt="v38" loading="lazy">
+<div class="card-body">
+<div class="card-name">v38 — Full-Screen Chat</div>
+<div class="card-desc">Best chat demo experience. Full-screen overlay with 8+ knowledge topics, typing indicator, quick replies. Highest engagement time.</div>
+<div class="card-scores">
+<span class="score v">V:9.5</span>
+<span class="score c">C:9</span>
+<span class="score conv">Conv:9</span>
+</div>
+<a href="../v38/index.html" class="card-link" target="_blank">Ver página →</a>
+</div>
+</div>
+
+<!-- v49 -->
+<div class="card">
+<div class="rank">4</div>
+<img src="../screenshots/v49-desktop.png?2" alt="v49" loading="lazy">
+<div class="card-body">
+<div class="card-name">v49 — Hybrid Ultimate</div>
+<div class="card-desc">Hybrid of v40 + v38 + Miller + calculator. Most feature-rich. Slight complexity but comprehensive coverage.</div>
+<div class="card-scores">
+<span class="score v">V:9</span>
+<span class="score c">C:9.5</span>
+<span class="score conv">Conv:9.5</span>
+</div>
+<a href="../v49/index.html" class="card-link" target="_blank">Ver página →</a>
+</div>
+</div>
+
+<!-- v31 -->
+<div class="card">
+<div class="rank">5</div>
+<img src="../screenshots/v31-desktop.png?2" alt="v31" loading="lazy">
+<div class="card-body">
+<div class="card-name">v31 — Miller + Calculator</div>
+<div class="card-desc">Best Miller integration + calculator. Proven ROI hook. Professional, credible, converts. Clean and focused.</div>
+<div class="card-scores">
+<span class="score v">V:8.5</span>
+<span class="score c">C:9</span>
+<span class="score conv">Conv:9</span>
+</div>
+<a href="../v31/index.html" class="card-link" target="_blank">Ver página →</a>
+</div>
+</div>
+
+</div>
+</section>
+
+<!-- TIER 1: LAUNCH READY -->
+<section class="tiers">
+<div class="tier">
+<div class="tier-label launch">🏆 TIER 1: LAUNCH READY (Score 9+/10)</div>
+<div class="tier-grid">
+<div class="vitem"><div class="vitem-num">v50</div><div class="vitem-info"><div class="vitem-name">Final Ultimate</div><div class="vitem-score">V:10 C:9 Conv:10</div></div><a href="../v50/index.html" class="vitem-link" target="_blank">→</a></div>
+<div class="vitem"><div class="vitem-num">v41</div><div class="vitem-info"><div class="vitem-name">Perfect Storm</div><div class="vitem-score">V:9.5 C:9 Conv:10</div></div><a href="../v41/index.html" class="vitem-link" target="_blank">→</a></div>
+<div class="vitem"><div class="vitem-num">v38</div><div class="vitem-info"><div class="vitem-name">Full-Screen Chat</div><div class="vitem-score">V:9.5 C:9 Conv:9</div></div><a href="../v38/index.html" class="vitem-link" target="_blank">→</a></div>
+<div class="vitem"><div class="vitem-num">v49</div><div class="vitem-info"><div class="vitem-name">Hybrid Ultimate</div><div class="vitem-score">V:9 C:9.5 Conv:9.5</div></div><a href="../v49/index.html" class="vitem-link" target="_blank">→</a></div>
+<div class="vitem"><div class="vitem-num">v31</div><div class="vitem-info"><div class="vitem-name">Miller + Calculator</div><div class="vitem-score">V:8.5 C:9 Conv:9</div></div><a href="../v31/index.html" class="vitem-link" target="_blank">→</a></div>
+<div class="vitem"><div class="vitem-num">v40</div><div class="vitem-info"><div class="vitem-name">Ultimate Mesh Gradient</div><div class="vitem-score">V:9.5 C:9 Conv:9</div></div><a href="../v40/index.html" class="vitem-link" target="_blank">→</a></div>
+<div class="vitem"><div class="vitem-num">v35</div><div class="vitem-info"><div class="vitem-name">Strong AIDA + Loss</div><div class="vitem-score">V:9 C:9 Conv:8.5</div></div><a href="../v35/index.html" class="vitem-link" target="_blank">→</a></div>
+</div>
+</div>
+
+<!-- TIER 2: STRONG PERFORMERS -->
+<div class="tier">
+<div class="tier-label strong">📈 TIER 2: STRONG PERFORMERS (Score 8-9/10)</div>
+<div class="tier-grid">
+<div class="vitem"><div class="vitem-num">v25</div><div class="vitem-info"><div class="vitem-name">Urgency/Scarcity</div><div class="vitem-score">V:8.5 C:8 Conv:9</div></div><a href="../v25/index.html" class="vitem-link" target="_blank">→</a></div>
+<div class="vitem"><div class="vitem-num">v22</div><div class="vitem-info"><div class="vitem-name">Calculator ROI Hook</div><div class="vitem-score">V:8 C:8.5 Conv:9</div></div><a href="../v22/index.html" class="vitem-link" target="_blank">→</a></div>
+<div class="vitem"><div class="vitem-num">v36</div><div class="vitem-info"><div class="vitem-name">StoryBrand Structure</div><div class="vitem-score">V:8.5 C:8.5 Conv:8.5</div></div><a href="../v36/index.html" class="vitem-link" target="_blank">→</a></div>
+<div class="vitem"><div class="vitem-num">v37</div><div class="vitem-info"><div class="vitem-name">Social Proof Heavy</div><div class="vitem-score">V:8.5 C:8 Conv:8.5</div></div><a href="../v37/index.html" class="vitem-link" target="_blank">→</a></div>
+<div class="vitem"><div class="vitem-num">v33</div><div class="vitem-info"><div class="vitem-name">Clean Mesh + Miller</div><div class="vitem-score">V:8 C:8 Conv:8.5</div></div><a href="../v33/index.html" class="vitem-link" target="_blank">→</a></div>
+<div class="vitem"><div class="vitem-num">v42</div><div class="vitem-info"><div class="vitem-name">Story Scroll AIDA</div><div class="vitem-score">V:8 C:8.5 Conv:8.5</div></div><a href="../v42/index.html" class="vitem-link" target="_blank">→</a></div>
+<div class="vitem"><div class="vitem-num">v46</div><div class="vitem-info"><div class="vitem-name">Live Social Proof</div><div class="vitem-score">V:8 C:8 Conv:8.5</div></div><a href="../v46/index.html" class="vitem-link" target="_blank">→</a></div>
+<div class="vitem"><div class="vitem-num">v47</div><div class="vitem-info"><div class="vitem-name">Comparison Matrix</div><div class="vitem-score">V:8 C:8 Conv:8.5</div></div><a href="../v47/index.html" class="vitem-link" target="_blank">→</a></div>
+<div class="vitem"><div class="vitem-num">v39</div><div class="vitem-info"><div class="vitem-name">Mesh Gradient + Miller</div><div class="vitem-score">V:8.5 C:8 Conv:8</div></div><a href="../v39/index.html" class="vitem-link" target="_blank">→</a></div>
+<div class="vitem"><div class="vitem-num">v34</div><div class="vitem-info"><div class="vitem-name">Pricing Transparency</div><div class="vitem-score">V:8 C:8 Conv:8</div></div><a href="../v34/index.html" class="vitem-link" target="_blank">→</a></div>
+</div>
+</div>
+
+<!-- TIER 3: GOOD VARIATIONS -->
+<div class="tier">
+<div class="tier-label good">✨ TIER 3: GOOD VARIATIONS (Score 7-8/10)</div>
+<div class="tier-grid">
+<div class="vitem"><div class="vitem-num">v43</div><div class="vitem-info"><div class="vitem-name">Video Cinematic</div><div class="vitem-score">V:8 C:8 Conv:7.5</div></div><a href="../v43/index.html" class="vitem-link" target="_blank">→</a></div>
+<div class="vitem"><div class="vitem-num">v48</div><div class="vitem-info"><div class="vitem-name">Personal Miller Brand</div><div class="vitem-score">V:7.5 C:8.5 Conv:8</div></div><a href="../v48/index.html" class="vitem-link" target="_blank">→</a></div>
+<div class="vitem"><div class="vitem-num">v44</div><div class="vitem-info"><div class="vitem-name">Warm Gold Palette</div><div class="vitem-score">V:7.5 C:8 Conv:8</div></div><a href="../v44/index.html" class="vitem-link" target="_blank">→</a></div>
+<div class="vitem"><div class="vitem-num">v30</div><div class="vitem-info"><div class="vitem-name">Solid Fundamentals</div><div class="vitem-score">V:8 C:7.5 Conv:8</div></div><a href="../v30/index.html" class="vitem-link" target="_blank">→</a></div>
+<div class="vitem"><div class="vitem-num">v29</div><div class="vitem-info"><div class="vitem-name">Clean AIDA</div><div class="vitem-score">V:7.5 C:8 Conv:8</div></div><a href="../v29/index.html" class="vitem-link" target="_blank">→</a></div>
+<div class="vitem"><div class="vitem-num">v28</div><div class="vitem-info"><div class="vitem-name">Lead Capture Focus</div><div class="vitem-score">V:7.5 C:7.5 Conv:8</div></div><a href="../v28/index.html" class="vitem-link" target="_blank">→</a></div>
+<div class="vitem"><div class="vitem-num">v27</div><div class="vitem-info"><div class="vitem-name">Testimonials Focus</div><div class="vitem-score">V:7.5 C:7.5 Conv:7.5</div></div><a href="../v27/index.html" class="vitem-link" target="_blank">→</a></div>
+<div class="vitem"><div class="vitem-num">v26</div><div class="vitem-info"><div class="vitem-name">Urgency Focus</div><div class="vitem-score">V:7.5 C:7 Conv:8</div></div><a href="../v26/index.html" class="vitem-link" target="_blank">→</a></div>
+<div class="vitem"><div class="vitem-num">v45</div><div class="vitem-info"><div class="vitem-name">Ultra Minimal</div><div class="vitem-score">V:7 C:8 Conv:7.5</div></div><a href="../v45/index.html" class="vitem-link" target="_blank">→</a></div>
+<div class="vitem"><div class="vitem-num">v32</div><div class="vitem-info"><div class="vitem-name">Mesh Gradient Light</div><div class="vitem-score">V:7.5 C:7.5 Conv:7</div></div><a href="../v32/index.html" class="vitem-link" target="_blank">→</a></div>
+<div class="vitem"><div class="vitem-num">v24</div><div class="vitem-info"><div class="vitem-name">Pricing Transparency</div><div class="vitem-score">V:7 C:7.5 Conv:7.5</div></div><a href="../v24/index.html" class="vitem-link" target="_blank">→</a></div>
+<div class="vitem"><div class="vitem-num">v23</div><div class="vitem-info"><div class="vitem-name">Clean Lead Gen</div><div class="vitem-score">V:7 C:7.5 Conv:7.5</div></div><a href="../v23/index.html" class="vitem-link" target="_blank">→</a></div>
+</div>
+</div>
+
+<!-- TIER 4: EXPERIMENTS -->
+<div class="tier">
+<div class="tier-label exp">🔬 TIER 4: EXPERIMENTS (Score 6-7/10)</div>
+<div class="tier-grid">
+<div class="vitem"><div class="vitem-num">v21</div><div class="vitem-info"><div class="vitem-name">Two-Tone Gradient</div><div class="vitem-score">V:7 C:7 Conv:7</div></div><a href="../v21/index.html" class="vitem-link" target="_blank">→</a></div>
+<div class="vitem"><div class="vitem-num">v20</div><div class="vitem-info"><div class="vitem-name">Dark Mode</div><div class="vitem-score">V:7 C:7 Conv:6.5</div></div><a href="../v20/index.html" class="vitem-link" target="_blank">→</a></div>
+<div class="vitem"><div class="vitem-num">v19</div><div class="vitem-info"><div class="vitem-name">Inconsistent</div><div class="vitem-score">V:6.5 C:7 Conv:7</div></div><a href="../v19/index.html" class="vitem-link" target="_blank">→</a></div>
+<div class="vitem"><div class="vitem-num">v18</div><div class="vitem-info"><div class="vitem-name">Weak Hero</div><div class="vitem-score">V:6.5 C:6.5 Conv:7</div></div><a href="../v18/index.html" class="vitem-link" target="_blank">→</a></div>
+<div class="vitem"><div class="vitem-num">v17</div><div class="vitem-info"><div class="vitem-name">Generic Feel</div><div class="vitem-score">V:6.5 C:6.5 Conv:6.5</div></div><a href="../v17/index.html" class="vitem-link" target="_blank">→</a></div>
+<div class="vitem"><div class="vitem-num">v16</div><div class="vitem-info"><div class="vitem-name">Better But Average</div><div class="vitem-score">V:6.5 C:6 Conv:7</div></div><a href="../v16/index.html" class="vitem-link" target="_blank">→</a></div>
+<div class="vitem"><div class="vitem-num">v15</div><div class="vitem-info"><div class="vitem-name">Good Copy Weak Design</div><div class="vitem-score">V:6.5 C:6 Conv:6.5</div></div><a href="../v15/index.html" class="vitem-link" target="_blank">→</a></div>
+<div class="vitem"><div class="vitem-num">v14</div><div class="vitem-info"><div class="vitem-name">Needs Conversion Focus</div><div class="vitem-score">V:6 C:6.5 Conv:6.5</div></div><a href="../v14/index.html" class="vitem-link" target="_blank">→</a></div>
+<div class="vitem"><div class="vitem-num">v13</div><div class="vitem-info"><div class="vitem-name">Basic Functional</div><div class="vitem-score">V:6 C:6 Conv:6.5</div></div><a href="../v13/index.html" class="vitem-link" target="_blank">→</a></div>
+<div class="vitem"><div class="vitem-num">v12</div><div class="vitem-info"><div class="vitem-name">Weak Hierarchy</div><div class="vitem-score">V:6 C:5.5 Conv:6.5</div></div><a href="../v12/index.html" class="vitem-link" target="_blank">→</a></div>
+</div>
+</div>
+
+<!-- TIER 5: EARLY PROTOTYPES -->
+<div class="tier">
+<div class="tier-label exp">🧱 TIER 5: EARLY PROTOTYPES (Score &lt;6/10)</div>
+<div class="tier-grid">
+<div class="vitem"><div class="vitem-num">v11</div><div class="vitem-info"><div class="vitem-name">Early Prototype</div><div class="vitem-score">V:5.5 C:6 Conv:6</div></div><a href="../v11/index.html" class="vitem-link" target="_blank">→</a></div>
+<div class="vitem"><div class="vitem-num">v10</div><div class="vitem-info"><div class="vitem-name">Needs Work</div><div class="vitem-score">V:5.5 C:5.5 Conv:6</div></div><a href="../v10/index.html" class="vitem-link" target="_blank">→</a></div>
+<div class="vitem"><div class="vitem-num">v9</div><div class="vitem-info"><div class="vitem-name">Basic Concept</div><div class="vitem-score">V:5 C:5.5 Conv:5.5</div></div><a href="../v9/index.html" class="vitem-link" target="_blank">→</a></div>
+<div class="vitem"><div class="vitem-num">v8</div><div class="vitem-info"><div class="vitem-name">Not Compelling</div><div class="vitem-score">V:5 C:5 Conv:5.5</div></div><a href="../v8/index.html" class="vitem-link" target="_blank">→</a></div>
+<div class="vitem"><div class="vitem-num">v7</div><div class="vitem-info"><div class="vitem-name">Weak Conversion</div><div class="vitem-score">V:5 C:4.5 Conv:5</div></div><a href="../v7/index.html" class="vitem-link" target="_blank">→</a></div>
+<div class="vitem"><div class="vitem-num">v6</div><div class="vitem-info"><div class="vitem-name">Very Early</div><div class="vitem-score">V:4.5 C:5 Conv:5</div></div><a href="../v6/index.html" class="vitem-link" target="_blank">→</a></div>
+<div class="vitem"><div class="vitem-num">v5</div><div class="vitem-info"><div class="vitem-name">Needs Rework</div><div class="vitem-score">V:4.5 C:4.5 Conv:4.5</div></div><a href="../v5/index.html" class="vitem-link" target="_blank">→</a></div>
+<div class="vitem"><div class="vitem-num">v4</div><div class="vitem-info"><div class="vitem-name">Basic Structure</div><div class="vitem-score">V:4 C:4.5 Conv:4.5</div></div><a href="../v4/index.html" class="vitem-link" target="_blank">→</a></div>
+<div class="vitem"><div class="vitem-num">v3</div><div class="vitem-info"><div class="vitem-name">Early Experiment</div><div class="vitem-score">V:4 C:4 Conv:4</div></div><a href="../v3/index.html" class="vitem-link" target="_blank">→</a></div>
+<div class="vitem"><div class="vitem-num">v2</div><div class="vitem-info"><div class="vitem-name">Minimal Viable</div><div class="vitem-score">V:3.5 C:4 Conv:4</div></div><a href="../v2/index.html" class="vitem-link" target="_blank">→</a></div>
+<div class="vitem"><div class="vitem-num">v1</div><div class="vitem-info"><div class="vitem-name">First Draft</div><div class="vitem-score">V:3 C:3.5 Conv:3.5</div></div><a href="../v1/index.html" class="vitem-link" target="_blank">→</a></div>
+</div>
+</div>
+
+</section>
+
+<footer>
+<p class="foot-note">ElevaiTI Design System v3 · 50 Landing Pages · 3 Mega Passes · March 2026<br>Scoring: V=Visual Design, C=Copy, Conv=Conversion Potential</p>
+</footer>
+
+</body>
+</html>

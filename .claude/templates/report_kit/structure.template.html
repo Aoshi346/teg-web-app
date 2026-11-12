@@ -1,0 +1,582 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<!--
+  REPORT-KIT · structure.template.html — pestaña Graphify / ESTRUCTURA del código.
+  ── Contrato ───────────────────────────────────────────────────────────────
+  build.py inyecta graph-dataset.json (contrato skills/code-graph, generado por
+  graph_reduce.py; fixture.graph-dataset.json hasta que corra /code-graph de verdad)
+  en el placeholder DATA de `const DB` (línea 1 del script; NO escribir el placeholder
+  literal aquí: build.py reemplaza TODAS las ocurrencias). render_nav.py materializa
+  la topnav entre los marcadores NAV:BEGIN / NAV:END del body.
+  Dataset: {meta{source,sha,date,nodes_total,edges_total,reduced}, nodes[{id,label,group,
+  kind,files,loc,fan_in,fan_out,desc}], edges[{from,to,kind,weight,evidence}], communities}.
+  Grafo por comunidades en COLUMNAS; las aristas se enrutan por PASILLOS (nunca cruzan
+  cajas): adyacente = bezier por el pasillo · misma columna = bulge lateral · salto de
+  >1 columna = ruta ortogonal por debajo del diagrama. Motor adaptado de architecture.html.
+-->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Report-kit · Estructura</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Crect%20width='100'%20height='100'%20rx='22'%20fill='%231b2a4a'/%3E%3Ctext%20x='50'%20y='70'%20font-size='56'%20font-family='system-ui,sans-serif'%20font-weight='700'%20fill='%23fff'%20text-anchor='middle'%3ER%3C/text%3E%3C/svg%3E">
+<style>
+  /* SHARED:BEGIN */
+  :root{
+    --ink:#1b1b1f;--muted:#6b6b76;--faint:#6c6c78;--paper:#f6f4ef;--card:#fff;--line:#e4e0d7;
+    --navy:#1b2a4a;--accent:#c2410c;--green:#15803d;--amber:#b45309;--blue:#1d4ed8;--red:#b42318;
+    --radius-sm:6px;--radius-md:10px;--radius:14px;--radius-pill:999px;
+    --shadow-modal:0 20px 60px rgba(27,27,31,.28);
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --s-backlog:#6b6b76;--s-doing:#b45309;--s-review:#1d4ed8;--s-done:#15803d;--s-blocked:#b42318;
+    --d-aprobar:#15803d;--d-modificar:#1d4ed8;--d-aplazar:#b45309;--d-descartar:#b42318;
+  }
+  *{box-sizing:border-box}
+  h1{font-size:clamp(24px,3.6vw,38px);margin:0 0 10px;letter-spacing:-.02em;color:var(--ink)}
+  h1 em{font-style:italic;color:var(--navy)}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600;margin:0 0 10px}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px}
+  .kpi b{display:block;font-size:28px;font-weight:700;letter-spacing:-.02em;color:var(--navy);line-height:1.15}
+  .kpi span{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+  .kpi.warn b{color:var(--red)}
+  .badge{display:inline-block;font-size:11px;font-weight:700;padding:3px 10px;border-radius:var(--radius-pill);color:#fff;text-transform:uppercase;letter-spacing:.04em}
+  .nodata{max-width:560px;margin:80px auto;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:28px 32px;text-align:center}
+  .nodata code{font-family:var(--mono);font-size:.9em;background:#efece4;color:var(--navy);padding:2px 6px;border-radius:6px}
+  .icon{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px}
+  .demo-banner{display:flex;align-items:center;gap:8px;background:#fdf3e3;border:1px solid #eed9b0;border-radius:var(--radius-sm);padding:8px 14px;margin:14px 0 0;font-size:12.5px;color:#78350f}
+  .demo-banner .icon{flex:none}
+  .demo-banner[hidden]{display:none}  /* [hidden] pierde ante .demo-banner{display:flex} — sin esto el banner de demo sale SIEMPRE */
+  .audience-note{display:flex;align-items:center;gap:8px;background:#eef1f5;border:1px solid #d7dee8;border-radius:var(--radius-sm);padding:8px 14px;margin:12px 0 0;font-size:12.5px;color:var(--navy)}
+  .audience-note .icon{flex:none}
+  .scroll-hint{display:none;font-size:11px;color:var(--faint);text-align:right;margin:0 0 6px}
+  @media(max-width:767px){.scroll-hint{display:block}}
+  /* nav responsive: la gestiona el bloque que inyecta render_nav.py (fuente única) */
+  /* SHARED:END */
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 22px}
+  header.hero{border-bottom:1px solid var(--line);padding:32px 0 16px}
+  .lead{font-size:15.5px;color:var(--muted);max-width:80ch;margin:0}
+  section{padding:24px 0;border-bottom:1px solid var(--line)}
+  h2{font-size:19px;margin:0 0 12px;letter-spacing:-.01em}
+  .note{background:#fdebd9;border:1px solid #f3c9a8;border-left:4px solid var(--amber);border-radius:10px;padding:12px 16px;color:#7c2d12;font-size:14px;margin:14px 0}
+  footer{padding:26px 0 60px;color:var(--faint);font-size:13px}
+  /* ===== sello de frescura ===== */
+  .fresh{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;font-family:var(--mono);font-size:11.5px}
+  .fresh span{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:4px 10px;color:var(--muted)}
+  .fresh span b{color:var(--navy);font-weight:600}
+  .fresh .red-badge{background:#fbe9e7;border-color:#eec2bb;color:var(--red);font-weight:700;letter-spacing:.06em}
+  /* ===== controles ===== */
+  .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+  input[type=search]{font-family:var(--sans);font-size:14px;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);min-width:220px;color:var(--ink)}
+  .chips{display:flex;gap:6px;flex-wrap:wrap}
+  .gchip{font-family:var(--sans);font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid var(--line);background:var(--card);color:var(--muted);padding:5px 11px;border-radius:var(--radius-pill)}
+  .gchip i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px}
+  .gchip.on{color:#fff}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin-left:auto}
+  .legend svg{vertical-align:middle}
+  /* ===== grafo ===== */
+  .stage{display:grid;grid-template-columns:1fr 320px;gap:16px;min-width:0}
+  @media(max-width:900px){.stage{grid-template-columns:1fr}}
+  .stagecol{min-width:0}
+  /* Barra de zoom. El grafo se pinta con un viewBox fijo escalado a width:100%, así que en un
+     proyecto con muchas columnas cada caja acaba midiendo cuatro píxeles y no se lee nada.
+     Manipular el viewBox (y no un transform CSS) mantiene el texto nítido a cualquier escala. */
+  .zoombar{display:flex;gap:6px;align-items:center;margin:0 0 8px;flex-wrap:wrap}
+  .zoombar button{font-family:var(--mono);font-size:12px;line-height:1;padding:6px 10px;cursor:pointer;
+    background:var(--card);border:1px solid var(--line);border-radius:8px;color:var(--navy)}
+  .zoombar button:hover{background:#efece4}
+  .zoombar button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .zoombar .lvl{font-family:var(--mono);font-size:12px;color:var(--muted);min-width:52px;text-align:center}
+  .zoombar .hint{font-size:11.5px;color:var(--faint);margin-left:auto}
+  .diagram.grabbing{cursor:grabbing}
+  /* "ancho completo": el SVG deja de encogerse al contenedor y éste hace scroll horizontal.
+     En un grafo de muchas columnas se lee mejor que cualquier nivel de zoom. */
+  .diagram.natural{overflow-x:auto}
+  .diagram.natural svg{width:auto;max-width:none}
+  .diagram.grabbable{cursor:grab}
+  @media(max-width:767px){.zoombar .hint{display:none}}
+  .diagram{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:8px;overflow-x:auto;overflow-y:hidden;min-width:0;max-width:100%;box-shadow:inset -10px 0 8px -8px rgba(27,27,31,.12)}
+  #svg{min-width:700px;width:100%;height:auto;display:block}
+  .gnode{cursor:pointer}
+  .gnode rect{transition:.12s}
+  .gnode:hover rect{filter:brightness(.95)}
+  .gnode.sel rect{stroke:var(--accent);stroke-width:3}
+  .gnode.fade{opacity:.32}
+  .gnode.dim{opacity:.1;pointer-events:none}
+  .gnode text{font-family:var(--sans);font-size:12px;fill:#fff;font-weight:600;pointer-events:none}
+  .gnode text.sub{font-family:var(--mono);font-size:9.5px;fill:#dfe5ee;font-weight:500}
+  .colhead{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;fill:var(--muted);font-weight:700}
+  .gedge{stroke:#9aa1ad;fill:none;marker-end:url(#arrow);transition:.12s}
+  .gedge.inf{stroke-dasharray:5 4}
+  .gedge.hot{stroke:var(--accent);marker-end:url(#arrowhot)}
+  .gedge.cold,.gedge.dim{opacity:.12}
+  /* ===== panel ===== */
+  aside.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;align-self:start;position:sticky;top:64px}
+  aside.panel h3{margin:0 0 4px;font-size:16px;color:var(--navy);word-break:break-word}
+  aside.panel .tag{font-family:var(--mono);font-size:11px;color:var(--faint)}
+  aside.panel p{font-size:13.5px;color:var(--muted);margin:6px 0}
+  aside.panel h4{margin:14px 0 6px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+  aside.panel code{font-family:var(--mono);font-size:11.5px;background:#efece4;color:var(--navy);padding:1px 6px;border-radius:6px;display:inline-block;margin:2px 4px 2px 0;word-break:break-all}
+  .metrics{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+  .metrics span{font-family:var(--mono);font-size:11px;background:#fbfaf7;border:1px solid var(--line);border-radius:8px;padding:3px 8px;color:var(--muted)}
+  .metrics span b{color:var(--navy)}
+  .nlink{display:block;width:100%;text-align:left;font-family:var(--mono);font-size:11.5px;cursor:pointer;border:1px solid var(--line);background:#fbfaf7;color:var(--navy);padding:5px 9px;border-radius:8px;margin:3px 0}
+  .nlink:hover{border-color:var(--navy)}
+  .nlink em{font-style:normal;color:var(--faint);float:right}
+  button.btn{font-family:var(--sans);font-size:13.5px;font-weight:600;cursor:pointer;border:1px solid var(--navy);background:var(--navy);color:#fff;padding:8px 14px;border-radius:10px;margin-top:12px}
+  button.btn.copied{background:var(--green);border-color:var(--green)}
+  /* ===== god nodes ===== */
+  table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:13.5px;margin:8px 0}
+  th,td{padding:8px 12px;border-bottom:1px solid var(--line);text-align:left}
+  th{background:#fbfaf7;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+  tr:last-child td{border-bottom:none}
+  td.num,th.num{text-align:right;font-family:var(--mono);font-size:12.5px}
+  tbody tr{cursor:pointer} tbody tr:hover{background:#fbfaf7}
+  .gdot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:7px;vertical-align:-1px}
+  code{font-family:var(--mono);font-size:.88em;background:#efece4;color:var(--navy);padding:1px 6px;border-radius:6px}
+  #toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:8px 16px;border-radius:10px;font-size:13px;opacity:0;transition:.2s;pointer-events:none;z-index:50}
+  #toast.show{opacity:1}
+</style>
+</head>
+<body>
+<!-- ICONS:BEGIN -->
+<svg style="display:none" aria-hidden="true">
+  <symbol id="ic-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></symbol>
+  <symbol id="ic-download" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></symbol>
+  <symbol id="ic-upload" viewBox="0 0 24 24"><path d="M12 21V9"/><path d="m7 14 5-5 5 5"/><path d="M5 21h14"/></symbol>
+  <symbol id="ic-refresh" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></symbol>
+  <symbol id="ic-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".6" fill="currentColor"/></symbol>
+  <symbol id="ic-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><circle cx="12" cy="8" r=".6" fill="currentColor"/></symbol>
+  <symbol id="ic-tool" viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 1 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.1 2.1-2-2z"/></symbol><symbol id="ic-search" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10.5 10.5 L14 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol><symbol id="ic-eye" viewBox="0 0 16 16"><path d="M1.5 8 C4 4.2 12 4.2 14.5 8 C12 11.8 4 11.8 1.5 8 Z" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="8" cy="8" r="2" fill="currentColor"/></symbol><symbol id="ic-arrow" viewBox="0 0 16 16"><path d="M2.5 8 H12 M8.6 4 L13 8 L8.6 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol><symbol id="ic-clip" viewBox="0 0 16 16"><rect x="4" y="2.6" width="8" height="11" rx="1.4" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6 2.6 V1.8 H10 V2.6" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6 6.4 H10 M6 9 H10 M6 11.4 H8.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></symbol>
+</svg>
+<!-- ICONS:END -->
+<!-- NAV:BEGIN -->
+<!-- NAV:END -->
+
+<div class="wrap"><div class="demo-banner" id="demoBanner" hidden><svg class="icon"><use href="#ic-info"></use></svg><span><b>Datos de demostración.</b> Este set usa un fixture de ejemplo, no un proyecto real.</span></div></div>
+
+<header class="hero"><div class="wrap">
+  <p class="eyebrow">estructura · code-graph</p>
+  <h1>Estructura del código</h1>
+  <p class="lead">Grafo de módulos por comunidad: quién llama a quién, acoplamiento (fan-in/fan-out) y candidatos a deuda. Click en un nodo → detalle y vecinos.</p>
+  <p class="audience-note"><svg class="icon"><use href="#ic-tool"></use></svg> Página técnica — pensada para tu equipo de desarrollo. Puedes saltártela tranquilamente.</p>
+  <div class="fresh" id="fresh"></div>
+</div></header>
+
+<main class="wrap">
+  <div class="nodata" id="nodata" hidden>
+    <p class="eyebrow">Report-kit · Estructura</p>
+    <p><b>Sin datos inyectados.</b></p>
+    <p>Esta es la plantilla sin inyectar. Genera el informe con<br><code>python3 build.py &lt;plan-dir&gt;</code><br>structure.html se alimenta de <code>graph-dataset.json</code> (skill <code>/code-graph</code>) o del fixture si aún no hay grafo real.</p>
+  </div>
+
+  <div id="content">
+    <section>
+      <div class="controls">
+        <input type="search" id="q" placeholder="Buscar nodo (label o ruta)…" aria-label="Buscar nodo">
+        <div class="chips" id="chips"></div>
+        <div class="legend">
+          <span><svg width="34" height="10"><line x1="0" y1="5" x2="34" y2="5" stroke="#9aa1ad" stroke-width="2"/></svg> EXTRACTED</span>
+          <span><svg width="34" height="10"><line x1="0" y1="5" x2="34" y2="5" stroke="#9aa1ad" stroke-width="2" stroke-dasharray="5 4"/></svg> INFERRED</span>
+          <span>grosor ∝ weight</span>
+        </div>
+      </div>
+      <div class="stage">
+        <div class="stagecol">
+          <p class="scroll-hint">deslizá para ver más →</p>
+          <div class="zoombar" role="group" aria-label="Zoom del grafo">
+            <button type="button" id="zOut"  aria-label="Alejar">−</button>
+            <span class="lvl" id="zLvl" aria-live="polite">100%</span>
+            <button type="button" id="zIn"   aria-label="Acercar">+</button>
+            <button type="button" id="zFit"  aria-label="Ajustar a la ventana">ajustar</button>
+            <button type="button" id="zWide" aria-label="Ver el grafo a ancho completo">ancho completo</button>
+            <span class="hint">rueda para hacer zoom · arrastra para mover · doble clic para ajustar</span>
+          </div>
+          <div class="diagram" id="diagram">
+            <svg id="svg" role="img" aria-label="Grafo de estructura del código">
+              <defs>
+                <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#9aa1ad"/></marker>
+                <marker id="arrowhot" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#c2410c"/></marker>
+              </defs>
+              <g id="g-edges"></g><g id="g-nodes"></g>
+            </svg>
+          </div>
+        </div>
+        <aside class="panel">
+          <span class="tag" id="p-tag">nodo</span>
+          <h3 id="p-title">Selecciona un nodo</h3>
+          <p id="p-desc">Click en una caja del grafo (o en una fila de god nodes) para ver métricas, archivos y vecinos.</p>
+          <div id="p-extra"></div>
+          <button class="btn" id="copySub"><svg class="icon"><use href="#ic-copy"></use></svg> copiar subgrafo (md)</button>
+        </aside>
+      </div>
+    </section>
+
+    <section>
+      <h2>God nodes — top 10 por acoplamiento (fan-in + fan-out)</h2>
+      <p class="lead" style="font-size:14px;margin-bottom:10px">Candidatos a deuda: mucho entra y mucho sale. Click en una fila para inspeccionar.</p>
+      <div style="overflow-x:auto"><table><thead><tr><th>#</th><th>Nodo</th><th>Comunidad</th><th class="num">loc</th><th class="num">fan-in</th><th class="num">fan-out</th><th class="num">total</th></tr></thead>
+      <tbody id="god"></tbody></table></div>
+    </section>
+  </div>
+</main>
+
+<footer class="wrap" id="foot">Report-kit · estructura del código · un .html autocontenido</footer>
+
+<script>
+const DB = /*__DATA__*/null;
+const META = /*__META__*/null;
+(function(){const m=META;if(m&&m.project){const t=`${m.project} · ${m.plan_id||""} · ronda ${m.round||1} · ${m.generated||""}`.toUpperCase();document.querySelectorAll(".eyebrow").forEach(el=>el.textContent=t);}})();
+
+/* ===== helpers ===== */
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function toast(m){const t=$("toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1500)}
+function copy(txt,btn){navigator.clipboard?.writeText(txt).then(()=>ok(btn)).catch(()=>{const t=document.createElement("textarea");t.value=txt;document.body.appendChild(t);t.select();document.execCommand("copy");t.remove();ok(btn)})}
+function ok(btn){if(!btn)return;btn.classList.add("copied");const o=btn.textContent;btn.textContent="✓ Copiado";toast("Copiado");setTimeout(()=>{btn.classList.remove("copied");btn.textContent=o},1500)}
+
+const NW=200,NH=46,COLGAP=96,ROWGAP=18,TOP=64,LEFT=26;
+let M={},COM={},NODES=[],EDGES=[],byId={},OUT={},INN={},SEL=null,active=new Set(),q="";
+
+if(!DB||!Array.isArray(DB.nodes)){
+  $("nodata").hidden=false;$("content").style.display="none";$("fresh").style.display="none";
+}else{init();}
+
+/* ordena in-place cada columna (array de nodos) por baricentro de sus vecinos en la
+   columna adyacente ya procesada — 2 pasadas: izquierda→derecha, luego derecha→izquierda. */
+function barycenterOrder(cols){
+  const colOf={};cols.forEach((col,ci)=>col.forEach(n=>colOf[n.id]=ci));
+  const rowOf=()=>{const r={};cols.forEach(col=>col.forEach((n,i)=>r[n.id]=i));return r;};
+  const neighbors=id=>EDGES.filter(e=>e.from===id||e.to===id).map(e=>e.from===id?e.to:e.from);
+  function sweep(dir){ // dir=1: usa vecinos de la columna anterior · dir=-1: de la siguiente
+    const order=dir===1?cols.map((_,i)=>i):cols.map((_,i)=>i).reverse();
+    order.forEach(ci=>{
+      const refCi=ci-dir;
+      if(refCi<0||refCi>=cols.length)return;
+      const row=rowOf();
+      const scored=cols[ci].map(n=>{
+        const nb=neighbors(n.id).filter(id=>colOf[id]===refCi);
+        const b=nb.length?nb.reduce((a,id)=>a+row[id],0)/nb.length:row[n.id];
+        return {n,b};
+      });
+      scored.sort((a,b)=>a.b-b.b);
+      cols[ci]=scored.map(s=>s.n);
+    });
+  }
+  sweep(1);sweep(-1);
+  return cols;
+}
+
+function init(){
+  M=DB.meta||{};COM=DB.communities||{};NODES=DB.nodes;EDGES=DB.edges||[];
+  document.title=`Estructura del código · ${M.sha?String(M.sha).slice(0,10):"grafo"}`;
+  if(/FIXTURE/i.test(M.source||"")){
+    const b=$("demoBanner");
+    b.hidden=false;
+    b.querySelector("span").innerHTML='<b>Datos de demostración.</b> Estás viendo el grafo FIXTURE sintético — corre <code>/code-graph</code> para el real.';
+  }
+
+  /* sello de frescura */
+  $("fresh").innerHTML=[
+    `fuente: <b>${esc(M.source||"—")}</b>`,
+    `sha: <b>${esc(String(M.sha||"—").slice(0,12))}</b>`,
+    `fecha: <b>${esc(M.date||"—")}</b>`,
+    `<b>${M.nodes_total??NODES.length}</b> nodos · <b>${M.edges_total??EDGES.length}</b> aristas`
+  ].map(h=>`<span>${h}</span>`).join("")+(M.reduced?'<span class="red-badge">REDUCIDO</span>':"");
+
+  /* comunidades: las declaradas primero, luego cualquier group huérfano */
+  const groups=[...Object.keys(COM),...[...new Set(NODES.map(n=>n.group))].filter(g=>!COM[g])];
+  groups.forEach(g=>{if(!COM[g])COM[g]={label:g,color:"#8b8b95"};active.add(g)});
+
+  /* layout: una columna por comunidad, orden interno por acoplamiento y luego
+     refinado por baricentro de vecinos (2 pasadas izq→der→izq) para minimizar
+     cruces de aristas en los pasillos entre columnas (QA-loop TPL1-W3 F-UGLY-11/F-AMATEUR-12). */
+  byId={};NODES.forEach(n=>byId[n.id]=n);
+  const cols=groups.map(g=>NODES.filter(n=>n.group===g).sort((a,b)=>(b.fan_in+b.fan_out)-(a.fan_in+a.fan_out)));
+  barycenterOrder(cols);
+  cols.forEach((col,ci)=>{col.forEach((n,ri)=>{n.col=ci;n.x=LEFT+ci*(NW+COLGAP);n.y=TOP+ri*(NH+ROWGAP)})});
+  const maxRows=Math.max(...groups.map(g=>NODES.filter(n=>n.group===g).length),1);
+  const BOTTOM=TOP+maxRows*(NH+ROWGAP)-ROWGAP;
+  const nLong=EDGES.filter(e=>byId[e.from]&&byId[e.to]&&Math.abs(byId[e.to].col-byId[e.from].col)>1).length;
+  const W=LEFT*2+groups.length*NW+(groups.length-1)*COLGAP;
+  const H=BOTTOM+(nLong?44+nLong*13:16)+14;
+  $("svg").setAttribute("viewBox",`0 0 ${W} ${H}`);
+  // El zoom se instala cuando el DOM está garantizado, no en línea. Esta función de layout puede
+  // correr antes de que exista el contenedor del diagrama, y entonces initZoom salía por su
+  // `return` temprano dejando los botones pintados y muertos — sin error visible, que es lo peor.
+  // El try/catch se queda porque el zoom es un extra: si falla, el grafo TIENE que pintarse igual.
+  (function(w, h){
+    const arranca = () => { try { initZoom(w, h); } catch(e){ console.warn("zoom no disponible:", e); } };
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", arranca);
+    else arranca();
+  })(W, H);
+
+  /* vecindad */
+  OUT={};INN={};
+  EDGES.forEach(e=>{(OUT[e.from]=OUT[e.from]||[]).push(e);(INN[e.to]=INN[e.to]||[]).push(e)});
+
+  drawEdges(BOTTOM);drawNodes(groups);drawChips(groups);drawGod();
+  $("q").oninput=e=>{q=e.target.value.trim().toLowerCase();applyFilter()};
+  $("copySub").onclick=e=>{SEL?copy(subgraphMd(SEL),e.target):toast("Selecciona un nodo primero")};
+  $("foot").textContent=`Report-kit · estructura · ${esc(M.source||"")} · sha ${String(M.sha||"—").slice(0,12)}`;
+}
+
+/* ── ruta ortogonal con esquinas redondeadas (para saltos de >1 columna) ── */
+function roundedPath(pts,r){
+  let d=`M${pts[0][0]} ${pts[0][1]}`;
+  for(let i=1;i<pts.length-1;i++){
+    const [x0,y0]=pts[i-1],[x1,y1]=pts[i],[x2,y2]=pts[i+1];
+    const v1=[Math.sign(x1-x0),Math.sign(y1-y0)],v2=[Math.sign(x2-x1),Math.sign(y2-y1)];
+    d+=` L${x1-v1[0]*r} ${y1-v1[1]*r} Q${x1} ${y1} ${x1+v2[0]*r} ${y1+v2[1]*r}`;
+  }
+  return d+` L${pts[pts.length-1][0]} ${pts[pts.length-1][1]}`;
+}
+
+function drawEdges(BOTTOM){
+  const eg=$("g-edges");let lane=0;
+  /* carriles: los bulge intra-columna pegados a la caja (x+14..x+38) y los beziers
+     adyacentes abanicados por gutter (mx±) — así no comparten pasillo y no se cruzan
+     visualmente (QA iter-2 F3/F-UGLY-11: el orden estaba bien, el RUTADO no). */
+  const sameColIdx={};
+  const gutter={};
+  EDGES.forEach(e=>{const A=byId[e.from],B=byId[e.to];if(!A||!B)return;
+    if(Math.abs(B.col-A.col)===1){const g=Math.min(A.col,B.col);(gutter[g]=gutter[g]||[]).push(e);}});
+  Object.values(gutter).forEach(list=>list.sort((a,b)=>((byId[a.from].y+byId[a.to].y)-(byId[b.from].y+byId[b.to].y)))
+    .forEach((e,i,arr)=>{e._fan=(i-(arr.length-1)/2)*8;}));
+  EDGES.forEach(e=>{
+    const A=byId[e.from],B=byId[e.to];if(!A||!B)return;
+    const dc=B.col-A.col,y1=A.y+NH/2,y2=B.y+NH/2;let d;
+    if(dc===0){                                   /* misma columna → bulge CORTO pegado a la caja */
+      /* anidado por distancia: la curva que salta MÁS filas se abomba MÁS (paréntesis anidados) —
+         QA iter-3 F3: por orden de dibujo, la corta podía abombarse más que la larga y cruzarse */
+      const rows=Math.min(Math.abs((B.y-A.y)/(NH+ROWGAP)),4);
+      const x=A.x+NW,bx=x+10+rows*8;
+      d=`M${x} ${y1} C ${bx} ${y1}, ${bx} ${y2}, ${x} ${y2}`;
+    }else if(Math.abs(dc)===1){                   /* adyacente → bezier abanicado en su carril */
+      const dir=Math.sign(dc),x1=dir>0?A.x+NW:A.x,x2=dir>0?B.x:B.x+NW;
+      const mx=(x1+x2)/2+(e._fan||0);
+      d=`M${x1} ${y1} C ${mx} ${y1}, ${mx} ${y2}, ${x2} ${y2}`;
+    }else{                                        /* salto largo → por DEBAJO del diagrama */
+      const dir=Math.sign(dc),x1=dir>0?A.x+NW:A.x,x2=dir>0?B.x:B.x+NW;
+      /* risers pegados a la caja (los beziers van por el centro del gutter) — reduce cruces;
+         los cruces residuales dashed-sobre-solid de saltos largos son inherentes a un grafo
+         no-planar por capas (limitación conocida, QA iter-3 F4) */
+      const off=10+(lane%3)*5,laneY=BOTTOM+34+lane*13;lane++;
+      d=roundedPath([[x1,y1],[x1+dir*off,y1],[x1+dir*off,laneY],[x2-dir*off,laneY],[x2-dir*off,y2],[x2,y2]],10);
+    }
+    const pa=document.createElementNS("http://www.w3.org/2000/svg","path");
+    pa.setAttribute("d",d);
+    pa.setAttribute("class","gedge"+(e.evidence==="INFERRED"?" inf":""));
+    pa.setAttribute("stroke-width",(1.1+.9*Math.min(e.weight||1,5)).toFixed(1));
+    pa.dataset.from=e.from;pa.dataset.to=e.to;
+    pa.innerHTML=`<title>${esc(A.label)} → ${esc(B.label)} · ${esc(e.kind||"dep")} · ${esc(e.evidence||"")} · w${e.weight||1}</title>`;
+    eg.appendChild(pa);
+  });
+}
+
+function drawNodes(groups){
+  const ng=$("g-nodes");
+  groups.forEach((g,ci)=>{
+    const x=LEFT+ci*(NW+COLGAP);
+    ng.innerHTML+=`<rect x="${x}" y="${TOP-30}" width="10" height="10" rx="3" fill="${COM[g].color}"/>
+      <text class="colhead" x="${x+16}" y="${TOP-21}">${esc(COM[g].label)}</text>`;
+  });
+  NODES.forEach(n=>{
+    const g=document.createElementNS("http://www.w3.org/2000/svg","g");
+    g.setAttribute("class","gnode");g.dataset.id=n.id;
+    g.setAttribute("transform",`translate(${n.x},${n.y})`);
+    g.innerHTML=`<rect width="${NW}" height="${NH}" rx="10" fill="${COM[n.group].color}" stroke="rgba(0,0,0,.18)"/>
+      <text x="12" y="19">${esc(trunc(n.label,26))}</text>
+      <text x="12" y="35" class="sub">${n.loc??"—"} loc · in ${n.fan_in??0} · out ${n.fan_out??0}</text>
+      <title>${esc(n.id)}</title>`;
+    g.onclick=()=>select(n.id);ng.appendChild(g);
+  });
+}
+
+function trunc(s,n){s=String(s??"");return s.length>n?s.slice(0,n-1)+"…":s}
+
+/* ===== selección → panel + resaltado de vecindad ===== */
+function select(id){
+  SEL=id;const n=byId[id];if(!n)return;
+  const nb=new Set([id]);
+  (OUT[id]||[]).forEach(e=>nb.add(e.to));(INN[id]||[]).forEach(e=>nb.add(e.from));
+  document.querySelectorAll(".gnode").forEach(el=>{
+    el.classList.toggle("sel",el.dataset.id===id);
+    el.classList.toggle("fade",!nb.has(el.dataset.id));
+  });
+  document.querySelectorAll(".gedge").forEach(el=>{
+    const hot=el.dataset.from===id||el.dataset.to===id;
+    el.classList.toggle("hot",hot);el.classList.toggle("cold",!hot);
+  });
+  $("p-tag").textContent=`${n.kind||"module"} · ${COM[n.group]?.label||n.group}`;
+  $("p-title").textContent=n.label;
+  $("p-desc").textContent=n.desc||"";
+  const link=(other,e,dirLabel)=>`<button class="nlink" onclick="select('${esc(other.id).replace(/'/g,"\\'")}')">${esc(other.label)}<em>${esc(e.kind||"dep")} · ${e.evidence==="INFERRED"?"inf":"ext"}</em></button>`;
+  const calls=(OUT[id]||[]).map(e=>byId[e.to]?link(byId[e.to],e):"").join("");
+  const callers=(INN[id]||[]).map(e=>byId[e.from]?link(byId[e.from],e):"").join("");
+  $("p-extra").innerHTML=
+    `<div class="metrics"><span>loc <b>${n.loc??"—"}</b></span><span>fan-in <b>${n.fan_in??0}</b></span><span>fan-out <b>${n.fan_out??0}</b></span></div>`+
+    ((n.files&&n.files.length)?`<h4>Archivos</h4>${n.files.map(f=>`<code>${esc(f)}</code>`).join("")}`:"")+
+    `<h4>→ Llama a (${(OUT[id]||[]).length})</h4>${calls||'<p style="font-size:12.5px">— nadie</p>'}`+
+    `<h4>← Le llaman (${(INN[id]||[]).length})</h4>${callers||'<p style="font-size:12.5px">— nadie</p>'}`;
+}
+
+/* ===== filtros: buscador + chips de comunidad ===== */
+function drawChips(groups){
+  $("chips").innerHTML=groups.map(g=>
+    `<button class="gchip on" data-g="${esc(g)}" style="background:${COM[g].color};border-color:${COM[g].color}"><i style="background:#fff"></i>${esc(COM[g].label)}</button>`).join("");
+  document.querySelectorAll(".gchip").forEach(ch=>ch.onclick=()=>{
+    const g=ch.dataset.g;
+    if(active.has(g))active.delete(g);else active.add(g);
+    ch.classList.toggle("on",active.has(g));
+    ch.style.background=active.has(g)?COM[g].color:"var(--card)";
+    ch.style.borderColor=active.has(g)?COM[g].color:"var(--line)";
+    applyFilter();
+  });
+}
+function visible(n){
+  return active.has(n.group)&&(!q||n.label.toLowerCase().includes(q)||n.id.toLowerCase().includes(q));
+}
+function applyFilter(){
+  document.querySelectorAll(".gnode").forEach(el=>el.classList.toggle("dim",!visible(byId[el.dataset.id])));
+  document.querySelectorAll(".gedge").forEach(el=>{
+    el.classList.toggle("dim",!visible(byId[el.dataset.from])||!visible(byId[el.dataset.to]));
+  });
+}
+
+/* ===== god nodes ===== */
+function drawGod(){
+  const top=[...NODES].sort((a,b)=>((b.fan_in||0)+(b.fan_out||0))-((a.fan_in||0)+(a.fan_out||0))).slice(0,10);
+  $("god").innerHTML=top.map((n,i)=>
+    `<tr onclick="select('${esc(n.id).replace(/'/g,"\\'")}')"><td class="num">${i+1}</td>`+
+    `<td><span class="gdot" style="background:${COM[n.group].color}"></span><code>${esc(n.label)}</code></td>`+
+    `<td>${esc(COM[n.group]?.label||n.group)}</td><td class="num">${n.loc??"—"}</td>`+
+    `<td class="num">${n.fan_in??0}</td><td class="num">${n.fan_out??0}</td>`+
+    `<td class="num"><b>${(n.fan_in||0)+(n.fan_out||0)}</b></td></tr>`).join("");
+}
+
+/* ===== copiar subgrafo (nodo + vecinos) como markdown ===== */
+function subgraphMd(id){
+  const n=byId[id];if(!n)return"";
+  const L=[`## Subgrafo: ${n.label} (\`${n.id}\`)`,
+    `- Comunidad: ${COM[n.group]?.label||n.group} · ${n.loc??"—"} loc · fan-in ${n.fan_in??0} · fan-out ${n.fan_out??0}`];
+  if(n.desc)L.push(`- ${n.desc}`);
+  if(n.files&&n.files.length)L.push(`- Archivos: ${n.files.map(f=>"`"+f+"`").join(", ")}`);
+  L.push("","### → Llama a");
+  const outs=(OUT[id]||[]).map(e=>byId[e.to]?`- \`${byId[e.to].id}\` (${e.kind||"dep"}, ${e.evidence||"?"})`:null).filter(Boolean);
+  L.push(...(outs.length?outs:["- (nadie)"]));
+  L.push("","### ← Le llaman");
+  const inns=(INN[id]||[]).map(e=>byId[e.from]?`- \`${byId[e.from].id}\` (${e.kind||"dep"}, ${e.evidence||"?"})`:null).filter(Boolean);
+  L.push(...(inns.length?inns:["- (nadie)"]));
+  L.push("",`_Fuente: ${M.source||"?"} · sha ${String(M.sha||"?").slice(0,12)} · ${M.date||""}_`);
+  return L.join("\n");
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════════════════
+   PAN Y ZOOM DEL GRAFO
+   Se mueve el viewBox del SVG, no un transform CSS: así el texto y las líneas se re-rasterizan
+   a cada escala y siguen nítidos, que es justo lo que se pierde escalando el bitmap.
+   El nivel se recuerda por informe en la clave de UI — nunca junto a las decisiones, que son
+   el dato que importa (report-kit.md regla 4c).
+   ═══════════════════════════════════════════════════════════════════════════════════════════ */
+// `var` y no `let`, y esto NO es descuido: `function initZoom` se hoistea entera, así que se
+// la llama desde el layout (mucho más arriba) antes de que el motor evalúe esta línea. Con `let`,
+// esas tres quedan en zona muerta temporal en ese momento y el primer uso lanza
+// «Cannot access 'VB0' before initialization» — que el try/catch se tragaba, dejando los botones
+// pintados y muertos. `var` se hoistea con ellas y el problema desaparece.
+var VB = null, VB0 = null, ZKEY = null;
+
+function initZoom(W, H){
+  const svg = $("svg"), box = document.getElementById("diagram");
+  if (!svg || !box) return;
+  VB0 = {x:0, y:0, w:W, h:H};
+  ZKEY = (typeof KEY !== "undefined" ? KEY : "tlr") + "::zoom";
+
+  let guardado = null;
+  try { guardado = JSON.parse(localStorage.getItem(ZKEY) || "null"); } catch(e){}
+  // Solo se restaura si el grafo no ha cambiado de tamaño: un viewBox de otro grafo deja la
+  // vista en un sitio vacío y parece que la página está rota.
+  VB = (guardado && guardado.W === W && guardado.H === H)
+       ? {x:guardado.x, y:guardado.y, w:guardado.w, h:guardado.h}
+       : {...VB0};
+
+  // `nivel` y `aplicar` se declaran ANTES de la primera llamada. Con `const nivel` declarado
+  // después, la llamada a aplicar() caía en la zona muerta temporal, lanzaba ReferenceError y
+  // se llevaba por delante TODO el pintado del grafo que viene a continuación — el síntoma era
+  // un lienzo en blanco, no un error visible.
+  function nivel(){ return Math.round(VB0.w / VB.w * 100); }
+  function aplicar(){
+    svg.setAttribute("viewBox", `${VB.x} ${VB.y} ${VB.w} ${VB.h}`);
+    const l = document.getElementById("zLvl"); if (l) l.textContent = nivel() + "%";
+    try { localStorage.setItem(ZKEY, JSON.stringify({...VB, W:VB0.w, H:VB0.h})); } catch(e){}
+  }
+  aplicar();
+  box.classList.add("grabbable");
+  // Zoom respecto a un punto (cx,cy) en coordenadas del SVG: lo que hay bajo el cursor se queda
+  // bajo el cursor. Sin esto el zoom "se va" y hay que recolocar a mano cada vez.
+  function zoom(f, cx, cy){
+    const w = Math.min(VB0.w * 6, Math.max(VB0.w / 12, VB.w * f));
+    const k = w / VB.w;
+    if (cx == null){ cx = VB.x + VB.w/2; cy = VB.y + VB.h/2; }
+    VB = {x: cx - (cx - VB.x) * k, y: cy - (cy - VB.y) * k, w, h: VB.h * k};
+    aplicar();
+  }
+  const puntoSVG = ev => { const r = svg.getBoundingClientRect();
+    return [VB.x + (ev.clientX - r.left) / r.width * VB.w,
+            VB.y + (ev.clientY - r.top) / r.height * VB.h]; };
+
+  document.getElementById("zIn") ?.addEventListener("click", () => zoom(1/1.25));
+  document.getElementById("zOut")?.addEventListener("click", () => zoom(1.25));
+  document.getElementById("zFit")?.addEventListener("click", () => { VB = {...VB0}; aplicar(); });
+  // "ancho completo": deja el grafo a su tamaño natural y el contenedor hace scroll horizontal.
+  // Para un grafo muy ancho suele leerse mejor que cualquier zoom.
+  document.getElementById("zWide")?.addEventListener("click", () => {
+    const nat = box.classList.toggle("natural");
+    svg.style.width = nat ? VB0.w + "px" : "";
+    svg.style.maxWidth = nat ? "none" : "";
+    VB = {...VB0}; aplicar();
+  });
+
+  box.addEventListener("wheel", ev => {
+    if (!ev.ctrlKey && Math.abs(ev.deltaX) > Math.abs(ev.deltaY)) return;  // scroll lateral: pasa
+    ev.preventDefault();
+    const [cx, cy] = puntoSVG(ev);
+    zoom(ev.deltaY > 0 ? 1.12 : 1/1.12, cx, cy);
+  }, {passive:false});
+
+  let arr = null;
+  box.addEventListener("pointerdown", ev => {
+    if (ev.target.closest("g.node")) return;            // clic en un nodo: es selección, no pan
+    arr = {x:ev.clientX, y:ev.clientY, vx:VB.x, vy:VB.y};
+    box.setPointerCapture(ev.pointerId); box.classList.add("grabbing");
+  });
+  box.addEventListener("pointermove", ev => {
+    if (!arr) return;
+    const r = svg.getBoundingClientRect();
+    VB.x = arr.vx - (ev.clientX - arr.x) / r.width  * VB.w;
+    VB.y = arr.vy - (ev.clientY - arr.y) / r.height * VB.h;
+    aplicar();
+  });
+  const soltar = ev => { arr = null; box.classList.remove("grabbing");
+    try { box.releasePointerCapture(ev.pointerId); } catch(e){} };
+  box.addEventListener("pointerup", soltar);
+  box.addEventListener("pointercancel", soltar);
+  box.addEventListener("dblclick", () => { VB = {...VB0}; aplicar(); });
+
+  // Teclado: sin esto el grafo solo se maneja con ratón (WCAG 2.1.1)
+  box.tabIndex = 0;
+  box.addEventListener("keydown", ev => {
+    const paso = VB.w * 0.08, m = {ArrowLeft:[-paso,0], ArrowRight:[paso,0],
+                                   ArrowUp:[0,-paso], ArrowDown:[0,paso]}[ev.key];
+    if (m){ ev.preventDefault(); VB.x += m[0]; VB.y += m[1]; aplicar(); }
+    else if (ev.key === "+" || ev.key === "=") { ev.preventDefault(); zoom(1/1.25); }
+    else if (ev.key === "-")                   { ev.preventDefault(); zoom(1.25); }
+    else if (ev.key === "0")                   { ev.preventDefault(); VB = {...VB0}; aplicar(); }
+  });
+}
+
+</script>
+<div id="toast"></div>
+</body>
+</html>

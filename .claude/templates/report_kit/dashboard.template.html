@@ -1,0 +1,1793 @@
+<!doctype html>
+<html lang="es">
+<!--
+  report_kit/dashboard.template.html — dashboard interactivo del report-kit.
+  build.py inyecta report.json en `const DB = ...null;` y render_nav.py rellena la topnav
+  entre los marcadores NAV. Schema de datos: item.schema.json (KEEP = status/decision/note/
+  severity/effort/evidence — se persiste ENTERO en localStorage y en el servidor).
+  Self-contained: tokens de templates/html/base.html, sin CDN. Ver rules/report-kit.md.
+-->
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Crect%20width='100'%20height='100'%20rx='22'%20fill='%231b2a4a'/%3E%3Ctext%20x='50'%20y='70'%20font-size='56'%20font-family='system-ui,sans-serif'%20font-weight='700'%20fill='%23fff'%20text-anchor='middle'%3ER%3C/text%3E%3C/svg%3E">
+<style>
+  /* SHARED:BEGIN — bloque CSS canónico e idéntico en las 5 plantillas del report-kit
+     (index/structure/dashboard/results/otto). No editar a mano en un solo archivo:
+     re-sincronizar en las otras 4. Ver rules/report-kit.md · QA-loop TPL1-W3 iter-1. */
+  :root{
+    --ink:#1b1b1f;--muted:#6b6b76;--faint:#6c6c78;--paper:#f6f4ef;--card:#fff;--line:#e4e0d7;
+    --navy:#1b2a4a;--accent:#c2410c;--green:#15803d;--amber:#b45309;--blue:#1d4ed8;--red:#b42318;
+    --radius-sm:6px;--radius-md:10px;--radius:14px;--radius-pill:999px;
+    --shadow-modal:0 20px 60px rgba(27,27,31,.28);
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --s-backlog:#6b6b76;--s-doing:#b45309;--s-review:#1d4ed8;--s-done:#15803d;--s-blocked:#b42318;
+    --d-aprobar:#15803d;--d-modificar:#1d4ed8;--d-aplazar:#b45309;--d-descartar:#b42318;
+  }
+  *{box-sizing:border-box}
+  h1{font-size:clamp(24px,3.6vw,38px);margin:0 0 10px;letter-spacing:-.02em;color:var(--ink)}
+  h1 em{font-style:italic;color:var(--navy)}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600;margin:0 0 10px}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px}
+  .kpi b{display:block;font-size:28px;font-weight:700;letter-spacing:-.02em;color:var(--navy);line-height:1.15}
+  .kpi span{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+  .kpi.warn b{color:var(--red)}
+  .badge{display:inline-block;font-size:11px;font-weight:700;padding:3px 10px;border-radius:var(--radius-pill);color:#fff;text-transform:uppercase;letter-spacing:.04em}
+  .nodata{max-width:560px;margin:80px auto;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:28px 32px;text-align:center}
+  .nodata code{font-family:var(--mono);font-size:.9em;background:#efece4;color:var(--navy);padding:2px 6px;border-radius:6px}
+  .icon{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px}
+  .demo-banner{display:flex;align-items:center;gap:8px;background:#fdf3e3;border:1px solid #eed9b0;border-radius:var(--radius-sm);padding:8px 14px;margin:14px 0 0;font-size:12.5px;color:#78350f}
+  .demo-banner .icon{flex:none}
+  .demo-banner[hidden]{display:none}  /* [hidden] pierde ante .demo-banner{display:flex} — sin esto el banner de demo sale SIEMPRE */
+  .audience-note{display:flex;align-items:center;gap:8px;background:#eef1f5;border:1px solid #d7dee8;border-radius:var(--radius-sm);padding:8px 14px;margin:12px 0 0;font-size:12.5px;color:var(--navy)}
+  .audience-note .icon{flex:none}
+  .scroll-hint{display:none;font-size:11px;color:var(--faint);text-align:right;margin:0 0 6px}
+  @media(max-width:767px){.scroll-hint{display:block}}
+  /* nav responsive: la gestiona el bloque que inyecta render_nav.py (fuente única) */
+  /* SHARED:END */
+  html,body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55}
+  body{background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.55;}
+  .wrap{max-width:1240px;margin:0 auto;padding:0 22px}
+  a{color:var(--blue)}
+  .hide{display:none!important}
+
+  /* ===== HERO ===== */
+  header.hero{border-bottom:1px solid var(--line);padding:28px 0 20px}
+  .lead{font-size:13.5px;color:var(--muted);margin:0;font-family:var(--mono)}
+  .progress{display:flex;height:12px;border-radius:6px;overflow:hidden;margin-top:14px;border:1px solid var(--line);background:var(--card)}
+  .progress > i{display:block;height:100%}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;font-size:11.5px;color:var(--muted)}
+  .legend .dot{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px;vertical-align:middle}
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:14px}
+  button{font-family:var(--sans)}
+  .btn{font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--navy);background:var(--navy);color:#fff;padding:7px 13px;border-radius:10px}
+  .btn.ghost{background:var(--card);color:var(--navy)}
+  .btn.ghost:hover{background:#efece4}
+  .btn.sm{padding:5px 10px;font-size:12px}
+  .toggle{display:inline-flex;border:1px solid var(--navy);border-radius:10px;overflow:hidden}
+  .toggle button{border:0;background:var(--card);color:var(--navy);font-weight:700;font-size:13px;padding:8px 14px;cursor:pointer}
+  .toggle button.on{background:var(--navy);color:#fff}
+  .saveind{display:inline-flex;align-items:center;gap:7px;font-size:12px;padding:6px 11px;border-radius:var(--radius-pill);border:1px solid var(--line);background:var(--card);color:var(--muted)}
+  .saveind .led{width:8px;height:8px;border-radius:50%;background:var(--faint)}
+  .saveind.disk .led{background:var(--green)}
+  .saveind.local .led{background:var(--amber)}
+  .saveind.saving .led{background:var(--blue);animation:pulse 1s infinite}
+  @keyframes pulse{50%{opacity:.3}}
+
+  /* ===== FILTROS ===== */
+  .filters{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:10px 14px;margin:16px 0}
+  .frow{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:5px 0}
+  .frow > .lbl{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);width:72px;flex:none;font-weight:600}
+  .chip{border:1px solid var(--line);background:var(--card);border-radius:var(--radius-pill);padding:4px 10px;font-size:12px;color:var(--ink);display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+  .chip:hover{border-color:var(--faint)}
+  .chip.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+  .chip .n{opacity:.65;font-size:10.5px}
+  .chip .sw{width:8px;height:8px;border-radius:50%}
+  .clearbtn{margin-left:auto;color:var(--muted);border-style:dashed}
+
+  /* ===== BOARD ===== */
+  .board{display:grid;grid-template-columns:1fr 340px;gap:16px;align-items:start}
+  @media(max-width:980px){.board{grid-template-columns:1fr}}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:16px}
+  .panel > h2{font-size:12px;margin:0;padding:12px 16px;border-bottom:1px solid var(--line);text-transform:uppercase;letter-spacing:.07em;color:var(--navy)}
+  .panel > h2 .cnt{float:right;font-weight:600;color:var(--muted);text-transform:none;letter-spacing:0}
+
+  .pg{border-bottom:1px solid var(--line)}
+  .pg:last-child{border-bottom:0}
+  .pg > .head{display:flex;align-items:center;gap:10px;padding:10px 16px;cursor:pointer;user-select:none}
+  .pg > .head:hover{background:#fbfaf7}
+  .pg .caret{transition:transform .15s;color:var(--muted);font-size:11px}
+  .pg.open .caret{transform:rotate(90deg)}
+  .pg .pgname{font-weight:700}
+  .pg .pgslug{font-size:11px;color:var(--faint);font-family:var(--mono)}
+  .pg .mini{margin-left:auto;display:flex;gap:3px}
+  .pg .mini i{width:8px;height:8px;border-radius:var(--radius-sm);display:inline-block}
+  .pg .items{display:none;padding:2px 10px 10px}
+  .pg.open .items{display:block}
+
+  .item{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;padding:9px 8px;border-top:1px dashed #eee9df}
+  .item:first-child{border-top:0}
+  .stbtn{flex:none;width:92px;border-radius:var(--radius-sm);color:#fff;font-size:10.5px;font-weight:700;padding:5px 6px;border:0;text-align:center;text-transform:uppercase;letter-spacing:.05em;cursor:pointer}
+  .item .t{font-size:13.5px;cursor:pointer;color:var(--navy);font-weight:600;text-decoration:underline;text-decoration-color:#c9d2e0;text-underline-offset:3px}
+  .item .t:hover{color:var(--navy);text-decoration:underline}
+  .item .meta{margin-top:5px;display:flex;gap:5px;flex-wrap:wrap;font-size:11px;color:var(--muted);align-items:center}
+  .tag{border-radius:6px;padding:2px 7px;font-size:10.5px;font-weight:700;letter-spacing:.02em}
+  .tag.id{background:#efece4;color:var(--navy);font-family:var(--mono);font-weight:600}
+  .tag.btn2{cursor:pointer;user-select:none}
+  .tag.sev-P0{background:#f7dcd6;color:#8c1c13}
+  .tag.sev-P1{background:#f3e5cf;color:#7c4a03}
+  .tag.sev-P2{background:#f7f5f0;color:var(--muted)}
+  .tag.sev-P3{background:#f1efe9;color:var(--faint)}
+  .tag.epic{color:#fff}
+  .tag.eff{background:#dfe6f7;color:var(--blue)}
+  .tag.ag{background:#e9e3f5;color:#5b21b6}
+  .tag.verd{color:#fff}
+  .tag.evn{background:#e2ece3;color:var(--green)}
+  .item.dec-aprobar{background:linear-gradient(90deg,rgba(21,128,61,.06),transparent 55%)}
+  .item.dec-modificar{background:linear-gradient(90deg,rgba(29,78,216,.06),transparent 55%)}
+  .item.dec-aplazar{background:linear-gradient(90deg,rgba(180,83,9,.07),transparent 55%)}
+  .item.dec-descartar{background:linear-gradient(90deg,rgba(180,35,24,.06),transparent 55%);opacity:.7}
+
+  .matrix{padding:12px 16px}
+  .mx{width:100%;border-collapse:collapse}
+  .mx th,.mx td{border:1px solid var(--line);text-align:center;padding:0}
+  .mx th{font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;padding:5px;background:#fbfaf7}
+  .mx td{height:44px;vertical-align:middle;font-weight:700;font-size:14px}
+  .mx td.qw{background:#e9f3ea}
+  .chartblock{padding:8px 16px 14px}
+  .bar{display:flex;align-items:center;gap:8px;margin:5px 0;font-size:12px}
+  .bar .nm{width:118px;flex:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .bar .track{flex:1;background:#efece4;border-radius:6px;height:13px;overflow:hidden}
+  .bar .fill{height:100%;border-radius:6px;display:block}
+  .bar .v{width:28px;text-align:right;color:var(--muted);flex:none}
+  .hint{color:var(--muted);font-size:11.5px;margin:4px 2px 0}
+
+  /* ===== KANBAN ===== */
+  .kanban{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;align-items:start;margin-bottom:16px}
+  @media(max-width:980px){.kanban{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:560px){.kanban{grid-template-columns:1fr}}
+  .col{background:var(--card);border:1px solid var(--line);border-radius:12px;min-height:60px}
+  .col > h3{font-size:11px;margin:0;padding:9px 12px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:7px;text-transform:uppercase;letter-spacing:.06em}
+  .col > h3 .n{margin-left:auto;background:#efece4;color:var(--navy);border-radius:var(--radius-pill);padding:1px 8px;font-size:10.5px}
+  .col .stack{padding:8px;display:flex;flex-direction:column;gap:8px}
+  .kc{border:1px solid var(--line);border-left-width:4px;border-radius:var(--radius-md);padding:8px 9px;background:var(--card);cursor:grab;transition:.12s}
+  .kc:hover{border-color:var(--navy);box-shadow:0 1px 3px rgba(27,27,31,.08);transform:translateY(-1px)}
+  .kc:active{cursor:grabbing}
+  .kc .kt{font-size:12.5px;margin-bottom:5px}
+  .kc .meta{display:flex;gap:4px;flex-wrap:wrap;align-items:center}
+  .kc .pgcode{font-family:var(--mono);font-size:9.5px;color:var(--faint)}
+  .col.dragover{outline:2px dashed var(--accent);outline-offset:-3px;background:#fdf6ef}
+  .empty{color:var(--faint);font-size:12px;padding:12px;text-align:center}
+
+  /* ===== GANTT (US-1) y MINDMAP (US-2): chasis común =====
+     Ambas son vistas SVG del MISMO visible() que alimenta lista y kanban, así que comparten
+     filtros, decisiones y persistencia. SVG a mano (motor del mapa de index.html), sin librerías. */
+  .vhead{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:12px 0 10px}
+  .vhead .lbl{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+  .vhead .hint{margin:0}
+  .scrollbox{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:8px;overflow-x:auto;margin-bottom:16px}
+  .scrollbox svg{display:block}
+
+  /* ----- Gantt ----- */
+  .gantt text{font-family:var(--sans);font-size:11.5px;fill:var(--ink)}
+  .gantt text.lname{font-weight:700;fill:var(--navy);font-size:12px}
+  .gantt text.tick{font-family:var(--mono);font-size:9.5px;fill:var(--faint)}
+  .gantt text.gid{font-family:var(--mono);font-size:9.5px;fill:var(--faint)}
+  .gantt .grid{stroke:#eee9df;stroke-width:1}
+  .gantt .lanebg{fill:#fbfaf7;stroke:var(--line)}
+  .gantt .lanehead{cursor:pointer}
+  .gantt .lanehead:hover .lanebg{fill:#f3f0e9}
+  .gantt .gbar{cursor:pointer}
+  .gantt .gbar:hover rect{stroke:var(--navy);stroke-width:2}
+  .gantt .crit{fill:var(--red)}
+  .gantt .dep{fill:none;stroke:var(--red);stroke-width:1.4;marker-end:url(#gharrow);opacity:.8}
+  .gantt .today{stroke:var(--accent);stroke-width:1.5;stroke-dasharray:4 3}
+
+  /* ----- Mindmap ----- */
+  .mm text{font-family:var(--sans);font-size:12px;fill:var(--ink)}
+  .mm text.bt{fill:#fff;font-weight:700}          /* etiqueta sobre caja de color (raíz y ramas) */
+  .mm text.mmid{font-family:var(--mono);font-size:9.5px;fill:var(--faint)}
+  .mm text.mmsub{font-size:10px;fill:#e6eaf1}
+  .mm .branch{cursor:pointer}
+  .mm .branch:hover rect.bx{filter:brightness(1.12)}
+  .mm .leaf rect.lx{fill:var(--card);stroke:var(--line)}
+  .mm .leaf:hover rect.lx{stroke:var(--navy)}
+  .mm .ltitle{cursor:pointer}
+  .mm .mmedge{fill:none;stroke:#cfc8ba;stroke-width:1.5}
+  .mm .db{cursor:pointer}
+  .mm .db text{font-size:11px;font-weight:700;fill:var(--muted)}
+  .mm .db.on text{fill:#fff}
+  .mm .db rect{fill:#f2efe8;stroke:var(--line)}
+  .mm .db:hover rect{stroke:var(--navy)}
+
+  /* ===== MODAL DETALLE ===== */
+  #detail{position:fixed;inset:0;background:rgba(27,27,31,.55);display:flex;align-items:center;justify-content:center;z-index:70;padding:20px;opacity:0;pointer-events:none;transition:opacity .14s}
+  #detail.show{opacity:1;pointer-events:auto}
+  .dbox{background:var(--card);border-radius:var(--radius);max-width:880px;width:100%;max-height:90vh;display:flex;flex-direction:column;box-shadow:var(--shadow-modal);transform:translateY(8px);transition:transform .14s}
+  #detail.show .dbox{transform:translateY(0)}
+  .dhead{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 18px;border-bottom:1px solid var(--line)}
+  .dbody{padding:16px 18px 20px;overflow:auto}
+  .dtitle{font-size:17px;margin:0 0 8px;letter-spacing:-.01em;color:var(--navy)}
+  .dmeta{display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+  .goalbox{background:#f5f8f3;border:1px solid #d6dcc8;border-left:4px solid var(--green);border-radius:var(--radius-md);padding:9px 13px;font-size:13px;margin:0 0 12px}
+  .goalbox .glab{font-weight:700;color:var(--green)}
+  .descbox{font-size:13.5px;margin:0 0 12px;color:var(--ink)}
+  .descbox p{margin:0 0 8px;max-width:76ch}
+  .descbox code{font-family:var(--mono);font-size:.88em;background:#efece4;color:var(--navy);padding:1px 5px;border-radius:var(--radius-sm)}
+  .verdictbox{border:1px solid var(--line);border-radius:10px;padding:10px 13px;margin:0 0 12px;background:#fbfaf7}
+  .dsec{border-top:1px solid var(--line);padding-top:12px;margin-top:12px}
+  .dsl{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:600;margin-bottom:8px}
+  .decrow{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
+  .decbtn{border:1px solid var(--line);background:var(--card);border-radius:8px;padding:5px 11px;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer}
+  .decbtn.on{color:#fff}
+  .decbtn[data-d=aprobar].on{background:var(--d-aprobar);border-color:var(--d-aprobar)}
+  .decbtn[data-d=modificar].on{background:var(--d-modificar);border-color:var(--d-modificar)}
+  .decbtn[data-d=aplazar].on{background:var(--d-aplazar);border-color:var(--d-aplazar)}
+  .decbtn[data-d=descartar].on{background:var(--d-descartar);border-color:var(--d-descartar)}
+  .note{border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-family:var(--sans);font-size:12.5px;color:var(--ink);background:var(--card)}
+  .note::placeholder{color:var(--faint)}
+  textarea.note{width:100%;min-height:56px;resize:vertical}
+  .evgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+  .ev{margin:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fbfaf7;display:flex;flex-direction:column}
+  .ev figcaption{display:flex;align-items:center;gap:6px;padding:5px 8px;border-bottom:1px solid var(--line);font-size:10.5px}
+  .ev figcaption small{color:var(--faint);font-weight:400;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .evlab{font-family:var(--mono);font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:1px 6px;border-radius:var(--radius-sm);background:#e9e6de;color:var(--muted)}
+  .evlab.lab-antes{background:#e9e6de;color:var(--muted)}
+  .evlab.lab-actual{background:var(--navy);color:#fff}
+  .evlab.lab-despues{background:var(--green);color:#fff}
+  .ev img{width:100%;max-height:220px;object-fit:cover;display:block;cursor:zoom-in;background:#efece4}
+  .evlink{display:block;padding:12px 10px;font-size:12px;word-break:break-all}
+  .evdata{margin:0;padding:10px;font-family:var(--mono);font-size:11px;white-space:pre-wrap;word-break:break-word;color:var(--navy)}
+  .evdel{margin-left:auto;border:0;background:none;color:var(--faint);cursor:pointer;font-size:11px}
+  .evdel:hover{color:var(--red)}
+  .ph{color:var(--faint);font-size:11.5px;text-align:center;padding:22px 12px;line-height:1.5}
+  .evadd{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+  .evadd input{flex:1;min-width:140px}
+  .hrow{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px dashed #eee9df;font-size:12px;flex-wrap:wrap}
+  .hrow:first-child{border-top:0}
+  .hround{font-family:var(--mono);font-weight:700;color:var(--navy);width:30px;flex:none}
+  .hdate{color:var(--faint);font-family:var(--mono);font-size:11px}
+  .hnote{color:var(--muted)}
+  .icon.inl{vertical-align:-2px;margin-right:3px}
+  .wline{padding:2px 0;font-size:12.5px}
+  .w-code{color:var(--navy)}
+  .w-live{color:var(--blue)}
+  .w-gap{color:var(--amber);font-weight:600}
+  .w-inst{color:var(--muted)}
+  .howto{background:#f8efe4;border:1px solid #ecd9bd;border-radius:8px;padding:7px 11px;font-size:12.5px;margin-top:8px}
+
+  /* ===== EXPORT / LIGHTBOX / TOAST / NODATA ===== */
+  #export{position:fixed;inset:0;background:rgba(27,27,31,.5);display:flex;align-items:center;justify-content:center;z-index:80;padding:20px;opacity:0;pointer-events:none;transition:opacity .14s}
+  #export.show{opacity:1;pointer-events:auto}
+  #export .mbox{background:var(--card);border-radius:var(--radius);max-width:720px;width:100%;max-height:80vh;display:flex;flex-direction:column;box-shadow:var(--shadow-modal);transform:translateY(8px);transition:transform .14s}
+  #export.show .mbox{transform:translateY(0)}
+  #export h3{margin:0;padding:13px 18px;border-bottom:1px solid var(--line);font-size:15px}
+  #export textarea{flex:1;border:0;padding:14px 18px;font-family:var(--mono);font-size:12px;resize:none;outline:none;min-height:260px}
+  #export .mfoot{padding:12px 18px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end}
+  /* "¿dónde se guarda esto?" — mismo chasis que #export */
+  .saveind{cursor:pointer}
+  .saveind:hover{border-color:var(--navy);color:var(--ink)}
+  .whymode{margin-left:2px;width:16px;height:16px;line-height:1;padding:0;border-radius:50%;border:1px solid var(--line);
+    background:var(--paper);color:var(--muted);font-size:11px;font-weight:700;cursor:pointer;font-family:inherit}
+  .saveind:hover .whymode{border-color:var(--navy);color:var(--navy)}
+  #modehelp,#yolo{position:fixed;inset:0;background:rgba(27,27,31,.5);display:flex;align-items:center;justify-content:center;z-index:85;padding:20px;opacity:0;pointer-events:none;transition:opacity .14s}
+  #modehelp.show,#yolo.show{opacity:1;pointer-events:auto}
+  #modehelp .mbox,#yolo .mbox{background:var(--card);border-radius:var(--radius);max-width:620px;width:100%;max-height:84vh;display:flex;flex-direction:column;box-shadow:var(--shadow-modal);transform:translateY(8px);transition:transform .14s}
+  #modehelp.show .mbox,#yolo.show .mbox{transform:translateY(0)}
+  #modehelp h3,#yolo h3{margin:0;padding:13px 18px;border-bottom:1px solid var(--line);font-size:15px}
+  #modehelp #modehelpBody,#yolo #yoloBody{padding:16px 18px;overflow:auto;font-size:13.5px;line-height:1.6}
+  #yolo .mbox{max-width:660px}
+  #yolo > .mbox > p.muted{padding:12px 18px 0;margin:0}
+  #modehelp p,#yolo p{margin:0 0 11px}
+  #modehelp p.muted,#yolo p.muted{color:var(--muted);font-size:12.5px}
+  #modehelp pre,#yolo pre{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:11px 13px;font-family:var(--mono);font-size:12px;overflow-x:auto;margin:0 0 11px;white-space:pre-wrap;word-break:break-all}
+  #modehelp code,#yolo code{font-family:var(--mono);font-size:12px;background:var(--paper);padding:1px 5px;border-radius:4px}
+  #modehelp .mfoot,#yolo .mfoot{padding:12px 18px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end}
+  /* modo yolo — la política de autonomía del PLAN (meta.yolo), no de un item */
+  .ybadge{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.02em}
+  .ybadge.off{background:#e8e6e1;color:#6b6b6b}
+  .ybadge.on{background:#c2410c;color:#fff}
+  #yoloBtn.armed{border-color:#c2410c;color:#c2410c}
+  .yrow{margin:14px 0}
+  .yrow > .ylbl{display:block;font-weight:700;font-size:13px;margin-bottom:2px}
+  .yrow > .yhint{display:block;font-size:12px;color:#6b6b6b;margin-bottom:7px;line-height:1.45}
+  .yopt{display:block;padding:7px 10px;margin:3px 0;border:1px solid #e2e0da;border-radius:8px;cursor:pointer;font-size:13px;line-height:1.45}
+  .yopt:hover{background:#faf9f6}
+  .yopt input{margin-right:8px}
+  .yopt.sel{border-color:#c2410c;background:#fff7ed}
+  .yopt b{font-weight:700}
+  .yopt .ycount{float:right;color:#6b6b6b;font-size:12px;font-weight:600}
+  .ylocked{background:#fdf6f0;border:1px solid #f0d6c2;border-radius:8px;padding:10px 12px;margin:14px 0;font-size:12.5px;line-height:1.55}
+  .ylocked b{color:#9a3412}
+  .ylocked ul{margin:6px 0 0 18px;padding:0}
+  .yresumen{background:#f6f4ef;border-radius:8px;padding:11px 13px;margin:14px 0;font-size:13px;line-height:1.55}
+  .yresumen .big{font-size:20px;font-weight:800;color:#c2410c}
+  /* selección múltiple + modo aprobación + barra masiva */
+  .selbox{width:15px;height:15px;margin:4px 0 0;accent-color:var(--navy);cursor:pointer;flex:none}
+  .item{grid-template-columns:auto auto 1fr}
+  .item.withacts{grid-template-columns:auto auto 1fr auto}
+  .item.sel{background:#eef2f9;border-radius:8px}
+  .acts{display:flex;gap:4px;align-items:flex-start;padding-top:1px}
+  .decbtn.mini{padding:4px 9px;font-size:12.5px;border-radius:7px;line-height:1}
+  .decbtn.mini.on{color:#fff}
+  #modeDecide.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+  /* oculto = fuera de pantalla RELATIVO a su alto: con un translate fijo (80px) la barra asomaba
+     por abajo en cuanto envolvía a varias filas en pantallas estrechas (llega a 220px de alto). */
+  #bulkbar{position:fixed;left:50%;bottom:18px;transform:translateX(-50%) translateY(calc(100% + 24px));display:flex;gap:10px;align-items:center;
+    background:var(--ink);color:#fff;border-radius:14px;padding:10px 16px;z-index:70;box-shadow:0 12px 32px rgba(16,16,20,.35);
+    transition:transform .18s;max-width:96vw;flex-wrap:wrap;justify-content:center}
+  #bulkbar.show{transform:translateX(-50%) translateY(0)}
+  #bulkbar .bn{font-weight:700;font-size:13px;white-space:nowrap}
+  #bulkbar .grp{display:flex;gap:6px;flex-wrap:wrap}
+  #bulkbar .sep{width:1px;height:22px;background:rgba(255,255,255,.25)}
+  #bulkbar .bb{border:1px solid var(--c,#888);background:var(--c,#555);color:#fff;border-radius:8px;padding:5px 11px;font-size:12px;font-weight:700;cursor:pointer}
+  #bulkbar .bb:hover{filter:brightness(1.15)}
+  #bulkbar .bb.ghostb{background:transparent;border-color:rgba(255,255,255,.4)}
+  #bulkbar .bb.st{background:transparent;border-color:var(--c)}
+  #bulkbar .bb.st:hover{background:var(--c)}
+  .tlrec{background:#f4f6fb;border-left:3px solid var(--navy);border-radius:8px;padding:10px 13px;font-size:13px;line-height:1.55;color:var(--ink)}
+  .tlrec p{margin:0 0 8px} .tlrec p:last-child{margin:0}
+  .ro{font-family:var(--mono);font-size:10px;font-weight:400;text-transform:none;letter-spacing:0;color:var(--faint);margin-left:6px}
+  .descbox .blk{display:inline-block;margin-bottom:2px;color:var(--navy)}
+  .descbox p{margin:0 0 11px} .descbox p:last-child{margin:0}
+  .refs{display:flex;flex-direction:column;gap:6px}
+  /* Consecuencias: las dos caras de decidir. Sin esto un item solo se puede obedecer. */
+  .cons{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+  @media(max-width:640px){.cons{grid-template-columns:1fr}}
+  .cons > div{border-radius:9px;padding:10px 12px;font-size:12.5px;line-height:1.55}
+  .cons .si{background:#f0fdf4;border:1px solid #bbf7d0}
+  .cons .no{background:#fef7f2;border:1px solid #f4d5bd}
+  .cons b{display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+  .cons .si b{color:#15803d} .cons .no b{color:#9a3412}
+  .ref{display:flex;align-items:baseline;gap:9px;text-decoration:none;background:var(--paper);border:1px solid var(--line);
+    border-radius:8px;padding:8px 11px;font-size:13px;color:var(--ink);transition:.12s}
+  .ref:hover{border-color:var(--navy);background:#fff}
+  button.ref{width:100%;text-align:left;font:inherit;font-size:13px;cursor:pointer}
+  .reftipo{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:#fff;
+    background:var(--navy);border-radius:4px;padding:2px 6px;flex:none}
+  .refque{flex:1}
+  .refurl{font-family:var(--mono);font-size:11px;color:var(--faint);flex:none}
+  @media(max-width:640px){.ref{flex-wrap:wrap}.refurl{display:none}}
+  #lightbox{position:fixed;inset:0;background:rgba(27,27,31,.85);display:flex;align-items:center;justify-content:center;z-index:90;padding:24px;cursor:zoom-out;opacity:0;pointer-events:none;transition:opacity .14s}
+  #lightbox.show{opacity:1;pointer-events:auto}
+  #lightbox img{max-width:96%;max-height:92vh;border-radius:8px;box-shadow:var(--shadow-modal)}
+  #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(16px);background:var(--ink);color:#fff;padding:10px 17px;border-radius:10px;opacity:0;transition:.25s;z-index:95;font-size:13px;pointer-events:none}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  footer{padding:20px 0 56px;color:var(--faint);font-size:12px}
+.recwhy{margin-top:6px;padding:5px 9px;border-left:3px solid var(--muted);background:rgba(0,0,0,.025);
+  color:var(--muted);font-size:12.5px;line-height:1.45;border-radius:0 4px 4px 0;max-width:78ch}
+.recwhy em{opacity:.85}
+  .auditor{margin:10px 0 0;padding:10px 12px;background:#fbf7ef;border:1px solid #e8dcc4;
+    border-left:3px solid #c2410c;border-radius:9px;font-size:13.5px;line-height:1.55;color:#1b1b1f}
+  .auditor b.h{display:block;font-family:ui-monospace,Menlo,monospace;font-size:10.5px;
+    letter-spacing:.1em;text-transform:uppercase;color:#c2410c;margin-bottom:4px}
+</style>
+</head>
+<body>
+<!-- ICONS:BEGIN -->
+<svg style="display:none" aria-hidden="true">
+  <symbol id="ic-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></symbol>
+  <symbol id="ic-download" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></symbol>
+  <symbol id="ic-upload" viewBox="0 0 24 24"><path d="M12 21V9"/><path d="m7 14 5-5 5 5"/><path d="M5 21h14"/></symbol>
+  <symbol id="ic-refresh" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></symbol>
+  <symbol id="ic-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".6" fill="currentColor"/></symbol>
+  <symbol id="ic-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><circle cx="12" cy="8" r=".6" fill="currentColor"/></symbol>
+  <symbol id="ic-tool" viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 1 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.1 2.1-2-2z"/></symbol><symbol id="ic-search" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10.5 10.5 L14 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol><symbol id="ic-eye" viewBox="0 0 16 16"><path d="M1.5 8 C4 4.2 12 4.2 14.5 8 C12 11.8 4 11.8 1.5 8 Z" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="8" cy="8" r="2" fill="currentColor"/></symbol><symbol id="ic-arrow" viewBox="0 0 16 16"><path d="M2.5 8 H12 M8.6 4 L13 8 L8.6 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol><symbol id="ic-clip" viewBox="0 0 16 16"><rect x="4" y="2.6" width="8" height="11" rx="1.4" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6 2.6 V1.8 H10 V2.6" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6 6.4 H10 M6 9 H10 M6 11.4 H8.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></symbol>
+</svg>
+<!-- ICONS:END -->
+<!-- NAV:BEGIN -->
+<!-- NAV:END -->
+
+<div class="wrap"><div class="demo-banner" id="demoBanner" hidden><svg class="icon"><use href="#ic-info"></use></svg><span><b>Datos de demostración.</b> Este set usa un fixture de ejemplo, no un proyecto real.</span></div></div>
+
+<div id="nodata" class="nodata" hidden>
+  <p class="eyebrow">Report-kit · Dashboard</p>
+  <p><b>Sin datos inyectados.</b></p>
+  <p>Esta es la plantilla cruda. Genera el informe con<br><code>python3 build.py &lt;plan-dir&gt;</code><br>para inyectar <code>report.json</code> en esta página.</p>
+</div>
+
+<div id="app">
+  <header class="hero"><div class="wrap">
+    <p class="eyebrow">Report-kit · Dashboard</p>
+    <h1 id="hTitle">Dashboard</h1>
+    <p class="lead" id="hSub"></p>
+    <div class="kpis" id="kpis"></div>
+    <div class="progress" id="progress"></div>
+    <div class="legend" id="legend"></div>
+    <div class="toolbar">
+      <span id="saveind" class="saveind local" onclick="openModeHelp()" title="¿Dónde se guardan mis decisiones? (clic)"><span class="led"></span><span id="saveTxt">solo navegador</span><button class="whymode" onclick="event.stopPropagation();openModeHelp()" aria-label="Cómo se guardan las decisiones">?</button></span>
+      <div class="toggle">
+        <button id="viewDash" class="on" onclick="setView('dash')">Dashboard</button>
+        <button id="viewKanban" onclick="setView('kanban')">Kanban</button>
+        <button id="viewGantt" onclick="setView('gantt')">Gantt</button>
+        <button id="viewMind" onclick="setView('mind')">Mapa mental</button>
+      </div>
+      <button id="modeDecide" class="btn ghost" onclick="togDecide()" title="Botones de decisión en cada tarjeta">✓ Modo aprobación</button>
+      <button id="yoloBtn" class="btn ghost" onclick="openYolo()" title="Qué puede ejecutar el agente sin preguntarte">🚀 Modo yolo <span id="yoloBadge" class="ybadge off">off</span></button>
+      <button class="btn ghost" onclick="selectVisibles()" title="Selecciona todo lo que pasa los filtros actuales">☑ Seleccionar visibles</button>
+      <button class="btn ghost" onclick="downloadJSON()"><svg class="icon"><use href="#ic-download"></use></svg> Descargar JSON</button>
+      <label class="btn ghost" style="display:inline-flex;align-items:center;cursor:pointer"><svg class="icon"><use href="#ic-upload"></use></svg> Importar<input id="importFile" type="file" accept=".json" style="display:none" onchange="importJSON(event)"></label>
+      <button class="btn ghost" onclick="exportMD()"><svg class="icon"><use href="#ic-copy"></use></svg> copiar cambios (md)</button>
+      <button class="btn ghost" onclick="resetAll()"><svg class="icon"><use href="#ic-refresh"></use></svg> Reset</button>
+    </div>
+  </div></header>
+
+  <div class="wrap">
+    <div class="filters" id="filters"></div>
+
+    <div id="dashView" class="board">
+      <div class="panel">
+        <h2>Items por página <span class="cnt" id="dashCount"></span></h2>
+        <div id="pageList"></div>
+      </div>
+      <div>
+        <div class="panel">
+          <h2>Decisiones</h2>
+          <div class="chartblock" id="byDecision"></div>
+          <div class="hint" style="padding:0 16px 12px">Las decisiones se toman en el detalle de cada item (clic en el título).</div>
+        </div>
+        <div class="panel">
+          <h2>Prioridad · severidad × esfuerzo</h2>
+          <div class="matrix"><div id="matrix"></div><div class="hint">Verde = quick wins (alta severidad, poco esfuerzo).</div></div>
+        </div>
+        <div class="panel"><h2>Items por épica</h2><div class="chartblock" id="byEpic"></div></div>
+        <div class="panel"><h2>Items por página</h2><div class="chartblock" id="byPage"></div></div>
+      </div>
+    </div>
+
+    <div id="kanbanView" class="kanban hide"></div>
+
+    <div id="ganttView" class="hide">
+      <div class="audience-note"><svg class="icon"><use href="#ic-info"></use></svg><span id="gNote"></span></div>
+      <div class="vhead">
+        <span class="lbl">Agrupar por</span>
+        <div class="toggle">
+          <button id="gByEpic" class="on" onclick="setGGroup('epic')">Épica</button>
+          <button id="gByPage" onclick="setGGroup('page')">Página</button>
+        </div>
+        <button class="btn ghost sm" id="gAllBtn" onclick="gToggleAll()">Plegar todo</button>
+        <span class="hint" id="gLegend"></span>
+      </div>
+      <p class="scroll-hint">deslizá para ver el resto del calendario →</p>
+      <div class="scrollbox"><svg id="gsvg" class="gantt" role="img" aria-label="Calendario orientativo del plan"></svg></div>
+    </div>
+
+    <div id="mindView" class="hide">
+      <div class="audience-note"><svg class="icon"><use href="#ic-info"></use></svg><span id="mNote"></span></div>
+      <div class="vhead">
+        <span class="lbl">Ramas por</span>
+        <div class="toggle">
+          <button id="mByEpic" class="on" onclick="setMGroup('epic')">Épica</button>
+          <button id="mByPage" onclick="setMGroup('page')">Página</button>
+        </div>
+        <button class="btn ghost sm" id="mAllBtn" onclick="mToggleAll()">Desplegar todo</button>
+        <span class="hint" id="mLegend"></span>
+      </div>
+      <p class="scroll-hint">deslizá para ver las hojas →</p>
+      <div class="scrollbox"><svg id="msvg" class="mm" role="img" aria-label="Mapa mental del plan: ramas desplegables con decisión en el nodo"></svg></div>
+    </div>
+
+    <footer id="footnote"></footer>
+  </div>
+</div>
+
+<div id="detail" onclick="if(event.target.id==='detail')closeDetail()">
+  <div class="dbox">
+    <div class="dhead">
+      <div><span id="dId" class="tag id"></span> <span id="dPageLbl" style="color:var(--muted);font-size:12.5px"></span></div>
+      <button class="btn ghost sm" onclick="closeDetail()">✕ Cerrar</button>
+    </div>
+    <div class="dbody">
+      <h3 class="dtitle" id="dTitle"></h3>
+      <div class="dmeta" id="dMeta"></div>
+      <div id="dGoal"></div>
+      <div class="descbox" id="dDesc"></div>
+      <div id="dVerdict"></div>
+      <div class="dsec" id="dConsWrap" style="display:none">
+        <div class="dsl">Qué pasa si decides <span class="ro">las dos caras</span></div>
+        <div class="cons" id="dCons"></div>
+      </div>
+      <div class="dsec" id="dRefsWrap" style="display:none">
+        <div class="dsl">Para entenderlo mejor <span class="ro">enlaces verificados</span></div>
+        <div class="refs" id="dRefs"></div>
+      </div>
+      <div class="dsec" id="dRecWrap" style="display:none">
+        <div class="dsl">Recomendación del Tech Lead <span class="ro">solo lectura</span></div>
+        <div class="tlrec" id="dRec"></div>
+      </div>
+      <div class="dsec">
+        <div class="dsl">Tu decisión</div>
+        <div class="decrow" id="dDec"></div>
+        <div class="dsl" style="margin-top:10px">Tu nota <span class="ro">solo tuya — el agente la lee</span></div>
+        <textarea class="note" id="dNote" placeholder="lo que quieras dejar dicho: matices, condiciones, «sí pero sin X», preguntas…" oninput="setNote(curDetail,this.value)"></textarea>
+      </div>
+      <div class="dsec">
+        <div class="dsl">Evidencia</div>
+        <div class="evgrid" id="dEvid"></div>
+        <div class="evadd">
+          <input class="note" id="evLabel" placeholder="etiqueta (ANTES / ACTUAL / DESPUÉS / dato…)">
+          <input class="note" id="evSrc" placeholder="ruta relativa, URL o data:image/…">
+          <button class="btn ghost sm" onclick="addEvidence()">+ añadir</button>
+        </div>
+      </div>
+      <div class="dsec" id="dHistWrap" style="display:none">
+        <div class="dsl">Historial de rondas</div>
+        <div id="dHist"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="export" onclick="if(event.target.id==='export')closeExport()">
+  <div class="mbox">
+    <h3 id="exportTitle">Export</h3>
+    <textarea id="exportText" readonly></textarea>
+    <div class="mfoot">
+      <button class="btn" onclick="copyExport()"><svg class="icon"><use href="#ic-copy"></use></svg> Copiar al portapapeles</button>
+      <button class="btn ghost" onclick="closeExport()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<div id="yolo" onclick="if(event.target.id==='yolo')closeYolo()">
+  <div class="mbox">
+    <h3>🚀 Modo yolo — qué puede hacer el agente sin preguntarte</h3>
+    <p class="muted" style="font-size:13px;line-height:1.55">Esto es una <b>política del plan</b>, no de un item. Se guarda en <code>report.json</code> y el agente la lee al arrancar: cuando le digas «sigue», ejecutará lo que entre en estos límites sin volver a preguntar.</p>
+    <div id="yoloBody"></div>
+    <div class="mfoot">
+      <button class="btn" onclick="copyYoloPrompt(this)"><svg class="icon"><use href="#ic-copy"></use></svg> Copiar instrucción para el agente</button>
+      <button id="yoloToggle" class="btn" onclick="togYolo()">Activar</button>
+      <button class="btn ghost" onclick="closeYolo()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<div id="modehelp" onclick="if(event.target.id==='modehelp')closeModeHelp()">
+  <div class="mbox">
+    <h3>¿Dónde se guardan mis decisiones?</h3>
+    <div id="modehelpBody"></div>
+    <div class="mfoot">
+      <button class="btn" onclick="copyServerCmd(this)"><svg class="icon"><use href="#ic-copy"></use></svg> Copiar comando</button>
+      <button class="btn ghost" onclick="closeModeHelp()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<div id="lightbox" onclick="closeLight()"><img alt="evidencia ampliada"></div>
+
+<div id="bulkbar">
+  <span id="bulkN" class="bn"></span>
+  <span class="grp">
+    <button class="bb" style="--c:#15803d" onclick="bulkDec('aprobar')">✓ Aprobar</button>
+    <button class="bb" style="--c:#1d4ed8" onclick="bulkDec('modificar')">✎ Modificar</button>
+    <button class="bb" style="--c:#b45309" onclick="bulkDec('aplazar')">⏸ Aplazar</button>
+    <button class="bb" style="--c:#b42318" onclick="bulkDec('descartar')">✕ Descartar</button>
+    <button class="bb" style="--c:#6b6b76" onclick="bulkDec(null)">∅ Sin decisión</button>
+  </span>
+  <span class="sep"></span>
+  <span class="grp" id="bulkStatusBtns"></span>
+  <span class="sep"></span>
+  <span class="grp" title="Qué se puede dejar corriendo sin nadie mirando (rules/goal-vs-loop.md §Modo noche)">
+    <button class="bb" style="--c:#4338ca" onclick="bulkNoct('si')">🌙 Apto noche</button>
+    <button class="bb" style="--c:#b45309" onclick="bulkNoct('revisar')">🌗 Revisar</button>
+    <button class="bb" style="--c:#6b6b76" onclick="bulkNoct('no')">☀️ No apto</button>
+  </span>
+  <span class="sep"></span>
+  <button class="bb ghostb" onclick="clearSel()">✕ Deseleccionar</button>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const DB = /*__DATA__*/null;
+(function(){const m=DB&&DB.meta;if(m&&m.project){const t=`${m.project} · ${m.plan_id||""} · ronda ${m.round||1} · ${m.generated||""}`.toUpperCase();document.querySelectorAll(".eyebrow").forEach(el=>el.textContent=t);}})();
+
+/* ---------- constantes ---------- */
+const STATUSES=["backlog","doing","review","done","blocked"];
+const STLABEL={backlog:"Backlog",doing:"En curso",review:"Revisión",done:"Hecho",blocked:"Bloqueado"};
+const SHEX={backlog:"#6b6b76",doing:"#b45309",review:"#1d4ed8",done:"#15803d",blocked:"#b42318"};
+const DEC=["aprobar","modificar","aplazar","descartar"];
+const DECLABEL={aprobar:"✓ Aprobar",modificar:"✎ Modificar",aplazar:"⏸ Aplazar",descartar:"✕ Descartar"};
+const DECHEX={aprobar:"#15803d",modificar:"#1d4ed8",aplazar:"#b45309",descartar:"#b42318"};
+const SEV=["P0","P1","P2","P3"],EFF=["S","M","L","XL"];
+const VMAP={done:["Hecho","#15803d"],partial:["Parcial","#b45309"],notdone:["No hecho","#b42318"],blocked:["Bloqueado","#6b6b76"],review:["A revisar","#1d4ed8"]};
+
+const META=DB?(DB.meta||{}):{};
+const EPICS=META.epics||{};
+let PAGES=[];
+if(DB){
+  PAGES=(META.pages||[]).map(p=>({code:p.code,name:p.name||p.code,slug:p.slug||""}));
+  const known=new Set(PAGES.map(p=>p.code));
+  DB.items.forEach(it=>{const c=it.page||"—";if(!known.has(c)){known.add(c);PAGES.push({code:c,name:c==="—"?"Sin página":c,slug:""});}});
+}
+const PAGEMAP={};PAGES.forEach(p=>PAGEMAP[p.code]=p);
+
+let backend=false,view="dash",curDetail=null;
+const F={epic:new Set(),page:new Set(),sev:new Set(),eff:new Set(),status:new Set(),dec:new Set(),tag:new Set(),noct:new Set(),rec:new Set()};
+/* Sugerencia del REVISOR — lo que recomienda quien analizó. NO es la decisión: la decisión la
+   escribe el Usuario y vive en `decision`. Se separan a propósito, porque el valor del informe
+   está justo en poder DISCREPAR: si la recomendación se escribiera en `decision` no quedaría
+   rastro de quién dijo qué, y "aprobar todo lo que aprueba el revisor" dejaría de ser una
+   decisión del Usuario para ser un valor por defecto que nadie tomó. */
+const REC=["aprobar","duda","no-aprobar"];
+const RECLABEL={aprobar:"👍 Aprobar",duda:"🤔 Duda","no-aprobar":"👎 No aprobar",_:"Sin recomendación"};
+const RECHEX={aprobar:"#15803d",duda:"#b45309","no-aprobar":"#b91c1c",_:"#c9c4b8"};
+function recOf(it){return (it.rec&&it.rec.rec)?it.rec.rec:"_";}
+/* Run nocturno (rules/goal-vs-loop.md §Modo noche). "_" = SIN DECLARAR, y se distingue de "no" a propósito:
+   tratar lo no declarado como apto es exactamente cómo se cuela de noche algo que nadie evaluó. */
+const NOCT=["si","revisar","no"];
+const NOCTLABEL={si:"🌙 Apto",revisar:"🌗 Revisar",no:"☀️ No apto",_:"Sin declarar"};
+const NOCTHEX={si:"#4338ca",revisar:"#b45309",no:"#8a8578",_:"#c9c4b8"};
+function noctOf(it){return (it.nocturno&&it.nocturno.apto)?it.nocturno.apto:"_";}
+const SEL=new Set();        // ids seleccionados para acción masiva (efímero A PROPÓSITO: ver §UI)
+/* Preferencias de UI (filtros, vista, modo aprobación) en clave APARTE de las decisiones: son
+   estado de la interfaz, no datos del plan. Mezclarlas arriesgaría el fichero que sí importa. */
+function uiKey(){return lsKey()+"::ui";}
+let decideMode=false;       // modo aprobación: botones de decisión en cada tarjeta
+let openPages=new Set(PAGES.map(p=>p.code));
+const BASE={};   // snapshot del DB inyectado (para exportMD de cambios y reset)
+
+/* ---------- persistencia dual (KEEP COMPLETO — fix del bug histórico) ---------- */
+function lsKey(){return "tlr::"+(META.project||"proj")+"::"+(META.plan_id||"plan")+"::v1";}
+/* keepOf/applyKeep = la lista x-keep del schema. OJO: pruebas.html comparte esta MISMA clave de
+   localStorage, así que las dos páginas deben serializar la lista COMPLETA — si una omite un campo
+   (p.ej. `tested`), la última en guardar lo borra. Mismo bug histórico que las evidencias. */
+function keepOf(it){return {status:it.status,decision:(it.decision===undefined?null:it.decision),note:it.note||"",
+  severity:it.severity||null,effort:it.effort||null,evidence:Array.isArray(it.evidence)?it.evidence:[],
+  tested:(it.tested&&typeof it.tested==="object")?it.tested:{},
+  nocturno:(it.nocturno&&typeof it.nocturno==="object")?it.nocturno:{}};}
+function applyKeep(it,o){
+  if(!o)return;
+  if(o.status)it.status=o.status;
+  if("decision"in o)it.decision=o.decision;
+  if("note"in o)it.note=o.note;
+  if(o.severity)it.severity=o.severity;
+  if(o.effort)it.effort=o.effort;
+  if(Array.isArray(o.evidence))it.evidence=o.evidence;
+  if(o.tested&&typeof o.tested==="object")it.tested=o.tested;
+  if(o.nocturno&&typeof o.nocturno==="object")it.nocturno=o.nocturno;
+}
+function snapshot(){const m={};DB.items.forEach(it=>m[it.id]=keepOf(it));return m;}
+function applyLocal(){try{const m=JSON.parse(localStorage.getItem(lsKey()))||{};DB.items.forEach(it=>applyKeep(it,m[it.id]));}catch(e){}}
+let saveT;
+function save(){
+  try{localStorage.setItem(lsKey(),JSON.stringify(snapshot()));}catch(e){}
+  if(!backend)return;
+  setInd("saving");
+  clearTimeout(saveT);
+  saveT=setTimeout(()=>{
+    fetch("api/save",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({items:DB.items})})
+      .then(r=>{if(!r.ok)throw 0;setInd("disk");})
+      .catch(()=>{backend=false;setInd("local");toast("Sin servidor: guardado solo en navegador");});
+  },500);
+}
+function setInd(mode){
+  const e=document.getElementById("saveind"),t=document.getElementById("saveTxt");
+  e.className="saveind "+mode;
+  t.textContent=mode==="disk"?"guardado en disco":mode==="saving"?"guardando…":"solo navegador";
+}
+
+/* ---------- "¿dónde se guarda esto?" (afordancia del chip de modo) ----------
+   El modo servidor existía desde el principio pero vivía enterrado en una rule. El chip es el
+   único sitio donde el usuario está mirando cuando se hace la pregunta, así que la respuesta va
+   ahí: qué implica cada modo y el comando exacto para cambiar, copiable. */
+const SERVER_CMD='cd '+((DB.meta&&DB.meta.plan_dir)||'.docs/plans/'+((DB.meta&&DB.meta.plan_id)||''))+' && python3 server.py';
+function openModeHelp(){
+  const decided=DB.items.filter(i=>i.decision).length, total=DB.items.length;
+  document.getElementById("modehelpBody").innerHTML = backend
+    ? `<p><b>Estás en modo servidor.</b> Cada decisión se escribe en <code>report.json</code> en disco
+         (escritura atómica + copia en <code>.backups/</code>) en cuanto la tomas. Tu agente lee ese
+         mismo fichero, así que ve tus decisiones sin que tengas que exportar nada.</p>
+       <p class="muted">Llevas <b>${decided}</b> de ${total} decididos. Si paras el servidor, la página
+         sigue funcionando y vuelve a guardar solo en el navegador.</p>`
+    : `<p><b>Ahora mismo: solo en tu navegador</b> (localStorage, clave
+         <code>tlr::${esc(DB.meta.project||"")}::${esc(DB.meta.plan_id||"")}::v1</code>). Sobrevive a
+         recargas y pestañas, pero <b>no</b> a otro navegador, otro equipo ni un borrado de datos — y
+         <b>tu agente no las ve</b>: <code>report.json</code> en disco sigue sin tus decisiones.</p>
+       <p><b>Para que se guarden en disco</b> (y el agente esté siempre al día), levanta el backend
+         que ya viene con este informe:</p>
+       <pre>${esc(SERVER_CMD)}</pre>
+       <p class="muted">Abre <code>http://127.0.0.1:8765</code>. Escribe en el mismo
+         <code>report.json</code> del plan, de forma atómica y con backup rotado. Lo que ya tengas
+         decidido aquí no se pierde: pulsa <b>Descargar JSON</b> antes y <b>Importar</b> después, o
+         simplemente vuelve a decidir — llevas <b>${decided}</b> de ${total}.</p>
+       <p class="muted">Alternativa sin servidor: <b>Descargar JSON</b> y pasarle el fichero al agente.</p>`;
+  document.getElementById("modehelp").classList.add("show");
+}
+function closeModeHelp(){document.getElementById("modehelp").classList.remove("show");}
+function copyServerCmd(btn){
+  navigator.clipboard.writeText(SERVER_CMD).then(()=>{
+    const o=btn.innerHTML;btn.textContent="✓ copiado";setTimeout(()=>btn.innerHTML=o,1400);
+  }).catch(()=>toast("No pude copiar — selecciona el comando a mano"));
+}
+async function boot(){
+  try{
+    const r=await fetch("api/health",{cache:"no-store"});
+    if(!r.ok)throw 0;
+    backend=true;
+    try{PERMISOS=((await r.json())||{}).permisos||null;}catch(e){PERMISOS=null;}
+    try{
+      const dj=await(await fetch("report.json",{cache:"no-store"})).json();
+      if(dj&&dj.items){const by={};dj.items.forEach(x=>by[x.id]=x);DB.items.forEach(it=>{if(by[it.id])applyKeep(it,keepOf(by[it.id]));});}
+    }catch(e){}
+    setInd("disk");
+  }catch(e){backend=false;applyLocal();setInd("local");}
+  document.getElementById("footnote").innerHTML=backend
+    ?'Modo <b>servidor</b>: cada cambio se guarda en <code>report.json</code> en disco (backup en .backups/). "MD cambios" copia el delta para <code>tasks.md</code>.'
+    :'Modo <b>estático</b>: los cambios (estado, decisión, nota, severidad, esfuerzo y evidencia) se guardan en tu navegador. "Descargar JSON" para volcarlos, o levanta <code>python3 server.py .</code> para persistir a disco.';
+  loadUI();
+  renderAll();
+}
+
+/* ---------- helpers ---------- */
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]));}
+function mdish(s){
+  if(!s)return"";
+  // Los 4 bloques del formato de propuesta (📍 cómo está · 🎯 qué queremos · 🔧 cómo · 🧭 por qué)
+  // SIEMPRE arrancan párrafo, vengan con salto de línea o escritos seguidos en tasks.md — que solo
+  // admite una línea por campo. Sin esto, media docena de items se leían como un muro de texto.
+  // Marcadores de bloque por ALTERNACIÓN, nunca en clase de caracteres: ⚠️ son DOS code points
+  // (U+26A0 + selector U+FE0F) y dentro de [...] se descomponen — partía por cualquier emoji con
+  // selector (ℹ️, ✔️…) y por un ⚠ suelto a mitad de frase. Se ancla además al rótulo literal, para
+  // que el formato no dependa solo del emoji.
+  const BLK = /\s*(?=(?:📍|🎯|🔧|🧭|⚠️|⚠)\s*(?:Cómo está ahora|Qué queremos conseguir|Cómo se haría|Por qué así|Por qué esta|AVISO|OJO|PENDIENTE))/g;
+  // \s* puede casar en ancho cero y duplicar el salto → se colapsan 3+ en exactamente 2.
+  s = String(s).replace(BLK, "\n\n").replace(/\n{3,}/g, "\n\n").replace(/^\s+/, "");
+  return esc(s).split(/\n{2,}/).map(p=>"<p>"+p
+    .replace(/`([^`]+)`/g,"<code>$1</code>")
+    .replace(/\*\*([^*]+)\*\*/g,"<b>$1</b>")
+    .replace(/^((?:📍|🎯|🔧|🧭|⚠️|⚠)\s*[^—:]{3,44}[—:])/,"<b class=\"blk\">$1</b>")
+    .replace(/\n/g,"<br>")+"</p>").join("");
+}
+function find(id){return DB.items.find(x=>x.id===id);}
+function pageName(c){const p=PAGEMAP[c||"—"];return p?p.name:(c||"—");}
+function epicColor(k){return (EPICS[k]&&EPICS[k].color)||"#6b6b76";}
+function epicTag(k){return k?`<span class="tag epic" style="background:${epicColor(k)}">${esc(k)}</span>`:"";}
+function vbadge(it){
+  const m=VMAP[it.verdict];if(!m)return"";
+  const p=it.precision_pct!=null?" · "+it.precision_pct+"%":"";
+  return `<span class="tag verd" style="background:${m[1]}" title="verdict: ${esc(it.verdict)}${p}">${m[0]}${p}</span>`;
+}
+const WMAP=[["🔎","w-code","ic-search"],["👁","w-live","ic-eye"],["➡","w-gap","ic-arrow"],["📋","w-inst","ic-clip"]];
+function wline(t){
+  let cls="wline";for(const[emo,c] of WMAP){if(t.startsWith(emo)){cls+=" "+c;break;}}
+  let h=esc(t.replace(/\uFE0F/gu,""));
+  for(const[emo,,ic] of WMAP){h=h.split(emo).join(`<svg class="icon inl" aria-hidden="true"><use href="#${ic}"/></svg>`);}
+  return `<div class="${cls}">${h}</div>`;
+}
+function whyHTML(why){
+  if(!why)return"";
+  return why.split(/\n+/).map(l=>{const t=l.trim();return t?wline(t):"";}).join("");
+}
+
+/* ---------- filtros ---------- */
+function matches(it){
+  if(F.epic.size&&!F.epic.has(it.epic||"_"))return false;
+  if(F.page.size&&!F.page.has(it.page||"—"))return false;
+  if(F.sev.size&&!F.sev.has(it.severity||"_"))return false;
+  if(F.eff.size&&!F.eff.has(it.effort||"_"))return false;
+  if(F.status.size&&!F.status.has(it.status))return false;
+  if(F.dec.size&&!F.dec.has(it.decision||"_"))return false;
+  if(F.tag.size&&!(it.tags||[]).some(t=>F.tag.has(t)))return false;
+  if(F.noct.size&&!F.noct.has(noctOf(it)))return false;
+  if(F.rec.size&&!F.rec.has(recOf(it)))return false;
+  return true;
+}
+function allTags(){const s=new Set();DB.items.forEach(i=>(i.tags||[]).forEach(t=>s.add(t)));return[...s].sort();}
+function visible(){return DB.items.filter(matches);}
+function cnt(p){return DB.items.filter(p).length;}
+function chip(active,label,n,onclick,sw){return `<button class="chip ${active?'on':''}" onclick="${onclick}">`+(sw?`<span class="sw" style="background:${sw}"></span>`:"")+`${label}${n!=null?` <span class="n">${n}</span>`:""}</button>`;}
+function renderFilters(){
+  let h="";
+  h+=`<div class="frow"><span class="lbl">Decisión</span>`+
+    DEC.map(d=>chip(F.dec.has(d),DECLABEL[d],cnt(i=>i.decision===d),`tog('dec','${d}')`,DECHEX[d])).join("")+
+    chip(F.dec.has("_"),"Sin decidir",cnt(i=>!i.decision),`tog('dec','_')`,"#c9c4b8")+`</div>`;
+  h+=`<div class="frow"><span class="lbl">Estado</span>`+STATUSES.map(s=>chip(F.status.has(s),STLABEL[s],cnt(i=>i.status===s),`tog('status','${s}')`,SHEX[s])).join("")+`</div>`;
+  if(Object.keys(EPICS).length)
+    h+=`<div class="frow"><span class="lbl">Épica</span>`+Object.keys(EPICS).map(k=>chip(F.epic.has(k),`${esc(k)} · ${esc(EPICS[k].name||k)}`,cnt(i=>i.epic===k),`tog('epic','${k}')`,epicColor(k))).join("")+`</div>`;
+  h+=`<div class="frow"><span class="lbl">Sev / Esf</span>`+SEV.map(s=>chip(F.sev.has(s),s,cnt(i=>i.severity===s),`tog('sev','${s}')`)).join("")+
+    `<span style="width:16px"></span>`+EFF.map(e=>chip(F.eff.has(e),"Esf "+e,cnt(i=>i.effort===e),`tog('eff','${e}')`)).join("")+
+    `<button class="chip clearbtn" onclick="clearF()">✕ limpiar</button></div>`;
+  h+=`<div class="frow"><span class="lbl">Página</span>`+PAGES.map(p=>chip(F.page.has(p.code),esc(p.code),cnt(i=>(i.page||"—")===p.code),`tog('page','${p.code}')`)).join("")+`</div>`;
+  /* Filtro, y NADA más. Hubo aquí un botón de "aprobar todo lo que aprueba el revisor" y se
+     retiró: era un camino paralelo con sus propias reglas (solo visibles, solo sin decidir) para
+     algo que la maquinaria existente ya hace y que además deja ver QUÉ vas a aprobar antes de
+     hacerlo → filtrar por "👍 Aprobar" · "☑ Seleccionar visibles" · "✓ Aprobar" de la barra masiva. */
+  h+=`<div class="frow"><span class="lbl" title="Lo que recomienda quien analizó. NO es tu decisión. Filtra por 'Aprobar' y usa 'Seleccionar visibles' para decidirlos en bloque.">Sugerencia del revisor</span>`+
+    REC.map(v=>chip(F.rec.has(v),RECLABEL[v],cnt(i=>recOf(i)===v),`tog('rec','${v}')`,RECHEX[v])).join("")+
+    chip(F.rec.has("_"),RECLABEL._,cnt(i=>recOf(i)==="_"),`tog('rec','_')`,RECHEX._)+`</div>`;
+  h+=`<div class="frow"><span class="lbl" title="Qué se puede dejar corriendo sin nadie mirando (rules/goal-vs-loop.md §Modo noche)">Run nocturno</span>`+
+    NOCT.map(v=>chip(F.noct.has(v),NOCTLABEL[v],cnt(i=>noctOf(i)===v),`tog('noct','${v}')`,NOCTHEX[v])).join("")+
+    chip(F.noct.has("_"),NOCTLABEL._,cnt(i=>noctOf(i)==="_"),`tog('noct','_')`,NOCTHEX._)+`</div>`;
+  const tgs=allTags();
+  if(tgs.length)
+    h+=`<div class="frow"><span class="lbl">Etiquetas</span>`+tgs.map(t=>chip(F.tag.has(t),esc(t),cnt(i=>(i.tags||[]).includes(t)),`tog('tag','${esc(t).replace(/'/g,"\\'")}')`)).join("")+`</div>`;
+  document.getElementById("filters").innerHTML=h;
+}
+function saveUI(){
+  try{localStorage.setItem(uiKey(),JSON.stringify({
+    f:Object.fromEntries(Object.entries(F).map(([k,v])=>[k,[...v]])), view, decideMode,
+    open:[...openPages]}));}catch(e){}
+}
+function loadUI(){
+  try{
+    const u=JSON.parse(localStorage.getItem(uiKey())||"null"); if(!u)return;
+    // Solo se restauran valores que SIGUEN existiendo: si un plan se regenera y desaparece una
+    // épica o una etiqueta, un filtro fantasma dejaría la lista vacía sin explicación aparente.
+    const vivos={epic:new Set(Object.keys(EPICS)),page:new Set(PAGES.map(p=>p.code)),
+      sev:new Set(SEV),eff:new Set(EFF),status:new Set(STATUSES),
+      dec:new Set([...DEC,"_"]),tag:new Set(allTags()),noct:new Set([...NOCT,"_"]),
+      rec:new Set([...REC,"_"])};
+    let podados=0;
+    Object.entries(u.f||{}).forEach(([k,arr])=>{ if(!F[k])return;
+      (arr||[]).forEach(v=>{ if(!vivos[k]||vivos[k].has(v))F[k].add(v); else podados++; }); });
+    if(["dash","kanban","gantt","mind"].includes(u.view))view=u.view;
+    decideMode=!!u.decideMode;
+    (u.open||[]).forEach(c=>openPages.add(c));
+    if(podados)setTimeout(()=>toast(`${podados} filtro(s) guardados ya no existen — descartados`),600);
+  }catch(e){}
+}
+function tog(d,v){const s=F[d];s.has(v)?s.delete(v):s.add(v);saveUI();renderAll();}
+function clearF(){Object.values(F).forEach(s=>s.clear());saveUI();renderAll();}
+
+
+/* ---------- MODO YOLO — la política de autonomía del PLAN (meta.yolo) ----------
+   Vive en meta, no en el item: es una decisión sobre el plan entero. Por eso no entra en keepOf()
+   ni en la clave de decisiones, y se guarda aparte (localStorage ::yolo + POST con `yolo`).
+
+   Los tres ejes salen de reglas que ya existen y no se reinventan aquí:
+     alcance -> el campo `rec` del revisor y tu `decision`
+     tipo    -> rules/governance.md §3.1 (autonomía por tipo de tarea)
+     git     -> rules/governance.md §2 (push y merge SIEMPRE requieren aprobación)
+   Y los gates duros de §2 no son configurables a propósito: un yolo que pueda desplegar a
+   producción no es un modo de trabajo, es un incidente con antelación. */
+const YOLO_DEF={activo:false,alcance:"aprobados",tipo:"mecanico",git:"nada",actualizado:null};
+/* T-101 · el perfil de autonomía REAL del proyecto (settings.json), según /api/health. En modo
+   servidor, activar/desactivar el yolo aplica `settings_profile.py --yolo on|off`; sin servidor,
+   solo se guarda la política y aquí se enseña el comando para aplicarlo a mano. */
+let PERMISOS=null;
+const YOLO_CMD_ON="python3 .claude/scripts/settings_profile.py . --yolo on",
+      YOLO_CMD_OFF="python3 .claude/scripts/settings_profile.py . --yolo off";
+function yoloPermisosHTML(){
+  if(!backend)return `<div class="yrow"><span class="ylbl">Permisos del proyecto</span>
+      <span class="yhint">Sin servidor, este botón solo guarda la política en tu navegador: <b>no cambia los permisos</b>.
+      Levanta el servidor (el <code>?</code> del chip de modo) o, desde la raíz del proyecto:</span>
+      <pre>${esc(YOLO.activo?YOLO_CMD_ON:YOLO_CMD_OFF)}</pre></div>`;
+  const p=PERMISOS||{};
+  const txt=p.error?`no se pudo leer (${esc(p.error)})`
+    :(p.perfil?`perfil <b>${esc(p.perfil)}</b>`:"sin perfil declarado")+(p.yolo?" · interruptor YOLO <b>puesto</b>":"");
+  return `<div class="yrow"><span class="ylbl">Permisos del proyecto (settings.json)</span>
+      <span class="yhint">Ahora: ${txt}. <b>Activar también cambia los permisos del proyecto a yolo</b>
+      (no pregunta nada salvo lo prohibido); <b>desactivar los devuelve exactamente a como estaban</b>.
+      Queda anotado en <code>decisiones.md</code>. Una sesión ya abierta puede necesitar reabrirse para notarlo.</span></div>`;
+}
+let YOLO=Object.assign({},YOLO_DEF);
+
+const Y_ALCANCE=[
+  {v:"aprobados",     t:"Solo lo aprobado",        d:"Lo que <b>tú</b> marcaste «aprobar», más lo que el revisor recomienda aprobar y nadie ha tocado."},
+  {v:"aprobados-duda",t:"Aprobado + en duda",      d:"Lo anterior y además lo que el revisor dejó en «duda». El agente decide esos, y lo anota."},
+  {v:"todo",          t:"Todo lo que decida él",   d:"Cualquier item pendiente, tenga o no recomendación. El más rápido y el que más te puede sorprender."}];
+const Y_TIPO=[
+  {v:"mecanico",  t:"Solo lo mecánico y verificable", d:"Aplicar una regla ya decidida a N sitios, con tests del módulo en verde antes y después."},
+  {v:"refactor",  t:"…y refactors con criterio",     d:"Extraer un módulo, partir un fichero, reordenar responsabilidades. Escribe el plan antes."},
+  {v:"todo",      t:"…y lógica nueva",               d:"Reglas de negocio y decisiones de producto. <b>Aquí el test verde no prueba que la decisión sea correcta.</b>"}];
+const Y_GIT=[
+  {v:"nada",   t:"No toca git",  d:"Deja los cambios en el árbol de trabajo. Tú miras y commiteas."},
+  {v:"commit", t:"Puede commitear", d:"Un commit por lote, en la rama actual. <b>Es el techo: nunca hace push ni merge.</b>"}];
+
+function yoloAplica(it){
+  if(it.status==="done")return false;
+  if(it.decision==="descartar"||it.decision==="aplazar")return false;
+  if(it.decision==="aprobar")return true;                  // lo que TÚ aprobaste, siempre
+  const r=recOf(it);
+  if(YOLO.alcance==="todo")return !it.decision;
+  if(YOLO.alcance==="aprobados-duda")return !it.decision&&(r==="aprobar"||r==="duda");
+  return !it.decision&&r==="aprobar";
+}
+function yoloCuenta(alc){
+  const prev=YOLO.alcance; YOLO.alcance=alc;
+  const n=DB.items.filter(yoloAplica).length; YOLO.alcance=prev; return n;
+}
+function yoloKey(){return lsKey()+"::yolo";}
+function saveYolo(){
+  YOLO.actualizado=new Date().toISOString().slice(0,16).replace("T"," ");
+  DB.meta=DB.meta||{}; DB.meta.yolo=Object.assign({},YOLO);
+  try{localStorage.setItem(yoloKey(),JSON.stringify(YOLO));}catch(e){}
+  if(backend){
+    fetch("api/save",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({items:DB.items,yolo:YOLO})})
+      .then(r=>{if(!r.ok)throw 0;setInd("disk");return r.json();})
+      .then(j=>{const p=j&&j.permisos;if(!p)return;
+        if(p.ok){
+          toast(YOLO.activo?"Permisos del proyecto → YOLO (anotado en decisiones.md)":"Permisos del proyecto restaurados a como estaban");
+          fetch("api/health",{cache:"no-store"}).then(r=>r.json()).then(h=>{PERMISOS=h.permisos||PERMISOS;renderYolo();}).catch(()=>{});}
+        else toast("⚠️ La política se guardó, pero los permisos NO cambiaron: "+(p.salida||"").slice(-140));
+        renderYolo();})
+      .catch(()=>{backend=false;setInd("local");toast("Sin servidor: la política queda solo en el navegador");});
+  }
+  renderYoloBadge();
+}
+function loadYolo(){
+  const m=(DB.meta&&DB.meta.yolo)||null;                   // el disco manda sobre el navegador
+  if(m&&typeof m==="object"){YOLO=Object.assign({},YOLO_DEF,m);return;}
+  try{const u=JSON.parse(localStorage.getItem(yoloKey())||"null");
+      if(u&&typeof u==="object")YOLO=Object.assign({},YOLO_DEF,u);}catch(e){}
+}
+function renderYoloBadge(){
+  const b=document.getElementById("yoloBadge"),n=document.getElementById("yoloBtn");
+  if(!b||!n)return;
+  const activos=YOLO.activo?DB.items.filter(yoloAplica).length:0;
+  b.className="ybadge "+(YOLO.activo?"on":"off");
+  b.textContent=YOLO.activo?(activos+" items"):"off";
+  n.classList.toggle("armed",!!YOLO.activo);
+}
+function yoloOpt(grupo,def,campo){
+  return def.map(o=>{const sel=YOLO[campo]===o.v;
+    const c=campo==="alcance"?`<span class="ycount">${yoloCuenta(o.v)} items</span>`:"";
+    return `<label class="yopt ${sel?"sel":""}"><input type="radio" name="y_${campo}" ${sel?"checked":""}
+      onchange="setYolo('${campo}','${o.v}')"><b>${o.t}</b>${c}<br><span class="muted" style="font-size:12px">${o.d}</span></label>`;}).join("");
+}
+function renderYolo(){
+  const n=DB.items.filter(yoloAplica).length;
+  document.getElementById("yoloBody").innerHTML=yoloPermisosHTML()+
+    `<div class="yrow"><span class="ylbl">1 · Qué items entran</span>
+       <span class="yhint">Lo que <b>tú</b> aprobaste entra siempre. Esto decide cuánto más se le suma.</span>
+       ${yoloOpt(Y_ALCANCE,Y_ALCANCE,"alcance")}</div>
+     <div class="yrow"><span class="ylbl">2 · Qué clase de trabajo puede hacer solo</span>
+       <span class="yhint">El eje de <code>governance.md</code> §3.1. Un item que pida más de este nivel se para y te pregunta, aunque entre por el alcance.</span>
+       ${yoloOpt(Y_TIPO,Y_TIPO,"tipo")}</div>
+     <div class="yrow"><span class="ylbl">3 · Hasta dónde llega con git</span>
+       <span class="yhint">Tu límite: el máximo es commit.</span>
+       ${yoloOpt(Y_GIT,Y_GIT,"git")}</div>
+     <div class="ylocked"><b>Esto NO se salta, ni con el yolo al máximo</b> (<code>governance.md</code> §2):
+       <ul><li><b>git push y merge a main</b> — el trabajo se queda en la rama</li>
+           <li>Deploy a producción</li>
+           <li>Migraciones destructivas y borrado de datos</li>
+           <li>Gasto externo (APIs de pago, infraestructura)</li>
+           <li>Dependencias del sistema (<code>apt</code>, <code>brew</code>)</li></ul>
+       <div style="margin-top:7px">Y cada item ejecutado queda anotado con qué hizo, qué gate lo verificó y el commit.</div></div>
+     <div class="yresumen">Con esta política el agente ejecutaría <span class="big">${n}</span> de ${DB.items.length} items sin volver a preguntarte.
+       ${YOLO.actualizado?`<div class="muted" style="font-size:12px;margin-top:4px">Última vez que la tocaste: ${esc(YOLO.actualizado)}</div>`:""}</div>`;
+  const b=document.getElementById("yoloToggle");
+  b.textContent=YOLO.activo?"Desactivar":"Activar";
+  b.className="btn"+(YOLO.activo?" ghost":"");
+}
+function setYolo(campo,v){YOLO[campo]=v;saveYolo();renderYolo();}
+function togYolo(){
+  YOLO.activo=!YOLO.activo; saveYolo(); renderYolo();
+  toast(YOLO.activo?`Modo yolo ACTIVO · ${DB.items.filter(yoloAplica).length} items al alcance del agente`
+                   :"Modo yolo desactivado");
+}
+function openYolo(){renderYolo();document.getElementById("yolo").classList.add("show");}
+function closeYolo(){document.getElementById("yolo").classList.remove("show");}
+function yoloPrompt(){
+  const alc={aprobados:"solo los items que yo he aprobado y los que el revisor recomienda aprobar",
+    "aprobados-duda":"los aprobados, los recomendados y también los que el revisor dejó en duda",
+    todo:"cualquier item pendiente, lo recomiende el revisor o no"}[YOLO.alcance];
+  const tip={mecanico:"SOLO trabajo mecánico y verificable (tests del módulo en verde antes y después, diff acotado a los ficheros previstos)",
+    refactor:"trabajo mecánico y además refactors con criterio, escribiendo el plan antes de ejecutarlo",
+    todo:"cualquier tipo de trabajo, incluida lógica nueva"}[YOLO.tipo];
+  const git=YOLO.git==="commit"?"Puedes hacer commit por lote en la rama actual."
+    :"NO toques git: deja los cambios en el árbol de trabajo.";
+  const ids=DB.items.filter(yoloAplica).map(i=>i.id);
+  return `MODO YOLO ACTIVO para el plan ${DB.meta.plan_id||""}.\n\n`+
+    `Alcance: ejecuta ${alc}.\n`+
+    `Nivel: ${tip}.\n`+
+    `Git: ${git} NUNCA hagas push ni merge a main.\n\n`+
+    `No se salta, pase lo que pase (governance.md §2): deploy a produccion, merge a main, `+
+    `migraciones destructivas, borrado de datos, gasto externo y dependencias del sistema `+
+    `siguen requiriendo mi aprobacion explicita.\n\n`+
+    `Por cada item que ejecutes, anota en el informe que hiciste, que gate lo verifico y el commit.\n`+
+    `Si un item pide mas nivel del declarado, paralo y preguntame en vez de bajarlo tu.\n\n`+
+    `Items al alcance (${ids.length}): ${ids.join(", ")||"(ninguno con esta politica)"}`;
+}
+function copyYoloPrompt(btn){
+  navigator.clipboard.writeText(yoloPrompt()).then(()=>{
+    const o=btn.innerHTML;btn.innerHTML="✓ Copiado";setTimeout(()=>btn.innerHTML=o,1400);});
+}
+
+/* ---------- selección múltiple + acciones masivas ---------- */
+function toggleSel(e,id){e.stopPropagation();SEL.has(id)?SEL.delete(id):SEL.add(id);renderPages();renderBulk();}
+function selectVisibles(){visible().forEach(i=>SEL.add(i.id));if(view!=="dash")setView("dash");renderPages();renderBulk();}
+function clearSel(){SEL.clear();renderPages();renderBulk();}
+/* Decisión en masa. Tiene DOS salvaguardas, y las dos vienen de un incidente real: con 49 items
+   seleccionados, un clic en "✕ Descartar" —que está pegado a "✓ Aprobar"— convirtió 48
+   aprobaciones en descartes de golpe, en silencio y pisando el trabajo de una hora. Se recuperó
+   del backup del server.py, pero en modo estático no habría habido de dónde.
+
+   1. CONFIRMA cuando la acción PISA decisiones ya tomadas. Aplicar sobre lo no decidido es barato
+      y no molesta; cambiar lo ya decidido es lo que duele, y es justo lo que no avisaba.
+   2. DESHACER en el aviso, siempre. Es la red que no depende de que aciertes en el diálogo. */
+let _undoDec=null;
+function bulkDec(d){
+  if(!SEL.size)return;
+  const ids=[...SEL];
+  const pisa=ids.filter(id=>{const it=find(id);return it&&it.decision&&it.decision!==d;});
+  if(pisa.length>=3 &&
+     !confirm(`Vas a cambiar la decisión de ${pisa.length} item(s) que YA tenían una distinta`+
+              `${d?` → ${DECLABEL[d]}`:" → sin decisión"}.\n\n`+
+              `(${ids.length-pisa.length} más están sin decidir y no había nada que pisar.)\n\n`+
+              `¿Seguro? Si te equivocas, el aviso trae "deshacer".`))return;
+  _undoDec=ids.map(id=>{const it=find(id);return it?{id,prev:it.decision}:null;}).filter(Boolean);
+  let n=0;ids.forEach(id=>{const it=find(id);if(it){it.decision=d;n++;}});
+  save();renderAll();
+  toast(d?`${n} items → ${DECLABEL[d]}`:`${n} items → sin decisión`, "deshacer", undoDec);
+}
+function undoDec(){
+  if(!_undoDec)return;
+  _undoDec.forEach(({id,prev})=>{const it=find(id);if(it)it.decision=prev;});
+  const n=_undoDec.length; _undoDec=null;
+  save();renderAll();toast(`${n} items devueltos a su decisión anterior`);
+}
+/* Marcar en masa qué entra en un run nocturno. La razón se pide UNA vez para toda la selección:
+   sin razón la marca no es auditable, y pedirla item por item garantiza que nadie la escriba. */
+function bulkNoct(v){
+  if(!SEL.size)return;
+  let razon="";
+  if(v){
+    razon=(prompt(`¿Por qué estos ${SEL.size} item(s) son "${NOCTLABEL[v]}" para un run sin supervisión?\n`+
+                  `(criterios en rules/goal-vs-loop.md §Modo noche — quedará escrito junto a la marca)`,"")||"").trim();
+    if(!razon&&!confirm("Sin razón la marca no se puede auditar después. ¿Marcar igualmente?"))return;
+  }
+  let n=0;SEL.forEach(id=>{const it=find(id);if(!it)return;
+    it.nocturno = v ? {apto:v,razon:razon} : {}; n++;});
+  save();renderAll();
+  toast(v?`${n} items → ${NOCTLABEL[v]}`:`${n} items → run nocturno sin declarar`);
+}
+function bulkStatus(s){
+  if(!SEL.size)return;
+  let n=0;SEL.forEach(id=>{const it=find(id);if(it){it.status=s;n++;}});
+  save();renderAll();toast(`${n} items → ${STLABEL[s]}`);
+}
+function renderBulk(){
+  const bar=document.getElementById("bulkbar");
+  if(!SEL.size){bar.classList.remove("show");return;}
+  document.getElementById("bulkN").textContent=SEL.size+" seleccionados";
+  bar.classList.add("show");
+}
+function togDecide(){
+  decideMode=!decideMode; saveUI();
+  document.getElementById("modeDecide").classList.toggle("on",decideMode);
+  if(decideMode&&view!=="dash")setView("dash");else renderAll();
+}
+
+/* ---------- edición ---------- */
+function cycleStatus(id){const it=find(id);it.status=STATUSES[(STATUSES.indexOf(it.status)+1)%STATUSES.length];save();renderAll();if(curDetail===id)renderDetailMeta(it);}
+function cycleSev(id){const it=find(id);it.severity=SEV[(SEV.indexOf(it.severity)+1)%SEV.length];save();renderAll();if(curDetail===id)renderDetailMeta(it);}
+function cycleEff(id){const it=find(id);it.effort=EFF[(EFF.indexOf(it.effort)+1)%EFF.length];save();renderAll();if(curDetail===id)renderDetailMeta(it);}
+function setDec(id,d){const it=find(id);it.decision=(it.decision===d)?null:d;save();renderAll();if(curDetail===id)renderDecRow(it);}
+function setNote(id,v){const it=find(id);if(it){it.note=v;save();}} // sin re-render (no perder foco)
+
+/* ---------- header ---------- */
+function renderHeader(){
+  const all=DB.items,total=all.length||1,bs={};STATUSES.forEach(s=>bs[s]=0);all.forEach(it=>bs[it.status]++);
+  const dec=all.filter(i=>i.decision).length,verd=all.filter(i=>i.verdict).length;
+  document.getElementById("kpis").innerHTML=
+    `<div class="kpi"><b>${all.length}</b><span>items</span></div>`+
+    `<div class="kpi"><b>${PAGES.length}</b><span>páginas</span></div>`+
+    `<div class="kpi"><b style="color:var(--red)">${all.filter(i=>i.severity==='P0'&&i.status!=='done').length}</b><span>P0 abiertos</span></div>`+
+    `<div class="kpi"><b style="color:var(--accent)">${dec}/${all.length}</b><span>decididos</span></div>`+
+    `<div class="kpi"><b style="color:var(--blue)">${verd}</b><span>con veredicto</span></div>`+
+    `<div class="kpi"><b style="color:var(--green)">${Math.round(bs.done/total*100)}%</b><span>hechos</span></div>`;
+  document.getElementById("progress").innerHTML=STATUSES.map(s=>{const pct=bs[s]/total*100;
+    return pct>0?`<i title="${STLABEL[s]}: ${bs[s]}" style="width:${pct}%;background:${SHEX[s]}"></i>`:"";}).join("");
+  document.getElementById("legend").innerHTML=STATUSES.map(s=>`<span><span class="dot" style="background:${SHEX[s]}"></span>${STLABEL[s]} (${bs[s]})</span>`).join("");
+}
+
+/* ---------- vista dashboard ---------- */
+/* Distintivo de run nocturno. Solo se pinta si está DECLARADO: un badge en los 200 items
+   sería ruido, y lo que interesa ver de un vistazo es qué se marcó, no qué falta por marcar
+   (para eso está el filtro "Sin declarar"). El title lleva la razón, que es lo auditable. */
+function noctBadge(it){
+  const v=noctOf(it); if(v==="_")return"";
+  const r=(it.nocturno&&it.nocturno.razon)?it.nocturno.razon:"sin razón declarada";
+  return `<span class="tag" style="background:${NOCTHEX[v]};color:#fff" title="Run nocturno — ${esc(r)}">${NOCTLABEL[v]}</span>`;
+}
+/* Distintivo de la sugerencia del revisor. Se pinta SIEMPRE que exista, y en hueco (borde, no
+   relleno) para no competir visualmente con la decisión del Usuario: la decisión es lo que manda
+   y ya colorea la tarjeta entera. La razón va en el title — una recomendación sin porqué solo se
+   puede obedecer, no contrastar. */
+function recBadge(it){
+  const v=recOf(it); if(v==="_")return"";
+  const r=(it.rec&&it.rec.razon)?it.rec.razon:"sin razón declarada";
+  return `<span class="tag" style="background:transparent;border:1px solid ${RECHEX[v]};color:${RECHEX[v]}" title="Sugerencia del revisor — ${esc(r)}">${RECLABEL[v]}</span>`;
+}
+function itemRow(it){
+  const acts=decideMode?`<div class="acts">`+DEC.map(d=>
+    `<button class="decbtn mini ${it.decision===d?'on':''}" ${it.decision===d?`style="background:${DECHEX[d]};border-color:${DECHEX[d]}"`:''} onclick="setDec('${it.id}','${d}')" title="${DECLABEL[d]}">${DECLABEL[d].split(" ")[0]}</button>`).join("")+`</div>`:"";
+  return `<div class="item ${it.decision?'dec-'+it.decision:''} ${SEL.has(it.id)?'sel':''} ${decideMode?'withacts':''}">`+
+    `<input type="checkbox" class="selbox" ${SEL.has(it.id)?"checked":""} onclick="toggleSel(event,'${it.id}')" title="Seleccionar para acción masiva">`+
+    `<button class="stbtn" style="background:${SHEX[it.status]}" onclick="cycleStatus('${it.id}')" title="Clic: cambiar estado">${STLABEL[it.status]}</button>`+
+    `<div class="body"><div class="t" onclick="openDetail('${it.id}')" title="Abrir detalle">${esc(it.title)}</div>`+
+    `<div class="meta">`+
+      `<span class="tag id">${esc(it.id)}</span>`+epicTag(it.epic)+
+      `<span class="tag btn2 sev-${it.severity||'P2'}" onclick="cycleSev('${it.id}')" title="Clic: cambiar severidad">${it.severity||"P?"}</span>`+
+      `<span class="tag btn2 eff" onclick="cycleEff('${it.id}')" title="Clic: cambiar esfuerzo">Esf ${it.effort||"?"}</span>`+
+      vbadge(it)+recBadge(it)+noctBadge(it)+
+      (it.agent?`<span class="tag ag">${esc(it.agent)}</span>`:"")+
+      ((it.evidence&&it.evidence.length)?`<span class="tag evn">${it.evidence.length} ev</span>`:"")+
+      ((it.blocks&&it.blocks.length)?`<span class="tag" style="background:#e9e6de;color:var(--muted)" title="bloquea: ${esc(it.blocks.join(', '))}">bloquea ${it.blocks.length}</span>`:"")+
+      (it.decision?`<span class="tag" style="background:${DECHEX[it.decision]};color:#fff">${DECLABEL[it.decision]}</span>`:"")+
+    `</div>`+recWhy(it)+`</div>${acts}</div>`;
+}
+/* La RAZÓN del revisor, visible en la propia fila y no solo al pasar el ratón.
+   Motivo: el chip dice "Aprobar" pero no por qué, y quien decide necesita poder
+   contrastar la recomendación sin abrir los 36 items uno a uno. Lo pidió el Usuario
+   el 2026-08-11 mirando su informe: "no sé por qué recomienda aprobar o no aprobar".
+   Va en tono apagado y con el color del veredicto en el borde, para que acompañe a la
+   decisión sin competir con ella. */
+function recWhy(it){
+  const v=recOf(it); if(v==="_")return"";
+  const r=(it.rec&&it.rec.razon)?String(it.rec.razon).trim():"";
+  if(!r) return `<div class="recwhy" style="border-color:${RECHEX[v]}"><em>sin razón declarada — una recomendación sin porqué solo se puede obedecer, no contrastar</em></div>`;
+  // El ANÁLISIS del auditor va debajo de la recomendación, no dentro: la razón es la frase corta
+  // que justifica el `rec`; el análisis es la evidencia detrás, y en los items en duda es lo que
+  // permite decidir sin ir a mirar el repo. Se admite **negrita** y `código` — nada más: es texto
+  // del agente, y meterle HTML libre sería una vía de inyección desde tasks.md.
+  const md = t => esc(t).replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>")
+                        .replace(/`([^`]+)`/g, "<code>$1</code>");
+  const an = it.auditor ? `<div class="auditor"><b class="h">Análisis del auditor</b>${md(String(it.auditor))}</div>` : "";
+  return `<div class="recwhy" style="border-color:${RECHEX[v]}">${esc(r)}</div>${an}`;
+}
+function renderPages(){
+  const vis=visible();document.getElementById("dashCount").textContent=vis.length+" visibles";
+  const byPage={};vis.forEach(it=>{const c=it.page||"—";(byPage[c]=byPage[c]||[]).push(it);});
+  let h="";
+  PAGES.forEach(p=>{const list=byPage[p.code];if(!list||!list.length)return;
+    const mini=STATUSES.map(s=>{const n=list.filter(i=>i.status===s).length;
+      return n?`<i title="${STLABEL[s]}: ${n}" style="background:${SHEX[s]};width:${Math.max(8,n*3)}px"></i>`:"";}).join("");
+    h+=`<div class="pg ${openPages.has(p.code)?'open':''}"><div class="head" onclick="togPage('${p.code}')">`+
+      `<span class="caret">▶</span><span class="pgname">${esc(p.name)}</span>`+
+      (p.slug?`<span class="pgslug">/${esc(p.slug)}</span>`:"")+
+      `<span style="color:var(--muted);font-size:12px">(${list.length})</span><span class="mini">${mini}</span></div>`+
+      `<div class="items">${list.map(itemRow).join("")}</div></div>`;});
+  document.getElementById("pageList").innerHTML=h||emptyState();
+}
+/* Un "sin resultados" que NO se explica hace pensar que el informe está roto — pasó de verdad:
+   los filtros se recuerdan entre visitas (clave ::ui), así que al volver días después la lista
+   aparece vacía sin que recuerdes qué habías filtrado. Aquí se dice cuáles están puestos y se
+   ofrece la salida en el mismo sitio donde surge el problema. */
+function activeFilters(){
+  const N={epic:"Épica",page:"Página",sev:"Severidad",eff:"Esfuerzo",status:"Estado",dec:"Decisión",tag:"Etiqueta"};
+  return Object.entries(F).filter(([,s])=>s&&s.size)
+    .map(([k,s])=>`<b>${N[k]||k}</b>: ${[...s].map(v=>esc(v==="_"?"Sin decidir":v)).join(", ")}`);
+}
+function emptyState(){
+  const act=activeFilters();
+  if(!act.length) return `<div class="empty">Este informe no tiene items todavía.</div>`;
+  return `<div class="empty" style="text-align:left">
+    <p style="margin:0 0 8px"><b>Ningún item cumple los filtros que tienes puestos.</b></p>
+    <p style="margin:0 0 12px;color:var(--muted);font-size:13px">Filtrando por ${act.join(" · ")}
+      — se guardan en el navegador, así que siguen puestos aunque cierres la pestaña.</p>
+    <button class="btn" onclick="clearF()">✕ quitar todos los filtros y ver los ${DB.items.length} items</button>
+  </div>`;
+}
+function togPage(c){openPages.has(c)?openPages.delete(c):openPages.add(c);saveUI();renderPages();}
+function renderMatrix(){
+  const vis=visible();
+  let h=`<table class="mx"><tr><th></th>${EFF.map(e=>`<th>Esf ${e}</th>`).join("")}</tr>`;
+  SEV.forEach(sv=>{h+=`<tr><th>${sv}</th>`;EFF.forEach(ef=>{
+    const n=vis.filter(i=>i.severity===sv&&i.effort===ef).length;
+    const qw=(sv==='P0'&&ef!=='XL')||(sv==='P1'&&(ef==='S'||ef==='M'));
+    h+=`<td class="${qw?'qw':''}" style="color:${n?'var(--navy)':'#c9c4b8'}">${n||'·'}</td>`;});h+=`</tr>`;});
+  document.getElementById("matrix").innerHTML=h+`</table>`;
+}
+function barChart(el,rows){const max=Math.max(1,...rows.map(r=>r.v));
+  el.innerHTML=rows.map(r=>`<div class="bar"><span class="nm" title="${esc(r.nm)}">${esc(r.nm)}</span><span class="track"><span class="fill" style="width:${r.v/max*100}%;background:${r.color}"></span></span><span class="v">${r.v}</span></div>`).join("")||'<div class="empty">—</div>';}
+function renderCharts(){
+  const vis=visible();
+  barChart(document.getElementById("byDecision"),DEC.map(d=>({nm:DECLABEL[d],v:vis.filter(i=>i.decision===d).length,color:DECHEX[d]})).concat([{nm:"Sin decidir",v:vis.filter(i=>!i.decision).length,color:"#c9c4b8"}]));
+  barChart(document.getElementById("byEpic"),Object.keys(EPICS).map(k=>({nm:k+" · "+(EPICS[k].name||k),v:vis.filter(i=>i.epic===k).length,color:epicColor(k)})).filter(r=>r.v>0));
+  barChart(document.getElementById("byPage"),PAGES.map(p=>({nm:p.name,v:vis.filter(i=>(i.page||"—")===p.code).length,color:"#1b2a4a"})).filter(r=>r.v>0));
+}
+
+/* ---------- kanban ---------- */
+function renderKanban(){
+  const vis=visible();
+  document.getElementById("kanbanView").innerHTML=STATUSES.map(s=>{
+    const list=vis.filter(i=>i.status===s);
+    const cards=list.length?list.map(it=>
+      `<div class="kc" draggable="true" ondragstart="dragStart(event,'${it.id}')" ondragend="dragEnd(event)" style="border-left-color:${SHEX[s]}" onclick="openDetail('${it.id}')" title="Arrastra para mover · clic para detalle">`+
+      `<div class="kt">${esc(it.title)}</div><div class="meta"><span class="tag id">${esc(it.id)}</span>${epicTag(it.epic)}${it.severity?`<span class="tag sev-${it.severity}">${it.severity}</span>`:""}${vbadge(it)}${it.decision?`<span class="tag" style="background:${DECHEX[it.decision]};color:#fff">${DECLABEL[it.decision]}</span>`:""}<span class="pgcode">${esc(pageName(it.page))}</span></div></div>`).join("")
+      :`<div class="empty">suelta aquí</div>`;
+    return `<div class="col" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="drop(event,'${s}')">`+
+      `<h3><span class="dot" style="width:9px;height:9px;border-radius:3px;background:${SHEX[s]};display:inline-block"></span>${STLABEL[s]}<span class="n">${list.length}</span></h3>`+
+      `<div class="stack">${cards}</div></div>`;}).join("");
+}
+let dragId=null;
+function dragStart(e,id){dragId=id;e.dataTransfer.effectAllowed="move";try{e.dataTransfer.setData("text/plain",id);}catch(_){}e.currentTarget.style.opacity=".4";}
+function dragEnd(e){e.currentTarget.style.opacity="";}
+function dragOver(e){e.preventDefault();e.dataTransfer.dropEffect="move";e.currentTarget.classList.add("dragover");}
+function dragLeave(e){e.currentTarget.classList.remove("dragover");}
+function drop(e,status){e.preventDefault();e.currentTarget.classList.remove("dragover");
+  const id=dragId||(e.dataTransfer&&e.dataTransfer.getData("text/plain"));dragId=null;if(!id)return;
+  const it=find(id);if(!it||it.status===status)return;
+  it.status=status;save();renderAll();toast(it.id+" → "+STLABEL[status]);}
+
+/* ================= Gantt (US-1) y mapa mental (US-2) — motor SVG común =================
+   Son VISTAS del dashboard, no páginas aparte: leen el mismo visible() (los filtros de arriba las
+   afectan) y escriben con setDec()/save() (la misma persistencia dual). Sin librerías ni CDN —
+   SVG a mano, el mismo motor que el mapa conceptual de index.html. Ver rules/report-kit.md. */
+const SVGNS="http://www.w3.org/2000/svg";
+const DUR={S:1,M:3,L:5,XL:10};   // días orientativos por esfuerzo (se declara en la propia vista)
+const DECSYM={aprobar:"✓",modificar:"✎",aplazar:"⏸",descartar:"✕"};
+const DECTINT={aprobar:"#eef6ef",modificar:"#eef1fb",aplazar:"#fbf3e9",descartar:"#fbeeed"};
+function el(tag,attrs,txt){const n=document.createElementNS(SVGNS,tag);
+  for(const k in (attrs||{}))if(attrs[k]!=null)n.setAttribute(k,attrs[k]);
+  if(txt!=null)n.textContent=txt;return n;}
+function tip(node,txt){node.appendChild(el("title",null,txt));return node;}
+function cut(s,n){s=String(s==null?"":s);return s.length>n?s.slice(0,n-1)+"…":s;}
+/* Recorta MIDIENDO, no contando caracteres: los nombres de epic/página son de largo libre y a ojo
+   siempre acaban pisando la columna de al lado. Requiere que el nodo ya esté en el documento. */
+function fitText(node,max){
+  if(!node.getComputedTextLength||max<=0)return node;
+  let s=node.textContent;
+  while(s.length>2&&node.getComputedTextLength()>max){s=s.slice(0,-2);node.textContent=s+"…";}
+  return node;
+}
+function dnum(s){const t=Date.parse(String(s||"")+"T00:00:00Z");return isNaN(t)?null:Math.round(t/864e5);}
+function grpKey(it,g){return g==="epic"?(it.epic||"_sin"):(it.page||"—");}
+/* con la clave delante: tres epics "Curso AI4DEV · módulos …" truncadas se ven idénticas */
+function grpName(k,g){return g==="epic"?(k==="_sin"?"Sin épica":(k+" · "+((EPICS[k]&&EPICS[k].name)||k))):pageName(k);}
+function grpColor(k,g){return g==="epic"?epicColor(k):"#1b2a4a";}
+function groupBy(items,g){const order=[],by={};
+  items.forEach(it=>{const k=grpKey(it,g);if(!by[k]){by[k]=[];order.push(k);}by[k].push(it);});
+  return order.map(k=>({key:k,name:grpName(k,g),color:grpColor(k,g),items:by[k]}));}
+function svgEmpty(svg,msg){
+  svg.textContent="";svg.setAttribute("width",420);svg.setAttribute("height",56);svg.setAttribute("viewBox","0 0 420 56");
+  svg.appendChild(el("text",{x:14,y:33,fill:"#6c6c78"},msg));
+}
+
+/* ---------- US-1 · planificación CPM ----------
+   Modelo explícito: cada CARRIL (épica o página) avanza de uno en uno — es lo que hace un equipo
+   que trabaja una épica— y `blocks[]` añade precedencias ENTRE carriles. Así el Gantt dice algo
+   útil aunque nadie haya declarado dependencias, que hoy es el caso. Con `blocks[]` aparecen las
+   flechas y el camino crítico deja de ser simplemente "el carril más largo". */
+function schedule(items,g){
+  const lanes=groupBy(items,g);
+  const sevRank=i=>{const r=SEV.indexOf(i.severity);return r<0?9:r;};
+  lanes.forEach(L=>L.items.sort((a,b)=>sevRank(a)-sevRank(b)
+    ||String(a.start||"~").localeCompare(String(b.start||"~"))||String(a.id).localeCompare(String(b.id))));
+  const idx={};items.forEach(i=>idx[i.id]=i);
+  const preds={},succs={};items.forEach(i=>{preds[i.id]=[];succs[i.id]=[];});
+  const link=(a,b)=>{if(a===b||!idx[a]||!idx[b]||succs[a].indexOf(b)>=0)return;succs[a].push(b);preds[b].push(a);};
+  lanes.forEach(L=>{for(let n=1;n<L.items.length;n++)link(L.items[n-1].id,L.items[n].id);});
+  const deps=[];
+  items.forEach(i=>(i.blocks||[]).forEach(b=>{if(idx[b]){link(i.id,b);deps.push([i.id,b]);}}));
+  let anchor=null;
+  items.forEach(i=>[i.start,i.due].forEach(s=>{const d=dnum(s);if(d!=null&&(anchor==null||d<anchor))anchor=d;}));
+  const day=s=>{const d=dnum(s);return (d==null||anchor==null)?null:d-anchor;};
+  // topológico tolerante a ciclos: blocks[] se escribe a mano y puede cerrarlos; un ciclo NO debe
+  // dejar la vista en blanco, se coloca al final y se avisa del número.
+  const indeg={};items.forEach(i=>indeg[i.id]=preds[i.id].length);
+  const q=items.filter(i=>!indeg[i.id]).map(i=>i.id),order=[],seen=new Set();
+  while(q.length){const id=q.shift();order.push(id);seen.add(id);succs[id].forEach(s=>{if(--indeg[s]===0)q.push(s);});}
+  const cyc=items.filter(i=>!seen.has(i.id));cyc.forEach(i=>order.push(i.id));
+  const dur=i=>DUR[i.effort]||3,es={},ef={};
+  order.forEach(id=>{const it=idx[id];let s=0;
+    preds[id].forEach(p=>{if(ef[p]!=null&&ef[p]>s)s=ef[p];});
+    const ds=day(it.start);if(ds!=null&&ds>s)s=ds;
+    es[id]=s;let f=s+dur(it);const dd=day(it.due);if(dd!=null&&dd>f)f=dd;ef[id]=f;});
+  const T=Math.max(1,...items.map(i=>ef[i.id]||0));
+  const ls={};
+  for(let n=order.length-1;n>=0;n--){const id=order[n];let f=T;
+    succs[id].forEach(s=>{if(ls[s]!=null&&ls[s]<f)f=ls[s];});
+    ls[id]=f-(ef[id]-es[id]);}
+  const crit=new Set(items.filter(i=>(ls[i.id]-es[i.id])<=0).map(i=>i.id));
+  return {lanes,es,ef,T,crit,deps,anchor,cycles:cyc.length,dur};
+}
+let gGroup="epic";
+const gClosed=new Set();
+function setGGroup(g){gGroup=g;gClosed.clear();
+  document.getElementById("gByEpic").classList.toggle("on",g==="epic");
+  document.getElementById("gByPage").classList.toggle("on",g==="page");renderGantt();}
+function gToggleAll(){
+  const lanes=groupBy(visible(),gGroup);
+  if(gClosed.size)gClosed.clear();else lanes.forEach(L=>gClosed.add(L.key));
+  renderGantt();}
+function gTogLane(k){gClosed.has(k)?gClosed.delete(k):gClosed.add(k);renderGantt();}
+/* el paso de la regla se calcula en PÍXELES, no en días: con fechas reales el rótulo mide ~36px y
+   un paso de 1 día los solapaba ("09-0109-0209-03…"). */
+const MON=["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+function tickStep(ppd,dated){
+  const need=dated?42:28,min=Math.max(1,Math.ceil(need/ppd));
+  for(const c of [1,2,5,10,15,20,25,50,100,200])if(c>=min)return c;
+  return min;
+}
+function tickLabel(anchor,d){
+  if(anchor==null)return "d"+d;
+  const dt=new Date((anchor+d)*864e5);
+  return dt.getUTCDate()+" "+MON[dt.getUTCMonth()];
+}
+function renderGantt(){
+  const svg=document.getElementById("gsvg"),items=visible();
+  document.getElementById("gAllBtn").textContent=gClosed.size?"Desplegar todo":"Plegar todo";
+  if(!items.length){svgEmpty(svg,"Sin items para estos filtros.");
+    document.getElementById("gNote").textContent="Ajusta los filtros para ver el calendario.";
+    document.getElementById("gLegend").textContent="";return;}
+  const S=schedule(items,gGroup);
+  const LX=274,ROW=20,LANEH=27,TOP=30,PAD=16;
+  const PPD=Math.max(4,Math.min(26,Math.floor(Math.max(360,900-LX)/S.T)||4));
+  const W=LX+S.T*PPD+PAD*2;
+  let H=TOP;
+  S.lanes.forEach(L=>{H+=LANEH+(gClosed.has(L.key)?0:L.items.length*ROW)+6;});
+  H+=12;
+  svg.textContent="";svg.setAttribute("width",W);svg.setAttribute("height",H);svg.setAttribute("viewBox",`0 0 ${W} ${H}`);
+  const defs=el("defs");
+  const mk=el("marker",{id:"gharrow",viewBox:"0 0 10 10",refX:9,refY:5,markerWidth:6,markerHeight:6,orient:"auto-start-reverse"});
+  mk.appendChild(el("path",{d:"M0 0 L10 5 L0 10 z",fill:"#b42318"}));defs.appendChild(mk);svg.appendChild(defs);
+  const X=d=>LX+d*PPD;
+
+  /* regla temporal: días desde el arranque, o fechas reales si algún item trae start/due */
+  const step=tickStep(PPD,S.anchor!=null),grid=el("g");
+  for(let d=0;d<=S.T;d+=step){
+    grid.appendChild(el("line",{x1:X(d),y1:TOP-8,x2:X(d),y2:H-8,class:"grid"}));
+    grid.appendChild(el("text",{x:X(d),y:TOP-14,class:"tick","text-anchor":"middle"},tickLabel(S.anchor,d)));
+  }
+  if(S.anchor!=null){const t=Math.floor(Date.now()/864e5)-S.anchor;
+    if(t>=0&&t<=S.T){grid.appendChild(el("line",{x1:X(t),y1:TOP-8,x2:X(t),y2:H-8,class:"today"}));
+      grid.appendChild(tip(el("text",{x:X(t),y:TOP-14,class:"tick","text-anchor":"middle",fill:"#c2410c"},"hoy"),"hoy"));}}
+  svg.appendChild(grid);
+
+  // body va al DOM ANTES de llenarlo: fitText necesita medir texto ya renderizado
+  const YOF={},body=el("g");svg.appendChild(body);
+  let y=TOP;
+  S.lanes.forEach(L=>{
+    const closed=gClosed.has(L.key),days=Math.max(...L.items.map(i=>S.ef[i.id]))-Math.min(...L.items.map(i=>S.es[i.id]));
+    const allCrit=L.items.every(i=>S.crit.has(i.id));
+    const head=el("g",{class:"lanehead"});
+    head.appendChild(el("rect",{x:0,y:y,width:W,height:LANEH,class:"lanebg"}));
+    head.appendChild(el("rect",{x:0,y:y,width:5,height:LANEH,fill:L.color}));
+    const nameNode=el("text",{x:14,y:y+18,class:"lname"},(closed?"▶ ":"▼ ")+L.name);
+    const cntNode=el("text",{x:LX-10,y:y+18,class:"tick","text-anchor":"end",fill:allCrit?"#b42318":null},
+      L.items.length+(L.items.length===1?" item · ":" items · ")+days+" d"+(allCrit?" · crítico":""));
+    head.appendChild(nameNode);head.appendChild(cntNode);
+    tip(head,(closed?"Desplegar":"Plegar")+" "+L.name);
+    head.onclick=()=>gTogLane(L.key);
+    body.appendChild(head);
+    fitText(nameNode,LX-10-(cntNode.getComputedTextLength?cntNode.getComputedTextLength():70)-14-10);
+    if(closed){ // resumen del carril plegado: de su primer inicio a su último fin
+      const a=Math.min(...L.items.map(i=>S.es[i.id])),b=Math.max(...L.items.map(i=>S.ef[i.id]));
+      body.appendChild(tip(el("rect",{x:X(a),y:y+7,width:Math.max(5,(b-a)*PPD),height:LANEH-14,rx:5,
+        fill:L.color,opacity:.5}),`${L.name}: ${L.items.length} items · ${b-a} días`));
+      y+=LANEH+6;return;
+    }
+    y+=LANEH;
+    L.items.forEach(it=>{
+      const by=y+3,bh=ROW-7,x0=X(S.es[it.id]),w=Math.max(5,(S.ef[it.id]-S.es[it.id])*PPD);
+      YOF[it.id]={x0:x0,x1:x0+w,y:by+bh/2};
+      body.appendChild(el("text",{x:12,y:y+14,class:"gid"},cut(it.id,10)));
+      fitText(body.appendChild(el("text",{x:72,y:y+14},it.title)),LX-72-10);
+      const g=el("g",{class:"gbar"});
+      g.appendChild(el("rect",{x:x0,y:by,width:w,height:bh,rx:4,fill:SHEX[it.status]}));
+      // el camino crítico va como FRANJA inferior, no como borde: un borde rojo es invisible
+      // sobre las barras ámbar (doing) y rojas (blocked), que son justo las que más importan.
+      if(S.crit.has(it.id))g.appendChild(el("rect",{x:x0,y:by+bh-3,width:w,height:3,rx:1.5,class:"crit"}));
+      if(it.decision)g.appendChild(el("circle",{cx:x0+w+7,cy:by+bh/2,r:4,fill:DECHEX[it.decision]}));
+      tip(g,`${it.id} · ${it.title}\n${STLABEL[it.status]} · esfuerzo ${it.effort||"?"} (${S.dur(it)} d)`+
+        `\ndía ${S.es[it.id]}→${S.ef[it.id]}`+(S.crit.has(it.id)?" · CAMINO CRÍTICO":"")+
+        (it.decision?`\ndecisión: ${it.decision}`:"")+(it.start?`\nstart real: ${it.start}`:"")+(it.due?`\ndue real: ${it.due}`:""));
+      g.onclick=()=>openDetail(it.id);
+      body.appendChild(g);
+      y+=ROW;
+    });
+    y+=6;
+  });
+
+  /* flechas SOLO de las dependencias declaradas (las implícitas del carril serían ruido) */
+  const deps=el("g");
+  S.deps.forEach(([a,b])=>{const A=YOF[a],B=YOF[b];if(!A||!B)return;
+    const mx=(A.x1+B.x0)/2;
+    deps.appendChild(tip(el("path",{d:`M${A.x1} ${A.y} C ${mx} ${A.y}, ${mx} ${B.y}, ${B.x0} ${B.y}`,class:"dep"}),a+" bloquea a "+b));});
+  svg.appendChild(deps);
+
+  const nd=S.deps.length;
+  document.getElementById("gNote").innerHTML=
+    `<b>Calendario orientativo, no un compromiso.</b> Las duraciones salen del <b>esfuerzo</b> `+
+    `(S=1 · M=3 · L=5 · XL=10 días) y el orden, de la prioridad dentro de cada carril; `+
+    (nd?`hay <b>${nd}</b> dependencia${nd>1?"s":""} declarada${nd>1?"s":""} en <code>blocks[]</code> (flechas rojas). `
+      :`<b>ningún item declara dependencias</b> en <code>blocks[]</code>, así que no hay flechas: añade `+
+       `<code>blocks: OTRO-ID</code> en tasks.md donde el orden importe de verdad. `)+
+    (S.anchor!=null?`Hay fechas reales (<code>start</code>/<code>due</code>): el eje son fechas.`
+      :`Sin fechas reales (<code>start</code>/<code>due</code>): el eje son días desde el arranque.`)+
+    (S.cycles?` ⚠ ${S.cycles} item(s) en un ciclo de dependencias — revisa <code>blocks[]</code>.`:"");
+  document.getElementById("gLegend").innerHTML=
+    `${items.length} items · ${S.T} días de recorrido · <b style="color:var(--red)">franja roja bajo la barra</b> = camino crítico `+
+    `(lo que marca la fecha de fin) · ● = decisión tomada · clic en una barra = detalle`;
+}
+
+/* ---------- US-2 · mapa mental navegable (decisión EN el nodo) ----------
+   Árbol horizontal: plan → ramas (épica/página) → hojas (tareas). PLEGADO POR DEFECTO: con 122
+   items desplegarlo todo se satura, así que se abre lo que se está mirando. Respeta los filtros:
+   las ramas cuentan y muestran solo lo que pasa visible(). */
+let mGroup="epic";
+const mOpen=new Set(),MMCAP=40;
+function setMGroup(g){mGroup=g;mOpen.clear();
+  document.getElementById("mByEpic").classList.toggle("on",g==="epic");
+  document.getElementById("mByPage").classList.toggle("on",g==="page");renderMind();}
+function mTogBranch(k){mOpen.has(k)?mOpen.delete(k):mOpen.add(k);renderMind();}
+function mToggleAll(){
+  const B=groupBy(visible(),mGroup);
+  if(mOpen.size)mOpen.clear();else B.forEach(b=>mOpen.add(b.key));
+  renderMind();}
+function renderMind(){
+  const svg=document.getElementById("msvg"),items=visible();
+  document.getElementById("mAllBtn").textContent=mOpen.size?"Plegar todo":"Desplegar todo";
+  if(!items.length){svgEmpty(svg,"Sin items para estos filtros.");
+    document.getElementById("mNote").textContent="Ajusta los filtros para ver el mapa.";
+    document.getElementById("mLegend").textContent="";return;}
+  const B=groupBy(items,mGroup);
+  const RX=10,RW=186,BX=236,BW=262,LX=536,LW=400,W=LX+LW+16;
+  const LEAF=26,LGAP=5,BH=44,BGAP=16,TOP=16;
+  let y=TOP;
+  B.forEach(b=>{
+    const open=mOpen.has(b.key);
+    b.rows=[];b.more=0;
+    if(open&&b.items.length){
+      b.items.slice(0,MMCAP).forEach(it=>{b.rows.push({it:it,y:y});y+=LEAF+LGAP;});
+      b.more=Math.max(0,b.items.length-MMCAP);
+      if(b.more){b.moreY=y;y+=LEAF+LGAP;}
+      b.cy=(b.rows[0].y+(y-LGAP))/2;
+      y+=BGAP;
+    }else{b.cy=y+BH/2;y+=BH+BGAP;}
+  });
+  const H=Math.max(y+TOP-BGAP,120),rootCy=(B[0].cy+B[B.length-1].cy)/2;
+  svg.textContent="";svg.setAttribute("width",W);svg.setAttribute("height",H);svg.setAttribute("viewBox",`0 0 ${W} ${H}`);
+  const edges=el("g"),nodes=el("g");
+  svg.appendChild(edges);svg.appendChild(nodes);   // en el DOM antes de llenarlos: fitText mide
+
+  const root=el("g");
+  root.appendChild(el("rect",{x:RX,y:rootCy-26,width:RW,height:52,rx:12,fill:"#1b1b1f"}));
+  root.appendChild(el("text",{x:RX+14,y:rootCy-4,class:"bt"},META.title||"Plan"));
+  root.appendChild(el("text",{x:RX+14,y:rootCy+14,class:"mmsub"},`${items.length} items · ${items.filter(i=>i.decision).length} decididos`));
+  tip(root,META.title||"Plan");nodes.appendChild(root);
+  fitText(root.querySelector("text.bt"),RW-28);
+
+  B.forEach(b=>{
+    edges.appendChild(el("path",{class:"mmedge",
+      d:`M${RX+RW} ${rootCy} C ${(RX+RW+BX)/2} ${rootCy}, ${(RX+RW+BX)/2} ${b.cy}, ${BX} ${b.cy}`}));
+    const open=mOpen.has(b.key),dec=b.items.filter(i=>i.decision).length;
+    const g=el("g",{class:"branch"});
+    g.appendChild(el("rect",{x:BX,y:b.cy-BH/2,width:BW,height:BH,rx:11,fill:b.color,class:"bx"}));
+    g.appendChild(el("text",{x:BX+14,y:b.cy-4,class:"bt"},(open?"▼ ":"▶ ")+b.name));
+    g.appendChild(el("text",{x:BX+14,y:b.cy+14,class:"mmsub"},`${b.items.length} items · ${dec} decididos`));
+    tip(g,(open?"Plegar ":"Desplegar ")+b.name);
+    g.onclick=()=>mTogBranch(b.key);
+    nodes.appendChild(g);
+    fitText(g.querySelector("text.bt"),BW-28);
+
+    b.rows.forEach(r=>{
+      const it=r.it,cy=r.y+LEAF/2;
+      edges.appendChild(el("path",{class:"mmedge",
+        d:`M${BX+BW} ${b.cy} C ${(BX+BW+LX)/2} ${b.cy}, ${(BX+BW+LX)/2} ${cy}, ${LX} ${cy}`}));
+      const lg=el("g",{class:"leaf"});
+      const box=el("rect",{x:LX,y:r.y,width:LW,height:LEAF,rx:7,class:"lx"});
+      if(it.decision){box.style.fill=DECTINT[it.decision];box.style.stroke=DECHEX[it.decision];}
+      lg.appendChild(box);
+      lg.appendChild(tip(el("rect",{x:LX,y:r.y+4,width:4,height:LEAF-8,rx:2,fill:SHEX[it.status]}),STLABEL[it.status]));
+      const t=el("g",{class:"ltitle"});
+      t.appendChild(el("text",{x:LX+12,y:r.y+17,class:"mmid"},cut(it.id,8)));
+      t.appendChild(el("text",{x:LX+72,y:r.y+17},it.title));
+      tip(t,`${it.id} · ${it.title}\n${STLABEL[it.status]}${it.decision?" · "+it.decision:""}\n(clic: abrir detalle)`);
+      t.onclick=()=>openDetail(it.id);
+      lg.appendChild(t);
+      nodes.appendChild(lg);                       // en el DOM para poder medir
+      fitText(t.querySelectorAll("text")[1],LW-176);
+      DEC.forEach((d,i)=>{
+        const bx=LX+LW-96+i*22,by=r.y+(LEAF-18)/2,on=it.decision===d;
+        const db=el("g",{class:"db"+(on?" on":"")});
+        const rc=el("rect",{x:bx,y:by,width:20,height:18,rx:5});
+        if(on){rc.style.fill=DECHEX[d];rc.style.stroke=DECHEX[d];}
+        db.appendChild(rc);
+        if(d==="aplazar"){ // ⏸ (U+23F8) no está en la mayoría de fuentes del sistema: sale como
+          // cuadrado de fallback. Se dibuja: dos barras. El resto de glifos sí resuelven.
+          [0,1].forEach(n=>db.appendChild(el("rect",{x:bx+7+n*4,y:by+5,width:2.5,height:8,rx:1,
+            fill:on?"#fff":"#6b6b76"})));
+        }else{
+          db.appendChild(el("text",{x:bx+10,y:by+13,"text-anchor":"middle"},DECSYM[d]));
+        }
+        tip(db,DECLABEL[d]+(on?" (quitar)":""));
+        db.onclick=e=>{e.stopPropagation();setDec(it.id,d);};
+        lg.appendChild(db);
+      });
+    });
+    if(b.more){
+      edges.appendChild(el("path",{class:"mmedge",
+        d:`M${BX+BW} ${b.cy} C ${(BX+BW+LX)/2} ${b.cy}, ${(BX+BW+LX)/2} ${b.moreY+LEAF/2}, ${LX} ${b.moreY+LEAF/2}`}));
+      const mg=el("g");
+      mg.appendChild(el("rect",{x:LX,y:b.moreY,width:LW,height:LEAF,rx:7,fill:"#f2efe8",stroke:"#e4e0d7"}));
+      mg.appendChild(el("text",{x:LX+12,y:b.moreY+17,fill:"#6b6b76"},`+${b.more} items más — afina los filtros para verlos`));
+      nodes.appendChild(mg);
+    }
+  });
+  document.getElementById("mNote").innerHTML=
+    `<b>Navega y decide sin cambiar de pantalla:</b> clic en una rama la despliega, clic en el título `+
+    `de una hoja abre su detalle, y los cuatro botones de la hoja son la decisión (se guardan igual `+
+    `que en el resto del informe). Arranca plegado a propósito: con ${DB.items.length} items, todo `+
+    `desplegado no se lee.`;
+  document.getElementById("mLegend").innerHTML=
+    `${items.length} items visibles en ${B.length} ramas · franja izquierda = estado · fondo = decisión`+
+    (B.some(b=>b.more)?` · las ramas de más de ${MMCAP} items se recortan`:"");
+}
+
+function setView(v){view=v; saveUI();
+  const VIEWS={dash:"dashView",kanban:"kanbanView",gantt:"ganttView",mind:"mindView"};
+  const BTN={dash:"viewDash",kanban:"viewKanban",gantt:"viewGantt",mind:"viewMind"};
+  for(const k in VIEWS){
+    document.getElementById(BTN[k]).classList.toggle("on",k===v);
+    document.getElementById(VIEWS[k]).classList.toggle("hide",k!==v);
+  }
+  renderAll();}
+function renderAll(){renderHeader();renderFilters();
+  if(view==="dash"){renderPages();renderMatrix();renderCharts();}
+  else if(view==="kanban")renderKanban();
+  else if(view==="gantt")renderGantt();
+  else renderMind();
+  renderBulk();
+  const sb=document.getElementById("bulkStatusBtns");
+  if(sb&&!sb.childElementCount)sb.innerHTML=STATUSES.map(s2=>`<button class="bb st" style="--c:${SHEX[s2]}" onclick="bulkStatus('${s2}')">${STLABEL[s2]}</button>`).join("");}
+
+/* ---------- modal detalle ---------- */
+function openDetail(id){
+  curDetail=id;const it=find(id);if(!it)return;
+  document.getElementById("dId").textContent=it.id;
+  const p=PAGEMAP[it.page||"—"];
+  document.getElementById("dPageLbl").textContent=p?(p.name+(p.slug?" · /"+p.slug:"")):(it.page||"");
+  document.getElementById("dTitle").textContent=it.title;
+  renderDetailMeta(it);
+  document.getElementById("dGoal").innerHTML=it.goal?`<div class="goalbox"><span class="glab"><svg class="icon"><use href="#ic-target"></use></svg> Criterio técnico de aceptación (para el equipo):</span> ${esc(it.goal)}</div>`:"";
+  document.getElementById("dDesc").innerHTML=mdish(it.desc);
+  const m=VMAP[it.verdict];
+  document.getElementById("dVerdict").innerHTML=m
+    ?`<div class="verdictbox"><div style="margin-bottom:6px"><span class="tag verd" style="background:${m[1]}">${m[0]}</span>`+
+      (it.precision_pct!=null?` <b style="color:${m[1]}">${it.precision_pct}%</b>`:"")+
+      (it.confidence?` <span style="color:var(--muted);font-size:12px">confianza ${esc(it.confidence)}</span>`:"")+`</div>`+
+      whyHTML(it.why)+
+      (it.verdict!=="done"&&it.howto?`<div class="howto"><b>Qué falta:</b> ${esc(it.howto)}</div>`:"")+`</div>`
+    :"";
+  renderDecRow(it);
+  document.getElementById("dNote").value=it.note||"";
+  const mdc = s => esc(s).replace(/\*\*([^*]+)\*\*/g,"<b>$1</b>")
+                          .replace(/`([^`]+)`/g,"<code>$1</code>");
+  const c=it.consecuencias||{}, cw=document.getElementById("dConsWrap");
+  cw.style.display = (c.si||c.no) ? "" : "none";
+  document.getElementById("dCons").innerHTML =
+    (c.si?`<div class="si"><b>Si lo apruebas</b>${mdc(c.si)}</div>`:"")+
+    (c.no?`<div class="no"><b>Si no lo apruebas</b>${mdc(c.no)}</div>`:"");
+  const refs=it.refs||[], fw=document.getElementById("dRefsWrap");
+  fw.style.display = refs.length ? "" : "none";
+  const TIPO={"doc-oficial":"doc oficial","libreria":"librería","repo-interno":"en nuestro repo","articulo":"artículo","norma":"norma"};
+  // Una ref al repo (../../../.claude/…) sale de la carpeta que sirve server.py y da 404 en modo
+  // servidor — solo abre bien desde disco. En vez de dejar un enlace muerto, en modo servidor se
+  // muestra la ruta y se copia al portapapeles para abrirla en el editor.
+  const outOfPlan = u => /^\.\.\//.test(String(u)) && location.protocol !== "file:";
+  document.getElementById("dRefs").innerHTML = refs.map(r=>{
+    const tipo=`<span class="reftipo">${esc(TIPO[r.tipo]||"enlace")}</span>`;
+    const que=`<span class="refque">${esc(r.que)}</span>`;
+    const short=esc(String(r.url).replace(/^https?:\/\//,"").replace(/^(\.\.\/)+/,"").slice(0,52));
+    return outOfPlan(r.url)
+      ? `<button type="button" class="ref" data-path="${esc(String(r.url).replace(/^(\.\.\/)+/,""))}" `+
+        `onclick="copyRefPath(this)" title="Fichero del repo: el servidor solo sirve la carpeta del plan. Clic para copiar la ruta.">`+
+        `${tipo}${que}<span class="refurl">📋 ${short}</span></button>`
+      : `<a class="ref" href="${esc(r.url)}" target="_blank" rel="noopener">${tipo}${que}`+
+        `<span class="refurl">${short}</span></a>`;
+  }).join("");
+  // `tasks_to_items.py` escribe la recomendacion en `rec` como objeto {rec, razon};
+  // esta plantilla leia solo `tl_rec` (string), asi que la RAZON no se pintaba nunca y
+  // el usuario veia el chip sin saber por que se recomienda eso. Se aceptan las dos formas.
+  // Detectado 2026-08-11 por el Usuario, mirando su propio informe.
+  const _ICONREC={aprobar:"👍","no-aprobar":"👎",duda:"🤔"};
+  let rec = it.tl_rec || "";
+  if (!rec && it.rec) {
+    if (typeof it.rec === "string") rec = it.rec;
+    else if (it.rec.rec) {
+      const v=it.rec.rec, z=(it.rec.razon||"").trim();
+      rec = `${_ICONREC[v]||"•"} **${v.charAt(0).toUpperCase()+v.slice(1)}**` + (z ? ` — ${z}` : "");
+    }
+  }
+  const rw=document.getElementById("dRecWrap");
+  rw.style.display = rec ? "" : "none";
+  document.getElementById("dRec").innerHTML = rec ? mdish(rec) : "";
+  renderEvidence(it);
+  renderHistory(it);
+  document.getElementById("detail").classList.add("show");
+}
+function renderDetailMeta(it){
+  document.getElementById("dMeta").innerHTML=
+    `<button class="stbtn" style="background:${SHEX[it.status]};width:auto;padding:5px 12px" onclick="cycleStatus('${it.id}')" title="Clic: cambiar estado">${STLABEL[it.status]}</button>`+
+    epicTag(it.epic)+
+    `<span class="tag btn2 sev-${it.severity||'P2'}" onclick="cycleSev('${it.id}')">${it.severity||"P?"}</span>`+
+    `<span class="tag btn2 eff" onclick="cycleEff('${it.id}')">Esf ${it.effort||"?"}</span>`+
+    (it.agent?`<span class="tag ag">${esc(it.agent)}</span>`:"")+
+    ((it.tags||[]).map(t=>`<span class="tag" style="background:#e9e6de;color:var(--muted)">${esc(t)}</span>`).join(""));
+}
+function renderDecRow(it){
+  document.getElementById("dDec").innerHTML=DEC.map(d=>
+    `<button class="decbtn ${it.decision===d?'on':''}" data-d="${d}" onclick="setDec('${it.id}','${d}')">${DECLABEL[d]}</button>`).join("");
+}
+function closeDetail(){document.getElementById("detail").classList.remove("show");curDetail=null;}
+
+/* ---------- evidencia (KEEP: editable y persistida) ---------- */
+function labClass(l){const s=String(l||"").toLowerCase();
+  if(s.startsWith("antes"))return"lab-antes";
+  if(s.startsWith("actual"))return"lab-actual";
+  if(s.startsWith("despu"))return"lab-despues";
+  return"";}
+function evFig(ev,i,editable){
+  const cap=`<figcaption><span class="evlab ${labClass(ev.label)}">${esc(ev.label||ev.kind)}</span>`+
+    (ev.caption?`<small>${esc(ev.caption)}</small>`:"")+
+    (editable?`<button class="evdel" onclick="delEvidence(${i})" title="quitar evidencia">✕</button>`:"")+`</figcaption>`;
+  if(ev.kind==="img")
+    return `<figure class="ev">${cap}<img src="${esc(ev.src)}" alt="${esc(ev.label||'evidencia')}" loading="lazy" onclick="openLight(this.src)" onerror="evFail(this)"></figure>`;
+  if(ev.kind==="link")
+    return `<figure class="ev">${cap}<a class="evlink" href="${esc(ev.src)}" target="_blank" rel="noopener">${esc(ev.src)}</a></figure>`;
+  return `<figure class="ev">${cap}<pre class="evdata">${esc(ev.src)}</pre></figure>`;
+}
+function evFail(img){
+  const src=(img.getAttribute("src")||"").slice(0,90);
+  img.outerHTML=`<div class="ph">imagen no encontrada<br><code style="font-size:10px">${esc(src)}</code></div>`;
+}
+function renderEvidence(it){
+  const box=document.getElementById("dEvid");
+  box.innerHTML=(it.evidence&&it.evidence.length)
+    ?it.evidence.map((ev,i)=>evFig(ev,i,true)).join("")
+    :`<div class="ph" style="grid-column:1/-1">Sin evidencia adjunta — añade una ruta o data-URI abajo.</div>`;
+}
+function guessKind(src){
+  if(/^data:image\//.test(src))return"img";
+  if(/\.(png|jpe?g|webp|gif|svg)(\?.*)?$/i.test(src))return"img";
+  if(/^https?:\/\//.test(src))return"link";
+  return"data";
+}
+function addEvidence(){
+  const it=find(curDetail);if(!it)return;
+  const label=document.getElementById("evLabel").value.trim(),src=document.getElementById("evSrc").value.trim();
+  if(!src){toast("Falta la ruta/URL/data de la evidencia");return;}
+  (it.evidence=it.evidence||[]).push({kind:guessKind(src),label:label||"evidencia",src:src});
+  document.getElementById("evLabel").value="";document.getElementById("evSrc").value="";
+  save();renderEvidence(it);renderAll();
+}
+function delEvidence(i){
+  const it=find(curDetail);if(!it||!it.evidence)return;
+  it.evidence.splice(i,1);save();renderEvidence(it);renderAll();
+}
+
+/* ---------- historial de rondas ---------- */
+function renderHistory(it){
+  const wrap=document.getElementById("dHistWrap"),box=document.getElementById("dHist");
+  if(!(it.history&&it.history.length)){wrap.style.display="none";box.innerHTML="";return;}
+  wrap.style.display="block";
+  box.innerHTML=it.history.map(h=>{
+    const st=h.status&&STLABEL[h.status]?`<span class="tag" style="background:${SHEX[h.status]};color:#fff">${STLABEL[h.status]}</span>`:"";
+    const vd=h.verdict&&VMAP[h.verdict]?`<span class="tag verd" style="background:${VMAP[h.verdict][1]}">${VMAP[h.verdict][0]}</span>`:"";
+    return `<div class="hrow"><span class="hround">R${h.round}</span><span class="hdate">${esc(h.date||"")}</span>${st}${vd}${h.note?`<span class="hnote">${esc(h.note)}</span>`:""}</div>`;
+  }).join("");
+}
+
+/* ---------- export / import / reset ---------- */
+function payload(){return {meta:META,items:DB.items};}
+function downloadJSON(){
+  const blob=new Blob([JSON.stringify(payload(),null,2)],{type:"application/json"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="report.json";a.click();
+  toast("report.json descargado");
+}
+function importJSON(ev){
+  const f=ev.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{try{
+    const d=JSON.parse(r.result),by={};(d.items||[]).forEach(x=>by[x.id]=x);
+    DB.items.forEach(it=>{if(by[it.id])applyKeep(it,keepOf(by[it.id]));});
+    save();renderAll();toast("JSON importado (merge por id)");
+  }catch(e){toast("JSON inválido");}};
+  r.readAsText(f);ev.target.value="";
+}
+function changes(){
+  return DB.items.filter(it=>{const b=BASE[it.id];
+    return b&&(it.status!==b.status||(it.decision||null)!==(b.decision||null));});
+}
+function exportMD(){
+  const ch=changes();
+  if(!ch.length){toast("Sin cambios respecto al report.json inyectado");return;}
+  let md=`# ${META.title||"Plan"} — cambios (${ch.length} items · ${new Date().toISOString().slice(0,10)})\n\n`;
+  PAGES.forEach(p=>{
+    const list=ch.filter(i=>(i.page||"—")===p.code);if(!list.length)return;
+    md+=`## ${p.name}\n`;
+    list.forEach(it=>{
+      const b=BASE[it.id];
+      const box=it.status==="done"?"x":(it.status==="doing"||it.status==="review")?">":it.status==="blocked"?"!":" ";
+      md+=`- [${box}] \`${it.id}\` ${it.title} — ${b.status} → ${it.status}`+
+        (((it.decision||null)!==(b.decision||null))?` · decisión: ${it.decision||"(quitada)"}`:"")+
+        (it.note?` — _${it.note}_`:"")+`\n`;
+    });
+    md+=`\n`;
+  });
+  showExport("Cambios vs report.json (pegar en tasks.md)",md);
+}
+function resetAll(){
+  if(!confirm("¿Resetear estados, decisiones, notas y evidencia al report.json original?"))return;
+  try{localStorage.removeItem(lsKey());}catch(e){}
+  DB.items.forEach(it=>applyKeep(it,JSON.parse(JSON.stringify(BASE[it.id]))));
+  save();renderAll();toast("Reseteado al estado inyectado");
+}
+function showExport(t,x){document.getElementById("exportTitle").textContent=t;document.getElementById("exportText").value=x;document.getElementById("export").classList.add("show");}
+function closeExport(){document.getElementById("export").classList.remove("show");}
+function copyRefPath(btn){
+  const p=btn.getAttribute("data-path")||"";
+  (navigator.clipboard?navigator.clipboard.writeText(p):Promise.reject())
+    .then(()=>toast("ruta copiada: "+p)).catch(()=>toast("copia manual: "+p));
+}
+function copyExport(){
+  const t=document.getElementById("exportText");t.select();
+  (navigator.clipboard?navigator.clipboard.writeText(t.value):Promise.reject())
+    .then(()=>toast("Copiado")).catch(()=>{document.execCommand("copy");toast("Copiado");});
+}
+
+/* ---------- lightbox / toast ---------- */
+function openLight(src){const l=document.getElementById("lightbox");l.querySelector("img").src=src;l.classList.add("show");}
+function closeLight(){document.getElementById("lightbox").classList.remove("show");}
+let toastT;
+/* El aviso admite una ACCIÓN opcional (hoy: deshacer). Cuando la lleva, dura más: una acción que
+   desaparece en 1,7 s no es una red, es un guiño. */
+function toast(m,accionLabel,accionFn){
+  const e=document.getElementById("toast");
+  e.textContent=m;
+  if(accionLabel&&accionFn){
+    const b=document.createElement("button");
+    b.textContent=accionLabel;
+    b.style.cssText="margin-left:12px;padding:2px 10px;border-radius:6px;border:1px solid currentColor;"+
+                    "background:transparent;color:inherit;cursor:pointer;font:inherit;font-weight:600";
+    b.onclick=()=>{e.classList.remove("show");accionFn();};
+    e.appendChild(b);
+  }
+  e.classList.add("show");
+  clearTimeout(toastT);
+  toastT=setTimeout(()=>e.classList.remove("show"), accionLabel?9000:1700);
+}
+
+/* ---------- init ---------- */
+function initBase(){DB.items.forEach(it=>BASE[it.id]=JSON.parse(JSON.stringify(keepOf(it))));}
+function init(){
+  document.title="Dashboard — "+(META.title||META.plan_id||"report-kit");
+  document.getElementById("hTitle").textContent=META.title||"Dashboard";
+  document.getElementById("hSub").textContent=
+    [META.project,META.plan_id,"ronda "+(META.round||1),META.generated?("generado "+META.generated):null,META.site||null]
+    .filter(Boolean).join(" · ");
+  if(META.demo===true||(META.project==="tech-lead-template"&&META.plan_id==="report-kit-demo"))document.getElementById("demoBanner").hidden=false;
+  initBase();
+  loadYolo();
+  boot();
+  renderYoloBadge();
+  applyDeepLink();
+}
+/* Enlaces desde otras páginas del set: `dashboard.html?tag=X` deja la vista filtrada por esa
+   etiqueta (y descarta lo guardado, que si no gana y confunde), `?st=backlog` deja solo lo pendiente, y `#ID` abre el detalle del item.
+   Sin esto, "míralo en el dashboard" obliga a buscar la tarjeta a mano entre casi 200. */
+function applyDeepLink(){
+  try{
+    const q=new URLSearchParams(location.search);
+    const tag=q.get("tag"), dec=q.get("dec"), st=q.get("st");
+    if(tag||dec||st){
+      Object.values(F).forEach(s=>s.clear());
+      if(tag&&allTags().includes(tag))F.tag.add(tag);
+      if(dec)F.dec.add(dec);
+      // ?st=backlog — «qué queda». Sin esto, enlazar a lo pendiente obligaba a decir «filtra tú
+      // por estado», que es justo lo que un enlace directo existe para evitar.
+      if(st)st.split(",").forEach(v=>F.status.add(v));
+      saveUI(); renderAll();
+    }
+    const id=decodeURIComponent((location.hash||"").replace(/^#/,""));
+    if(id&&DB.items.some(i=>i.id===id))openDetail(id);
+  }catch(e){}
+}
+if(!DB){
+  document.getElementById("app").style.display="none";
+  document.getElementById("nodata").hidden=false;
+}else{
+  init();
+}
+</script>
+</body>
+</html>

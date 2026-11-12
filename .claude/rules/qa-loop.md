@@ -1,8 +1,15 @@
 ---
 paths:
   - ".docs/feedback/**"
+  - "**/trend-delta.json"
+  - "vrt.json"
+  - ".claude/commands/qa-loop.md"
+  - ".claude/agents/lidia-naive-tester*"
+  - ".claude/agents/vera-art-director*"
+  - ".claude/agents/ignacio-roig*"
+  - ".claude/agents/shared/calibration-v2.md"
+  - ".claude/scripts/certifica_objeto.py"
 ---
-
 # QA Loop — Protocolo Lidia + Vera + Ignacio hasta avg ≥ 9.0
 
 > **Cuándo aplicar:** al cerrar cualquier wave/feature **con UI**. Orquesta los tres auditores de
@@ -13,7 +20,7 @@ paths:
 > / `ux-reviewer`. Tampoco sobre código que no compila (verifica build antes).
 >
 > **Relacionado:** `verification.md`, `verdict-contract.md` (esquema de veredicto reutilizable),
-> **`e2e-stability.md`** (estado determinista + selectores estables: prerrequisito para que este
+> **`verification.md` §Estabilidad E2E** (estado determinista + selectores estables: prerrequisito para que este
 > bucle no mida ruido), skills `verification-loops`, `ux-reviewer`, `naive-user-playthrough`,
 > `visual-regression` (diff objetivo contra baseline, complementa la crítica subjetiva de Vera),
 > `feedback-audit`; agentes `lidia-naive-tester`, `vera-art-director`, `ignacio-roig`; skills
@@ -24,11 +31,34 @@ paths:
 ## Disparo
 
 - Manual: `/qa-loop` o "lanza qa-loop sobre la wave actual".
-- Autónomo: dentro de `/loop` (plugin ralph-loop) con el prompt de cierre de wave.
+- Autónomo: con `/goal` y el prompt de cierre de wave como condición («`RESULT.md` con PASS según
+  §4, o para tras 3 iteraciones», que es el tope de §6). El bucle converge a una nota, así que es una
+  meta verificable, no un `/loop` por reloj; y la condición tiene que poder demostrarse en la
+  conversación (`goal-vs-loop.md` §`/goal`). Antes ponía «dentro de `/loop` (plugin ralph-loop)»:
+  son dos cosas distintas y ninguna era la buena (MO-30). Si se quiere repetir el mismo prompt
+  entero, es `/ralph-loop:ralph-loop … --max-iterations 3`.
 
 ---
 
 ## Protocolo (estricto)
+
+### 0. El gate determinista — ANTES de gastar un turno de auditor
+
+Lo barato va primero. Hoy Vera gasta turnos haciendo greps que una máquina hace mejor y más rápido.
+
+```bash
+python3 .claude/scripts/gate_diseno.py <build|url> --exigir-impeccable --json \
+  > .docs/feedback/qa-loop/<WAVE_ID>/iter-<n>/gate/gate.json
+```
+
+| Sale | Qué significa | Qué se hace |
+|---|---|---|
+| **0** | Medido, sin hallazgos de reglas `activo` | Se sigue |
+| **1** | Medido, hay hallazgos | **La ronda no arranca.** Se arreglan y se vuelve a medir |
+| **2** | **NO SE PUDO MEDIR** (sin npx, sin red, destino inexistente) | **Tampoco arranca**, y no es lo mismo que «limpio». Se arregla el instrumento |
+
+Un `--sin-impeccable` en una ronda de `/qa-loop` **invalida este paso**: queda escrito en el JSON y
+la ronda se marca como medida a medias.
 
 ### 1. Pre-flight
 - RAM libre: `bash .claude/hooks/check-ram.sh` en verde — el umbral lo calcula el hook (`--explain`)
@@ -40,8 +70,55 @@ paths:
 - Anotar `WAVE_ID` y `iteration_n` (empieza en 1).
 - **Congelar el build y anotar su sha** (`git rev-parse --short HEAD`) → es el `target_sha` de la
   ronda. Se lo pasas a los tres auditores. Ver §1b.
-- **Declarar el perfil de rúbrica** del objetivo: `landing` | `herramienta-interna`. Decide si
-  `fotos_videos` cuenta o es N/A (AUD-8) y no se cambia a mitad de ronda.
+- **Sellar el objeto al abrir** (`certifica_objeto.py sellar … --salida …/sello/apertura.txt`): el
+  sha no ve el bundle servido ni lo que responde la API. Ver §1b, punto 5.
+- **Si los auditores van a la vez contra un despliegue vivo**: cuentas, límites de peticiones e
+  instrumento, §2c, antes de lanzar a nadie.
+- **Declarar el perfil de rúbrica** del objetivo: `web-cliente` | `producto-panel` (antes `landing` |
+  `herramienta-interna`, que siguen valiendo por compatibilidad —
+  `patterns/diseno/perfiles.yaml#equivalencias`). Decide los pesos de los ejes, si `fotos_videos`
+  cuenta o es N/A (AUD-8), y **no se cambia a mitad de ronda**.
+
+### 1c. Regresión visual — el baseline se bendice al CERRAR, no al abrir
+
+`visual-regression` existe desde hace meses y **no estaba cableada a este bucle**: era el hueco nº3
+declarado en §2b, y es el que dejó pasar L-008, F-008 y F-012 (defectos que una ronda introdujo y
+nadie vio hasta la siguiente).
+
+```bash
+VRT=.claude/skills/visual-regression/vrt.py
+python3 $VRT capture --config vrt.json
+python3 $VRT compare --config vrt.json      # exit 1 = regresión contra la iteración anterior
+```
+
+Tres decisiones que lo hacen funcionar, y las tres importan:
+
+1. **El baseline se bendice al CERRAR cada iteración**, no al abrirla. Así iter-n+1 compara contra
+   iter-n y los defectos nuevos los caza la máquina, no la suerte.
+2. **Un `bless` cita el finding que lo justifica** (`fix(F-012): … — baseline actualizado`). Un
+   bless sin id de hallazgo es la puerta por la que cualquier regresión desaparece sin dejar rastro.
+3. **El diff NO se le pasa a Vera.** Un rectángulo rojo señalando dónde mirar es anclaje, y rompe la
+   evaluación ciega de `calibration-v2.md` §2. El diff va al orquestador y al que arregla.
+
+### 1d. ¿El fix declarado se aplicó de verdad?
+
+Es el hueco **mejor documentado** de §2b: Ignacio cazó **3 fixes declarados y no aplicados**, de
+forma incidental, en 1 de cada 3 rondas. No necesita un auditor nuevo — necesita un script.
+
+```bash
+python3 .claude/scripts/verificar_fixes.py <WAVE_ID> <iter> --json
+```
+
+- **Entrada**, y es el único coste real: quien arregla escribe `iter-<n>/fixes/fixes-declarados.json`
+  con, por cada hallazgo, **cómo se comprueba** (selector + propiedad + valor esperado). El campo se
+  autopropone desde el `fix_proposal` que Vera ya emite.
+- **Doble evidencia** (`rules/verdict-contract.md`): 🔎 el `git diff` entre los dos sha toca la
+  región citada · 👁 una sonda evalúa el predicado contra el build congelado.
+- Lo que no admite predicado automático se marca `verificacion: manual` y cae en la relectura de
+  Ignacio. El hueco se reduce a esos, en vez de ser total.
+- **Un `notdone` sobre un fix declarado es P0 y la ronda NO se promedia**: significa que estamos
+  midiendo un build cuyos cambios no son los que se dijo, y promediar eso es peor que no medir
+  (mismo razonamiento que §1b).
 
 ### 1b. El build NO se toca durante la ronda (AUD-3) — regla dura
 
@@ -61,6 +138,40 @@ paths:
    inventada — y una media inventada contamina además todo lo que se compare con ella después.
 4. Al cerrar, el orquestador verifica que los tres `target_sha` coinciden. Si no coinciden,
    **la ronda no se promedia**: se anota como inválida en `RESULT.md` y se repite.
+5. **El sha no basta: se certifica el objeto al abrir y al cerrar** (MO-51, de elvion). Un sha no
+   describe lo servido: en elvion, quince rondas se certificaron con el sha y el md5 de la plantilla,
+   y un reordenado del catálogo que cambiaba por completo lo que veía el cliente **no movió ni un bit**
+   de la plantilla, porque viajaba por la API; el bundle del widget, en `.gitignore`, ni siquiera se
+   puede reconstruir desde un sha. Por eso son **dos medidas**: la de cierre cazó dos movimientos que
+   la de apertura no podía ver.
+
+   ```bash
+   S=.docs/feedback/qa-loop/<WAVE_ID>/iter-<n>/sello
+   C="--base http://127.0.0.1:<PORT> --pagina / --bundle /static/<bundle>.js --api /api/<ruta>/ \
+      --cabecera-env X-API-Key=<VARIABLE> --ignorar <clave-volátil> --git-ruta frontend/"
+   python3 .claude/scripts/certifica_objeto.py sellar $C --guardar $S/apertura --salida $S/apertura.txt  # antes de lanzar a nadie
+   python3 .claude/scripts/certifica_objeto.py sellar $C --guardar $S/cierre --salida $S/cierre.txt      # cuando entregó el último
+   python3 .claude/scripts/certifica_objeto.py comparar $S/apertura.txt $S/cierre.txt
+   ```
+
+   | Sale | Qué se hace |
+   |---|---|
+   | **0** | El objeto no se movió: la ronda se puede promediar |
+   | **1** | **Se movió: la ronda no vale.** Se anota inválida en `RESULT.md` con las líneas que cambiaron y se repite sobre el objeto nuevo. Si fue una API, el `diff` de las dos copias guardadas dice qué cambió |
+   | **2** | **No se pudo medir** (una ruta que no da 200 —un 401, un 429 o una redirección a `/login` sellarían esa pantalla; las redirecciones no se siguen—, un JSON que no parsea, la variable de la clave vacía). No es «sin cambios»: se arregla el instrumento |
+
+   `sin_commitear` mayor que 0 en el sello quiere decir que el sha no describe lo servido. La clave
+   de la API se pasa por variable de entorno (`--cabecera-env`), nunca escrita en el comando, y su
+   valor no sale en el sello. Las copias de la API van en **carpetas distintas** al abrir y al cerrar
+   (`$S/apertura`, `$S/cierre`): con la misma, el cierre pisa la apertura. Probado contra un servidor
+   local con el bundle y un precio cambiados a mitad de ronda y un panel que redirige a `/login`:
+   `_archive/2026-10-20/medicion-2.16/probar_certifica.py`.
+6. **Congelado quiere decir también sin commits, sin build y sin escribir los datos que se ven**
+   (AMC, 2026-09-06 y 2026-09-26). Vera hace `git rev-parse HEAD` al empezar y al acabar y declara
+   desvío aunque el commit no toque el panel; `npm run build` a mitad de ronda cambia lo que sirve
+   nginx en vivo. Y el **dato** tampoco puede moverse: un auditor que preparó 57 informes a mitad de
+   ronda cambió los recuentos que veía otro. Editar el árbol sin commitear ni construir sí vale; en
+   el encargo de cada auditor se dice qué **no** puede escribir en la demo.
 
 Los tres auditores llevan esta regla escrita en su ficha (Lidia §Contrato de salida, Vera §Bloque
 `run`, Ignacio Regla #6). El orquestador es quien la hace cumplir.
@@ -79,22 +190,36 @@ El prompt de cada uno **debe** llevar el `target_sha` congelado (§1b) y el perf
 y **no debe** llevar la lista de cambios de la ronda anterior (evaluación ciega,
 `shared/calibration-v2.md` §2).
 
+**Topes de la puerta de UI** (`audit-team.md` §3): ≤5 jueces y ≤3 con navegador a la vez. Los tres de
+siempre más Aitor o Lena caben; la batería entera (todos los auditores-persona) solo en un hito de
+release, con `hito_release: true` en el acta. Desde la iteración 2, la ronda mira **solo lo que
+cambió** (las pantallas que tocó el diff entre los dos `target_sha`), no la web entera.
+
 ### 2b. Quién cubre qué — y qué NO cubre nadie (AUD-5)
 
-El template declara **13 auditores-persona; 10 no han corrido nunca.** Trece nombres en una lista
-tranquilizan; tres que corren de verdad protegen. **Un agente que nunca ha corrido no cuenta como
-cobertura** — y esto no es teórico: la accesibilidad de teclado figuraba «cubierta» por Aitor y en
-3 rondas sobre un dashboard con modales y kanban drag&drop no la miró nadie.
+El template declara **13 auditores-persona; 8 no han corrido nunca** (eran «10» hasta el
+2026-09-18: Aitor y Conrado sí tienen rondas con evidencia en disco — ver el aviso de abajo). Trece
+nombres en una lista tranquilizan; los que corren de verdad protegen. **Un agente que no corre en
+esta ronda no es cobertura de esta ronda** — y esto no es teórico: la accesibilidad de teclado
+figuraba «cubierta» por Aitor y en 3 rondas sobre un dashboard con modales y kanban drag&drop no la
+miró nadie. Que Aitor hubiera auditado OTRO proyecto en junio no protegía a este.
 
 **Dueño único por dimensión (reparto vigente, medido sobre TPL1-W3):**
 
-| Dimensión | Dueño | Absorbido de |
-|---|---|---|
-| Contraste WCAG AA | **Vera** | `aitor-a11y-auditor` (nunca ha corrido) |
-| Consistencia de componentes | **Vera**, prestado — vuelve a Rita cuando salga de modo sombra | `rita-pattern-keeper` (0 rondas) |
-| Brand voice / AI-slop | **Vera** (eje 10 + AI1-AI4 + `red-flags.sh`) | `lena-i18n-auditor` (nunca ha corrido) |
-| Onboarding · microcopy sin jerga · empty states | **Lidia** | `tomas-onboarding-tester` (nunca ha corrido) |
-| Primeros niveles de conversión (oferta, confianza, CTA) | **Lidia** | `conrado-cro-auditor` (nunca ha corrido) |
+> ⚠️ **Dos preguntas que esta rule colapsaba en una (corregido 2026-09-18).** Decía que Aitor y
+> Conrado «nunca han corrido», y **es falso y está en disco**: los dos tienen iter-1 e iter-2 sobre
+> `mini-RetoquePro`, fechadas el **2026-06-21**, con hallazgos identificados y evolución de score en
+> su `memory.md`. Lo que era cierto es otra cosa: **no corren en ESTE bucle**. Son preguntas
+> distintas y por eso ahora van en dos columnas. La frase que sí hay que conservar: *un auditor que
+> no corre en esta ronda no es cobertura de esta ronda* — da igual cuántas haya corrido antes.
+
+| Dimensión | Dueño en este bucle | Absorbido de | ¿Ha corrido alguna vez? |
+|---|---|---|---|
+| Contraste WCAG AA | **Vera** | `aitor-a11y-auditor` | **Sí** — 2 rondas (mini-RetoquePro, 2026-06-21, 5.71 → 7.0) |
+| Consistencia de componentes | **Vera**, prestado — vuelve a Rita cuando salga de modo sombra | `rita-pattern-keeper` | No — 0 rondas |
+| Brand voice / AI-slop | **Vera** (eje 10 + AI1-AI4 + `red-flags.sh`) | `lena-i18n-auditor` | No |
+| Onboarding · microcopy sin jerga · empty states | **Lidia** (modo primer uso) | `tomas-onboarding-tester` (retirado en la 3.01) | No |
+| Primeros niveles de conversión (oferta, confianza, CTA) | **Lidia** | `conrado-cro-auditor` | **Sí** — 2 rondas (mini-RetoquePro, 2026-06-21, 4.9 → 5.3) |
 
 **Huecos declarados — nadie los audita hoy.** No los cuentes como cubiertos:
 
@@ -111,11 +236,74 @@ cobertura** — y esto no es teórico: la accesibilidad de teclado figuraba «cu
 4. **Coherencia semántica de los datos mostrados** (¿el número de la página coincide con su
    fuente?) y **la salida imprimible** (`window.print()`, nunca auditada).
 
-**Los ortogonales que no han corrido** (`sofia-pentester`, `priya-privacy-auditor`,
-`quim-data-integrity`, `bruno-perf-cop`, `marco-qa-breaker`, `nadia-chatbot-evaluator`,
-`aitor-a11y-auditor`, `lena-i18n-auditor`, `tomas-onboarding-tester`, `conrado-cro-auditor`) se
-conservan, pero **como checklist, no como auditor**: se citan como «pendiente de correr una vez»,
-nunca como cobertura de la wave. Salen de esa categoría cuando corran y dejen evidencia en disco.
+**Los ortogonales que no han corrido NUNCA** —ocho, no diez (`sofia-pentester`,
+`priya-privacy-auditor`, `rafa-retrieval-engineer`, `bruno-perf-cop`, `marco-qa-breaker`,
+`nadia-chatbot-evaluator`, `lena-i18n-auditor`, `lidia-naive-tester`)— se conservan, pero
+**como checklist, no como auditor**: se citan como «pendiente de correr una vez», nunca como
+cobertura de la wave. Salen de esa categoría cuando corran y dejen evidencia en disco.
+**Aitor y Conrado ya salieron** (§tabla de arriba): tienen rondas con evidencia, y lo que falta de
+ellos es entrar en este bucle, no estrenarse.
+
+### 2c. QA en paralelo contra un despliegue vivo — que el entorno no se cuele como hallazgo (MO-27)
+
+Cosechado de `accounting_AMC` (rondas AMC-3, AMC-5 y NUC-2, septiembre de 2026): cada uno de estos
+fallos costó una ronda o una hora y **parecía un defecto del producto** —pantallas vacías, blanco
+sobre blanco, un 404 en una pantalla que funciona—. Antes de lanzar a los auditores a la vez:
+
+| Riesgo | Qué se ve | Qué se hace |
+|---|---|---|
+| **El límite de peticiones** (en AMC, `UserRateThrottle` de DRF: 2.000/h por usuario; el de login, por conexión) | Páginas que cargan **vacías, sin mensaje**; el único síntoma es un `429` en la consola o en la red | **Una cuenta por auditor** y **una sesión reutilizada por auditor**, nunca un login por script. Si un auditor dice «pantalla vacía» o «no encuentro el botón», **se mira el 429 antes de creer el hallazgo** (consola y red del navegador). La pentester va antes o después de los de navegador, no a la vez |
+| **Datos que se mueven** | Recuentos distintos entre dos auditores de la misma ronda | §1b punto 6: el encargo dice qué no se escribe. Los ids de una demo que se re-siembra se descubren por API, no se escriben a mano (si no, salen 404 que no son del panel) |
+| **El navegador** | Playwright no arranca, o un `set_input_files` entrega un fichero de 0 bytes y el POST muere con `ERR_ALPN_NEGOTIATION_FAILED` | El Chromium **del sistema** (detectar el binario, como `scripts/screenshot.py`; aquí `/usr/bin/chromium-browser`). El Chromium de **snap no lee `/tmp`**: las fixtures que se suben van bajo `/home`. Comprobación en una línea: `document.querySelector('input[type=file]').files[0].size` → 0 es esto |
+| **Colores en `oklch()` o `color(srgb …)`** | Contraste **exactamente 1,00** en todo: es la firma de una medición rota, no de un panel roto | `getComputedStyle` devuelve el color en el espacio en que se declaró, y un regex de `rgb()` no lo lee y cae al blanco. Se resuelve pintando el color en un `<canvas>` de 1×1 y leyendo `getImageData` (el snippet está en las fichas de Vera §R-B y de Aitor) |
+| **Código viejo servido** | La captura enseña lo de antes del arreglo, y `manage.py shell` (que carga el fichero fresco) dice que está bien | `runserver --noreload` no recarga: **reiniciar el servidor tras tocar backend, antes de capturar** |
+| **Una captura reducida como prueba de un carácter** | «Falta la tilde» leído de una captura de 390 px vista a 271 | Para tildes, ñ, comillas o guiones la evidencia 👁 es el texto del DOM (`el.textContent`), no la imagen (`verdict-contract.md`) |
+
+Y dos comprobaciones baratas antes de fiarse de una tanda de capturas: que **no pesen todas lo
+mismo** (si pesan igual, no entraste: es la pantalla de login) y que el contraste **no salga 1,00**
+(si sale, no estás leyendo los colores). El instrumento que no puede medir aborta
+(`verification.md` §El instrumento que no puede medir).
+
+### 2d. Validar cada P0/P1 antes de arreglar (EQ-D13)
+
+Antes del paso 5, un **verificador con contexto limpio** (subagente nuevo, no uno de los tres)
+recibe cada hallazgo P0/P1 de Lidia, Vera e Ignacio **con su material crudo** —la captura, el
+selector, el DOM, el `fichero:línea`— y lo **confirma** o lo **descarta** citando lo que vio
+(`verification.md` §Nivel 4: sin material, su veredicto es un eco). Solo los confirmados entran en la
+lista de arreglos y en el informe al Usuario; los descartados se quedan en el acta con su porqué. El
+coste es una pasada más; el ahorro, no arreglar fantasmas (un contraste 1,00 de un `oklch()` mal leído,
+un 429 tomado por pantalla vacía, §2c).
+
+Con la validación se escribe el **acta** de la iteración (`iter-<n>/acta.json`, formato:
+`gate_auditor.py --ejemplo`): puerta `ui`, autor (quien construyó y arregla), los auditores con su
+informe, las rondas con su alcance y cada P0/P1 con `validacion`, `validador` y `evidencia`.
+
+### 2e. Trampas del arnés — antes de creerle un negativo al instrumento (EQ-27, sub-ola 3.14)
+
+Cosechadas de las memorias de Lidia, Vera e Ignacio en tres proyectos (31-10). Valen para los tres,
+por eso viven aquí y no en cada ficha. La raíz común: **un instrumento nuevo se calibra contra un caso
+de resultado conocido antes de creerle un «0» o un «no funciona»**, y el síntoma se contrasta por otra
+vía (el mismo endpoint con `curl`, otro método de interacción) antes de reportarlo.
+
+| Trampa | Síntoma falso | Qué se hace |
+|---|---|---|
+| URL final `/login` | N capturas byte-idénticas (mismo md5) que «auditan» el login | Abortar si la URL final acaba en `/login`; comparar md5 de capturas hermanas |
+| Token en `sessionStorage` | `storage_state()` no lo guarda: todas las capturas, del login | Comprobar con `page.evaluate(() => JSON.stringify(sessionStorage))` tras entrar; reutilizar con `add_init_script` o una sola `page` por ancho |
+| Color `oklab()`/`oklch()` (Tailwind 4, también `bg-x/25`) | Un parser de `rgb()` da null → blanco → contraste sin medir o fantasma | Componer en canvas 2D y leer el píxel; cordura antes: `oklab(0.769729 0.0546647 0.155194 / 0.25)` sobre blanco = `rgb(252,231,194)`. El medidor no ve `background-image` (degradados): mirar el píxel |
+| Shell con scroll en `<main>` | `documentElement.scrollWidth == clientWidth` siempre: el desborde no puede dar positivo; `full_page=True` devuelve solo el viewport | Medir contra el contenedor que hace scroll (`main.getBoundingClientRect()`, `main.scrollHeight`); un sidebar `sticky`+`100vh` descolgado en `full_page` es artefacto |
+| `is_visible()` | `true` para elementos fuera de la zona visible por overflow | `bounding_box().x < viewport.width` y `scrollWidth` frente a `clientWidth`, con captura |
+| Selectores genéricos | `[class*=modal]`, «el primer `overflow-x:auto`» (suele ser el nav), `has_text` sin anclar («No» casa con «Prefiero no contestar») | Anclar con `closest()` y regex `^…$`; `nav a:visible` con menú duplicado; confirmar con captura antes/después |
+| `check({force:true})` sobre input `sr-only` | No dispara el `onChange` de React: casi un P0 de seguridad falso | `label.click()` y comprobar `checked` con `evaluate`; todo P0 se reproduce con dos vías |
+| `accept_downloads=False` | «La descarga baja 0 bytes, 3/3» | Contrastar el endpoint con `curl`; las condiciones del arnés (descargas, viewport, permisos) van en el informe |
+| Visor de PDF en headless | Pantalla negra | Bytes y cabecera `%PDF` con `fetch(location.href)`; pintar con `pdftoppm -png -r 70` |
+| Avisos efímeros (toasts) | Un grep del texto esperado solo confirma la hipótesis | `MutationObserver` sobre nodos nuevos; el estado de carga, con `page.route` diferido, no con `sleep` |
+| Fila escrita por el propio instrumento | Un stub de la ronda anterior pasa por dato real | Antes de que una fila sostenga un P0: ¿la escribí yo? Con datos de demo compartidos, medir la contaminación |
+
+El compositor de contraste que resuelve las filas de `oklab()` y degradados está **versionado** en
+`agents/vera-art-director/instruments/contrast-compositor.js`, con su fixture
+(`smoke/harvest/contrast_fixture.py`) y sus límites en el `README.md` de esa carpeta (AN-25). Un
+instrumento que un auditor arregla en una ronda se guarda ahí, no en el scratchpad. Y probar como
+cliente sin ensuciar la cola real: `agents/shared/clean-testing.md`.
 
 ### 3. Cálculo del score
 
@@ -133,6 +321,23 @@ score_wave = (lidia_avg + vera_avg) / 2   # Ignacio NO entra en la media (mide "
 Recalculado sobre TPL1-W3 con los ficheros ya guardados: Lidia 6.6/7.1/7.75 →
 **7.14/7.71/8.43**, y el `score_wave` de iter-3 habría sido **7.89** en vez de 7.55.
 **Sigue por debajo de 9.0** — ver el aviso del gate.
+
+### 3b. Comparación por pares: ¿la nueva es mejor que la anterior? (EQ-36)
+
+Desde la iteración 2, además de la nota, cada auditor contesta **una pregunta más**: entre la versión
+anterior y la nueva de las pantallas que cambiaron, ¿cuál es mejor y por qué? Las ve como **A y B en
+orden aleatorio** (el orquestador guarda qué es cuál); no se le dice cuál es la nueva. En su salida:
+
+```json
+"pairwise": {"mejor": "A", "porque": "el CTA se ve sin hacer scroll en 390", "pantallas": ["/precios"],
+             "a_es": "iter-1", "b_es": "iter-2"}
+```
+
+La guía oficial de dynamic workflows lo dice así: *la comparación por pares es más fiable que la nota
+absoluta* (el patrón *tournament*). La nota se mantiene —quitarla rompería los históricos—, pero el
+par manda cuando discrepan: si la media sube y **la mayoría de los jueces prefiere la anterior**, la
+iteración **no cuenta como mejora** para la regla de parada de §6 y se anota en `RESULT.md`
+(«la nota sube, el par dice que no»). Es la defensa contra un juez que puntúa alto o bajo por costumbre.
 
 ### 4. Gate PASS estricto — **el categórico primero**
 
@@ -228,12 +433,13 @@ sin esa línea escrita, la siguiente sesión vuelve a no saber si su número val
 ### 5. Bucle de mejora (si score < 9.0)
 
 1. **El fix lo aplica el Tech Lead en la sesión** — no un subagente: arreglar exige ver el código,
-   el boceto y la conversación, que es justo lo que un contexto limpio no tiene. Consume:
+   el boceto y la conversación, que es justo lo que un contexto limpio no tiene. De los P0/P1, solo
+   los **confirmados** en §2d. Consume:
    - `lidia/REPORT.md` (P0 y P1)
    - `vera/findings.json` (todo lo de severity ≥ medium)
    - `ignacio/REPORT.md` (UGLY + AMATEUR + PLACEHOLDER + INCONSISTENT)
 2. Implementa fixes (en worktree si se está paralelizando; en main si es wave única) siguiendo
-   `frontend/CLAUDE.md` y cerrando cada pantalla tocada
+   `patterns/stack/` (`estilos` · `componentes` · `accesibilidad`) y cerrando cada pantalla tocada
    con la skill `ux-reviewer`. Si un finding obliga a **replantear la forma** de la pantalla, eso ya
    no es un fix: es `disenar-pantalla`, media ronda.
 3. `iteration_n += 1` → vuelve al paso 2 (re-ejecutar los 3 auditores).
@@ -241,19 +447,28 @@ sin esa línea escrita, la siguiente sesión vuelve a no saber si su número val
 
 ### 6. Tope de iteraciones
 
-- Máximo **5 iteraciones** consecutivas.
-- Si tras 5 iteraciones no se alcanza `score_wave ≥ 9.0` **o** el score no mejora ≥ 0.3 entre dos
-  iteraciones consecutivas:
-  - **Escalar al Supervisor**: `openclaw gateway wake --text "BLOCKED [proyecto]: QA loop wave <ID> no converge — score actual <X> tras <n> iter" --mode now`
+- Máximo **3 iteraciones** consecutivas (`audit-team.md` §3: ≤3 rondas por puerta, de la 2ª en
+  adelante solo sobre el diff). Perseguir cada hallazgo hasta el último lleva
+  a sobreingeniería.
+- Si tras 3 iteraciones no se alcanza `score_wave ≥ 9.0` **o** el score no mejora ≥ 0.3 entre dos
+  iteraciones consecutivas **o** la comparación por pares (§3b) dice que la nueva no es mejor:
+  - **Escalar al Supervisor** por el canal que exista en la máquina (`CLAUDE.md` regla 4; aquí,
+    Telegram): `python3 .claude/scripts/avisar.py "BLOCKED [proyecto]: QA loop wave <ID> no converge —
+    score actual <X> tras <n> iter"`. Si sale con 1, el aviso no llegó: dilo en `RESULT.md`.
   - Documentar el bloqueo en `RESULT.md`.
   - Detener el loop.
 
 ### 7. Cierre
 
 Al PASS:
+- **Gate del acta**: `python3 .claude/scripts/gate_auditor.py .docs/feedback/qa-loop/<WAVE_ID>/iter-<n>/acta.json`
+  en 0. Con 1, la wave no cierra aunque la nota llegue: falta un auditor distinto del autor, se pasó un
+  tope o hay un P0/P1 sin validar (`audit-team.md` §1).
+- Registrar a cada juez: `agent_registry.py add … --puerta ui --hallazgos N --validados V --descartados D`.
 - Marcar la wave como `[x]` en `tasks.md`.
 - Actualizar `MEMORY.md` con la decisión final.
-- Notificar: `openclaw gateway wake --text "DONE [proyecto]: QA loop wave <ID> PASS avg <X>" --mode now`
+- Notificar por el mismo canal:
+  `python3 .claude/scripts/avisar.py "DONE [proyecto]: QA loop wave <ID> PASS avg <X>"`.
 
 ---
 
@@ -264,6 +479,7 @@ Al PASS:
 └── <WAVE_ID>/
     ├── RESULT.md                        ← trazabilidad de versiones, score final
     ├── iter-1/
+    │   ├── acta.json                    ← auditores, rondas y validación de cada P0/P1 (§2d)
     │   ├── lidia/   { REPORT.md, trend-delta.json, screenshots/ }
     │   ├── vera/    { REPORT.md, findings.json, screenshots/ }
     │   └── ignacio/ { REPORT.md, screenshots/ }
@@ -272,7 +488,7 @@ Al PASS:
 ```
 
 > `.gitignore`: los screenshots son grandes — versiona solo `REPORT.md`/`findings.json`/`RESULT.md`
-> (`.docs/feedback/*/**/screenshots/*.png`). Ver `claude-dir-staging.md`.
+> (`.docs/feedback/*/**/screenshots/*.png`). Al crear un agente, `create-agent` paso 8 lo añade.
 
 **Gate de formato antes de cerrar la iteración** (AUD-7) — cuesta un segundo y evita descubrir en
 la ronda 4 que las rondas 1-3 no se pueden comparar:
@@ -298,9 +514,16 @@ alias) y qué cobertura de anclas trae la ronda. Esquema:
 - ❌ **Parchear en caliente mientras los auditores corren** → destruye la ronda (§1b). Ya pasó, y
   el 7.55 con el que se cerró TPL1-W3 no describe ningún objeto real.
 - ❌ Promediar las notas de auditores que miraron **builds distintos**.
+- ❌ Dar por bueno el objeto porque el sha no cambió → el sha no ve el bundle servido ni la API (§1b.5).
+- ❌ Creerse una «pantalla vacía» sin mirar si hubo un `429`, o lanzar tres auditores con la misma
+  cuenta (§2c).
+- ❌ Reportar un contraste de 1,00 como hallazgo → es la firma de un `oklch()` mal leído (§2c).
 - ❌ Leer los `trend.json` de los auditores como su boletín de notas: miden **el producto** (AUD-1).
 - ❌ Contar como cobertura un auditor que **nunca ha corrido** (§2b) — parece cobertura y no la da.
 - ❌ Cambiar el perfil de rúbrica a mitad de ronda para que salga mejor el número.
+- ❌ Arreglar un P0/P1 que nadie validó, o validarlo pasando solo la conclusión del juez (§2d).
+- ❌ Contar como mejora una iteración en la que la nota sube y los jueces prefieren la anterior (§3b).
+- ❌ Una cuarta iteración, o re-auditar la web entera desde la 2ª (§6).
 - ❌ Cerrar la ronda sin pasar `trend_lint.py` sobre el `trend-delta.json` de Lidia (exit 1 = las
   rondas no se pueden comparar entre sí, y el fallo aparece al parsear, no al auditar).
 - ❌ Tratar el `+0.3` de la regla de parada como un umbral con significado estadístico mientras la
@@ -332,7 +555,13 @@ En `tasks.md` de cada wave con UI, añade el item de QA como gate de cierre:
 
 ---
 
-_Rule version: 1.1 · 2026-08-08 · adaptada de un patrón en producción (productivity_system).
+_Rule version: 1.4 · 2026-10-31 (sub-ola 3.11): §2d validación de cada P0/P1 por un verificador
+limpio y acta de la iteración (EQ-D13, EQ-1); §3b comparación por pares (EQ-36); topes de la puerta y
+tope de 3 iteraciones, de la 2ª en adelante solo sobre el diff (EQ-D8); el cierre exige `gate_auditor.py`.
+v1.3 · 2026-10-21 (sub-ola 2.16): §1b.5 certificar el objeto al abrir y al cerrar
+(`certifica_objeto.py`, MO-51, de elvion) y §1b.6 congelar también commits, build y datos; §2c QA en
+paralelo contra un despliegue vivo (MO-27, de AMC); el disparo autónomo pasa a `/goal` (MO-30).
+v1.1 · 2026-08-08 · adaptada de un patrón en producción (productivity_system).
 v1.1 (AUD-1/3/5/7/8/9/11/15): §1b build congelado — la causa raíz que invalidó iter-3 · §2b dueño
 único por dimensión y huecos declarados · §3 el score de Lidia pasa a `score_profiled` · §4 los
 gates categóricos se evalúan ANTES que los numéricos, con el aviso honesto de que el 9.0 sigue sin

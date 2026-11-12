@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="es">
+<!--
+  PLANTILLA ARQUITECTURA · diagrama SVG CLICABLE (nodo → panel lateral con deps/archivos).
+  ── Cómo usar ──────────────────────────────────────────────────────────────
+  1) Define los nodos y aristas en el objeto NODES/EDGES del <script> (id, label, x, y, group,
+     desc, files[], deps[]).  2) El SVG se dibuja solo desde esos datos.  3) Click en un nodo →
+  panel lateral. Tier 2 (rules/html-output.md). Self-contained, sin CDN, tokens = base.html.
+  Pensada para formar parte de un plan multi-página (lleva la .topnav; ver hub.html).
+-->
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>[Proyecto] · Arquitectura</title>
+<style>
+  :root{
+    --ink:#1b1b1f;--muted:#6b6b76;--faint:#9a9aa4;--paper:#f6f4ef;--card:#fff;--line:#e4e0d7;
+    --navy:#1b2a4a;--accent:#c2410c;--green:#15803d;--blue:#1d4ed8;--violet:#6d28d9;--red:#b42318;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.55}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 22px}
+  .topnav{position:sticky;top:0;z-index:20;background:rgba(246,244,239,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .topnav .wrap{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:9px 22px}
+  .topnav .brand{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--navy);font-weight:700;margin-right:8px}
+  .topnav a{font-size:13px;color:var(--muted);text-decoration:none;padding:6px 10px;border-radius:8px}
+  .topnav a:hover{background:#efece4;color:var(--navy)} .topnav a.active{background:var(--navy);color:#fff}
+  header.hero{padding:34px 0 18px}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600;margin:0 0 10px}
+  h1{font-size:clamp(24px,3.6vw,38px);margin:0 0 8px;letter-spacing:-.02em}h1 em{font-style:italic;color:var(--navy)}
+  .lead{font-size:16px;color:var(--muted);max-width:78ch;margin:0}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;margin:14px 0 4px;font-size:12.5px;color:var(--muted)}
+  .legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:middle}
+  .stage{display:grid;grid-template-columns:1fr 320px;gap:16px;padding:14px 0 40px}
+  @media(max-width:860px){.stage{grid-template-columns:1fr}}
+  .diagram{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:8px;overflow:auto}
+  svg{width:100%;height:auto;display:block}
+  .node{cursor:pointer}
+  .node rect{rx:11;stroke-width:1.5;transition:.12s}
+  .node:hover rect{filter:brightness(.97)}
+  .node.sel rect{stroke:var(--accent);stroke-width:3}
+  .node text{font-family:var(--sans);font-size:12.5px;fill:#fff;font-weight:600}
+  .node text.sub{font-size:10px;fill:#dfe5ee;font-weight:500}
+  .edge{stroke:#9aa1ad;stroke-width:1.6;fill:none;marker-end:url(#arrow)}
+  .edge.dash{stroke-dasharray:5 4}
+  aside.panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;align-self:start;position:sticky;top:64px}
+  aside.panel h3{margin:0 0 4px;font-size:17px;color:var(--navy)}
+  aside.panel .tag{font-family:var(--mono);font-size:11px;color:var(--faint)}
+  aside.panel p{font-size:13.5px;color:var(--muted)}
+  aside.panel h4{margin:14px 0 6px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+  aside.panel code{font-family:var(--mono);font-size:12px;background:#efece4;color:var(--navy);padding:1px 6px;border-radius:6px;display:inline-block;margin:2px 4px 2px 0}
+  aside.panel ul{margin:4px 0;padding-left:18px;font-size:13px}
+  footer{padding:26px 0 60px;color:var(--faint);font-size:13px}
+</style>
+</head>
+<body>
+<nav class="topnav"><div class="wrap">
+  <span class="brand">[PROYECTO]</span>
+  <a href="index.html">Overview</a>
+  <a href="architecture.html" class="active">Arquitectura</a>
+  <a href="scope-and-boundaries.html">Alcance</a>
+  <a href="data-model.html">Datos</a>
+  <a href="user-flows.html">Flujos</a>
+  <a href="integrations.html">Integraciones</a>
+  <a href="parallelization.html">Paralelización</a>
+  <a href="dashboard.html">Dashboard</a>
+</div></nav>
+
+<header class="hero"><div class="wrap">
+  <p class="eyebrow">Arquitectura · flujo de datos</p>
+  <h1>Arquitectura <em>del sistema</em></h1>
+  <p class="lead">Haz click en cualquier nodo para ver sus dependencias y archivos. Las flechas siguen el flujo de un mensaje.</p>
+  <div class="legend">
+    <span><i style="background:#334155"></i>Canal</span>
+    <span><i style="background:#1b2a4a"></i>Core/Engine</span>
+    <span><i style="background:#6d28d9"></i>Datos/RAG</span>
+    <span><i style="background:#15803d"></i>Integración</span>
+  </div>
+</div></header>
+
+<div class="wrap stage">
+  <div class="diagram">
+    <svg id="svg" viewBox="0 0 760 520" role="img" aria-label="Diagrama de arquitectura">
+      <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#9aa1ad"/></marker></defs>
+      <g id="edges"></g><g id="nodes"></g>
+    </svg>
+  </div>
+  <aside class="panel" id="panel">
+    <span class="tag">nodo</span>
+    <h3 id="p-title">Selecciona un nodo</h3>
+    <p id="p-desc">Click en una caja del diagrama para ver su descripción, dependencias y archivos clave.</p>
+    <div id="p-extra"></div>
+  </aside>
+</div>
+
+<footer class="wrap">Diagrama generado desde datos · un .html autocontenido · snapshot [FECHA].</footer>
+
+<script>
+  /* ===== EDITA AQUÍ: nodos y aristas (ejemplo = chatbot multicanal) ===== */
+  const COLORS={channel:"#334155",core:"#1b2a4a",data:"#6d28d9",integ:"#15803d"};
+  const NODES=[
+    {id:"web",label:"Web Widget",sub:"IIFE Shadow-DOM",x:40,y:40,group:"channel",desc:"Widget embebido en la web del cliente.",files:["frontend/widget/src/main.tsx"],deps:["adapter"]},
+    {id:"wa",label:"WhatsApp",sub:"ManyChat",x:40,y:130,group:"channel",desc:"Canal WhatsApp Coexistence vía ManyChat.",files:["integrations/manychat/"],deps:["adapter"]},
+    {id:"ig",label:"Instagram",sub:"ManyChat",x:40,y:220,group:"channel",desc:"DMs de Instagram vía ManyChat.",files:["integrations/manychat/"],deps:["adapter"]},
+    {id:"adapter",label:"Channel Adapter",sub:"normalize/send",x:250,y:130,group:"core",desc:"Capa que normaliza entrada y despacha salida; el engine es agnóstico al canal.",files:["core/channels/base.py"],deps:["engine"]},
+    {id:"engine",label:"Engine LangGraph",sub:"ReAct agent⇄tools",x:470,y:130,group:"core",desc:"StateGraph con loop agente/tools + checkpointer Postgres + LLM multi-proveedor.",files:["core/workflow/xera_graph.py"],deps:["rag","integ"]},
+    {id:"rag",label:"RAG + Qdrant",sub:"xera_musas_kb",x:470,y:300,group:"data",desc:"Recuperación semántica sobre servicios/FAQ/catálogo. Embeddings configurables.",files:["core/services/rag/"],deps:[]},
+    {id:"integ",label:"Integraciones",sub:"Woo·Flowww·ManyChat",x:680,y:130,group:"integ",desc:"Gateways real+mock tras factory.py. Woo (no pago), Flowww (solo agenda), ManyChat.",files:["integrations/factory.py"],deps:[]}
+  ];
+  const EDGES=[["web","adapter"],["wa","adapter"],["ig","adapter"],["adapter","engine"],["engine","rag"],["engine","integ"]];
+  const W=190,H=56;
+  const byId=Object.fromEntries(NODES.map(n=>[n.id,n]));
+  const eg=document.getElementById("edges"),ng=document.getElementById("nodes");
+  EDGES.forEach(([a,b])=>{const A=byId[a],B=byId[b];const x1=A.x+W,y1=A.y+H/2,x2=B.x,y2=B.y+H/2;
+    const mx=(x1+x2)/2;const p=`M${x1} ${y1} C ${mx} ${y1}, ${mx} ${y2}, ${x2} ${y2}`;
+    const pa=document.createElementNS("http://www.w3.org/2000/svg","path");pa.setAttribute("d",p);pa.setAttribute("class","edge");eg.appendChild(pa);});
+  NODES.forEach(n=>{const g=document.createElementNS("http://www.w3.org/2000/svg","g");g.setAttribute("class","node");g.dataset.id=n.id;g.setAttribute("transform",`translate(${n.x},${n.y})`);
+    g.innerHTML=`<rect width="${W}" height="${H}" rx="11" fill="${COLORS[n.group]}" stroke="rgba(0,0,0,.15)"/><text x="14" y="24">${n.label}</text><text x="14" y="42" class="sub">${n.sub||""}</text>`;
+    g.onclick=()=>select(n.id);ng.appendChild(g);});
+  function select(id){document.querySelectorAll(".node").forEach(e=>e.classList.toggle("sel",e.dataset.id===id));
+    const n=byId[id];document.getElementById("p-title").textContent=n.label;document.getElementById("p-desc").textContent=n.desc;
+    const deps=n.deps&&n.deps.length?`<h4>Depende de</h4><p>${n.deps.map(d=>byId[d]?byId[d].label:d).join(" · ")}</p>`:"";
+    const files=n.files&&n.files.length?`<h4>Archivos</h4>${n.files.map(f=>`<code>${f}</code>`).join("")}`:"";
+    document.getElementById("p-extra").innerHTML=deps+files;}
+</script>
+</body>
+</html>

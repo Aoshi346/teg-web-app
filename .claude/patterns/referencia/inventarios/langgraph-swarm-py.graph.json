@@ -1,0 +1,120 @@
+{
+ "meta": {
+  "source": "gen_proyecto_graph.py — imports + convención de framework · proyecto langgraph-swarm-py",
+  "proyecto": "langgraph-swarm-py",
+  "sha": "749d445",
+  "date": "2026-08-26",
+  "nodes_total": 4,
+  "edges_total": 3,
+  "reduced": false,
+  "ficheros_por_capa": {
+   "otro": 4,
+   "agente-grafo": 3,
+   "test": 2,
+   "config": 1,
+   "servicio": 1
+  }
+ },
+ "nodes": [
+  {
+   "id": "langgraph_swarm",
+   "label": "langgraph_swarm",
+   "group": "agente-grafo",
+   "kind": "agente-grafo",
+   "files": [
+    "langgraph_swarm/__init__.py",
+    "langgraph_swarm/handoff.py",
+    "langgraph_swarm/swarm.py"
+   ],
+   "loc": 418,
+   "fan_in": 3,
+   "fan_out": 0,
+   "desc": "Annotation is typed as Any instead of StateLike. StateLike",
+   "n_ficheros": 3
+  },
+  {
+   "id": "tests",
+   "label": "tests",
+   "group": "agente-grafo",
+   "kind": "agente-grafo",
+   "files": [
+    "tests/__init__.py",
+    "tests/test_swarm.py",
+    "tests/test_import.py"
+   ],
+   "loc": 279,
+   "fan_in": 0,
+   "fan_out": 1,
+   "desc": "Create fake responses for the model",
+   "n_ficheros": 3
+  },
+  {
+   "id": "examples/research/src/agent",
+   "label": "agent",
+   "group": "servicio",
+   "kind": "servicio",
+   "files": [
+    "examples/research/src/agent/configuration.py",
+    "examples/research/src/agent/prompts.py",
+    "examples/research/src/agent/utils.py",
+    "examples/research/src/agent/agent.py"
+   ],
+   "loc": 168,
+   "fan_in": 0,
+   "fan_out": 1,
+   "desc": "Get raw values from environment or config",
+   "n_ficheros": 4
+  },
+  {
+   "id": "examples/customer_support/src/agent",
+   "label": "agent",
+   "group": "otro",
+   "kind": "otro",
+   "files": [
+    "examples/customer_support/src/agent/customer_support.py"
+   ],
+   "loc": 132,
+   "fan_in": 0,
+   "fan_out": 1,
+   "desc": "Mock data for tools",
+   "n_ficheros": 1
+  }
+ ],
+ "edges": [
+  {
+   "from": "tests",
+   "to": "langgraph_swarm",
+   "kind": "importa",
+   "weight": 1,
+   "evidence": "EXTRACTED"
+  },
+  {
+   "from": "examples/research/src/agent",
+   "to": "langgraph_swarm",
+   "kind": "importa",
+   "weight": 1,
+   "evidence": "EXTRACTED"
+  },
+  {
+   "from": "examples/customer_support/src/agent",
+   "to": "langgraph_swarm",
+   "kind": "importa",
+   "weight": 1,
+   "evidence": "EXTRACTED"
+  }
+ ],
+ "communities": {
+  "agente-grafo": {
+   "label": "Agente · grafo",
+   "color": "#7c3aed"
+  },
+  "servicio": {
+   "label": "Backend · servicios",
+   "color": "#0d9488"
+  },
+  "otro": {
+   "label": "Sin clasificar",
+   "color": "#9aa1ad"
+  }
+ }
+}

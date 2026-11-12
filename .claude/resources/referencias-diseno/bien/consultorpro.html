@@ -1,0 +1,2110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ElevaITI — Tu Departamento de IA Completo para Agencias</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --primary: #223843;
+            --accent: #A00505;
+            --accent-hover: #8a0404;
+            --bg: #EFF1F3;
+            --bg-white: #FFFFFF;
+            --text: #223843;
+            --text-light: #4a6274;
+            --border: #d5dbe0;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* ── UTILITY ── */
+        .section { padding: 80px 0; }
+        .section--white { background: var(--bg-white); }
+        .section--dark { background: var(--primary); color: #fff; }
+        .section--accent { background: var(--accent); color: #fff; }
+
+        .section-label {
+            display: inline-block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 12px;
+        }
+        .section--dark .section-label { color: #ff6b6b; }
+
+        h2 {
+            font-size: clamp(1.8rem, 4vw, 2.8rem);
+            font-weight: 800;
+            line-height: 1.15;
+            margin-bottom: 20px;
+        }
+        h3 {
+            font-size: clamp(1.2rem, 2.5vw, 1.5rem);
+            font-weight: 700;
+            line-height: 1.3;
+            margin-bottom: 12px;
+        }
+
+        .lead {
+            font-size: clamp(1rem, 2vw, 1.2rem);
+            color: var(--text-light);
+            max-width: 680px;
+            line-height: 1.7;
+        }
+        .section--dark .lead { color: #b0c4ce; }
+        .section--white .lead { color: var(--text-light); }
+
+        /* ── BUTTONS ── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 16px 36px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+        }
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+            box-shadow: 0 4px 20px rgba(160,5,5,0.35);
+        }
+        .btn-primary:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(160,5,5,0.4);
+        }
+        .btn-secondary {
+            background: var(--bg-white);
+            color: var(--primary);
+            border: 2px solid var(--border);
+        }
+        .btn-secondary:hover { border-color: var(--primary); }
+        .btn-large {
+            padding: 20px 48px;
+            font-size: 1.15rem;
+            border-radius: 10px;
+        }
+        .btn-ghost-white {
+            background: transparent;
+            color: #fff;
+            border: 2px solid rgba(255,255,255,0.4);
+        }
+        .btn-ghost-white:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: #fff;
+        }
+
+        /* ── HEADER ── */
+        header {
+            background: rgba(34,56,67,0.97);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: 14px 0;
+        }
+        .header-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .logo {
+            font-size: 1.3rem;
+            font-weight: 900;
+            color: #fff;
+            text-decoration: none;
+            letter-spacing: -0.5px;
+        }
+        .logo span { color: var(--accent); }
+        nav { display: flex; gap: 24px; align-items: center; }
+        nav a {
+            color: rgba(255,255,255,0.75);
+            text-decoration: none;
+            font-size: 0.88rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        nav a:hover { color: #fff; }
+        .nav-cta {
+            background: var(--accent);
+            color: #fff !important;
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+        .nav-cta:hover { background: var(--accent-hover) !important; }
+
+        /* ── HERO ── */
+        .hero {
+            background: linear-gradient(165deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+            color: #fff;
+            padding: 100px 0 80px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        .hero-badge {
+            display: inline-block;
+            background: rgba(160,5,5,0.25);
+            border: 1px solid rgba(160,5,5,0.5);
+            color: #ff8080;
+            padding: 6px 16px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 28px;
+            letter-spacing: 0.5px;
+        }
+        .hero h1 {
+            font-size: clamp(2.2rem, 6vw, 4rem);
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 24px;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .hero h1 .highlight {
+            color: #ff6b6b;
+            position: relative;
+        }
+        .hero-sub {
+            font-size: clamp(1rem, 2.5vw, 1.3rem);
+            color: rgba(255,255,255,0.75);
+            max-width: 680px;
+            margin: 0 auto 40px;
+            line-height: 1.7;
+        }
+        .hero-cta-group {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 50px;
+        }
+        .hero-stats {
+            display: flex;
+            gap: 48px;
+            justify-content: center;
+            flex-wrap: wrap;
+            padding-top: 40px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        .hero-stat { text-align: center; }
+        .hero-stat-num {
+            font-size: 2rem;
+            font-weight: 900;
+            color: #fff;
+            line-height: 1;
+        }
+        .hero-stat-label {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.6);
+            margin-top: 4px;
+        }
+
+        /* ── QUIEN SOY ── */
+        .quien-soy-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 60px;
+            align-items: center;
+            margin-top: 48px;
+        }
+        .miller-card {
+            background: var(--primary);
+            border-radius: 16px;
+            padding: 40px;
+            color: #fff;
+            position: relative;
+        }
+        .miller-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), #e05050);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 900;
+            margin-bottom: 20px;
+        }
+        .miller-name { font-size: 1.3rem; font-weight: 800; margin-bottom: 4px; }
+        .miller-title { font-size: 0.85rem; color: #a0c4ce; margin-bottom: 20px; }
+        .miller-quote {
+            border-left: 3px solid var(--accent);
+            padding-left: 16px;
+            font-style: italic;
+            color: rgba(255,255,255,0.85);
+            font-size: 0.95rem;
+            line-height: 1.7;
+            margin-bottom: 20px;
+        }
+        .miller-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+        .miller-tag {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.15);
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 0.78rem;
+            color: rgba(255,255,255,0.8);
+        }
+        .validation-list { display: flex; flex-direction: column; gap: 20px; }
+        .validation-item {
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+            padding: 20px;
+            background: var(--bg);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+        .validation-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--accent), #e05050);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+        .validation-text strong { display: block; font-size: 1rem; margin-bottom: 2px; }
+        .validation-text span { font-size: 0.85rem; color: var(--text-light); }
+
+        /* ── PROBLEMA ── */
+        .problems-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 24px;
+            margin-top: 48px;
+        }
+        .problem-card {
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px 28px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .problem-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(34,56,67,0.1);
+        }
+        .problem-num {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--accent);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+        .problem-icon {
+            font-size: 2.5rem;
+            margin-bottom: 16px;
+        }
+        .problem-card h3 { color: var(--primary); }
+        .problem-card p { font-size: 0.9rem; color: var(--text-light); line-height: 1.6; }
+        .problem-result {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+            font-size: 0.85rem;
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        /* ── SOLUCION 4 DEPARTAMENTOS ── */
+        .dept-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 24px;
+            margin-top: 48px;
+        }
+        .dept-card {
+            background: var(--bg-white);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .dept-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(34,56,67,0.12);
+        }
+        .dept-header {
+            padding: 24px 24px 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .dept-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--primary), #2c5364);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+        .dept-num {
+            font-size: 0.7rem;
+            color: var(--accent);
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        .dept-name {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: var(--primary);
+            line-height: 1.2;
+        }
+        .dept-body { padding: 0 24px 24px; }
+        .dept-body ul {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .dept-body li {
+            font-size: 0.88rem;
+            color: var(--text-light);
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+        .dept-body li::before {
+            content: '✓';
+            color: #22c55e;
+            font-weight: 700;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+        .dept-result {
+            background: var(--bg);
+            margin: 0 -24px -24px;
+            padding: 16px 24px;
+            border-top: 1px solid var(--border);
+            font-size: 0.82rem;
+            color: var(--accent);
+            font-weight: 600;
+            font-style: italic;
+        }
+
+        /* ── DIRECTOR IA ── */
+        .director-visual {
+            margin-top: 48px;
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+        }
+        .director-center {
+            background: linear-gradient(135deg, var(--primary), #2c5364);
+            color: #fff;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .director-center-icon {
+            font-size: 3rem;
+            margin-bottom: 12px;
+        }
+        .director-center h3 { color: #fff; margin-bottom: 8px; }
+        .director-center p { color: rgba(255,255,255,0.7); font-size: 0.95rem; }
+        .director-depts {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .director-dept-item {
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px 16px;
+            text-align: center;
+        }
+        .director-dept-item .ddi-icon { font-size: 1.8rem; margin-bottom: 8px; }
+        .director-dept-item .ddi-name { font-size: 0.82rem; font-weight: 700; color: var(--primary); }
+        .director-arrows {
+            text-align: center;
+            color: var(--accent);
+            font-size: 2rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .director-example {
+            background: var(--bg);
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .director-example-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 16px;
+        }
+        .de-you {
+            background: rgba(160,5,5,0.08);
+            border-left: 3px solid var(--accent);
+            padding: 12px 16px;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.95rem;
+            color: var(--primary);
+            font-weight: 500;
+            margin-bottom: 16px;
+        }
+        .de-result {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .de-result-badge {
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* ── ROI ── */
+        .roi-numbers {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 24px;
+            margin-top: 48px;
+        }
+        .roi-big {
+            text-align: center;
+            padding: 40px 24px;
+            background: var(--bg-white);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+        }
+        .roi-big .roi-val {
+            font-size: clamp(2.5rem, 5vw, 3.5rem);
+            font-weight: 900;
+            color: var(--accent);
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+        .roi-big .roi-label {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+        .roi-detail {
+            margin-top: 48px;
+            background: var(--bg);
+            border-radius: 16px;
+            padding: 40px;
+            border: 1px solid var(--border);
+        }
+        .roi-detail h3 { text-align: center; margin-bottom: 32px; }
+        .roi-calc-grid {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 24px;
+            align-items: center;
+            max-width: 700px;
+            margin: 0 auto 24px;
+        }
+        .roi-calc-box {
+            background: var(--bg-white);
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+        .roi-calc-box .rcb-num {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: var(--primary);
+        }
+        .roi-calc-box .rcb-label {
+            font-size: 0.78rem;
+            color: var(--text-light);
+            margin-top: 4px;
+        }
+        .roi-calc-arrow { font-size: 2rem; color: var(--accent); text-align: center; }
+        .roi-highlight-row {
+            display: flex;
+            justify-content: center;
+            gap: 48px;
+            flex-wrap: wrap;
+            padding: 24px;
+            background: rgba(160,5,5,0.06);
+            border-radius: 12px;
+            border: 1px solid rgba(160,5,5,0.2);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        .roi-highlight-row .rih-item { text-align: center; }
+        .roi-highlight-row .rih-num {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: var(--accent);
+        }
+        .roi-highlight-row .rih-label {
+            font-size: 0.78rem;
+            color: var(--text-light);
+        }
+
+        /* ── PROCESO ── */
+        .timeline {
+            position: relative;
+            margin-top: 48px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 28px;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(to bottom, var(--accent), var(--primary));
+            border-radius: 3px;
+        }
+        .timeline-item {
+            display: flex;
+            gap: 28px;
+            margin-bottom: 40px;
+            position: relative;
+        }
+        .timeline-item:last-child { margin-bottom: 0; }
+        .timeline-dot {
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), #e05050);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 1;
+            box-shadow: 0 4px 16px rgba(160,5,5,0.3);
+        }
+        .timeline-content {
+            background: var(--bg-white);
+            border-radius: 16px;
+            padding: 28px;
+            flex: 1;
+            border: 1px solid var(--border);
+        }
+        .timeline-week {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 6px;
+        }
+        .timeline-content h3 { color: var(--primary); margin-bottom: 12px; }
+        .timeline-two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 16px;
+        }
+        .timeline-col-title {
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+        .ti ellos .timeline-col-title { color: var(--accent); }
+        .ti ellos .timeline-col-title { color: #22c55e; }
+        .timeline-col ul {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .timeline-col li {
+            font-size: 0.83rem;
+            color: var(--text-light);
+            display: flex;
+            align-items: flex-start;
+            gap: 6px;
+        }
+        .ti ellos li::before { content: '→'; color: var(--accent); font-weight: 700; }
+        .ti ellos li::before { content: '→'; color: #22c55e; font-weight: 700; }
+        .ti ellos li::before { content: '→'; }
+        .ti ellos li.green::before { content: '→'; color: #22c55e; }
+        .ti ellos li.green::before { content: '→'; color: #22c55e; }
+        .timeline-result {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+            font-size: 0.88rem;
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        /* ── OFERTA ── */
+        .oferta-intro { text-align: center; margin-bottom: 48px; }
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            max-width: 860px;
+            margin: 0 auto 48px;
+        }
+        .pricing-card {
+            background: var(--bg-white);
+            border-radius: 20px;
+            border: 2px solid var(--border);
+            overflow: hidden;
+        }
+        .pricing-card.featured {
+            border-color: var(--accent);
+            box-shadow: 0 8px 40px rgba(160,5,5,0.15);
+        }
+        .pricing-badge {
+            background: var(--accent);
+            color: #fff;
+            text-align: center;
+            padding: 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .pricing-header {
+            padding: 32px;
+            text-align: center;
+        }
+        .pricing-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+        .pricing-price {
+            font-size: 2.8rem;
+            font-weight: 900;
+            color: var(--primary);
+            line-height: 1;
+        }
+        .pricing-price span {
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text-light);
+        }
+        .pricing-normal {
+            font-size: 0.82rem;
+            color: var(--text-light);
+            margin-top: 4px;
+        }
+        .pricing-body { padding: 0 32px 32px; }
+        .pricing-features {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+        .pricing-features li {
+            font-size: 0.88rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            color: var(--text);
+        }
+        .pricing-features li::before {
+            content: '✓';
+            color: #22c55e;
+            font-weight: 700;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+        .pricing-card .btn { width: 100%; }
+
+        /* Bonuses */
+        .bonuses-label {
+            text-align: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--text-light);
+            margin-bottom: 20px;
+        }
+        .bonuses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        .bonus-card {
+            background: var(--bg-white);
+            border-radius: 16px;
+            padding: 28px;
+            border: 1px solid var(--border);
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+        }
+        .bonus-icon {
+            font-size: 2rem;
+            flex-shrink: 0;
+        }
+        .bonus-name {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 1rem;
+            margin-bottom: 4px;
+        }
+        .bonus-value {
+            font-size: 0.78rem;
+            color: var(--accent);
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .bonus-desc { font-size: 0.85rem; color: var(--text-light); }
+
+        /* Valor table */
+        .valor-table-wrap {
+            max-width: 700px;
+            margin: 48px auto 0;
+            background: var(--bg-white);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+        .valor-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .valor-table th {
+            background: var(--primary);
+            color: #fff;
+            padding: 14px 20px;
+            text-align: left;
+            font-size: 0.82rem;
+            font-weight: 600;
+        }
+        .valor-table td {
+            padding: 12px 20px;
+            font-size: 0.88rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text);
+        }
+        .valor-table tr:last-child td { border-bottom: none; }
+        .valor-table tr:last-child td { font-weight: 800; font-size: 1rem; color: var(--accent); }
+        .valor-table .check { color: #22c55e; font-weight: 700; }
+        .valor-table .val-price { color: var(--text-light); }
+        .valor-table .val-incl { color: #22c55e; font-weight: 700; }
+
+        /* ── GARANTIA ── */
+        .garantia-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            max-width: 900px;
+            margin: 48px auto 0;
+        }
+        .garantia-card {
+            background: var(--bg-white);
+            border-radius: 20px;
+            padding: 40px 32px;
+            border: 2px solid var(--border);
+            text-align: center;
+        }
+        .garantia-card h3 { margin-bottom: 16px; }
+        .garantia-icon { font-size: 3rem; margin-bottom: 16px; }
+        .garantia-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            text-align: left;
+            margin: 24px 0;
+        }
+        .garantia-step {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+        .gs-num {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        .gs-text { font-size: 0.9rem; color: var(--text-light); }
+        .garantia-why {
+            margin-top: 20px;
+            padding: 16px;
+            background: var(--bg);
+            border-radius: 10px;
+            font-size: 0.88rem;
+            color: var(--text-light);
+            font-style: italic;
+        }
+
+        /* ── ESCASEZ ── */
+        .escasez-box {
+            background: linear-gradient(135deg, var(--primary), #2c5364);
+            border-radius: 20px;
+            padding: 60px 40px;
+            text-align: center;
+            color: #fff;
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+        }
+        .escasez-box::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 30% 50%, rgba(160,5,5,0.2) 0%, transparent 60%);
+        }
+        .escasez-urgencia {
+            display: inline-block;
+            background: var(--accent);
+            padding: 8px 24px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+            position: relative;
+        }
+        .escasez-count {
+            font-size: clamp(3rem, 8vw, 5rem);
+            font-weight: 900;
+            color: #ff6b6b;
+            line-height: 1;
+            margin-bottom: 8px;
+            position: relative;
+        }
+        .escasez-label-big {
+            font-size: clamp(1.2rem, 3vw, 1.8rem);
+            font-weight: 700;
+            margin-bottom: 32px;
+            position: relative;
+        }
+        .escasez-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            text-align: left;
+            max-width: 400px;
+            margin: 0 auto 32px;
+            position: relative;
+        }
+        .escasez-list li {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.95rem;
+        }
+        .escasez-list li::before { content: '⚡'; }
+        .precio-timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-width: 400px;
+            margin: 0 auto;
+            position: relative;
+        }
+        .pt-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.88rem;
+        }
+        .pt-row.active {
+            background: rgba(160,5,5,0.3);
+            border: 1px solid rgba(160,5,5,0.5);
+            font-weight: 700;
+        }
+        .pt-row .pt-label { color: rgba(255,255,255,0.7); }
+        .pt-row .pt-price { font-weight: 700; }
+        .pt-row.active .pt-label,
+        .pt-row.active .pt-price { color: #fff; }
+        .pt-row .pt-note {
+            font-size: 0.72rem;
+            color: rgba(255,255,255,0.5);
+        }
+
+        /* ── PRUEBA SOCIAL ── */
+        .testimonial-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-top: 48px;
+        }
+        .testimonial-card {
+            background: var(--bg-white);
+            border-radius: 16px;
+            padding: 32px;
+            border: 1px solid var(--border);
+        }
+        .testimonial-header {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .testimonial-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), #2c5364);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: #fff;
+            flex-shrink: 0;
+        }
+        .testimonial-name { font-weight: 800; font-size: 1rem; color: var(--primary); }
+        .testimonial-role { font-size: 0.82rem; color: var(--text-light); }
+        .testimonial-quote {
+            border-left: 3px solid var(--accent);
+            padding-left: 16px;
+            font-style: italic;
+            font-size: 0.95rem;
+            color: var(--text);
+            line-height: 1.7;
+            margin-bottom: 20px;
+        }
+        .testimonial-stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .ts-badge {
+            background: rgba(160,5,5,0.08);
+            color: var(--accent);
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 0.78rem;
+            font-weight: 700;
+        }
+        .validacion-row {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 32px;
+            margin-top: 48px;
+            padding-top: 40px;
+            border-top: 1px solid var(--border);
+        }
+        .validacion-item {
+            text-align: center;
+        }
+        .validacion-num {
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--accent);
+        }
+        .validacion-text {
+            font-size: 0.82rem;
+            color: var(--text-light);
+            margin-top: 4px;
+        }
+
+        /* ── FAQ ── */
+        .faq-list {
+            max-width: 760px;
+            margin: 48px auto 0;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .faq-item {
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .faq-q {
+            padding: 20px 24px;
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--primary);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+        .faq-q::after {
+            content: '+';
+            font-size: 1.4rem;
+            color: var(--accent);
+            font-weight: 300;
+            flex-shrink: 0;
+            margin-left: 12px;
+        }
+        .faq-a {
+            padding: 0 24px 20px;
+            font-size: 0.92rem;
+            color: var(--text-light);
+            line-height: 1.7;
+            display: none;
+        }
+        .faq-item.open .faq-a { display: block; }
+        .faq-item.open .faq-q::after { content: '−'; }
+
+        /* ── FOOTER CTA ── */
+        .footer-cta {
+            background: linear-gradient(165deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+            padding: 80px 0;
+            text-align: center;
+            color: #fff;
+        }
+        .footer-cta h2 {
+            color: #fff;
+            max-width: 700px;
+            margin: 0 auto 16px;
+        }
+        .footer-cta .lead {
+            color: rgba(255,255,255,0.7);
+            margin: 0 auto 40px;
+        }
+        .contact-row {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 32px;
+            margin-top: 40px;
+            padding-top: 32px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.7);
+        }
+        .contact-item .ci-icon { font-size: 1.2rem; }
+        .footer-bottom {
+            margin-top: 40px;
+            font-size: 0.78rem;
+            color: rgba(255,255,255,0.4);
+        }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 768px) {
+            nav { display: none; }
+            .hero { padding: 70px 0 60px; }
+            .hero h1 { font-size: 2rem; }
+            .hero-stats { gap: 28px; }
+            .quien-soy-grid { grid-template-columns: 1fr; }
+            .miller-card { order: -1; }
+            .pricing-grid { grid-template-columns: 1fr; max-width: 420px; }
+            .garantia-grid { grid-template-columns: 1fr; }
+            .testimonial-grid { grid-template-columns: 1fr; }
+            .timeline::before { left: 20px; }
+            .timeline-dot { width: 44px; height: 44px; font-size: 0.9rem; }
+            .timeline-two-col { grid-template-columns: 1fr; }
+            .director-depts { grid-template-columns: repeat(2, 1fr); }
+            .roi-calc-grid { grid-template-columns: 1fr; }
+            .escasez-box { padding: 40px 24px; }
+        }
+
+        @media (max-width: 480px) {
+            .hero-cta-group { flex-direction: column; align-items: stretch; }
+            .hero-cta-group .btn { text-align: center; }
+            .hero-stats { flex-direction: column; gap: 16px; }
+            .director-depts { grid-template-columns: 1fr 1fr; }
+            .bonuses-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER -->
+    <header>
+        <div class="container header-inner">
+            <a href="#" class="logo">Eleva<span>ITI</span></a>
+            <nav>
+                <a href="#solucion">Departamentos</a>
+                <a href="#proceso">Proceso</a>
+                <a href="#oferta">Precios</a>
+                <a href="#garantia">Garantía</a>
+                <a href="#faq">FAQ</a>
+                <a href="https://calendly.com/miller-elevaiti" class="nav-cta" target="_blank">Agenda Demo</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- HERO -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-badge">🔥 Solo 7 plazas disponibles Abril 2026</div>
+            <h1>Tu Agencia Trabaja <span class="highlight">3-4x Más Rápido</span> Sin Contratar</h1>
+            <p class="hero-sub">
+                Instalo 4 Departamentos de IA completos — Administración, Ventas, Desarrollo y Marketing —
+                coordinados por un Director virtual. Tu agencia escala sin contratar. Tú recuperas tu vida.
+            </p>
+            <div class="hero-cta-group">
+                <a href="https://calendly.com/miller-elevaiti" class="btn btn-primary btn-large" target="_blank">
+                    🚀 Agenda Demo Gratuita
+                </a>
+                <a href="#solucion" class="btn btn-ghost-white">
+                    Ver Cómo Funciona
+                </a>
+            </div>
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <div class="hero-stat-num">70→25h</div>
+                    <div class="hero-stat-label">Horas/semana recuperadas</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="hero-stat-num">3-4x</div>
+                    <div class="hero-stat-label">Productividad real</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="hero-stat-num">4 Semanas</div>
+                    <div class="hero-stat-label">Para verlo funcionando</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="hero-stat-num">1,266%</div>
+                    <div class="hero-stat-label">ROI conservador</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- QUIEN SOY -->
+    <section class="section section--white" id="quien-soy">
+        <div class="container">
+            <div class="section-label">01 — Quién Soy</div>
+            <h2>Construí esto para salvarme a mí mismo</h2>
+            <p class="lead">Ingeniero en robótica. Trabajaba 70h/semana en tareas manuales mientras automatizaba fábricas enteras. Hasta que decidí automatizar mi propio negocio.</p>
+
+            <div class="quien-soy-grid">
+                <div class="miller-card">
+                    <div class="miller-avatar">ME</div>
+                    <div class="miller-name">Miller Espinosa</div>
+                    <div class="miller-title">Ingeniero en Robótica · Fundador ElevaITI</div>
+                    <div class="miller-quote">
+                        "La tecnología debería trabajar para ti, no al revés. Construí este sistema para salvarme de las 70 horas semanales. Funcionó tan bien que ahora lo comparto."
+                    </div>
+                    <div class="miller-tags">
+                        <span class="miller-tag">🧠 Ing. Robótica</span>
+                        <span class="miller-tag">🏢 3 Negocios</span>
+                        <span class="miller-tag">⚡ 70→25h/sem</span>
+                        <span class="miller-tag">📈 3-4x productividad</span>
+                    </div>
+                </div>
+
+                <div class="validation-list">
+                    <div class="validation-item">
+                        <div class="validation-icon">🏆</div>
+                        <div class="validation-text">
+                            <strong>8+ años</strong>
+                            <span>trabajando con tecnologías avanzadas: robótica, IA y automatización industrial</span>
+                        </div>
+                    </div>
+                    <div class="validation-item">
+                        <div class="validation-icon">📈</div>
+                        <div class="validation-text">
+                            <strong>3 negocios escalados</strong>
+                            <span>Proxera, Elvion y ElevaITI — usando exactamente este sistema</span>
+                        </div>
+                    </div>
+                    <div class="validation-item">
+                        <div class="validation-icon">📊</div>
+                        <div class="validation-text">
+                            <strong>Productividad 3-4x documentada</strong>
+                            <span>Real, medible y verificable — no cifras de marketing</span>
+                        </div>
+                    </div>
+                    <div class="validation-item">
+                        <div class="validation-icon">💡</div>
+                        <div class="validation-text">
+                            <strong>No soy vendedor de humo</strong>
+                            <span>Uso este sistema cada día. No predico teoría — practico lo que vendo.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- EL PROBLEMA -->
+    <section class="section" id="problema">
+        <div class="container">
+            <div class="section-label">02 — El Problema</div>
+            <h2>¿Por qué tu agencia no está escalando?</h2>
+            <p class="lead">Las empresas que crecen más rápido no trabajan más. Trabajan con sistemas que lo hacen por ellas.</p>
+
+            <div class="problems-grid">
+                <div class="problem-card">
+                    <div class="problem-num">Problema #1</div>
+                    <div class="problem-icon">📈</div>
+                    <h3>No puedes escalar sin contratar</h3>
+                    <p>Cada nuevo cliente = más horas. Contratar es caro (€2.000+/mes). Onboarding lento (2-3 meses). Dependes de personas clave.</p>
+                    <div class="problem-result">→ Resultado: Estás "maxed out" con tus recursos actuales.</div>
+                </div>
+
+                <div class="problem-card">
+                    <div class="problem-num">Problema #2</div>
+                    <div class="problem-icon">⏰</div>
+                    <h3>Tu tiempo se va en operativa, no en estrategia</h3>
+                    <p>80% del día "apagando fuegos". Emails, seguimientos, coordinación sin fin. Microgestión constante.</p>
+                    <div class="problem-result">→ Resultado: Trabajas EN el negocio, no SOBRE el negocio.</div>
+                </div>
+
+                <div class="problem-card">
+                    <div class="problem-num">Problema #3</div>
+                    <div class="problem-icon">😰</div>
+                    <h3>60-80h/semana sin desconectar</h3>
+                    <p>Fines de semana trabajando. Móvil siempre encendido. Familia presente pero no disponible. Vacaciones imposibles.</p>
+                    <div class="problem-result">→ Resultado: Tienes un negocio, pero el negocio te tiene a ti.</div>
+                </div>
+
+                <div class="problem-card">
+                    <div class="problem-num">Problema #4</div>
+                    <div class="problem-icon">🚧</div>
+                    <h3>Atrapado entre €10k-15k/mes</h3>
+                    <p>Quieres €50k-100k/mes pero no hay forma. No puedes aceptar más clientes. Contratar más = márgenes más bajos.</p>
+                    <div class="problem-result">→ Resultado: Techo de crecimiento sin salida visible.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- LA SOLUCION -->
+    <section class="section section--white" id="solucion">
+        <div class="container">
+            <div class="section-label">03 — La Solución</div>
+            <h2>4 Departamentos IA que trabajan 24/7</h2>
+            <p class="lead">No vendo software. Instalo un sistema completo que trabaja por ti — con setup, formación y soporte incluido.</p>
+
+            <div class="dept-grid">
+                <div class="dept-card">
+                    <div class="dept-header">
+                        <div class="dept-icon">📋</div>
+                        <div>
+                            <div class="dept-num">Depto 01</div>
+                            <div class="dept-name">Administración</div>
+                        </div>
+                    </div>
+                    <div class="dept-body">
+                        <ul>
+                            <li>Gestión de calendario (Google Calendar)</li>
+                            <li>Organización de emails inteligente</li>
+                            <li>Notas y seguimiento automatizado</li>
+                            <li>Docs, Slides, Sheets automatizados</li>
+                            <li>Google Drive organizado</li>
+                        </ul>
+                    </div>
+                    <div class="dept-result">→ Nunca más pierdas tiempo en tareas administrativas</div>
+                </div>
+
+                <div class="dept-card">
+                    <div class="dept-header">
+                        <div class="dept-icon">💰</div>
+                        <div>
+                            <div class="dept-num">Depto 02</div>
+                            <div class="dept-name">Ventas</div>
+                        </div>
+                    </div>
+                    <div class="dept-body">
+                        <ul>
+                            <li>Chatbot comercial 24/7</li>
+                            <li>CRM con seguimiento automático</li>
+                            <li>Setter IA: agenda llamadas de venta</li>
+                            <li>Vende productos/servicios directo</li>
+                            <li>Calificación automática de leads</li>
+                        </ul>
+                    </div>
+                    <div class="dept-result">→ Tu vendedor IA cierra mientras duermes</div>
+                </div>
+
+                <div class="dept-card">
+                    <div class="dept-header">
+                        <div class="dept-icon">💻</div>
+                        <div>
+                            <div class="dept-num">Depto 03</div>
+                            <div class="dept-name">Desarrollo</div>
+                        </div>
+                    </div>
+                    <div class="dept-body">
+                        <ul>
+                            <li>Crea y modifica dashboards</li>
+                            <li>Edita páginas web desde el móvil con voz</li>
+                            <li>Desarrollo técnico bajo demanda</li>
+                            <li>Integraciones y automatizaciones</li>
+                            <li>Ajustes visuales y UX</li>
+                        </ul>
+                    </div>
+                    <div class="dept-result">→ Cambios en minutos, no días. Desde el coche.</div>
+                </div>
+
+                <div class="dept-card">
+                    <div class="dept-header">
+                        <div class="dept-icon">🎨</div>
+                        <div>
+                            <div class="dept-num">Depto 04</div>
+                            <div class="dept-name">Marketing</div>
+                        </div>
+                    </div>
+                    <div class="dept-body">
+                        <ul>
+                            <li>Contenido escrito: blogs, posts, emails</li>
+                            <li>Contenido visual: imágenes, gráficos</li>
+                            <li>Edición de vídeos</li>
+                            <li>Analítica y reportes automáticos</li>
+                            <li>Estrategia y planificación de contenido</li>
+                        </ul>
+                    </div>
+                    <div class="dept-result">→ Contenido profesional diario sin contratar</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- DIRECTOR IA -->
+    <section class="section" id="director">
+        <div class="container">
+            <div class="section-label">04 — El Director IA</div>
+            <h2>No basta con tener departamentos. Necesitas quien los coordine.</h2>
+            <p class="lead">El Director IA sabe qué departamento usar para cada tarea, distribuye trabajo, prioriza y reporta progreso. Tú le hablas en lenguaje natural — él ejecuta.</p>
+
+            <div class="director-visual">
+                <div class="director-center">
+                    <div class="director-center-icon">🎯</div>
+                    <h3>Director IA</h3>
+                    <p>Coordina los 4 departamentos. Aprende de tu negocio. Se adapta. Ejecuta.</p>
+                </div>
+
+                <div class="director-depts">
+                    <div class="director-dept-item">
+                        <div class="ddi-icon">📋</div>
+                        <div class="ddi-name">Admin</div>
+                    </div>
+                    <div class="director-dept-item">
+                        <div class="ddi-icon">💰</div>
+                        <div class="ddi-name">Ventas</div>
+                    </div>
+                    <div class="director-dept-item">
+                        <div class="ddi-icon">💻</div>
+                        <div class="ddi-name">Dev</div>
+                    </div>
+                    <div class="director-dept-item">
+                        <div class="ddi-icon">🎨</div>
+                        <div class="ddi-name">Marketing</div>
+                    </div>
+                </div>
+
+                <div class="director-example">
+                    <div class="director-example-label">Ejemplo real de uso</div>
+                    <div class="de-you">
+                        <strong>Tú le dices:</strong> "Necesito landing page para campaña nueva, contenido blog esta semana, y seguimiento leads del lunes"
+                    </div>
+                    <div style="text-align:center; margin-bottom:16px; font-size:0.82rem; color:var(--text-light);">↓</div>
+                    <div class="de-result">
+                        <span class="de-result-badge">💻 Dev → Landing page</span>
+                        <span class="de-result-badge">🎨 Marketing → Blog</span>
+                        <span class="de-result-badge">💰 Ventas → Seguimiento</span>
+                    </div>
+                    <div style="margin-top:16px; padding-top:16px; border-top:1px solid var(--border); text-align:center;">
+                        <strong style="color:var(--accent);">Resultado:</strong>
+                        <span style="font-size:0.9rem; color:var(--text-light);"> Todo hecho en 24-48h. Sin microgestionar.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ROI -->
+    <section class="section section--white" id="roi">
+        <div class="container">
+            <div class="section-label">05 — ROI</div>
+            <h2>Números que importan</h2>
+            <p class="lead" style="text-align:center;">Basado en escenario conservador (30% mejora de productividad)</p>
+
+            <div class="roi-numbers">
+                <div class="roi-big">
+                    <div class="roi-val">1,266%</div>
+                    <div class="roi-label">ROI anual (conservador)</div>
+                </div>
+                <div class="roi-big">
+                    <div class="roi-val">€82.836</div>
+                    <div class="roi-label">Ahorro anual</div>
+                </div>
+                <div class="roi-big">
+                    <div class="roi-val">€6.903</div>
+                    <div class="roi-label">Ganancia neta mensual</div>
+                </div>
+                <div class="roi-big">
+                    <div class="roi-val">Mes 1</div>
+                    <div class="roi-label">Ya generas ROI positivo</div>
+                </div>
+            </div>
+
+            <div class="roi-detail">
+                <h3>Cómo llegamos a 1,266% ROI</h3>
+                <p style="text-align:center; color:var(--text-light); margin-bottom:32px; font-size:0.9rem;">Escenario: Agencia de 5 personas, €30/hora promedio</p>
+                <div class="roi-calc-grid">
+                    <div class="roi-calc-box">
+                        <div class="rcb-num">200h</div>
+                        <div class="rcb-label">Producción semanal (5 personas × 40h)</div>
+                    </div>
+                    <div class="roi-calc-arrow">↓ +30% con ElevaITI →</div>
+                    <div class="roi-calc-box">
+                        <div class="rcb-num">260h</div>
+                        <div class="rcb-label">Producción equivalente (sin contratar)</div>
+                    </div>
+                </div>
+                <div class="roi-highlight-row">
+                    <div class="rih-item">
+                        <div class="rih-num">€1.800</div>
+                        <div class="rih-label">Ahorro semanal</div>
+                    </div>
+                    <div class="rih-item">
+                        <div class="rih-num">€7.200</div>
+                        <div class="rih-label">Ahorro mensual</div>
+                    </div>
+                    <div class="rih-item">
+                        <div class="rih-num">€3.797</div>
+                        <div class="rih-label">Inversión mes 1 (setup + mes)</div>
+                    </div>
+                    <div class="rih-item">
+                        <div class="rih-num">€3.403</div>
+                        <div class="rih-label">Ganancia neta mes 1</div>
+                    </div>
+                </div>
+                <p style="text-align:center; margin-top:20px; font-size:0.82rem; color:var(--text-light);">
+                    Con 3-4x productividad real (mi caso): el valor sube a <strong style="color:var(--accent);">€12.000-18.000/mes</strong>
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- PROCESO -->
+    <section class="section" id="proceso">
+        <div class="container">
+            <div class="section-label">06 — El Proceso</div>
+            <h2>4 Semanas hasta tu piloto automático</h2>
+            <p class="lead">Tú inviertes 1 hora. Nosotros 20+ horas técnicas. Tú ves resultados desde la Semana 1.</p>
+
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-dot">S1</div>
+                    <div class="timeline-content">
+                        <div class="timeline-week">Semana 1</div>
+                        <h3>Implementación</h3>
+                        <p style="font-size:0.88rem; color:var(--text-light); margin-bottom:12px;">Setup técnico completo + Configuración de los 4 departamentos + Primera adaptación.</p>
+                        <div class="timeline-two-col">
+                            <div class="timeline-col">
+                                <div class="timeline-col-title" style="color:var(--accent);">Nosotros ↓</div>
+                                <ul>
+                                    <li>Setup técnico (4-5h)</li>
+                                    <li>Config 4 departamentos</li>
+                                    <li>Integración sistemas</li>
+                                </ul>
+                            </div>
+                            <div class="timeline-col">
+                                <div class="timeline-col-title" style="color:#22c55e;">Tú ↓</div>
+                                <ul>
+                                    <li>Llamada kick-off (1h)</li>
+                                    <li>Nos das accesos</li>
+                                    <li>Pruebas iniciales</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="timeline-result">→ Sistema funcionando. +30% productividad.</div>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-dot">S2</div>
+                    <div class="timeline-content">
+                        <div class="timeline-week">Semana 2</div>
+                        <h3>Formación + Adaptación Principal</h3>
+                        <p style="font-size:0.88rem; color:var(--text-light); margin-bottom:12px;">Formación a tu equipo + Ajustes según feedback + Personalización profunda.</p>
+                        <div class="timeline-two-col">
+                            <div class="timeline-col">
+                                <div class="timeline-col-title" style="color:var(--accent);">Nosotros ↓</div>
+                                <ul>
+                                    <li>Videos formativos</li>
+                                    <li>Llamada con tu equipo</li>
+                                    <li>Ajustes personalizados</li>
+                                </ul>
+                            </div>
+                            <div class="timeline-col">
+                                <div class="timeline-col-title" style="color:#22c55e;">Tú ↓</div>
+                                <ul>
+                                    <li>Equipo aprende</li>
+                                    <li>Das feedback</li>
+                                    <li>Empiezas a delegar</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="timeline-result">→ Equipo entrenado. Mejora visible en operación.</div>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-dot">S3</div>
+                    <div class="timeline-content">
+                        <div class="timeline-week">Semana 3</div>
+                        <h3>Refinamiento</h3>
+                        <p style="font-size:0.88rem; color:var(--text-light); margin-bottom:12px;">Adaptación fina + Workflows específicos + Optimización de automatizaciones.</p>
+                        <div class="timeline-two-col">
+                            <div class="timeline-col">
+                                <div class="timeline-col-title" style="color:var(--accent);">Nosotros ↓</div>
+                                <ul>
+                                    <li>Adaptación fina</li>
+                                    <li>Workflows específicos</li>
+                                    <li>Optimización</li>
+                                </ul>
+                            </div>
+                            <div class="timeline-col">
+                                <div class="timeline-col-title" style="color:#22c55e;">Tú ↓</div>
+                                <ul>
+                                    <li>Usas el sistema</li>
+                                    <li>Documentas necesidades</li>
+                                    <li>Ves ahorro real</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="timeline-result">→ Sistema adaptado. Productividad 2-3x.</div>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-dot">S4+</div>
+                    <div class="timeline-content">
+                        <div class="timeline-week">Semana 4+</div>
+                        <h3>En Ritmo — Piloto Automático</h3>
+                        <p style="font-size:0.88rem; color:var(--text-light); margin-bottom:12px;">Mantenimiento continuo + Actualizaciones + Nuevas features + Soporte priority.</p>
+                        <div class="timeline-two-col">
+                            <div class="timeline-col">
+                                <div class="timeline-col-title" style="color:var(--accent);">Nosotros ↓</div>
+                                <ul>
+                                    <li>Mantenimiento (incluido)</li>
+                                    <li>Updates mensuales</li>
+                                    <li>Soporte priority</li>
+                                </ul>
+                            </div>
+                            <div class="timeline-col">
+                                <div class="timeline-col-title" style="color:#22c55e;">Tú ↓</div>
+                                <ul>
+                                    <li>Trabajas 3-4x más rápido</li>
+                                    <li>Delegas a IA</li>
+                                    <li>Escalas sin contratar</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="timeline-result">→ Nueva normalidad. No vuelves atrás nunca.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- OFERTA -->
+    <section class="section section--white" id="oferta">
+        <div class="container">
+            <div class="section-label">07 — La Oferta</div>
+            <div class="oferta-intro">
+                <h2>Tu Departamento de IA Completo</h2>
+                <p class="lead">Setup + Sistema + Formación + Soporte. Todo incluido.</p>
+            </div>
+
+            <div class="pricing-grid">
+                <div class="pricing-card">
+                    <div class="pricing-header">
+                        <div class="pricing-name">Setup Inicial</div>
+                        <div class="pricing-price">€3.500 <span>/ precio fundador</span></div>
+                        <div class="pricing-normal">Precio normal: €5.000 (sube tras 10 clientes)</div>
+                    </div>
+                    <div class="pricing-body">
+                        <ul class="pricing-features">
+                            <li>4 Departamentos IA completos</li>
+                            <li>Director IA (Business Manager)</li>
+                            <li>Setup técnico (4-5h ours)</li>
+                            <li>Integración sistemas actuales</li>
+                            <li>Primera adaptación a tu flujo</li>
+                            <li>Servidor + infra año 1</li>
+                            <li>Uso LLMs nivel profesional</li>
+                        </ul>
+                        <a href="https://calendly.com/miller-elevaiti" class="btn btn-secondary" target="_blank">Agenda Demo →</a>
+                    </div>
+                </div>
+
+                <div class="pricing-card featured">
+                    <div class="pricing-badge">🔥 Mejor Valor — Pago en Fases</div>
+                    <div class="pricing-header">
+                        <div class="pricing-name">Pago en 3 Cuotas</div>
+                        <div class="pricing-price">€1.500 <span>/ mes × 2</span></div>
+                        <div class="pricing-normal">+ €500 ahora para reservar plaza</div>
+                    </div>
+                    <div class="pricing-body">
+                        <ul class="pricing-features">
+                            <li>Todo lo del setup inicial</li>
+                            <li>Pagas cuando ves que funciona</li>
+                            <li>Sin riesgo inicial alto</li>
+                            <li>Soporte priority</li>
+                            <li>Mantenimiento continuo</li>
+                            <li>Actualizaciones gratis</li>
+                            <li>Bonuses fundadores (solo Abril)</li>
+                        </ul>
+                        <a href="https://calendly.com/miller-elevaiti" class="btn btn-primary" target="_blank">Reserva tu Plaza →</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bonuses-label">— Stack de Valor — Bonuses Exclusivos Abril 2026 —</div>
+            <div class="bonuses-grid">
+                <div class="bonus-card">
+                    <div class="bonus-icon">📹</div>
+                    <div>
+                        <div class="bonus-name">Formación Completa en Video</div>
+                        <div class="bonus-value">Valor: €800 · Incluido</div>
+                        <div class="bonus-desc">Videos paso a paso de cada departamento. Casos de uso reales. Trucos avanzados. Formación equipo en 1 día.</div>
+                    </div>
+                </div>
+                <div class="bonus-card">
+                    <div class="bonus-icon">🚀</div>
+                    <div>
+                        <div class="bonus-name">Setup + Adaptación Personalizada</div>
+                        <div class="bonus-value">Valor: €2.000 · Incluido</div>
+                        <div class="bonus-desc">Nosotros lo implementamos todo. Tú inviertes 1 hora. 3 semanas de adaptación personalizada incluidas.</div>
+                    </div>
+                </div>
+                <div class="bonus-card">
+                    <div class="bonus-icon">🎯</div>
+                    <div>
+                        <div class="bonus-name">Consultoría Optimización 3 Meses</div>
+                        <div class="bonus-value">Valor: €1.200 · Incluido</div>
+                        <div class="bonus-desc">Ajustes personalizados. Acceso directo a Miller. Optimización mensual. El sistema se adapta a ti.</div>
+                    </div>
+                </div>
+                <div class="bonus-card">
+                    <div class="bonus-icon">🆕</div>
+                    <div>
+                        <div class="bonus-name">Acceso a Nuevos Departamentos IA</div>
+                        <div class="bonus-value">Valor: €500 · Gratis para fundadores</div>
+                        <div class="bonus-desc">Nuevos departamentos beta. Influyes en qué construimos. Tu sistema mejora cada mes sin coste extra.</div>
+                    </div>
+                </div>
+                <div class="bonus-card">
+                    <div class="bonus-icon">⚡</div>
+                    <div>
+                        <div class="bonus-name">Setup Express 48h</div>
+                        <div class="bonus-value">Valor: €400 · Solo clientes 1-10</div>
+                        <div class="bonus-desc">Priorizamos tu setup. Funcionando en 48h. Empiezas a ahorrar tiempo este fin de semana.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="valor-table-wrap">
+                <table class="valor-table">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Valor Real</th>
+                            <th>Incluido</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>4 Departamentos IA completos</td>
+                            <td class="val-price">€15.000</td>
+                            <td class="val-incl check">✓</td>
+                        </tr>
+                        <tr>
+                            <td>Setup + implementación</td>
+                            <td class="val-price">€2.000</td>
+                            <td class="val-incl check">✓</td>
+                        </tr>
+                        <tr>
+                            <td>Formación en video</td>
+                            <td class="val-price">€800</td>
+                            <td class="val-incl check">✓</td>
+                        </tr>
+                        <tr>
+                            <td>Consultoría 3 meses</td>
+                            <td class="val-price">€1.200</td>
+                            <td class="val-incl check">✓</td>
+                        </tr>
+                        <tr>
+                            <td>Acceso nuevos departamentos</td>
+                            <td class="val-price">€500</td>
+                            <td class="val-incl check">✓</td>
+                        </tr>
+                        <tr>
+                            <td>Setup Express 48h</td>
+                            <td class="val-price">€400</td>
+                            <td class="val-incl check">✓</td>
+                        </tr>
+                        <tr>
+                            <td>Servidor + infra año 1</td>
+                            <td class="val-price">€3.564</td>
+                            <td class="val-incl check">✓</td>
+                        </tr>
+                        <tr>
+                            <td>Soporte priority año 1</td>
+                            <td class="val-price">€2.400</td>
+                            <td class="val-incl check">✓</td>
+                        </tr>
+                        <tr>
+                            <td><strong>TOTAL VALOR</strong></td>
+                            <td><strong>€25.864</strong></td>
+                            <td><strong style="color:var(--primary);">€7.064</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p style="text-align:center; margin-top:16px; font-size:0.85rem; color:var(--text-light);">
+                Descuento implícito: <strong style="color:var(--accent);">73% OFF</strong> · Ratio valor/precio: <strong>3.66x</strong>
+            </p>
+        </div>
+    </section>
+
+    <!-- GARANTIA -->
+    <section class="section" id="garantia">
+        <div class="container">
+            <div class="section-label">08 — Garantía</div>
+            <h2 style="text-align:center;">Inversión de Riesgo = Cero</h2>
+            <p class="lead" style="text-align:center; margin:0 auto;">Porque estamos tan seguros que funciona que asumimos todo el riesgo.</p>
+
+            <div class="garantia-grid">
+                <div class="garantia-card">
+                    <div class="garantia-icon">🛡️</div>
+                    <h3>30 Días Money-Back Total</h3>
+                    <p style="font-size:0.9rem; color:var(--text-light);">Si en los primeros 30 días no ves al menos 30% mejora en productividad y sistema funcionando como prometido →</p>
+                    <div style="background:rgba(160,5,5,0.08); padding:12px 20px; border-radius:10px; font-weight:800; color:var(--accent); font-size:1.1rem; margin:16px 0;">
+                        Devolvemos 100% del setup. Sin preguntas.
+                    </div>
+                    <div class="garantia-why">
+                        <strong>Por qué:</strong> Estamos tan seguros que funciona que asumimos todo el riesgo.
+                    </div>
+                </div>
+
+                <div class="garantia-card">
+                    <div class="garantia-icon">💳</div>
+                    <h3>Pago en Fases</h3>
+                    <p style="font-size:0.9rem; color:var(--text-light);">Solo pagas cuando ves que funciona. Cada fase después de la anterior.</p>
+                    <div class="garantia-steps">
+                        <div class="garantia-step">
+                            <div class="gs-num">1</div>
+                            <div class="gs-text"><strong>Ahora:</strong> €500 — reservas tu plaza</div>
+                        </div>
+                        <div class="garantia-step">
+                            <div class="gs-num">2</div>
+                            <div class="gs-text"><strong>Semana 1:</strong> €1.500 — ves el sistema funcionando</div>
+                        </div>
+                        <div class="garantia-step">
+                            <div class="gs-num">3</div>
+                            <div class="gs-text"><strong>Semana 2-3:</strong> €1.500 — termina la adaptación</div>
+                        </div>
+                        <div class="garantia-step">
+                            <div class="gs-num">4</div>
+                            <div class="gs-text"><strong> Mensual:</strong> €297/mes — soporte continuo</div>
+                        </div>
+                    </div>
+                    <div class="garantia-why">
+                        <strong>Por qué:</strong> Solo pagas cuando ves que funciona.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ESCASEZ -->
+    <section class="section section--dark" id="escasez">
+        <div class="container">
+            <div class="section-label" style="color:#ff6b6b;">09 — Escasez Real</div>
+            <div class="escasez-box">
+                <div class="escasez-urgencia">⚡ PLAZAS LIMITADAS POR MES</div>
+                <div class="escasez-count">7</div>
+                <div class="escasez-label-big">Plazas disponibles Abril 2026</div>
+
+                <ul class="escasez-list">
+                    <li>Solo 10 clientes por mes (calidad > cantidad)</li>
+                    <li>4-5h de implementación + 2 semanas de adaptación</li>
+                    <li>Seguimiento directo con Miller</li>
+                    <li>Límite duro para mantener calidad</li>
+                </ul>
+
+                <div class="precio-timeline">
+                    <div class="pt-row active">
+                        <span class="pt-label">Abril 2026 <span class="pt-note">← AHORA</span></span>
+                        <span class="pt-price">€3.500</span>
+                    </div>
+                    <div class="pt-row">
+                        <span class="pt-label">Mayo 2026 <span class="pt-note">(+Depto 5)</span></span>
+                        <span class="pt-price">€4.000</span>
+                    </div>
+                    <div class="pt-row">
+                        <span class="pt-label">Junio 2026 <span class="pt-note">(features avanzadas)</span></span>
+                        <span class="pt-price">€4.500</span>
+                    </div>
+                    <div class="pt-row">
+                        <span class="pt-label">Julio+ 2026 <span class="pt-note">(versión madura)</span></span>
+                        <span class="pt-price">€5.000+</span>
+                    </div>
+                </div>
+
+                <p style="margin-top:24px; font-size:0.88rem; color:rgba(255,255,255,0.6); position:relative;">
+                    Diferencia decidir hoy vs esperar: <strong style="color:#ff6b6b;">€1.500</strong>
+                </p>
+            </div>
+
+            <div style="text-align:center; margin-top:32px;">
+                <a href="https://calendly.com/miller-elevaiti" class="btn btn-primary btn-large" target="_blank">
+                    🚀 Reserva tu Plaza Ahora
+                </a>
+                <p style="margin-top:12px; font-size:0.82rem; color:rgba(255,255,255,0.5);">
+                    Quedan 7 de 10 plazas · Precio sube €500/mes
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- PRUEBA SOCIAL -->
+    <section class="section section--white" id="testimonios">
+        <div class="container">
+            <div class="section-label">10 — Casos de Éxito</div>
+            <h2 style="text-align:center;">Funcionó para nosotros. Funcionará para ti.</h2>
+
+            <div class="testimonial-grid">
+                <div class="testimonial-card">
+                    <div class="testimonial-header">
+                        <div class="testimonial-avatar">ME</div>
+                        <div>
+                            <div class="testimonial-name">Miller Espinosa</div>
+                            <div class="testimonial-role">Fundador ElevaITI · Ingeniero Robótica</div>
+                        </div>
+                    </div>
+                    <div class="testimonial-quote">
+                        "Construí esto para salvarme de trabajar 70 horas/semana. Gestionaba 3 proyectos simultáneos (Proxera, Elvion, Agencia IA) y no podía escalar sin contratar. Funcionó tan bien que ahora lo comparto. Si tienes el mismo problema que yo — esto es la solución."
+                    </div>
+                    <div class="testimonial-stats">
+                        <span class="ts-badge">70→25h/semana</span>
+                        <span class="ts-badge">3-4x productividad</span>
+                        <span class="ts-badge">45-50h recuperadas</span>
+                        <span class="ts-badge">3 negocios escalados</span>
+                    </div>
+                </div>
+
+                <div class="testimonial-card">
+                    <div class="testimonial-header">
+                        <div class="testimonial-avatar" style="background:linear-gradient(135deg,#2c5364,#203a43);">SP</div>
+                        <div>
+                            <div class="testimonial-name">Socio Proxera</div>
+                            <div class="testimonial-role">Gestión inmobiliaria · Barcelona</div>
+                        </div>
+                    </div>
+                    <div class="testimonial-quote">
+                        "Cuando vi los resultados de Miller, lo quise para Proxera inmediatamente. Gestión manual de clientes inmobiliarios, no podía aceptar más sin contratar, dependencia total de mí para todo. Ahora gestiono el triple de clientes sin contratar a nadie."
+                    </div>
+                    <div class="testimonial-stats">
+                        <span class="ts-badge">3x clientes</span>
+                        <span class="ts-badge">Sin contratar</span>
+                        <span class="ts-badge">Sistema escalable</span>
+                        <span class="ts-badge">Docs automatizados</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="validacion-row">
+                <div class="validacion-item">
+                    <div class="validacion-num">8+</div>
+                    <div class="validacion-text">Años de experiencia IA</div>
+                </div>
+                <div class="validacion-item">
+                    <div class="validacion-num">3</div>
+                    <div class="validacion-text">Negocios escalados</div>
+                </div>
+                <div class="validacion-item">
+                    <div class="validacion-num">3-4x</div>
+                    <div class="validacion-text">Productividad real</div>
+                </div>
+                <div class="validacion-item">
+                    <div class="validacion-num">24/7</div>
+                    <div class="validacion-text">Sistema funcionando</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="section" id="faq">
+        <div class="container">
+            <div class="section-label">11 — FAQ</div>
+            <h2 style="text-align:center;">Preguntas Frecuentes</h2>
+
+            <div class="faq-list">
+                <div class="faq-item">
+                    <div class="faq-q">¿Qué es exactamente ElevaITI? ¿Software?</div>
+                    <div class="faq-a">No es software. Es un sistema completo de IA. Te instalo 4 departamentos especializados (Admin, Ventas, Dev, Marketing) coordinados por un Director virtual. Tú no usas herramientas — tienes un equipo IA que trabaja por ti. Setup, formación y soporte incluido.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-q">¿Cuánto tiempo tarda en estar funcionando?</div>
+                    <div class="faq-a">Setup Express en 48h (solo clientes fundadores). Setup normal: 1-2 semanas. Semana 1: sistema funcionando con +30% productividad. Semana 4: piloto automático con 3-4x productividad.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-q">¿Qué pasa si no funciona para mi agencia?</div>
+                    <div class="faq-a">Tienes dos opciones: (1) 30 días money-back total — si no ves al menos 30% mejora, devolvemos 100% del setup sin preguntas. (2) Pago en fases — solo pagas cuando ves que funciona, fase por fase.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-q">¿Necesito conocimientos técnicos?</div>
+                    <div class="faq-a">No. Si sabes usar WhatsApp y email, sabes usar ElevaITI. El Director IA entiende lenguaje natural. Le hablas como a un asistente. No necesitas saber de IA, código ni automatización. Nosotros hacemos todo el trabajo técnico.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-q">¿Cuánto cuesta al mes después del setup?</div>
+                    <div class="faq-a">€297/mes (precio fundadores — nunca sube si reservas ahora). Incluye: servidor, LLMs, mantenimiento, actualizaciones, soporte priority y acceso a nuevos departamentos. No hay sorpresas ni extras.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-q">¿Para qué tipo de agencia es?</div>
+                    <div class="faq-a">Ideal para agencias de marketing, consultoría y servicios de 3-20 personas facturando €10k-50k/mes que quieren llegar a €50k-100k/mes. Trabajas 60+ horas, quieres escalar sin contratar, tu tiempo se va en operativa.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-q">¿Qué pasa cuando suban los precios?</div>
+                    <div class="faq-a">Los fundadores tienen precio congelado para siempre (€3.500 setup + €297/mes). En Abril: €3.500. En Mayo: €4.000. Julio+: €5.000+. Los fundadores también tienen bonuses exclusivos (Setup 48h, beta nuevos departamentos, co-branding).</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER CTA -->
+    <section class="footer-cta" id="contacto">
+        <div class="container">
+            <div class="hero-badge" style="background:rgba(160,5,5,0.3); border-color:rgba(160,5,5,0.5); color:#ff8080; margin-bottom:20px;">Solo 7 plazas · Abril 2026</div>
+            <h2>¿Listo para escalar sin contratar?</h2>
+            <p class="lead">
+                Agenda una demo de 15 minutos. Ves los 4 departamentos en acción.<br>
+                Calculamos tu ROI. Resuelves tus dudas. Decides con información.
+            </p>
+            <a href="https://calendly.com/miller-elevaiti" class="btn btn-primary btn-large" target="_blank" style="font-size:1.2rem;">
+                🚀 Agenda tu Demo Gratuita — 15 Min
+            </a>
+
+            <div class="contact-row">
+                <div class="contact-item">
+                    <span class="ci-icon">📧</span>
+                    <span>m.espinosa@elevaiti.com</span>
+                </div>
+                <div class="contact-item">
+                    <span class="ci-icon">📱</span>
+                    <span>+34 606 234 081</span>
+                </div>
+                <div class="contact-item">
+                    <span class="ci-icon">🌐</span>
+                    <span>elevaiti.com</span>
+                </div>
+                <div class="contact-item">
+                    <span class="ci-icon">📍</span>
+                    <span>Barcelona, España (servicio global)</span>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                Miller Espinosa · Ingeniero en Robótica · Fundador ElevaITI<br>
+                "El sistema que me salvó — ahora disponible para ti" · Barcelona → Dubai 2027
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // FAQ accordion
+        document.querySelectorAll('.faq-q').forEach(function(q) {
+            q.addEventListener('click', function() {
+                var item = q.parentElement;
+                var wasOpen = item.classList.contains('open');
+                document.querySelectorAll('.faq-item').forEach(function(i) {
+                    i.classList.remove('open');
+                });
+                if (!wasOpen) {
+                    item.classList.add('open');
+                }
+            });
+        });
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(function(a) {
+            a.addEventListener('click', function(e) {
+                var target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    e.preventDefault();
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>

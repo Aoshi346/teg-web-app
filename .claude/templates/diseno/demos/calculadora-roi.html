@@ -1,0 +1,51 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>Demo · calculadora</title>
+<!--
+  T22 · arquetipo 3 de 4 — la calculadora.
+  Precedente: resources/referencias-diseno/bien/elevaiti-v5.html:2366 — tres deslizadores reales,
+  en la versión PRIMERA del ranking humano. (Ojo: el RANKING.csv atribuye la calculadora a V7, y
+  v7 tiene CERO `type="range"`. Manda el fichero, no la memoria de quien escribió el ranking.)
+  Doctrina: patterns/diseno/demo-de-producto.md
+
+  Por qué funciona: convierte tu promesa en SU número. Deja de ser «ahorramos tiempo» y pasa a ser
+  «ahorras 1.240 € al mes», calculado con los datos que acaba de meter la persona.
+
+  Reglas: funciona con teclado (son inputs de verdad, no divs) · el resultado va en `aria-live` ·
+  sin JS los valores por defecto ya están escritos en el HTML, así que se ve un resultado real.
+
+  ⚠️ El número que sale es una ESTIMACIÓN y la página lo dice. Una calculadora que promete un
+  ahorro exacto es una promesa que alguien te va a reclamar.
+-->
+<style>
+ :root{--bg:#fdfaf6;--tinta:#2d2420;--acento:#a0624a;--linea:#e6ddd2}
+ body{margin:0;min-height:100vh;display:grid;place-items:center;background:var(--bg);color:var(--tinta);
+      font-family:system-ui,sans-serif}
+ .calc{width:min(460px,92vw);border:1px solid var(--linea);border-radius:14px;padding:1.5rem;
+       box-shadow:0 8px 32px rgba(45,36,32,.10)}            /* sombra TEÑIDA, nunca negro puro */
+ label{display:block;margin:1rem 0 .35rem;font-size:.82rem;letter-spacing:.08em;text-transform:uppercase;opacity:.7}
+ input{width:100%;accent-color:var(--acento)}
+ output{display:block;margin-top:1.5rem;padding-top:1.25rem;border-top:1px solid var(--linea);
+        font-size:clamp(2rem,6vw,3rem);line-height:1;font-weight:600}
+ small{display:block;margin-top:.6rem;opacity:.65;line-height:1.5}
+</style></head><body>
+ <form class="calc">
+   <label for="h">Horas al mes en esa tarea: <b id="hv">40</b></label>
+   <input type="range" id="h" min="5" max="160" value="40" step="5">
+   <label for="c">Coste por hora: <b id="cv">25</b> €</label>
+   <input type="range" id="c" min="10" max="90" value="25" step="5">
+   <output id="r" aria-live="polite">Ahorro estimado: <b>700 €</b> al mes</output>
+   <small>Estimación con los datos que has puesto, asumiendo que se automatiza el 70 %. No es
+          un presupuesto: es un orden de magnitud para saber si merece la pena hablar.</small>
+ </form>
+<script>
+(function(){
+  var h=document.getElementById('h'),c=document.getElementById('c'),r=document.getElementById('r'),
+      hv=document.getElementById('hv'),cv=document.getElementById('cv');
+  function pinta(){
+    hv.textContent=h.value; cv.textContent=c.value;
+    var ahorro=Math.round(h.value*c.value*0.7);
+    r.innerHTML='Ahorro estimado: <b>'+ahorro.toLocaleString('es-ES')+' €</b> al mes';
+  }
+  h.addEventListener('input',pinta); c.addEventListener('input',pinta); pinta();
+})();
+</script></body></html>

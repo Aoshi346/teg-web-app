@@ -1,0 +1,633 @@
+# Entradas PROPUESTAS del patrón de casa FRONTEND — para integrar en el catálogo (no las integro yo).
+# Generado por el agente de patrón frontend (US-7). Hermano: _catalog-entries-backend.yaml.
+#
+# ─────────────────────────────────────────────────────────────────────────────────────────────
+# LEER ANTES DE INTEGRAR: estas filas NO pueden ir tal cual a `.claude/patterns/catalog.yaml`.
+#
+# El catálogo de este repo tiene una regla dura (README.md, RESEARCH.md del plan de Rita):
+#     «un patrón entra con dominancia MEDIDA (≥85% activo · 60-85% débil) y ≥2 precedentes file:line».
+# Estas filas no la cumplen y no pueden cumplirla: en `tech-lead-template` no hay una sola línea de
+# React de la que medir dominancia. Son patrones DECLARADOS (el "patrón de casa" que US-7 pide para
+# proyectos NUEVOS), no INFERIDOS. Es la distinción que el propio README ya hace entre catalog.yaml
+# (se mide) y ownership.yaml (se declara) — y estas filas caen del lado declarado.
+#
+# Por eso llevan dos campos que el schema actual no tiene, y que hay que aprobar o sustituir:
+#     origen: casa      → declarado por decisión (vs `medido`, inferido del repo)
+#     referencia:       → sustituye a `precedentes` mientras no haya código real que citar
+#
+# RECOMENDACIÓN (decisión del Usuario / TL):
+#   Estas filas son una SEMILLA, no filas del catálogo de este repo. Su sitio natural es que
+#   `/project-setup` las copie al `catalog.yaml` del proyecto DERIVADO cuando el repo está vacío
+#   (la rama "proyecto nuevo" de US-7), y que en la rama "proyecto existente" NO se copien: allí
+#   manda el patrón medido del repo (QA-2), y estas quedan como propuesta a discutir.
+#   Si en cambio se integran en el catálogo de la plantilla, deben ir en `sombra` (solo miden) para
+#   que no bloqueen nada aquí, donde no aplican.
+#
+# ESTADO AL ARRANCAR UN PROYECTO NUEVO: `activo` las que la tabla marca como tal. Es legítimo porque
+# en un repo vacío la dominancia de una regla nueva es trivialmente del 100% (no hay violaciones
+# preexistentes) y la "regla de inversión" (>20-30 sitios marcados ⇒ la mala es la regla) no se
+# puede disparar. En un repo CON código hay que medir primero: correr el checker con `--all` y, si
+# una regla marca medio repo, baja a `debil` o al baseline. No al revés.
+# ─────────────────────────────────────────────────────────────────────────────────────────────
+#
+# Mecanismo (escalón más barato posible, igual que en el catálogo):
+#   script  → .claude/patterns/stack/pattern_check_frontend.py   (determinista, 0 tokens, stdlib)
+#   lint    → regla de ESLint nombrada (más precisa: AST; exige que el proyecto instale el plugin)
+#   runtime → axe-core dentro del test (lo que no se puede saber sin ejecutar)
+#
+# Verificación — ahora es REPRODUCIBLE, no una nota de quien las escribió:
+#   python3 .claude/patterns/stack/pattern_check_frontend.py --self-test
+#   · 37/37 reglas disparan sobre los fixtures INFRACTORES  → sensibilidad
+#   ·  0 hallazgos sobre los 10 ficheros CONFORMES          → FPR 0% medido
+#   · exit 1 con violaciones activas, exit 0 en limpio, `pattern-exempt: <id>` respetado
+# Los fixtures van embebidos en el propio script (FIXTURES_CONFORME / FIXTURES_INFRACTOR) y se
+# materializan en un temporal: `_fixtures/` es del comprobador de backend y no se toca.
+
+project: "<proyecto derivado>"
+seeded_from: tech-lead-template
+stack: "React · TypeScript · Vite ↔ Django/DRF"
+checker: .claude/patterns/stack/pattern_check_frontend.py
+
+patterns:
+  # ── capa api — llamadas a la API y manejo de errores ──────────────────────────────────────
+  - id: fe-http-en-capa-api
+    enunciado: "Ningún componente, hook o store llama a la red: todo HTTP pasa por src/api/"
+    eje: 2-capas
+    capa: api
+    mecanismo: script
+    ambito: "src/**/*.{ts,tsx}"
+    origen: casa
+    dominancia: "n/a — patrón declarado"
+    estado: activo
+    baseline: null
+    referencia: "stack/api-y-errores.md §Implementación de referencia (client.ts + orders.ts)"
+    doc: stack/api-y-errores.md
+
+  - id: fe-tres-estados
+    enunciado: "Toda vista con datos remotos renderiza carga y error antes de asumir data"
+    eje: 3-errores
+    capa: api
+    mecanismo: script
+    ambito: "src/**/*.tsx"
+    origen: casa
+    dominancia: "n/a — patrón declarado"
+    estado: activo
+    baseline: null
+    referencia: "stack/api-y-errores.md §Implementación de referencia (OrderList.tsx)"
+    doc: stack/api-y-errores.md
+
+  - id: fe-estado-vacio
+    enunciado: "Una lista de datos remotos distingue «no hay nada» de «no se pudo cargar»"
+    eje: 3-errores
+    capa: api
+    mecanismo: script
+    ambito: "src/**/*.tsx"
+    origen: casa
+    dominancia: "n/a — patrón declarado"
+    estado: debil          # heurística: hay listas legítimas sin mensaje de vacío
+    baseline: null
+    referencia: "stack/api-y-errores.md §Implementación de referencia"
+    doc: stack/api-y-errores.md
+
+  - id: fe-error-no-silencioso
+    enunciado: "Ningún catch vacío ni que solo haga console.*"
+    eje: 3-errores
+    capa: api
+    mecanismo: script      # parseo de llaves balanceadas, no grep de línea
+    ambito: "src/**/*.{ts,tsx}"
+    origen: casa
+    dominancia: "n/a — patrón declarado"
+    estado: activo
+    baseline: null
+    referencia: "stack/api-y-errores.md §El antipatrón que sustituye"
+    doc: stack/api-y-errores.md
+
+  - id: fe-error-traducido
+    enunciado: "El error que ve el usuario pasa por toUserMessage(), nunca es error.message crudo"
+    eje: 3-errores
+    capa: api
+    mecanismo: script
+    ambito: "src/**/*.tsx"
+    origen: casa
+    dominancia: "n/a — patrón declarado"
+    estado: activo
+    baseline: null
+    referencia: "stack/api-y-errores.md §Implementación de referencia (errors.ts)"
+    doc: stack/api-y-errores.md
+
+  - id: fe-mutacion-invalida-cache
+    enunciado: "Toda mutación invalida o actualiza la caché que deja obsoleta"
+    eje: 2-capas
+    capa: api
+    mecanismo: script
+    ambito: "src/**/*.tsx"
+    origen: casa
+    dominancia: "n/a — patrón declarado"
+    estado: debil          # una mutación que navega a otra pantalla no necesita invalidar
+    baseline: null
+    referencia: "stack/api-y-errores.md §Cómo se comprueba"
+    doc: stack/api-y-errores.md
+
+  - id: fe-timeout-obligatorio
+    enunciado: "El cliente HTTP impone AbortSignal.timeout: ninguna petición cuelga para siempre"
+    eje: 3-errores
+    capa: api
+    mecanismo: script
+    ambito: "src/api/**/*.ts"
+    origen: casa
+    dominancia: "n/a — patrón declarado"
+    estado: activo
+    baseline: null
+    referencia: "stack/api-y-errores.md §Implementación de referencia (client.ts)"
+    doc: stack/api-y-errores.md
+
+  # ── capa estado ───────────────────────────────────────────────────────────────────────────
+  - id: fe-servidor-fuera-del-store
+    enunciado: "El estado del servidor vive en la caché de queries, nunca en el store global"
+    eje: 2-capas
+    capa: estado
+    mecanismo: script
+    ambito: "src/store?(s)/**/*.ts"
+    origen: casa
+    dominancia: "n/a — patrón declarado"
+    estado: activo
+    baseline: null
+    referencia: "stack/estado.md §Implementación de referencia (uiStore.ts)"
+    doc: stack/estado.md
+
+  - id: fe-sin-fetch-en-useeffect
+    enunciado: "Los datos no se cargan desde useEffect: se cargan con useQuery"
+    eje: 2-capas
+    capa: estado
+    mecanismo: script
+    ambito: "src/**/*.{ts,tsx}"
+    origen: casa
+    dominancia: "n/a — patrón declarado"
+    estado: activo
+    baseline: null
+    referencia: "stack/estado.md §El antipatrón que sustituye"
+    doc: stack/estado.md
+
+  - id: fe-store-sin-react
+    enunciado: "El store no importa de React: es lógica pura y testeable sin render"
+    eje: 2-capas
+    capa: estado
+    mecanismo: script
+    ambito: "src/store?(s)/**/*.ts"
+    origen: casa
+    dominancia: "n/a — patrón declarado"
+    estado: activo
+    baseline: null
+    referencia: "stack/estado.md §Implementación de referencia"
+    doc: stack/estado.md
+
+  - id: fe-sin-estado-derivado
+    enunciado: "Lo que se puede calcular al renderizar no se copia a estado con un useEffect"
+    eje: 2-capas
+    capa: estado
+    mecanismo: script
+    ambito: "src/**/*.{ts,tsx}"
+    origen: casa
+    dominancia: "n/a — patrón declarado"
+    estado: debil          # el mismo patrón sintáctico es legítimo al sincronizar con algo externo
+    baseline: null
+    referencia: "stack/estado.md §Implementación de referencia (estado derivado)"
+    doc: stack/estado.md
+
+  # ── capa componentes ──────────────────────────────────────────────────────────────────────
+  - id: fe-props-tipadas
+    enunciado: "Props con interface exportada; prohibidos any y React.FC"
+    eje: 1-estructura
+    capa: componentes
+    mecanismo: script      # refuerzo: @typescript-eslint/no-explicit-any (AST, más preciso)
+    ambito: "src/**/*.{ts,tsx}"
+    origen: casa
+    dominancia: "n/a — patrón declarado"
+    estado: activo
+    baseline: null
+    referencia: "stack/componentes.md §Implementación de referencia (OrderCard)"
+    doc: stack/componentes.md
+
+  - id: fe-color-por-token
+    enunciado: "Ningún color literal en componentes: se consume del origen de tokens del proyecto"
+    eje: 1-estructura
+    capa: componentes
+    mecanismo: script
+    ambito: "src/**/*.{ts,tsx}"
+    origen: casa
+    dominancia: "n/a — patrón declarado"
+    estado: activo
+    baseline: null
+    referencia: "stack/componentes.md §Implementación de referencia"
+    doc: stack/componentes.md
+    nota: >
+      consolida la «Regla 0» que ya vivía suelta en agents/especialista-ux-ui.md.
+      AMPLIADA por EST-2 (2026-08-08): además del #hex detecta rgb()/rgba()/hsl()/hsla() con
+      números literales. NO marca rgb(var(--token)) — eso es consumir el token, que es lo que se
+      pide. Su pareja de proyecto es fe-origen-de-tokens: esta regla exige que el componente
+      consuma; aquella, que exista de dónde.
+
+  - id: fe-un-componente-por-fichero
+    enunciado: "Un componente exportado por fichero, y el fichero se llama como él (index.tsx exento)"
+    eje: 1-estructura
+    capa: componentes
+    mecanismo: script
+    ambito: "src/**/*.tsx"
+    origen: casa
+    dominancia: "n/a — patrón declarado"
+    estado: debil          # los componentes acompañantes (Card + CardSkeleton) son legítimos
+    baseline: null
+    referencia: "stack/componentes.md §Implementación de referencia"
+    doc: stack/componentes.md
+
+  - id: fe-techo-200-lineas
+    enunciado: "Un componente por encima de 200 líneas se parte o se justifica"
+    eje: 1-estructura
+    capa: componentes
+    mecanismo: script
+    ambito: "src/**/*.tsx"
+    origen: casa
+    dominancia: "n/a — patrón declarado"
+    estado: debil          # umbral para abrir la conversación, no veredicto
+    baseline: null
+    referencia: "stack/componentes.md §Cuándo se parte un componente"
+    doc: stack/componentes.md
+
+  # ── capa formularios ──────────────────────────────────────────────────────────────────────
+  - id: fe-esquema-unico
+    enunciado: "Un esquema zod por formulario es la única fuente de validación de cliente"
+    eje: 1-estructura
+    capa: formularios
+    mecanismo: script
+    ambito: "src/**/*.tsx"
+    origen: casa
+    dominancia: "n/a — patrón declarado"
+    estado: activo
+    baseline: null
+    referencia: "stack/formularios.md §Implementación de referencia (order.ts + OrderForm.tsx)"
+    doc: stack/formularios.md
+
+  - id: fe-submit-bloqueado
+    enunciado: "El submit se deshabilita mientras vuela (isSubmitting / isPending)"
+    eje: 3-errores
+    capa: formularios
+    mecanismo: script
+    ambito: "src/**/*.tsx"
+    origen: casa
+    dominancia: "n/a — patrón declarado"
+    estado: activo
+    baseline: null
+    referencia: "stack/formularios.md §Implementación de referencia"
+    doc: stack/formularios.md
+
+  - id: fe-errores-de-campo-del-backend
+    enunciado: "Los errores 400 por campo del DRF se pintan en su campo con setError"
+    eje: 3-errores
+    capa: formularios
+    mecanismo: script
+    ambito: "src/**/*.tsx"
+    origen: casa
+    dominancia: "n/a — patrón declarado"
+    estado: debil          # no distingue «los ignora» de «ese endpoint no devuelve errores de campo»
+    baseline: null
+    referencia: "stack/formularios.md §El contrato con el backend"
+    doc: stack/formularios.md
+
+  # ── capa tests ────────────────────────────────────────────────────────────────────────────
+  - id: fe-nivel-del-test
+    enunciado: "Unitario = render() sin navegador; E2E = page.goto() en tests/e2e/. Sin mezclas"
+    eje: 5-tests
+    capa: tests
+    mecanismo: script
+    ambito: "**/*.{test,spec}.{ts,tsx}"
+    origen: casa
+    dominancia: "n/a — patrón declarado"
+    estado: activo
+    baseline: null
+    referencia: "stack/tests.md §Los tres niveles y su frontera"
+    doc: stack/tests.md
+
+  - id: fe-consulta-por-rol
+    enunciado: "El test unitario consulta por rol/etiqueta; el data-testid es contrato del E2E"
+    eje: 5-tests
+    capa: tests
+    mecanismo: script      # refuerzo: testing-library/no-container, no-node-access
+    ambito: "**/*.{test,spec}.{ts,tsx}"
+    origen: casa
+    dominancia: "n/a — patrón declarado"
+    estado: activo
+    baseline: null
+    referencia: "stack/tests.md §Cómo se busca en el DOM · rules/verification.md §E2E-2"
+    doc: stack/tests.md
+
+  - id: fe-red-en-el-boundary
+    enunciado: "La red se simula con MSW; no se mockea el módulo de api/services"
+    eje: 5-tests
+    capa: tests
+    mecanismo: script
+    ambito: "**/*.{test,spec}.{ts,tsx}"
+    origen: casa
+    dominancia: "n/a — patrón declarado"
+    estado: activo
+    baseline: null
+    referencia: "stack/tests.md §El antipatrón que sustituye"
+    doc: stack/tests.md
+
+  - id: fe-sin-snapshot-de-componente
+    enunciado: "Nada de toMatchSnapshot sobre árboles de componentes"
+    eje: 5-tests
+    capa: tests
+    mecanismo: script
+    ambito: "**/*.{test,spec}.{ts,tsx}"
+    origen: casa
+    dominancia: "n/a — patrón declarado"
+    estado: activo
+    baseline: null
+    referencia: "stack/tests.md §El antipatrón que sustituye"
+    doc: stack/tests.md
+
+  - id: fe-sin-espera-por-tiempo
+    enunciado: "Se espera por condición (findBy*/waitFor), nunca por tiempo"
+    eje: 5-tests
+    capa: tests
+    mecanismo: script
+    ambito: "**/*.{test,spec}.{ts,tsx}"
+    origen: casa
+    dominancia: "n/a — patrón declarado"
+    estado: activo
+    baseline: null
+    referencia: "stack/tests.md · rules/verification.md §E2E-3 (el mismo principio en el nivel E2E)"
+    doc: stack/tests.md
+
+  # ── capa a11y ─────────────────────────────────────────────────────────────────────────────
+  - id: fe-interactivo-semantico
+    enunciado: "Lo interactivo es <button>/<a>: nada de onClick sobre div/span/li/td"
+    eje: 6-a11y
+    capa: a11y
+    mecanismo: script      # refuerzo: jsx-a11y/no-static-element-interactions
+    ambito: "src/**/*.tsx"
+    origen: casa
+    dominancia: "n/a — patrón declarado"
+    estado: activo
+    baseline: null
+    referencia: "stack/accesibilidad.md §Implementación de referencia"
+    doc: stack/accesibilidad.md
+
+  - id: fe-imagen-con-alt
+    enunciado: "Toda <img> lleva alt (vacío si es decorativa)"
+    eje: 6-a11y
+    capa: a11y
+    mecanismo: script      # refuerzo: jsx-a11y/alt-text
+    ambito: "src/**/*.tsx"
+    origen: casa
+    dominancia: "n/a — patrón declarado"
+    estado: activo
+    baseline: null
+    referencia: "stack/accesibilidad.md §Implementación de referencia"
+    doc: stack/accesibilidad.md
+
+  - id: fe-target-size-habilitado
+    enunciado: "Si el test corre axe, habilita target-size explícitamente (viene DESACTIVADA)"
+    eje: 6-a11y
+    capa: a11y
+    mecanismo: script      # la comprobación real es runtime (axe); esto vigila que esté encendida
+    ambito: "**/*.{test,spec}.{ts,tsx}"
+    origen: casa
+    dominancia: "n/a — patrón declarado"
+    estado: debil
+    baseline: null
+    referencia: "stack/accesibilidad.md §Lo que el código no puede saber"
+    doc: stack/accesibilidad.md
+    nota: >
+      Verificado en la definición de la regla en axe-core: "enabled": false y tags [wcag22aa].
+      withTags(['wcag2a','wcag2aa']) NO la ejecuta. Sin esta fila, el gate de 24 px de WCAG 2.2
+      que audita Aitor puede estar «en verde» sin haberse comprobado jamás.
+
+  # ── capa stack — qué librerías se instalan (FE-1) ─────────────────────────────────────────
+  # Eje nuevo en el frontend: `4-dependencias`, tomado prestado del catálogo de backend, que ya
+  # lo usa para lo mismo. `7-seguridad` también es nuevo: el frontend tenía `3-errores` (fallos
+  # que ve el usuario) pero ningún eje para lo que explota alguien a propósito.
+  - id: fe-stack-canonico
+    enunciado: "Un solo papel, una sola librería: nada de Formik junto a RHF ni Yup junto a zod"
+    eje: 4-dependencias
+    capa: stack
+    mecanismo: script
+    ambito: "package.json"
+    origen: casa
+    dominancia: "n/a — patrón declarado"
+    estado: debil
+    baseline: null
+    referencia: "stack/frontend-stack.md §Implementación de referencia (la tabla de papeles)"
+    doc: stack/frontend-stack.md
+    nota: >
+      DÉBIL a propósito y es la decisión más discutible del set: al aterrizar en un repo existente
+      esta regla y su hermana son las que más van a disparar, y bloquear un package.json bloquea
+      también al proyecto que hereda código y no puede migrar hoy. Falso positivo conocido: MUI
+      arrastra @emotion/styled sin que nadie lo haya elegido.
+
+  - id: fe-version-mayor-del-canon
+    enunciado: "La versión mayor es la del canon (react-query 5 · zod 4 · react-router 7 · tailwind 4 · react ≥18)"
+    eje: 4-dependencias
+    capa: stack
+    mecanismo: script
+    ambito: "package.json"
+    origen: casa
+    dominancia: "n/a — patrón declarado"
+    estado: debil
+    baseline: null
+    referencia: "stack/frontend-stack.md §Implementación de referencia (package.json de referencia)"
+    doc: stack/frontend-stack.md
+    nota: >
+      Verificado con context7 (2026-08-08): TanStack Query va por v5 para React; zod 4 deprecó
+      z.string().email() en favor de z.email(); react-router 7 usa Component/ErrorBoundary, que
+      tienen prioridad sobre element/errorElement; tailwind 4 configura el tema en CSS con @theme.
+      Comprueba lo DECLARADO, no lo instalado (eso está en el lockfile) ni que el paquete exista
+      (eso es code-review-gate).
+
+  # ── capa estilos — Tailwind e iconos (FE-1) ───────────────────────────────────────────────
+  - id: fe-iconos-tree-shakeable
+    enunciado: "Los iconos se importan por su nombre; nunca `import * as` de lucide-react"
+    eje: 4-dependencias
+    capa: estilos
+    mecanismo: script
+    ambito: "src/**/*.{ts,tsx}"
+    origen: casa
+    dominancia: "n/a — patrón declarado"
+    estado: activo
+    baseline: null
+    referencia: "stack/estilos.md §Implementación de referencia (los iconos, uno a uno)"
+    doc: stack/estilos.md
+    nota: >
+      Verificado en la doc de lucide (2026-08-08): el paquete es ESM y por tanto tree-shakeable,
+      y para nombres decididos en ejecución la vía sancionada es el mapa de imports dinámicos.
+      El namespace impide al empaquetador demostrar qué sobra: >1.700 iconos en el bundle. No
+      rompe nada — solo hace la página más lenta, que es por lo que nadie lo ve.
+
+  - id: fe-escala-de-tailwind
+    enunciado: "Valores de la escala, no arbitrarios, en p/m/gap/text/rounded/leading"
+    eje: 1-estructura
+    capa: estilos
+    mecanismo: script      # refuerzo: prettier-plugin-tailwindcss + Tailwind IntelliSense
+    ambito: "src/**/*.tsx"
+    origen: casa
+    dominancia: "n/a — patrón declarado"
+    estado: debil
+    baseline: null
+    referencia: "stack/estilos.md §El antipatrón que sustituye"
+    doc: stack/estilos.md
+    nota: "w- y h- quedan fuera a propósito: un ancho fijo en px es legítimo a menudo."
+
+  - id: fe-clases-con-helper
+    enunciado: "Las clases condicionales pasan por cn() (clsx + tailwind-merge), no por plantilla"
+    eje: 1-estructura
+    capa: estilos
+    mecanismo: script      # refuerzo: eslint-plugin-better-tailwindcss
+    ambito: "src/**/*.tsx"
+    origen: casa
+    dominancia: "n/a — patrón declarado"
+    estado: debil
+    baseline: null
+    referencia: "stack/estilos.md §Implementación de referencia (el ayudante cn())"
+    doc: stack/estilos.md
+    nota: >
+      El motivo no es estético: al concatenar, entre `px-2` y `px-4` gana la que Tailwind escribió
+      última EN LA HOJA, no la última del string. Comprobar el choque de verdad exigiría conocer
+      las clases generadas para el tema del proyecto, así que la regla comprobable es "pasa por
+      cn()", no "no tengas conflictos".
+
+  - id: fe-apply-con-reference
+    enunciado: "@apply en hoja de ámbito propio (module.css/vue/svelte) exige @reference"
+    eje: 1-estructura
+    capa: estilos
+    mecanismo: script
+    ambito: "**/*.module.{css,scss,sass,less}, **/*.{vue,svelte}"
+    origen: casa
+    dominancia: "n/a — patrón declarado"
+    estado: debil
+    baseline: null
+    referencia: "stack/estilos.md §El antipatrón que sustituye"
+    doc: stack/estilos.md
+    nota: >
+      Verificado en la guía de actualización de Tailwind 4: esas hojas se compilan aparte y no ven
+      el @theme, así que el @apply se queda sin resolver. La doc oficial NO desaconseja @apply en
+      general — esta regla persigue el @apply que no funciona, no su uso.
+
+  # ── capa rutas — react-router 7 (FE-1) ────────────────────────────────────────────────────
+  - id: fe-enlace-interno-con-link
+    enunciado: "La navegación interna usa <Link>/useNavigate, nunca <a href> ni window.location"
+    eje: 2-capas
+    capa: rutas
+    mecanismo: script
+    ambito: "src/**/*.tsx"
+    origen: casa
+    dominancia: "n/a — patrón declarado"
+    estado: activo
+    baseline: null
+    referencia: "stack/rutas.md §Implementación de referencia (la navegación)"
+    doc: stack/rutas.md
+    nota: >
+      Solo rutas literales que empiezan por una barra; se ignora si lleva target, download o
+      rel=external, y un href={variable} no se puede juzgar. El síntoma es engañoso: el enlace
+      LLEVA a la página correcta, solo que recargando la app y vaciando la caché de queries.
+
+  - id: fe-error-boundary-de-ruta
+    enunciado: "createBrowserRouter siempre con ErrorBoundary en la raíz"
+    eje: 3-errores
+    capa: rutas
+    mecanismo: script
+    ambito: "src/**/*.{ts,tsx}"
+    origen: casa
+    dominancia: "n/a — patrón declarado"
+    estado: activo
+    baseline: null
+    referencia: "stack/rutas.md §Implementación de referencia (el ErrorBoundary)"
+    doc: stack/rutas.md
+    nota: >
+      Sin él, un fallo de loader o de render deja la pantalla en blanco: ni mensaje, ni botón, ni
+      nada que copiar para reportarlo. Comprueba el FICHERO del router, no cada ruta anidada — con
+      uno en la raíz queda cubierto todo lo de debajo.
+
+  - id: fe-rutas-en-un-sitio
+    enunciado: "Las rutas se declaran en el módulo de rutas, no repartidas por componentes"
+    eje: 1-estructura
+    capa: rutas
+    mecanismo: script
+    ambito: "src/**/*.tsx"
+    origen: casa
+    dominancia: "n/a — patrón declarado"
+    estado: debil
+    baseline: null
+    referencia: "stack/rutas.md §El antipatrón que sustituye"
+    doc: stack/rutas.md
+
+  # ── capa saneado — DOMPurify (FE-1) ───────────────────────────────────────────────────────
+  - id: fe-html-saneado
+    enunciado: "dangerouslySetInnerHTML solo con DOMPurify.sanitize, y saneando al PINTAR"
+    eje: 7-seguridad
+    capa: saneado
+    mecanismo: script      # refuerzo: react/no-danger + eslint-plugin-no-unsanitized
+    ambito: "src/**/*.{ts,tsx}"
+    origen: casa
+    dominancia: "n/a — patrón declarado"
+    estado: activo
+    baseline: null
+    referencia: "stack/saneado.md §Implementación de referencia (SafeHtml)"
+    doc: stack/saneado.md
+    nota: >
+      LÍMITE HONESTO: la comprobación es de fichero, no de flujo — verifica que el saneado APARECE,
+      no que el valor que llega a __html sea el saneado. Hace imposible el descuido, no el error
+      deliberado; eso lo cubren la revisión y sofia-pentester. Por eso el patrón mete el saneado en
+      un componente único (SafeHtml): si nadie más escribe __html, no hay dónde equivocarse.
+
+  - id: fe-sin-innerhtml
+    enunciado: "Nada de .innerHTML / insertAdjacentHTML / document.write en código de aplicación"
+    eje: 7-seguridad
+    capa: saneado
+    mecanismo: script      # refuerzo: no-unsanitized/property (sí sigue la asignación)
+    ambito: "src/**/*.{ts,tsx}"
+    origen: casa
+    dominancia: "n/a — patrón declarado"
+    estado: activo
+    baseline: null
+    referencia: "stack/saneado.md §El antipatrón que sustituye"
+    doc: stack/saneado.md
+    nota: "Exento `.innerHTML = ''`: vaciar un nodo no inyecta nada y era el falso positivo obvio."
+
+  # ── capa estilos · regla de PROYECTO — el sistema de diseño (EST-2) ───────────────────────
+  - id: fe-origen-de-tokens
+    enunciado: "Un único origen de tokens (@theme) y un documento fundacional que lo declare"
+    eje: 1-estructura
+    capa: estilos
+    mecanismo: script
+    ambito: "PROYECTO — el árbol entero (solo corre con --all)"
+    origen: casa
+    dominancia: "n/a — patrón declarado"
+    estado: debil
+    baseline: null
+    referencia: "stack/frontend-design-system.md §Implementación de referencia (el procedimiento)"
+    doc: stack/frontend-design-system.md
+    nota: >
+      DECISIÓN DEL USUARIO (EST-2): el template NO impone valores de diseño — ni paleta, ni escala,
+      ni tipografía. Impone el CONTRATO: un origen único de tokens y un documento fundacional en
+      .docs/core/design-system.md con el peso de la constitution.md de SpecKit. Esta es la ÚNICA
+      regla del catálogo frontend que juzga el conjunto y no un fichero, y por eso solo corre con
+      --all: desde un diff no se puede afirmar que al proyecto le falta algo. DÉBIL y con mensaje
+      prescriptivo — dice qué crear, no falla en seco. NO comprueba que el documento esté relleno
+      (solo que exista) ni que sus valores coincidan con los del @theme.
+
+  # ── capa componentes · formato de fechas e importes (UX-14, sub-ola 3.64) ─────────────────
+  - id: fe-fecha-importe-por-helper
+    enunciado: "Ninguna fecha ni importe llega a la pantalla sin pasar por el formateador del proyecto"
+    eje: 1-estructura
+    capa: componentes
+    mecanismo: script
+    ambito: "src/**/*.tsx (sin tests ni el propio helper de formato)"
+    origen: "accounting_AMC (.claude/scripts/gate_fechas.py)"
+    dominancia: "n/a — patrón declarado"
+    estado: debil
+    baseline: null
+    referencia: "stack/componentes.md §Fechas e importes"
+    doc: stack/componentes.md
+    nota: >
+      En AMC, 15 fechas crudas y 4 formatos en una tarjeta. Por nombre de campo y por formateo a
+      mano; no ve fechas en variables con otro nombre. Sobre el panel de AMC (31-10): 4 avisos.

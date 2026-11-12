@@ -1,0 +1,53 @@
+{
+ "meta": {
+  "title": "Mi proyecto — auditoría de feedback (ronda 1)",
+  "eyebrow": "Auditoría de feedback · verificado en vivo",
+  "lead": "Verificación item por item (código + en vivo con Playwright). Cada item lleva su cita verbatim, interpretación, estado, % de precisión y 3 capturas: ANTES · ACTUAL · DESPUÉS.",
+  "report_notes": [
+   "Lo marcado «Hecho» está verificado en vivo (DOM + screenshot).",
+   "Pendiente/Bloqueado = falta un asset o una decisión del cliente.",
+   "Cambios de docs NO commiteados a git salvo que se pida."
+  ],
+  "epics": {
+   "A": {"name": "Global / a11y", "color": "#1d4ed8"},
+   "C": {"name": "Contenido / precios", "color": "#b45309"},
+   "G": {"name": "Copy / textos", "color": "#444"}
+  },
+  "statuses": ["backlog", "doing", "review", "done", "blocked"],
+  "decisions": ["aprobar", "modificar", "aplazar", "descartar"],
+  "clarities": ["claro", "duda"],
+  "pages": [
+   {"code": "HOME", "name": "Home"},
+   {"code": "PRICE", "name": "Precios"}
+  ],
+  "total": 2
+ },
+ "items": [
+  {
+   "id": "HOME-1", "page": "HOME", "epic": "G", "severity": "P2", "effort": "S",
+   "clarity": "claro",
+   "text": "El título del hero debería decir «Aprende idiomas en Barcelona», no «Bienvenido».",
+   "texto_original": "El título del hero debería decir «Aprende idiomas en Barcelona», no «Bienvenido».",
+   "status": "backlog", "blocked": false, "decision": "", "note": "",
+   "verdict": "notdone", "confidence": "alta", "precision_pct": 90,
+   "interpretacion": "Cambiar el H1 del hero de la home por el copy indicado.",
+   "why": "🔎 Código: notdone — templates/home.html:12 sigue con «Bienvenido»\n👁 En vivo: notdone — el H1 renderizado muestra «Bienvenido»",
+   "howto": "Editar el H1 del hero en templates/home.html",
+   "anchor_type": "text", "anchor_value": "Bienvenido", "viewport": "desktop",
+   "before": "", "after": "", "src": "feedback.md"
+  },
+  {
+   "id": "PRICE-1", "page": "PRICE", "epic": "C", "severity": "P1", "effort": "M",
+   "clarity": "claro",
+   "text": "Falta el precio del plan anual en la tabla de precios.",
+   "texto_original": "Falta el precio del plan anual en la tabla de precios.",
+   "status": "done", "blocked": false, "decision": "aprobar", "note": "",
+   "verdict": "done", "confidence": "alta", "precision_pct": 95,
+   "interpretacion": "Añadir una columna/fila con el precio del plan anual.",
+   "why": "🔎 Código: done — templates/pricing.html:40 añade la fila «Anual 1200€»\n👁 En vivo: done — la tabla muestra la fila Anual",
+   "howto": "",
+   "anchor_type": "selector", "anchor_value": ".pricing-table", "viewport": "desktop",
+   "before": "", "after": "", "src": "feedback.md"
+  }
+ ]
+}

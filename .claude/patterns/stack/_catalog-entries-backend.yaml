@@ -1,0 +1,826 @@
+# PROPUESTA de entradas para `.claude/patterns/catalog.yaml` — mitad BACKEND del patrón de casa (US-7)
+# ─────────────────────────────────────────────────────────────────────────────────────────────
+# NO es el catálogo. Es el fichero de traspaso: el TL las integra en catalog.yaml.
+# Generado junto a `.claude/patterns/stack/backend-*.md` + `pattern_check_backend.py`.
+#
+# ⚠️ LEER ANTES DE INTEGRAR — estas filas NO son como las tres que ya hay en catalog.yaml
+#
+# 1) Son DECLARADAS, no MEDIDAS. El catálogo actual exige "dominancia medida antes de fijar", y con
+#    razón: se infiere del repo. Aquí no hay repo del que inferir — el template no tiene código
+#    Django, y el caso de uso de US-7 es justamente el proyecto NUEVO, donde por definición no hay
+#    precedentes. Por eso `dominancia: declarado` y por eso cada fila lleva `source:` a su doc.
+#    Encaja con la regla R-9 de Rita: una regla declarada CON `source:` sustituye a los 2
+#    precedentes, y se cita textual, nunca parafraseada.
+#
+# 2) `precedentes:` apunta a `_fixtures/conforme/`, que es código real, parseable y verificado
+#    (0 hallazgos en `--self-test`). Rita puede citarlo como file:line igual que citaría el repo.
+#
+# 3) EL `estado` DE AQUÍ ES EL DE UN PROYECTO NUEVO. En un proyecto EXISTENTE manda lo que el repo
+#    ya hace (doctrina de US-7: imponer el estilo de casa a un heredado haría que Rita marcara
+#    medio repo). Protocolo al adoptar en un repo con código:
+#         a. Sembrar TODAS las filas como `estado: sombra`.
+#         b. Medir:  python3 .claude/patterns/stack/pattern_check_backend.py --all --json
+#         c. Congelar lo preexistente en `baseline/<id>.json` (deuda aceptada) y promover a
+#            `activo` solo las reglas cuya violación sea minoritaria (<20-30 sitios — regla de
+#            inversión del README: si marcaría medio repo, la mala es la regla).
+#
+# 4) Mecanismo: todas son `ast` o `grep` (escalón determinista, 0 tokens). NINGUNA es "que lo mire
+#    Rita": una regla sin comprobación ejecutable no está en este fichero, está en el informe como
+#    descartada.
+#
+# Ejes usados (los dos primeros ya existen en catalog.yaml; los otros son NUEVOS — decisión del TL):
+#   1-estructura · 4-dependencias · 2-datos · 3-seguridad · 5-concurrencia · 6-configuracion
+
+project: tech-lead-template
+measured: null                  # declarado, no medido — ver nota 1
+source_set: ".claude/patterns/stack/"
+checker: ".claude/patterns/stack/pattern_check_backend.py"
+self_test: "55/55 reglas disparan sobre los fixtures infractores · 0 falsos positivos sobre los TRES fixtures conformes (conforme 11 ficheros · conforme-casa 18 · conforme-plano 6)"
+
+patterns:
+
+  # ══ capa 4 · SERVICIOS — dónde vive la lógica de negocio ═══════════════════════════════════
+  - id: be-svc-sin-drf
+    enunciado: "services.py no importa DRF/HTTP ni recibe `request`: la lógica se llama desde un test, una task o un comando"
+    eje: 1-estructura
+    mecanismo: ast
+    ambito: "**/services.py, **/services/**.py, **/use_cases/**.py, **/selectors.py"
+    dominancia: declarado
+    estado: activo
+    baseline: null
+    precedentes:
+      - ".claude/patterns/stack/_fixtures/conforme/apps/facturacion/services.py:44"
+      - ".claude/patterns/stack/_fixtures/conforme/apps/facturacion/views.py:33"
+    source: ".claude/patterns/stack/backend-servicios.md"
+    doc: stack/backend-servicios.md
+
+  - id: be-svc-escritura-en-vista
+    enunciado: "Las vistas no escriben en la BD: delegan en un servicio (salvo serializer.save y hooks perform_* triviales)"
+    eje: 1-estructura
+    mecanismo: ast
+    ambito: "**/views.py, **/views/**.py, **/viewsets.py"
+    dominancia: declarado
+    estado: activo
+    baseline: null
+    precedentes:
+      - ".claude/patterns/stack/_fixtures/conforme/apps/facturacion/views.py:22"
+      - ".claude/patterns/stack/_fixtures/conforme/apps/facturacion/services.py:44"
+    source: ".claude/patterns/stack/backend-servicios.md"
+    doc: stack/backend-servicios.md
+
+  # ══ capa 5 · CELERY ════════════════════════════════════════════════════════════════════════
+  - id: be-celery-delay-en-transaccion
+    enunciado: "No se encola dentro de transaction.atomic() sin on_commit: el worker corre antes del COMMIT"
+    eje: 5-concurrencia
+    mecanismo: ast
+    ambito: "**/*.py (excepto tests)"
+    dominancia: declarado
+    estado: activo
+    baseline: null
+    precedentes:
+      - ".claude/patterns/stack/_fixtures/conforme/apps/facturacion/services.py:58"
+    source: ".claude/patterns/stack/backend-celery.md"
+    doc: stack/backend-celery.md
+    verificado: "docs.djangoproject.com/en/5.2/topics/db/transactions (on_commit) — 2026-08-08"
+
+  - id: be-celery-serializer-json
+    enunciado: "task_serializer='json' + accept_content=['json']: hace imposible pasar objetos del ORM y cierra el RCE de pickle"
+    eje: 3-seguridad
+    mecanismo: grep
+    ambito: "**/settings/**.py, **/settings.py"
+    dominancia: declarado
+    estado: activo
+    baseline: null
+    precedentes:
+      - ".claude/patterns/stack/_fixtures/conforme/config/settings/base.py:46"
+    source: ".claude/patterns/stack/backend-celery.md"
+    doc: stack/backend-celery.md
+
+  - id: be-celery-timeouts
+    enunciado: "settings define task_soft_time_limit y task_time_limit (sin ellos una task cuelga un worker para siempre)"
+    eje: 6-configuracion
+    mecanismo: grep
+    ambito: "**/settings/**.py, **/settings.py"
+    dominancia: declarado
+    estado: activo
+    baseline: null
+    precedentes:
+      - ".claude/patterns/stack/_fixtures/conforme/config/settings/base.py:50"
+    source: ".claude/patterns/stack/backend-celery.md"
+    doc: stack/backend-celery.md
+
+  - id: be-celery-retry-io
+    enunciado: "Task que hace I/O de red declara autoretry_for + retry_backoff"
+    eje: 5-concurrencia
+    mecanismo: ast
+    ambito: "**/tasks.py, **/tasks/**.py"
+    dominancia: declarado
+    estado: activo           # PROMOVIDA desde 'debil' (REF-5): 0 de 28 tareas la cumplian en el repo medido
+    baseline: null
+    precedentes:
+      - ".claude/patterns/stack/_fixtures/conforme/apps/facturacion/tasks.py:21"
+    source: ".claude/patterns/stack/backend-celery.md"
+    doc: stack/backend-celery.md
+    verificado: "docs.celeryq.dev/en/stable/userguide/tasks.html — max_retries=3, retry_backoff_max=600, retry_jitter=True — 2026-08-08"
+
+  - id: be-celery-ackslate-idempotente
+    enunciado: "Task con acks_late=True exige un test de idempotencia que la nombre"
+    eje: 5-concurrencia
+    mecanismo: ast            # proxy: cruza el nombre de la task contra los ficheros de test
+    ambito: "**/tasks.py, **/tasks/**.py"
+    dominancia: declarado
+    estado: debil            # el proxy ("existe un test que la nombra") no demuestra idempotencia
+    baseline: null
+    precedentes:
+      - ".claude/patterns/stack/_fixtures/conforme/apps/facturacion/tests/test_tasks.py:8"
+      - ".claude/patterns/stack/_fixtures/conforme/apps/facturacion/tasks.py:25"
+    source: ".claude/patterns/stack/backend-celery.md"
+    doc: stack/backend-celery.md
+
+  # ══ capa 1 · MODELOS Y MIGRACIONES ═════════════════════════════════════════════════════════
+  - id: be-model-checkconstraint-condition
+    enunciado: "CheckConstraint usa `condition=` — el argumento `check=` se ELIMINÓ en Django 5.1"
+    eje: 2-datos
+    mecanismo: ast
+    ambito: "**/models.py, **/models/**.py"
+    dominancia: declarado
+    estado: activo
+    baseline: null
+    precedentes:
+      - ".claude/patterns/stack/_fixtures/conforme/apps/facturacion/models.py:49"
+    source: ".claude/patterns/stack/backend-modelos.md"
+    doc: stack/backend-modelos.md
+    verificado: "docs.djangoproject.com/en/5.2/internals/deprecation — 'removing the check keyword argument from CheckConstraint' (Django 5.1) — 2026-08-08"
+
+  - id: be-model-related-name
+    enunciado: "Toda FK/O2O/M2M declara related_name explícito"
+    eje: 2-datos
+    mecanismo: ast
+    ambito: "**/models.py, **/models/**.py"
+    dominancia: declarado
+    estado: activo
+    baseline: null
+    precedentes:
+      - ".claude/patterns/stack/_fixtures/conforme/apps/facturacion/models.py:26"
+    source: ".claude/patterns/stack/backend-modelos.md"
+    doc: stack/backend-modelos.md
+
+  - id: be-model-null-en-texto
+    enunciado: "Campos de texto no usan null=True (dos estados vacíos); excepción automática: unique=True"
+    eje: 2-datos
+    mecanismo: ast
+    ambito: "**/models.py, **/models/**.py"
+    dominancia: declarado
+    estado: activo
+    baseline: null
+    precedentes:
+      - ".claude/patterns/stack/_fixtures/conforme/apps/facturacion/models.py:29"
+    source: ".claude/patterns/stack/backend-modelos.md"
+    doc: stack/backend-modelos.md
+
+  - id: be-model-dinero-float
+    enunciado: "El dinero nunca es FloatField — DecimalField con max_digits/decimal_places"
+    eje: 2-datos
+    mecanismo: ast
+    ambito: "**/models.py, **/models/**.py"
+    dominancia: declarado
+    estado: activo
+    baseline: null
+    precedentes:
+      - ".claude/patterns/stack/_fixtures/conforme/apps/facturacion/models.py:30"
+    source: ".claude/patterns/stack/backend-modelos.md"
+    doc: stack/backend-modelos.md
+
+  - id: be-migracion-reversible
+    enunciado: "RunPython declara siempre la función inversa (o RunPython.noop explícito)"
+    eje: 2-datos
+    mecanismo: ast
+    ambito: "**/migrations/*.py"
+    dominancia: declarado
+    estado: activo
+    baseline: null
+    precedentes:
+      - ".claude/patterns/stack/_fixtures/conforme/apps/facturacion/migrations/0002_backfill_numero.py:21"
+    source: ".claude/patterns/stack/backend-modelos.md"
+    doc: stack/backend-modelos.md
+
+  # ══ capa 2 · SERIALIZERS ═══════════════════════════════════════════════════════════════════
+  - id: be-ser-fields-all
+    enunciado: "Serializers declaran fields explícito, nunca '__all__'"
+    eje: 3-seguridad
+    mecanismo: ast
+    ambito: "**/serializers.py, **/serializers/**.py"
+    dominancia: declarado
+    estado: activo
+    baseline: null
+    precedentes:
+      - ".claude/patterns/stack/_fixtures/conforme/apps/facturacion/serializers.py:16"
+      - ".claude/patterns/stack/_fixtures/conforme/apps/facturacion/serializers.py:40"
+    source: ".claude/patterns/stack/backend-serializers.md"
+    doc: stack/backend-serializers.md
+
+  - id: be-ser-campo-servidor-escribible
+    enunciado: "Campos que decide el servidor (user/owner/cliente/created_by/tenant) van en read_only_fields"
+    eje: 3-seguridad
+    mecanismo: ast
+    ambito: "**/serializers.py, **/serializers/**.py"
+    dominancia: declarado
+    estado: activo
+    baseline: null
+    precedentes:
+      - ".claude/patterns/stack/_fixtures/conforme/apps/facturacion/serializers.py:29"
+    source: ".claude/patterns/stack/backend-serializers.md"
+    doc: stack/backend-serializers.md
+
+  - id: be-ser-sin-efectos
+    enunciado: "Los serializers validan y transforman: no lanzan tasks, correos ni llamadas HTTP"
+    eje: 1-estructura
+    mecanismo: ast
+    ambito: "**/serializers.py, **/serializers/**.py"
+    dominancia: declarado
+    estado: activo
+    baseline: null
+    precedentes:
+      - ".claude/patterns/stack/_fixtures/conforme/apps/facturacion/serializers.py:31"
+      - ".claude/patterns/stack/_fixtures/conforme/apps/facturacion/services.py:58"
+    source: ".claude/patterns/stack/backend-serializers.md"
+    doc: stack/backend-serializers.md
+
+  # ══ capa 3 · VISTAS ════════════════════════════════════════════════════════════════════════
+  - id: be-view-queryset-sin-filtrar
+    enunciado: "ViewSet con queryset=...objects.all() y sin get_queryset() expone todas las filas"
+    eje: 3-seguridad
+    mecanismo: ast
+    ambito: "**/views.py, **/views/**.py, **/viewsets.py"
+    dominancia: declarado
+    estado: debil            # hay catálogos globales legítimos: alto daño pero también alto FPR
+    baseline: null
+    precedentes:
+      - ".claude/patterns/stack/_fixtures/conforme/apps/facturacion/views.py:22"
+      - ".claude/patterns/stack/_fixtures/conforme/apps/facturacion/views.py:55"
+    source: ".claude/patterns/stack/backend-vistas.md"
+    doc: stack/backend-vistas.md
+
+  - id: be-view-permisos-por-defecto
+    enunciado: "settings define DEFAULT_PERMISSION_CLASSES; AllowAny explícito exige razón escrita al lado"
+    eje: 3-seguridad
+    mecanismo: grep
+    ambito: "**/settings/**.py, **/views.py"
+    dominancia: declarado
+    estado: activo
+    baseline: null
+    precedentes:
+      - ".claude/patterns/stack/_fixtures/conforme/config/settings/base.py:22"
+      - ".claude/patterns/stack/_fixtures/conforme/apps/facturacion/views.py:53"
+    source: ".claude/patterns/stack/backend-vistas.md"
+    doc: stack/backend-vistas.md
+
+  - id: be-view-paginacion
+    enunciado: "settings define DEFAULT_PAGINATION_CLASS + PAGE_SIZE (una lista sin paginar tumba el proceso)"
+    eje: 6-configuracion
+    mecanismo: grep
+    ambito: "**/settings/**.py"
+    dominancia: declarado
+    estado: activo
+    baseline: null
+    precedentes:
+      - ".claude/patterns/stack/_fixtures/conforme/config/settings/base.py:26"
+    source: ".claude/patterns/stack/backend-vistas.md"
+    doc: stack/backend-vistas.md
+
+  - id: be-api-exception-handler
+    enunciado: "settings define EXCEPTION_HANDLER: una sola forma de error 400 {\"errors\": {campo: [msg]}} — contrato con el frontend"
+    eje: 1-estructura
+    mecanismo: grep
+    ambito: "**/settings/**.py"
+    dominancia: declarado
+    estado: activo
+    baseline: null
+    precedentes:
+      - ".claude/patterns/stack/_fixtures/conforme/config/settings/base.py:30"
+      - ".claude/patterns/stack/_fixtures/conforme/config/exceptions.py:24"
+    source: ".claude/patterns/stack/backend-vistas.md"
+    doc: stack/backend-vistas.md
+    verificado: "django-rest-framework.org/api-guide/exceptions + /settings — el default NO lleva envoltorio: campo a nivel raíz y {'detail': ...} en auth/404/throttling; NON_FIELD_ERRORS_KEY='non_field_errors' — 2026-08-08"
+    contrato_con: "frontend — api-y-errores.md (ApiError) + formularios.md §El contrato con el backend"
+
+  - id: be-view-error-sin-excepcion
+    enunciado: "Un error se LANZA (raise ValidationError), no se devuelve: `return Response(..., status=4xx)` esquiva el EXCEPTION_HANDLER"
+    eje: 1-estructura
+    mecanismo: ast
+    ambito: "**/views.py, **/views/**.py, **/viewsets.py"
+    dominancia: declarado
+    estado: activo
+    baseline: null
+    precedentes:
+      - ".claude/patterns/stack/_fixtures/conforme/apps/facturacion/views.py:38"
+    source: ".claude/patterns/stack/backend-vistas.md"
+    doc: stack/backend-vistas.md
+    verificado: "django-rest-framework.org/api-guide/exceptions — 'the exception handler is only invoked for exceptions raised during request processing. It does not apply to responses generated directly by views' — 2026-08-08"
+    contrato_con: "frontend — pareja obligatoria de be-api-exception-handler; sin esta, el handler tiene un agujero"
+
+  # ══ capa 6 · CACHÉ REDIS ═══════════════════════════════════════════════════════════════════
+  - id: be-cache-ttl-infinito
+    enunciado: "cache.set(..., timeout=None) guarda para siempre: TTL explícito o razón escrita"
+    eje: 6-configuracion
+    mecanismo: ast
+    ambito: "**/*.py (excepto tests)"
+    dominancia: declarado
+    estado: activo
+    baseline: null
+    precedentes:
+      - ".claude/patterns/stack/_fixtures/conforme/apps/facturacion/services.py:77"
+    source: ".claude/patterns/stack/backend-cache-redis.md"
+    doc: stack/backend-cache-redis.md
+
+  - id: be-cache-key-prefix
+    enunciado: "CACHES define KEY_PREFIX (varios proyectos comparten Redis en este servidor y las claves colisionan)"
+    eje: 6-configuracion
+    mecanismo: grep
+    ambito: "**/settings/**.py"
+    dominancia: declarado
+    estado: activo
+    baseline: null
+    precedentes:
+      - ".claude/patterns/stack/_fixtures/conforme/config/settings/base.py:35"
+    source: ".claude/patterns/stack/backend-cache-redis.md"
+    doc: stack/backend-cache-redis.md
+
+  - id: be-cache-key-helper
+    enunciado: "La clave de caché se construye en un helper, no con una f-string suelta en el punto de uso"
+    eje: 1-estructura
+    mecanismo: ast
+    ambito: "**/*.py (excepto tests)"
+    dominancia: declarado
+    estado: debil            # los locks de corta vida componen la clave en el sitio a propósito
+    baseline: null
+    precedentes:
+      - ".claude/patterns/stack/_fixtures/conforme/apps/facturacion/services.py:38"
+    source: ".claude/patterns/stack/backend-cache-redis.md"
+    doc: stack/backend-cache-redis.md
+
+  - id: be-cache-sin-invalidacion
+    enunciado: "Helper de clave usado en cache.set y nunca en cache.delete: nadie sabe invalidarlo"
+    eje: 1-estructura
+    mecanismo: ast            # cruce entre ficheros
+    ambito: "**/*.py (excepto tests)"
+    dominancia: declarado
+    estado: sombra           # hay cachés cuya invalidación ES el TTL; medir antes de decidir
+    baseline: null
+    precedentes:
+      - ".claude/patterns/stack/_fixtures/conforme/apps/facturacion/services.py:55"
+    source: ".claude/patterns/stack/backend-cache-redis.md"
+    doc: stack/backend-cache-redis.md
+
+  # ══ capa 7 · RABBITMQ ══════════════════════════════════════════════════════════════════════
+  - id: be-mq-dlx
+    enunciado: "Toda Queue declarada en código lleva x-dead-letter-exchange (sin DLQ el mensaje veneno gira eternamente)"
+    eje: 5-concurrencia
+    mecanismo: ast
+    ambito: "**/settings/**.py, **/tasks.py"
+    dominancia: declarado
+    estado: debil            # RabbitMQ recomienda configurarlo por POLICY, y una policy no está en el repo
+    baseline: null
+    precedentes:
+      - ".claude/patterns/stack/_fixtures/conforme/config/settings/base.py:65"
+    source: ".claude/patterns/stack/backend-mensajeria-rabbitmq.md"
+    doc: stack/backend-mensajeria-rabbitmq.md
+    verificado: "rabbitmq.com/docs/quorum-queues — poison message handling + 'recommended to configure a DLX' — 2026-08-08"
+
+  # ══ capa 8 · DOCKER Y ENTORNO ══════════════════════════════════════════════════════════════
+  - id: be-env-secreto-literal
+    enunciado: "Ningún secreto literal en compose/settings: siempre ${VAR} o env(...)"
+    eje: 3-seguridad
+    mecanismo: grep
+    ambito: "docker-compose*.yml, **/settings/**.py"
+    dominancia: declarado
+    estado: activo
+    baseline: null
+    precedentes:
+      - ".claude/patterns/stack/_fixtures/conforme/config/settings/base.py:12"
+      - ".claude/patterns/stack/_fixtures/conforme/docker-compose.yml:11"
+    source: ".claude/patterns/stack/backend-docker-env.md"
+    doc: stack/backend-docker-env.md
+
+  - id: be-env-documentado
+    enunciado: "Toda variable que settings lee está documentada en .env.example"
+    eje: 6-configuracion
+    mecanismo: grep           # cruce settings ↔ .env.example
+    ambito: "**/settings/**.py + .env.example"
+    dominancia: declarado
+    estado: activo
+    baseline: null
+    precedentes:
+      - ".claude/patterns/stack/_fixtures/conforme/.env.example:4"
+    source: ".claude/patterns/stack/backend-docker-env.md"
+    doc: stack/backend-docker-env.md
+
+  - id: be-compose-healthcheck
+    enunciado: "depends_on usa condition: service_healthy (si no, Django arranca antes que Postgres)"
+    eje: 6-configuracion
+    mecanismo: grep
+    ambito: "docker-compose*.yml"
+    dominancia: declarado
+    estado: debil            # hay servicios sin healthcheck posible (sidecars)
+    baseline: null
+    precedentes:
+      - ".claude/patterns/stack/_fixtures/conforme/docker-compose.yml:42"
+    source: ".claude/patterns/stack/backend-docker-env.md"
+    doc: stack/backend-docker-env.md
+
+  - id: be-compose-tag-latest
+    enunciado: "Las imágenes se fijan a una versión: nunca :latest ni tag ausente"
+    eje: 4-dependencias
+    mecanismo: grep
+    ambito: "docker-compose*.yml"
+    dominancia: declarado
+    estado: activo
+    baseline: null
+    precedentes:
+      - ".claude/patterns/stack/_fixtures/conforme/docker-compose.yml:7"
+    source: ".claude/patterns/stack/backend-docker-env.md"
+    doc: stack/backend-docker-env.md
+
+  # ══ AMPLIACIÓN 2026-08-08 (EVO-1/2/3/5/6/7/8/9/11/12/14/15 · REF-2/3/5/6/9) ══════════════
+  # 22 reglas nuevas. Los precedentes apuntan al fixture `conforme-casa/`, que es el tercer
+  # arquetipo: un proyecto CON bases de casa (modelo base, Meta compartido, vista base con el
+  # filtrado por dueño). Puntúa 0 hallazgos en --self-test, así que es citable como file:line.
+
+  - id: be-model-floatfield-max-length
+    enunciado: "FloatField no tiene max_length: que esté ahí prueba que nadie revisó esa declaración"
+    eje: 2-datos
+    mecanismo: ast
+    ambito: "**/models.py"
+    dominancia: declarado
+    estado: activo
+    baseline: null
+    precedentes:
+      - ".claude/patterns/stack/_fixtures/conforme-casa/expedientes/models.py:25"
+    source: ".claude/patterns/stack/backend-modelos.md"
+    doc: stack/backend-modelos.md
+
+  - id: be-model-bulk-create-invariante
+    enunciado: "bulk_create() no llama a save(): prohibido sobre un modelo cuyo save() calcula invariantes"
+    eje: 2-datos
+    mecanismo: ast
+    ambito: "**/*.py (fuera de scripts/ y management/)"
+    dominancia: declarado
+    estado: activo
+    baseline: null
+    precedentes:
+      - ".claude/patterns/stack/_fixtures/conforme-casa/core/models.py:71"
+    source: ".claude/patterns/stack/backend-modelos.md"
+    doc: stack/backend-modelos.md
+
+  - id: be-model-base-de-casa
+    enunciado: "Si el proyecto tiene un modelo base abstracto compartido (auditoría/dueño), los modelos de app heredan de él"
+    eje: 1-estructura
+    mecanismo: ast
+    ambito: "**/models.py"
+    dominancia: declarado
+    estado: debil           # hay modelos sin auditoría legítimos (tablas de enlace, catálogos)
+    baseline: null
+    precedentes:
+      - ".claude/patterns/stack/_fixtures/conforme-casa/core/models.py:35"
+      - ".claude/patterns/stack/_fixtures/conforme-casa/expedientes/models.py:21"
+    source: ".claude/patterns/stack/backend-modelos.md"
+    doc: stack/backend-modelos.md
+
+  - id: be-model-meta-base-de-casa
+    enunciado: "Si el proyecto tiene una base de `Meta` compartida, todo `class Meta` la hereda (si no, pierde sus permisos en silencio)"
+    eje: 3-seguridad
+    mecanismo: ast
+    ambito: "**/models.py"
+    dominancia: declarado
+    estado: activo          # el permiso que no se crea AL MIGRAR no aparece solo despues
+    baseline: null
+    precedentes:
+      - ".claude/patterns/stack/_fixtures/conforme-casa/core/models.py:17"
+      - ".claude/patterns/stack/_fixtures/conforme-casa/expedientes/models.py:30"
+    source: ".claude/patterns/stack/backend-modelos.md"
+    doc: stack/backend-modelos.md
+
+  - id: be-model-caducidad-no-comprobada
+    enunciado: "Un campo de caducidad que no lee nadie es una promesa falsa: quien lo configura cree que protege"
+    eje: 3-seguridad
+    mecanismo: ast
+    ambito: "**/models.py (cruzado con las capas consumidoras)"
+    dominancia: declarado
+    estado: debil           # en proyecto nuevo el modelo se escribe antes que la auth
+    baseline: null
+    precedentes:
+      - ".claude/patterns/stack/_fixtures/conforme-casa/core/permissions.py:31"
+    source: ".claude/patterns/stack/backend-modelos.md"
+    doc: stack/backend-modelos.md
+
+  - id: be-api-secreto-en-query
+    enunciado: "Una credencial o un identificador fuerte no se lee de la query: la URL acaba en el log de acceso, el historial y el Referer"
+    eje: 3-seguridad
+    mecanismo: ast
+    ambito: "**/*.py"
+    dominancia: "0 hallazgos / 1989 ficheros de un backend Django real (evo-preven, 2026-09-04) — el detector AST ve 1092 lecturas de query params con 222 nombres distintos y NINGUNA es una credencial: la regla es estrecha, no ruidosa. Sombra porque solo ha disparado sobre el fixture: sin violación real todavía, no se puede afirmar su recall"
+    estado: sombra
+    baseline: null
+    precedentes:
+      - ".claude/patterns/stack/_fixtures/infractor/apps/facturacion/views.py — request.query_params.get(\"token\")"
+      - ".claude/patterns/stack/_fixtures/conforme/apps/facturacion/views.py — control negativo: un filtro normal (\"estado\") NO dispara"
+    source: ".claude/rules/api-http-contract.md"
+    doc: ../rules/api-http-contract.md
+
+  - id: be-view-action-multiverbo
+    enunciado: "Un @action no mezcla un verbo de lectura con uno de escritura: son dos intenciones y por tanto dos endpoints"
+    eje: 3-seguridad
+    mecanismo: ast
+    ambito: "**/views.py, **/viewsets.py"
+    dominancia: "0 hallazgos / 1989 ficheros (evo-preven, 2026-09-04), coincidente con el grep crudo (0 @action multiverbo). Sombra por la misma razón que la anterior"
+    estado: sombra
+    baseline: null
+    precedentes:
+      - ".claude/patterns/stack/_fixtures/infractor/apps/facturacion/views.py — @action(methods=[\"get\", \"post\"])"
+      - ".claude/patterns/stack/_fixtures/conforme/apps/facturacion/views.py — control negativo: methods=[\"get\"] y methods=[\"post\"] por separado NO disparan"
+    source: ".claude/rules/api-http-contract.md"
+    doc: ../rules/api-http-contract.md
+
+  - id: be-view-base-de-casa
+    enunciado: "Si el proyecto tiene una vista base con el filtrado por dueño, las vistas de app heredan de ella y no de DRF directamente"
+    eje: 3-seguridad
+    mecanismo: ast
+    ambito: "**/views.py, **/viewsets.py"
+    dominancia: declarado
+    estado: debil           # hay vistas que legitimamente no van por la base (catalogo publico, webhook)
+    baseline: null
+    precedentes:
+      - ".claude/patterns/stack/_fixtures/conforme-casa/core/api.py:16"
+      - ".claude/patterns/stack/_fixtures/conforme-casa/expedientes/views.py:14"
+    source: ".claude/patterns/stack/backend-vistas.md"
+    doc: stack/backend-vistas.md
+
+  - id: be-http-timeout
+    enunciado: "Toda llamada HTTP saliente lleva timeout=: sin él, una conexión colgada aparca el worker para siempre"
+    eje: 5-concurrencia
+    mecanismo: ast
+    ambito: "**/*.py"
+    dominancia: declarado
+    estado: activo
+    baseline: null
+    precedentes:
+      - ".claude/patterns/stack/_fixtures/conforme-casa/expedientes/tasks.py:36"
+      - ".claude/patterns/stack/_fixtures/conforme/apps/facturacion/tasks.py:41"
+    source: ".claude/patterns/stack/backend-celery.md"
+    doc: stack/backend-celery.md
+
+  - id: be-sig-efecto-sin-on-commit
+    enunciado: "Un receiver corre DENTRO de la transacción de quien guardó: todo efecto hacia fuera va en transaction.on_commit()"
+    eje: 5-concurrencia
+    mecanismo: ast
+    ambito: "**/signals.py"
+    dominancia: declarado
+    estado: activo
+    baseline: null
+    precedentes:
+      - ".claude/patterns/stack/_fixtures/conforme-casa/expedientes/signals.py:31"
+    source: ".claude/patterns/stack/backend-signals.md"
+    doc: stack/backend-signals.md
+
+  - id: be-sig-logica-de-negocio
+    enunciado: "En signals.py solo hay receivers: una función de negocio definida ahí es inalcanzable fuera del post_save"
+    eje: 1-estructura
+    mecanismo: ast
+    ambito: "**/signals.py"
+    dominancia: declarado
+    estado: debil           # un helper que no escribe en la BD es legitimo
+    baseline: null
+    precedentes:
+      - ".claude/patterns/stack/_fixtures/conforme-casa/expedientes/signals.py:25"
+    source: ".claude/patterns/stack/backend-signals.md"
+    doc: stack/backend-signals.md
+
+  - id: be-tpl-ruta-duplicada
+    enunciado: "Dos apps no sirven la misma ruta de plantilla: gana la primera de INSTALLED_APPS y la otra no se renderiza JAMÁS"
+    eje: 1-estructura
+    mecanismo: grep
+    ambito: "**/templates/**/*.html (regla de PROYECTO: se calcula sobre todo el repo)"
+    dominancia: declarado
+    estado: activo
+    baseline: null
+    precedentes:
+      - ".claude/patterns/stack/_fixtures/conforme-casa/core/templates/core/base.html:1"
+      - ".claude/patterns/stack/_fixtures/conforme-casa/expedientes/templates/expedientes/detalle.html:1"
+    source: ".claude/patterns/stack/backend-estructura-apps.md"
+    doc: stack/backend-estructura-apps.md
+
+  - id: be-capa-compartida-importa-dominio
+    enunciado: "Una app de la capa compartida no importa una app de dominio a nivel de módulo (mide el enredo; no bloquea)"
+    eje: 4-dependencias
+    mecanismo: ast
+    ambito: "apps marcadas `# pattern-layer: shared`"
+    dominancia: declarado
+    estado: sombra          # mide el enredo; promoverla exige antes la lista de excepciones, que en un repo real son ~126
+    baseline: null
+    precedentes:
+      - ".claude/patterns/stack/_fixtures/conforme-casa/core/apps.py:2"
+    source: ".claude/patterns/stack/backend-estructura-apps.md"
+    doc: stack/backend-estructura-apps.md
+
+  - id: be-script-sin-runner
+    enunciado: "Todo fichero suelto que toque el ORM declara cómo se ejecuta (comando, django.setup() o cabecera `# runner:`)"
+    eje: 1-estructura
+    mecanismo: grep
+    ambito: "**/*.py con rol desconocido"
+    dominancia: declarado
+    estado: debil           # la lista de roles conocidos es generosa a proposito: el FP quema la regla
+    baseline: null
+    precedentes:
+      - ".claude/patterns/stack/_fixtures/conforme-casa/herramientas/reindexar_codigos.py:2"
+    source: ".claude/patterns/stack/backend-estructura-apps.md"
+    doc: stack/backend-estructura-apps.md
+
+  - id: be-py-monkeypatch-django
+    enunciado: "No se asignan atributos a clases de django.* a nivel de módulo: el efecto es global y depende del orden de import"
+    eje: 1-estructura
+    mecanismo: ast
+    ambito: "**/*.py"
+    dominancia: declarado
+    estado: debil           # desmontar un monkeypatch vivo no es una tarde; de entrada se pide que sea visible
+    baseline: null
+    precedentes:
+      - ".claude/patterns/stack/_fixtures/conforme-casa/core/models.py:35"
+    source: ".claude/patterns/stack/backend-estructura-apps.md"
+    doc: stack/backend-estructura-apps.md
+
+  - id: be-no-mongo
+    enunciado: "El stack canónico es PostgreSQL puro: pymongo/bson/djongo fuera (los campos JSON ya cubren ese caso)"
+    eje: 4-dependencias
+    mecanismo: grep
+    ambito: "**/*.py"
+    dominancia: declarado
+    estado: debil           # un proyecto puede usar Mongo con razon y entonces se exime
+    baseline: null
+    precedentes:
+      - ".claude/patterns/stack/_fixtures/conforme-casa/config/settings.py:27"
+    source: ".claude/patterns/stack/backend-estructura-apps.md"
+    doc: stack/backend-estructura-apps.md
+
+  - id: be-val-escritura-sin-full-clean
+    enunciado: "Un comando de gestión que escribe llama a full_clean(): es una puerta sin la validación del formulario"
+    eje: 2-datos
+    mecanismo: ast
+    ambito: "**/management/commands/*.py"
+    dominancia: declarado
+    estado: debil           # comprobacion por fichero, no por llamada: proxy deliberado
+    baseline: null
+    precedentes:
+      - ".claude/patterns/stack/_fixtures/conforme-casa/expedientes/management/commands/importar_expedientes.py:40"
+    source: ".claude/patterns/stack/backend-validacion.md"
+    doc: stack/backend-validacion.md
+
+  - id: be-model-choices-sin-constraint
+    enunciado: "Un campo con choices= sin CheckConstraint solo lo valida el formulario: create/update/import escriben lo que quieran"
+    eje: 2-datos
+    mecanismo: ast
+    ambito: "**/models.py"
+    dominancia: declarado
+    estado: sombra          # en proyecto existente marcaria los cientos de campos con choices que ya hay
+    baseline: null
+    precedentes:
+      - ".claude/patterns/stack/_fixtures/conforme-casa/expedientes/models.py:36"
+      - ".claude/patterns/stack/_fixtures/conforme-plano/expedientes/models.py:26"
+    source: ".claude/patterns/stack/backend-validacion.md"
+    doc: stack/backend-validacion.md
+
+  - id: be-owner-create-sin-dueno
+    enunciado: "Un create() fuera del formulario asigna owner= explícito: sin dueño la fila existe y es invisible"
+    eje: 3-seguridad
+    mecanismo: ast
+    ambito: "**/*.py (fuera de forms.py y serializers.py)"
+    dominancia: declarado
+    estado: debil           # 199 de 227 en el repo de referencia: sin baseline mataria la regla; alcance = codigo nuevo
+    baseline: null
+    precedentes:
+      - ".claude/patterns/stack/_fixtures/conforme-casa/expedientes/services.py:24"
+    source: ".claude/patterns/stack/backend-validacion.md"
+    doc: stack/backend-validacion.md
+
+  - id: be-test-stub-vacio
+    enunciado: "Ningún tests.py vacío de `startapp`: cuenta como app testeada en cualquier informe y no prueba nada"
+    eje: 1-estructura
+    mecanismo: ast
+    ambito: "**/tests.py"
+    dominancia: declarado
+    estado: activo
+    baseline: null
+    precedentes:
+      - ".claude/patterns/stack/_fixtures/conforme-casa/expedientes/tests/test_expedientes.py:16"
+    source: ".claude/patterns/stack/backend-tests.md"
+    doc: stack/backend-tests.md
+
+  - id: be-test-descubrible
+    enunciado: "Un fichero con `def test_` que el descubridor no encuentra es un test que no se ejecuta nunca"
+    eje: 1-estructura
+    mecanismo: ast
+    ambito: "**/*.py"
+    dominancia: declarado
+    estado: activo
+    baseline: null
+    precedentes:
+      - ".claude/patterns/stack/_fixtures/conforme-casa/expedientes/tests/test_expedientes.py:16"
+    source: ".claude/patterns/stack/backend-tests.md"
+    doc: stack/backend-tests.md
+
+  - id: be-test-db-alias-sin-engine
+    enunciado: "Todo alias de DATABASES declara ENGINE: sin él, `manage.py test` no puede crear su base y la suite ni arranca"
+    eje: 6-configuracion
+    mecanismo: ast
+    ambito: "**/settings*.py"
+    dominancia: declarado
+    estado: activo
+    baseline: null
+    precedentes:
+      - ".claude/patterns/stack/_fixtures/conforme-casa/config/settings.py:27"
+    source: ".claude/patterns/stack/backend-tests.md"
+    doc: stack/backend-tests.md
+
+  - id: be-obs-logging
+    enunciado: "settings define LOGGING: sin él, el fallo de las 4 de la mañana no deja rastro en ningún sitio"
+    eje: 6-configuracion
+    mecanismo: grep
+    ambito: "**/settings*.py"
+    dominancia: declarado
+    estado: activo
+    baseline: null
+    precedentes:
+      - ".claude/patterns/stack/_fixtures/conforme-casa/config/settings.py:37"
+      - ".claude/patterns/stack/_fixtures/conforme/config/settings/base.py:19"
+    source: ".claude/patterns/stack/backend-observabilidad.md"
+    doc: stack/backend-observabilidad.md
+
+  - id: be-obs-healthcheck
+    enunciado: "El proyecto expone un endpoint de salud: sin él nadie sabe si el proceso está vivo salvo mirándolo"
+    eje: 6-configuracion
+    mecanismo: ast
+    ambito: "**/urls.py (regla de PROYECTO)"
+    dominancia: declarado
+    estado: debil           # hay proyectos que exponen la salud fuera de Django (nginx, orquestador)
+    baseline: null
+    precedentes:
+      - ".claude/patterns/stack/_fixtures/conforme-casa/config/urls.py:23"
+    source: ".claude/patterns/stack/backend-observabilidad.md"
+    doc: stack/backend-observabilidad.md
+
+  # ══ capa 2b · FORMULARIOS (arquetipo server-rendered) ═══════════════════════════════════
+  # Estaban en el checker y en `backend-formularios-django.md` desde el principio y NO habían
+  # llegado a este fichero de traspaso. Se añaden aquí para que el YAML y el checker digan lo
+  # mismo: un catálogo que no cuadra con su comprobación es peor que no tenerlo.
+
+  - id: be-form-fields-enumerado
+    enunciado: "Meta.fields enumerado en un ModelForm: nunca '__all__' ni exclude (un campo nuevo no se vuelve editable solo)"
+    eje: 2-datos
+    mecanismo: ast
+    ambito: "**/forms.py"
+    dominancia: declarado
+    estado: activo
+    baseline: null
+    precedentes:
+      - ".claude/patterns/stack/_fixtures/conforme-plano/expedientes/forms.py:13"
+    source: ".claude/patterns/stack/backend-formularios-django.md"
+    doc: stack/backend-formularios-django.md
+
+  - id: be-form-base-de-casa
+    enunciado: "Si el proyecto tiene un ModelForm base compartido, los formularios de app heredan de él y no de django.forms directamente"
+    eje: 3-seguridad
+    mecanismo: ast
+    ambito: "**/forms.py"
+    dominancia: declarado
+    estado: activo          # solo dispara si el proyecto YA tiene una base de formulario compartida
+    baseline: null
+    precedentes:
+      - ".claude/patterns/stack/_fixtures/conforme-plano/core/forms.py:24"
+      - ".claude/patterns/stack/_fixtures/conforme-plano/expedientes/forms.py:7"
+    source: ".claude/patterns/stack/backend-formularios-django.md"
+    doc: stack/backend-formularios-django.md
+
+  - id: be-form-request-primero
+    enunciado: "Una base cuya firma empieza por `request` no se instancia con los datos en primera posición: el formulario queda unbound y is_valid() es False sin error"
+    eje: 2-datos
+    mecanismo: ast
+    ambito: "**/*.py"
+    dominancia: declarado
+    estado: activo          # regla de regresion pura: 0 hallazgos en el repo medido, coste de adopcion cero
+    baseline: null
+    precedentes:
+      - ".claude/patterns/stack/_fixtures/conforme-plano/expedientes/views.py:18"
+    source: ".claude/patterns/stack/backend-formularios-django.md"
+    doc: stack/backend-formularios-django.md
+
+  - id: be-form-clase-fuera-de-forms
+    enunciado: "Una clase *Form vive en forms.py — fuera de él nadie la encuentra y se duplica"
+    eje: 1-estructura
+    mecanismo: ast
+    ambito: "**/*.py (fuera de forms.py)"
+    dominancia: declarado
+    estado: debil           # 18 de 385 en el repo medido: baseline + exigir en fichero nuevo
+    baseline: null
+    precedentes:
+      - ".claude/patterns/stack/_fixtures/conforme-plano/expedientes/forms.py:7"
+    source: ".claude/patterns/stack/backend-formularios-django.md"
+    doc: stack/backend-formularios-django.md

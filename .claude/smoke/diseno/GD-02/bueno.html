@@ -1,0 +1,10 @@
+<!doctype html><html lang=es><head><meta charset=utf-8><title>GD-02 bueno</title>
+</head><body>
+  <div id="loader"></div>
+  <main><h1>El contenido aparece cuando termina de cargar, no cuando vence un reloj</h1></main>
+<script>
+  window.addEventListener('load', function () {
+    document.getElementById('loader').classList.add('hidden');
+  });
+  setTimeout(function () { document.body.dataset.listo = '1'; }, 120);
+</script></body></html>

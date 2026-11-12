@@ -1,0 +1,11 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><title>GD-13 — triplete HSL bien envuelto</title>
+<!-- El gemelo correcto: el mismo token, siempre dentro de hsl(); y un token con color entero
+     (#hex) sí se puede usar a pelo. -->
+<style>
+:root{--primary:215 28% 17%;--primary-foreground:0 0% 100%;--tinta:#243447}
+.cta{background:hsl(var(--primary));color:hsl(var(--primary-foreground));padding:8px 16px}
+</style></head><body><main>
+<p class="cta">Botón con el token envuelto en hsl().</p>
+<p style="color: hsl(var(--primary))">Texto en línea, también envuelto.</p>
+<p style="color: var(--tinta)">Un token que ya es un color se usa tal cual.</p>
+</main></body></html>

@@ -1,0 +1,59 @@
+{
+ "catalog": "Catálogo completo SINTÉTICO (ventanas de aluminio, inventado para la sub-ola 3.32)",
+ "references_required": true,
+ "families": [
+  {"id": "ventanas", "name": "Ventanas", "parent": null, "decisive_attributes": []},
+  {"id": "correderas", "name": "Ventanas correderas", "parent": "ventanas", "decisive_attributes": ["width_mm", "color"]},
+  {"id": "accesorios", "name": "Accesorios", "parent": null, "decisive_attributes": []},
+  {"id": "felpas", "name": "Felpas", "parent": "accesorios", "decisive_attributes": ["width_mm"]},
+  {"id": "ruedas", "name": "Ruedas", "parent": "accesorios", "decisive_attributes": ["system"]},
+  {"id": "kits", "name": "Kits de ventana", "parent": null, "decisive_attributes": []}
+ ],
+ "products": [
+  {"id": "amplitud", "name": "Ventana corredera Amplitud", "family": "correderas", "kind": "VARIANT_PARENT",
+   "parent": null, "attributes": {}, "references": [], "offer": null, "is_active": true, "retired_at": null,
+   "cross_sell_ids": [], "upsell_ids": [], "grouped_products": []},
+  {"id": "amplitud-blanca", "name": "Ventana corredera Amplitud blanca 1200", "family": null, "kind": "VARIANT",
+   "parent": "amplitud", "attributes": {"width_mm": 1200, "color": "blanco"},
+   "references": [{"kind": "gtin", "value": "8400000000011"}],
+   "offer": {"price": 189.0, "currency": "EUR", "stock": 7}, "is_active": true, "retired_at": null,
+   "units_sold": 120, "cross_sell_ids": ["felpa-6", "rueda-amplitud"], "upsell_ids": ["amplitud-rpt-blanca"],
+   "grouped_products": []},
+  {"id": "amplitud-negra", "name": "Ventana corredera Amplitud negra 1200", "family": null, "kind": "VARIANT",
+   "parent": "amplitud", "attributes": {"width_mm": 1200, "color": "negro"},
+   "references": [{"kind": "gtin", "value": "8400000000028"}],
+   "offer": {"price": 199.0, "currency": "EUR", "stock": 3}, "is_active": true, "retired_at": null,
+   "units_sold": 80, "cross_sell_ids": ["felpa-6"], "upsell_ids": [], "grouped_products": []},
+  {"id": "amplitud-rpt-blanca", "name": "Ventana corredera Amplitud RPT blanca 1200", "family": "correderas",
+   "kind": "SIMPLE", "parent": null, "attributes": {"width_mm": 1200, "color": "blanco"},
+   "references": [{"kind": "gtin", "value": "8400000000035"}],
+   "offer": {"price": 259.0, "currency": "EUR", "stock": 2}, "is_active": true, "retired_at": null,
+   "units_sold": 15, "cross_sell_ids": ["felpa-6"], "upsell_ids": [], "grouped_products": []},
+  {"id": "felpa-6", "name": "Felpa 6 mm (rollo 50 m)", "family": "felpas", "kind": "SIMPLE", "parent": null,
+   "attributes": {"width_mm": 6}, "references": [{"kind": "mfr_ref", "value": "FP-6-50"}],
+   "offer": {"price": 12.5, "currency": "EUR", "stock": 40}, "is_active": true, "retired_at": null,
+   "units_sold": 300, "cross_sell_ids": [], "upsell_ids": [], "grouped_products": []},
+  {"id": "rueda-amplitud", "name": "Rueda para sistema Amplitud", "family": "ruedas", "kind": "SIMPLE",
+   "parent": null, "attributes": {"system": "amplitud"}, "references": [{"kind": "mfr_ref", "value": "RU-AMP"}],
+   "offer": {"price": 3.2, "currency": "EUR", "stock": 200}, "is_active": true, "retired_at": null,
+   "units_sold": 260, "cross_sell_ids": ["felpa-6"], "upsell_ids": [], "grouped_products": []},
+  {"id": "felpa-8-retirada", "name": "Felpa 8 mm (descatalogada)", "family": "felpas", "kind": "SIMPLE",
+   "parent": null, "attributes": {"width_mm": 8}, "references": [{"kind": "mfr_ref", "value": "FP-8-50"}],
+   "offer": null, "is_active": false, "retired_at": "2026-06-30T00:00:00Z",
+   "cross_sell_ids": [], "upsell_ids": [], "grouped_products": []},
+  {"id": "kit-amplitud-blanca", "name": "Kit Amplitud blanca completa", "family": "kits", "kind": "BUNDLE",
+   "parent": null, "attributes": {}, "references": [],
+   "offer": {"price": 205.0, "currency": "EUR", "stock": null}, "is_active": true, "retired_at": null,
+   "components": [{"id": "amplitud-blanca", "quantity": 1}, {"id": "felpa-6", "quantity": 1},
+                  {"id": "rueda-amplitud", "quantity": 4}],
+   "units_sold": 30, "cross_sell_ids": [], "upsell_ids": [], "grouped_products": ["amplitud-blanca", "felpa-6", "rueda-amplitud"]}
+ ],
+ "relations": [
+  {"source": "felpa-6", "target": "rueda-amplitud", "kind": "COMPLEMENTS", "status": "VERIFIED"}
+ ],
+ "policies": [
+  {"topic": "shipping", "version": "v2", "date": "2026-09-01"},
+  {"topic": "returns", "version": "v1", "date": "2026-05-15"},
+  {"topic": "warranty", "version": "v1", "date": "2026-05-15"}
+ ]
+}

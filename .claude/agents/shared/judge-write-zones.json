@@ -1,0 +1,23 @@
+{
+  "_doc": "Zonas de escritura de los agentes juez (los que declaran tools: sin Edit). Lo lee scripts/judge_write_guard.py, el hook PreToolUse judge-write-guard.sh. Rutas relativas a la raíz del proyecto salvo las absolutas; {agent} = nombre del agente; se admite glob (*). Política y porqué: rules/audit-team.md §5.",
+  "default": [
+    ".docs/feedback/",
+    ".claude/agents/{agent}/",
+    "/tmp/",
+    "/var/tmp/",
+    "/dev/null"
+  ],
+  "extra": {
+    "analista-negocio": [".docs/negocio/"],
+    "auditor-evidencia": [".docs/negocio/"],
+    "entrevistador-negocio": [".docs/negocio/"],
+    "captacion-prospectos": [".docs/negocio/", ".docs/captacion/"],
+    "lidia-naive-tester": [".claude/agents/personas/"],
+    "pol-product-advisor": [".docs/plans/*/feedback/"],
+    "pilar-impacto-produccion": [".docs/plans/*/impacto/"],
+    "vera-art-director": [".docs/diseno/referencias/"],
+    "rita-pattern-keeper": [".claude/patterns/telemetry.jsonl"],
+    "marta-revenue-attribution": [".docs/negocio/"],
+    "roberto-clean-code": [".docs/plans/*/codigo/"]
+  }
+}

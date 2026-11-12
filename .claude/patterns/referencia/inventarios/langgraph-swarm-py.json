@@ -1,0 +1,69 @@
+{
+ "meta": {
+  "source": "gen_inventario_stack.py — AST para Python, expresiones regulares para TS/TSX",
+  "metodo": {
+   "python": "AST (exacto)",
+   "typescript": "regex (inventaria y cuenta; NO afirma nada fino sobre tipos)"
+  },
+  "proyecto": "langgraph-swarm-py",
+  "sha": "749d445",
+  "date": "2026-08-26",
+  "totales": {
+   "aristas": 1,
+   "componentes": 0,
+   "hooks": 0,
+   "modelos": 0,
+   "nodos": 1,
+   "paginas": 0,
+   "serializers": 0,
+   "tareas": 0,
+   "tools": 1,
+   "vistas": 0
+  },
+  "apps": {}
+ },
+ "tools": [
+  {
+   "nombre": "handoff_to_agent",
+   "file": "langgraph_swarm/handoff.py",
+   "line": 74,
+   "descripcion": "",
+   "args": [
+    {
+     "nombre": "state",
+     "tipo": "Annotated[Any, InjectedState]"
+    },
+    {
+     "nombre": "tool_call_id",
+     "tipo": "Annotated[str, InjectedToolCallId]"
+    }
+   ],
+   "sin_doc": true,
+   "sin_tipos": false,
+   "lanza": false
+  }
+ ],
+ "aristas": [
+  {
+   "de": "START",
+   "a": "route_to_active_agent",
+   "tipo": "condicional",
+   "file": "langgraph_swarm/swarm.py",
+   "line": 166
+  }
+ ],
+ "nodos": [
+  {
+   "nombre": "agent.name",
+   "file": "langgraph_swarm/swarm.py",
+   "line": 278
+  }
+ ],
+ "componentes": [],
+ "hooks": [],
+ "paginas": [],
+ "modelos": [],
+ "serializers": [],
+ "vistas": [],
+ "tareas": []
+}

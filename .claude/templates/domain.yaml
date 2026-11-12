@@ -1,0 +1,85 @@
+# Dominio de ESTE proyecto: la capa B de los paquetes de dominio (NE-18).
+# ============================================================================
+# DÓNDE VA: `<proyecto>/.docs/domain/domain.yaml`. Lo siembra `arrancar` (tanda 2.1) desde la
+# `seed.yaml` del paquete del sector, con todo en `supuesto`, y se confirma con el Usuario.
+#
+# QUIÉN LO LEE: `scripts/gen_agent_domain.py`, que escribe `.docs/domain/agents/<agente>.md` para los
+# auditores que llegan con huecos `[PERSONALIZAR]` (NE-14):
+#   marco-qa-breaker        ← states · one_time_actions · limits · time_windows · golden_rules
+#   sofia-pentester         ← protects
+#   priya-privacy-auditor   ← sensitive_data
+#   lidia-naive-tester      ← personas (la primera)
+#   nadia-chatbot-evaluator ← tone
+#   pol-product-advisor     ← personas
+# Las fichas de los agentes no se editan: leen su fichero. Así `propagar.py` las sigue actualizando
+# (una ficha editada en el proyecto pasa a «divergente» y no se vuelve a tocar).
+#
+# COMPROBACIÓN: `scripts/domain_lint.py <proyecto>` (NE-13): KPI en pantalla con ficha completa,
+# término con entidad, regla de oro con candado, evidencia en cada dato y ningún hueco que la
+# semilla del sector sabe rellenar. Vacío, pasa: un hueco declarado no es un error.
+#
+# EVIDENCIA, en cada dato (el sobre de `arrancar`): documentado · recordado · supuesto · desconocido.
+# Lo `supuesto` llega a los agentes marcado como hipótesis, no como regla.
+# ============================================================================
+
+version: 1
+sector: ninguno            # un id de .claude/domains/catalog.yaml del template, o ninguno
+updated: AAAA-MM-DD
+
+# Las «cosas» del negocio (tanda 2.1).
+entities:
+  - {name: "", recognized_by: "", evidence: desconocido}
+
+# Glosario: qué quiere decir AQUÍ cada palabra del negocio, y a qué entidad apunta (`entity` = un
+# `name` de arriba). «Cliente», «pedido», «venta»: la palabra que dos personas usan para dos cosas.
+glossary:
+  - {term: "", means: "", entity: "", evidence: desconocido}
+
+# Máquinas de estados: la de cada entidad que cambia de estado.
+states:
+  - entity: ""
+    states: []
+    final: []
+    forbidden: []          # "estado_a -> estado_b"
+    evidence: desconocido
+
+# Lo que NO se debe poder violar (3-6). Marco ataca aquí primero.
+# Cada regla nombra su CANDADO (NE-13): `lock` (constraint · validator · test · gate · permission),
+# `lock_where` (el fichero o el nombre del candado) y `not_enforced_in` (las vías por las que NO pasa:
+# una importación, el admin, un script; «ninguno» se escribe). Sin candado, la regla es prosa.
+golden_rules:
+  - {rule: "", source: "", lock: "", lock_where: "", not_enforced_in: "", evidence: desconocido}
+
+# Acciones «una sola vez» y su efecto (pagar, firmar, enviar).
+one_time_actions:
+  - {action: "", side_effects: "", evidence: desconocido}
+
+# Límites de entrada reales: tamaños, formatos, cantidades.
+limits:
+  - {what: "", value: "", evidence: desconocido}
+
+# Ventanas temporales: caducidades, plazos, SLA.
+time_windows:
+  - {what: "", value: "", evidence: desconocido}
+
+# Qué protege el sistema, en orden de criticidad. El primero es el «ataque estrella» de Sofía.
+protects:
+  - {asset: "", why: "", evidence: desconocido}
+
+# Datos personales o sensibles: cuáles, dónde viven y con qué base legal.
+sensitive_data:
+  - {data: "", where: "", legal_basis: "", evidence: desconocido}
+
+# Quién usa el producto. La primera es la persona de Lidia; Pol las usa todas.
+personas:
+  - {name: "", role: "", context: "", evidence: desconocido}
+
+# Voz del producto o del bot (Nadia).
+tone: {voice: "", avoid: [], evidence: desconocido}
+
+# KPIs que salen en una pantalla. Cada `id` tiene su ficha en `kpis_file` (formato de
+# `templates/fichas-kpi/kpis.yaml`, ruta relativa a esta carpeta) con fórmula, ventana, fuente,
+# unidad, población, agregación, `sin_dato` y su función. Cómo se añade uno: skill `metricas-dominio`.
+kpis_file: ""
+kpis:
+  - {id: "", screen: "", evidence: desconocido}

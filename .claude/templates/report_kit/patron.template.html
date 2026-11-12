@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="es">
+<!--
+  report_kit/fuentes.template.html — los informes de investigación que hay DETRÁS de los items.
+  build.py escanea <plan>/sources/*.md, calcula meta.sources (título, tamaño, épicas, nº de items)
+  y lo inyecta aquí. La página solo se genera si el plan tiene carpeta sources/ con .md dentro:
+  sin ella, render_nav omite la pestaña (no deja enlace muerto).
+  Self-contained: tokens de templates/html/base.html, sin CDN. Ver rules/report-kit.md.
+-->
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Patrón de código</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Crect%20width='100'%20height='100'%20rx='22'%20fill='%231b2a4a'/%3E%3Ctext%20x='50'%20y='70'%20font-size='56'%20font-family='system-ui,sans-serif'%20font-weight='700'%20fill='%23fff'%20text-anchor='middle'%3EF%3C/text%3E%3C/svg%3E">
+<style>
+  /* SHARED:BEGIN */
+  :root{
+    --ink:#1b1b1f;--muted:#6b6b76;--faint:#6c6c78;--paper:#f6f4ef;--card:#fff;--line:#e4e0d7;
+    --navy:#1b2a4a;--accent:#c2410c;--green:#15803d;--amber:#b45309;--blue:#1d4ed8;--red:#b42318;
+    --radius-sm:6px;--radius-md:10px;--radius:14px;--radius-pill:999px;
+    --shadow-modal:0 20px 60px rgba(27,27,31,.28);
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --s-backlog:#6b6b76;--s-doing:#b45309;--s-review:#1d4ed8;--s-done:#15803d;--s-blocked:#b42318;
+    --d-aprobar:#15803d;--d-modificar:#1d4ed8;--d-aplazar:#b45309;--d-descartar:#b42318;
+  }
+  *{box-sizing:border-box}
+  h1{font-size:clamp(24px,3.6vw,38px);margin:0 0 10px;letter-spacing:-.02em;color:var(--ink)}
+  h1 em{font-style:italic;color:var(--navy)}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600;margin:0 0 10px}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px}
+  .kpi b{display:block;font-size:28px;font-weight:700;letter-spacing:-.02em;color:var(--navy);line-height:1.15}
+  .kpi span{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+  .kpi.warn b{color:var(--red)}
+  .badge{display:inline-block;font-size:11px;font-weight:700;padding:3px 10px;border-radius:var(--radius-pill);color:#fff;text-transform:uppercase;letter-spacing:.04em}
+  .nodata{max-width:560px;margin:80px auto;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:28px 32px;text-align:center}
+  .nodata code{font-family:var(--mono);font-size:.9em;background:#efece4;color:var(--navy);padding:2px 6px;border-radius:6px}
+  .icon{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px}
+  .demo-banner{display:flex;align-items:center;gap:8px;background:#fdf3e3;border:1px solid #eed9b0;border-radius:var(--radius-sm);padding:8px 14px;margin:14px 0 0;font-size:12.5px;color:#78350f}
+  .demo-banner .icon{flex:none}
+  .demo-banner[hidden]{display:none}  /* [hidden] pierde ante .demo-banner{display:flex} — sin esto el banner de demo sale SIEMPRE */
+  .audience-note{display:flex;align-items:center;gap:8px;background:#eef1f5;border:1px solid #d7dee8;border-radius:var(--radius-sm);padding:8px 14px;margin:12px 0 0;font-size:12.5px;color:var(--navy)}
+  .audience-note .icon{flex:none}
+  .scroll-hint{display:none;font-size:11px;color:var(--faint);text-align:right;margin:0 0 6px}
+  @media(max-width:767px){.scroll-hint{display:block}}
+  /* nav responsive: la gestiona el bloque que inyecta render_nav.py (fuente única) */
+  /* SHARED:END */
+  html,body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55}
+  body{background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.55;}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 22px}
+
+  /* ===== HERO ===== */
+  header.hero{border-bottom:1px solid var(--line);padding:28px 0 20px}
+  .lead{font-size:13.5px;color:var(--muted);margin:0;font-family:var(--mono)}
+  .vbar{display:flex;height:12px;border-radius:6px;overflow:hidden;margin-top:14px;border:1px solid var(--line);background:var(--card)}
+  .vbar > i{display:block;height:100%}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;font-size:11.5px;color:var(--muted)}
+  .legend .dot{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px;vertical-align:middle}
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:14px}
+  .btn{font-family:var(--sans);font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--navy);background:var(--navy);color:#fff;padding:7px 13px;border-radius:10px}
+  .btn.ghost{background:var(--card);color:var(--navy)}
+  .btn.ghost:hover{background:#efece4}
+
+
+  /* ===== FUENTES ===== */
+  .srcgrid{display:flex;flex-direction:column;gap:12px;margin:18px 0 26px}
+  .src{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:15px 17px}
+  .src h3{margin:0 0 4px;font-size:15.5px;letter-spacing:-.01em;color:var(--navy)}
+  .src .file{font-family:var(--mono);font-size:11px;color:var(--faint)}
+  .src p.res{margin:8px 0 10px;color:var(--ink);font-size:14px}
+  .src .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:12px;color:var(--muted)}
+  .pill{border:1px solid var(--line);border-radius:var(--radius-pill);padding:3px 9px;font-size:11.5px;background:var(--paper)}
+  .pill.ep{color:#fff;border:0}
+  .open{margin-left:auto;font-family:var(--sans);font-size:12.5px;font-weight:600;text-decoration:none;
+    border:1px solid var(--navy);color:var(--navy);background:var(--card);border-radius:10px;padding:6px 12px}
+  .open:hover{background:var(--navy);color:#fff}
+  .src-md{font-family:var(--mono);font-size:11px;color:var(--faint);text-decoration:none;padding:6px 4px}
+  .src-md:hover{color:var(--navy);text-decoration:underline}
+  .note{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--navy);
+    border-radius:var(--radius);padding:13px 16px;margin:16px 0;font-size:14px}
+  footer{border-top:1px solid var(--line);margin-top:26px;padding:16px 0 40px;color:var(--muted);font-size:12.5px}
+</style>
+</head>
+<body>
+<!-- ICONS:BEGIN -->
+<svg style="display:none" aria-hidden="true">
+  <symbol id="ic-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></symbol>
+  <symbol id="ic-download" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></symbol>
+  <symbol id="ic-upload" viewBox="0 0 24 24"><path d="M12 21V9"/><path d="m7 14 5-5 5 5"/><path d="M5 21h14"/></symbol>
+  <symbol id="ic-refresh" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></symbol>
+  <symbol id="ic-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".6" fill="currentColor"/></symbol>
+  <symbol id="ic-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><circle cx="12" cy="8" r=".6" fill="currentColor"/></symbol>
+  <symbol id="ic-tool" viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 1 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.1 2.1-2-2z"/></symbol><symbol id="ic-search" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10.5 10.5 L14 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol><symbol id="ic-eye" viewBox="0 0 16 16"><path d="M1.5 8 C4 4.2 12 4.2 14.5 8 C12 11.8 4 11.8 1.5 8 Z" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="8" cy="8" r="2" fill="currentColor"/></symbol><symbol id="ic-arrow" viewBox="0 0 16 16"><path d="M2.5 8 H12 M8.6 4 L13 8 L8.6 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol><symbol id="ic-clip" viewBox="0 0 16 16"><rect x="4" y="2.6" width="8" height="11" rx="1.4" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6 2.6 V1.8 H10 V2.6" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6 6.4 H10 M6 9 H10 M6 11.4 H8.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></symbol>
+</svg>
+<!-- ICONS:END -->
+<!-- NAV:BEGIN -->
+<!-- NAV:END -->
+
+<div id="nodata" class="nodata" hidden>
+  <p class="eyebrow">Report-kit · Patrón</p>
+  <p><b>Sin datos inyectados.</b></p>
+  <p>Genera el dataset con<br><code>python3 gen_patron_dataset.py &lt;plan-dir&gt;</code><br>y después <code>python3 build.py &lt;plan-dir&gt;</code>.</p>
+</div>
+
+<div id="app">
+  <header class="hero"><div class="wrap">
+    <p class="eyebrow" id="eyebrow">Report-kit · Patrón de código</p>
+    <h1>Cómo se escribe el código en esta casa</h1>
+    <p class="lead">Qué reglas hay, cuáles bloquean de verdad y qué se está incumpliendo hoy.</p>
+    <div class="kpis" id="kpis"></div>
+    <div id="aviso"></div>
+  </div></header>
+
+  <div class="wrap">
+    <div class="note">
+      Un patrón <b>no mide si el código es bueno</b>: mide si se parece a lo que esta casa decidió, que
+      es otra cosa. Una regla en <b>sombra</b> cuenta y no bloquea nada — está ahí porque todavía no hay
+      evidencia suficiente para exigirla. Antes de mirar los números conviene saber cuáles de estos
+      avisos pueden frenar un commit y cuáles son solo información.
+    </div>
+
+    <div class="filtros" id="filtros"></div>
+    <div id="reglas"></div>
+
+    <h2 class="sec">Los documentos del patrón</h2>
+    <p class="secsub" id="docsub"></p>
+    <div id="docs"></div>
+
+    <div id="huerfanas"></div>
+    <footer id="foot"></footer>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<style>
+  .kpis{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:11px 15px;min-width:118px}
+  .kpi b{display:block;font-size:25px;line-height:1.15;font-family:var(--mono)}
+  .kpi span{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+  .kpi.warn b{color:#c2410c}
+  .avisobox{background:#fdf6f0;border:1px solid #f0d6c2;border-radius:9px;padding:11px 14px;margin-top:14px;font-size:13px;line-height:1.55}
+  .avisobox b{color:#9a3412}
+  .filtros{display:flex;gap:7px;flex-wrap:wrap;margin:18px 0 4px}
+  .fchip{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:4px 12px;font-size:12.5px;cursor:pointer}
+  .fchip.on{border-color:var(--ink);background:var(--ink);color:var(--paper)}
+  .fchip .n{opacity:.65;margin-left:5px;font-family:var(--mono);font-size:11.5px}
+  .rgrupo{margin:22px 0 8px;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700}
+  .regla{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:13px 15px;margin-bottom:9px}
+  .regla.activo{border-left:3px solid #15803d}
+  .regla.debil{border-left:3px solid #b45309}
+  .regla.sombra{border-left:3px solid #9aa1ad}
+  .rtop{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+  .rid{font-family:var(--mono);font-size:12.5px;font-weight:700}
+  .badge{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;padding:2px 8px;border-radius:999px;font-weight:700}
+  .badge.activo{background:#dcfce7;color:#15803d}
+  .badge.debil{background:#fef3c7;color:#b45309}
+  .badge.sombra{background:#ecebe6;color:#6b6b6b}
+  .rhall{margin-left:auto;font-family:var(--mono);font-size:12.5px;font-weight:700}
+  .rhall.cero{color:#15803d}
+  .rhall.hay{color:#c2410c}
+  .renun{margin:7px 0 0;font-size:13.5px;line-height:1.5}
+  .rmeta{margin-top:7px;font-size:11.5px;color:var(--muted);display:flex;gap:14px;flex-wrap:wrap}
+  .rmeta code{font-family:var(--mono);font-size:11px}
+  .vermas{background:none;border:0;color:var(--ink);font-size:12px;cursor:pointer;padding:5px 0;text-decoration:underline;text-underline-offset:3px}
+  .ejemplos{margin-top:8px;border-top:1px dashed var(--line);padding-top:8px;display:none}
+  .ejemplos.open{display:block}
+  .ej{font-family:var(--mono);font-size:11.5px;padding:4px 0;border-bottom:1px solid var(--line);line-height:1.5}
+  .ej:last-child{border-bottom:0}
+  .ej b{color:#c2410c;font-weight:600}
+  .ej .m{display:block;color:var(--muted);font-family:var(--sans);font-size:12px;margin-top:2px}
+  .sec{margin:34px 0 4px;font-size:19px}
+  .secsub{margin:0 0 14px;color:var(--muted);font-size:13px}
+  .dfam{margin:16px 0 7px;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700}
+  .dgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:9px}
+  .doc{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:10px 13px}
+  .doc b{font-size:13px;display:block;margin-bottom:3px;line-height:1.35}
+  .doc .f{font-family:var(--mono);font-size:11px;color:var(--muted)}
+  .doc .c{font-size:12px;color:var(--muted);margin-top:5px;line-height:1.45}
+  .doc .sin{display:inline-block;margin-top:6px;font-size:10.5px;background:#f1efea;color:#6b6b6b;padding:2px 7px;border-radius:999px}
+  footer{margin:40px 0 30px;padding-top:14px;border-top:1px solid var(--line);color:var(--muted);font-size:12px;line-height:1.6}
+</style>
+
+<script>
+const DB = /*__DATA__*/null;
+const META = /*__META__*/null;
+
+if(!DB||!DB.reglas){document.getElementById("nodata").hidden=false;document.getElementById("app").style.display="none";}
+else{
+
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const M=DB.meta||{};
+const ESTLABEL={activo:"bloquea",debil:"avisa",sombra:"solo mide",retirado:"retirada"};
+let F=null;   // familia filtrada
+
+if(META){
+  document.getElementById("eyebrow").textContent =
+    [META.project,META.plan_id,M.date?("medido "+M.date):null,M.sha?("sha "+M.sha):null].filter(Boolean).join(" · ");
+}
+
+function kpis(){
+  const e=M.por_estado||{};
+  const html=[
+    {n:M.docs_total,l:"documentos"},
+    {n:M.reglas_total,l:"reglas"},
+    {n:(e.activo||0)+(e.debil||0),l:"pueden avisar"},
+    {n:M.hallazgos_total,l:"hallazgos hoy"},
+    {n:M.bloquean,l:"bloquean",warn:M.bloquean===0}
+  ].map(k=>`<div class="kpi ${k.warn?"warn":""}"><b>${k.n}</b><span>${k.l}</span></div>`).join("");
+  document.getElementById("kpis").innerHTML=html;
+
+  const e2=M.por_estado||{};
+  let aviso="";
+  if((e2.sombra||0)>0){
+    aviso=`<div class="avisobox"><b>${e2.sombra} de las ${M.reglas_total} reglas están en sombra:
+      miden y no bloquean nada.</b> No es un descuido — una regla se promueve cuando su dominancia
+      está medida y no produce ruido. Mientras tanto, sus ${DB.reglas.filter(r=>r.estado==="sombra").reduce((a,r)=>a+r.hallazgos,0)}
+      hallazgos son información, no un gate.</div>`;
+  }
+  if((M.errores||[]).length){
+    aviso+=`<div class="avisobox"><b>Un comprobador no pudo correr</b>, así que esta página está
+      incompleta y lo dice: ${M.errores.map(esc).join(" · ")}</div>`;
+  }
+  document.getElementById("aviso").innerHTML=aviso;
+}
+
+function filtros(){
+  const fams=[...new Set(DB.reglas.map(r=>r.familia))].sort();
+  document.getElementById("filtros").innerHTML =
+    `<button class="fchip ${F===null?"on":""}" onclick="setF(null)">Todas<span class="n">${DB.reglas.length}</span></button>`+
+    fams.map(f=>`<button class="fchip ${F===f?"on":""}" onclick="setF('${esc(f)}')">${esc(f)}<span class="n">${DB.reglas.filter(r=>r.familia===f).length}</span></button>`).join("");
+}
+function setF(f){F=f;filtros();reglas();}
+
+function reglas(){
+  const rs=DB.reglas.filter(r=>F===null||r.familia===F);
+  let h="",grupo=null;
+  rs.forEach((r,i)=>{
+    if(r.estado!==grupo){
+      grupo=r.estado;
+      h+=`<div class="rgrupo">${esc(grupo)} — ${ESTLABEL[grupo]||""}</div>`;
+    }
+    const b=r.baseline_info;
+    h+=`<div class="regla ${esc(r.estado)}">
+      <div class="rtop"><span class="rid">${esc(r.id)}</span>
+        <span class="badge ${esc(r.estado)}">${esc(ESTLABEL[r.estado]||r.estado)}</span>
+        <span class="rhall ${r.hallazgos?"hay":"cero"}">${r.hallazgos} ${r.hallazgos===1?"hallazgo":"hallazgos"}</span></div>
+      <p class="renun">${esc(r.enunciado)}</p>
+      <div class="rmeta">
+        ${r.dominancia?`<span>dominancia medida: <b>${esc(r.dominancia)}</b></span>`:""}
+        ${r.mecanismo?`<span>mecanismo: <code>${esc(r.mecanismo)}</code></span>`:""}
+        ${r.ambito?`<span>ámbito: <code>${esc(r.ambito)}</code></span>`:""}
+        ${b?`<span>deuda congelada: <b>${b.congeladas}</b>${b.migradas?` · ${b.migradas} ya migradas`:""}${b.frozen_at?` (desde ${esc(b.frozen_at)})`:""}</span>`:""}
+      </div>
+      ${r.ejemplos&&r.ejemplos.length?`<button class="vermas" onclick="tog(${i})">ver ${r.ejemplos.length} de ${r.hallazgos} →</button>
+        <div class="ejemplos" id="ej${i}">${r.ejemplos.map(e=>
+          `<div class="ej"><b>${esc(e.path)}:${e.line}</b><span class="m">${esc(e.msg)}</span></div>`).join("")}</div>`:""}
+    </div>`;
+  });
+  document.getElementById("reglas").innerHTML=h||`<p class="secsub">Ninguna regla en esta familia.</p>`;
+}
+function tog(i){document.getElementById("ej"+i).classList.toggle("open");}
+
+function docs(){
+  const ds=DB.docs||[];
+  const conRegla=new Set(DB.reglas.map(r=>r.doc).filter(Boolean));
+  document.getElementById("docsub").textContent =
+    `${ds.length} documentos escriben el patrón. Solo ${DB.reglas.length} de sus reglas tienen comprobador: el resto se verifica leyendo.`;
+  const fams=[...new Set(ds.map(d=>d.familia))].sort();
+  document.getElementById("docs").innerHTML = fams.map(f=>
+    `<div class="dfam">${esc(f)} — ${ds.filter(d=>d.familia===f).length} documentos</div>
+     <div class="dgrid">${ds.filter(d=>d.familia===f).map(d=>
+       `<div class="doc"><b>${esc(d.titulo)}</b><span class="f">${esc(d.file)} · ${d.lineas} líneas</span>
+        ${d.cuando?`<div class="c">${esc(d.cuando)}</div>`:""}
+        ${conRegla.has(d.file)?"":`<span class="sin">sin comprobador</span>`}</div>`).join("")}</div>`).join("");
+}
+
+function huerfanas(){
+  const hs=DB.huerfanas||[];
+  if(!hs.length)return;
+  document.getElementById("huerfanas").innerHTML =
+    `<h2 class="sec">Reglas que disparan y no están en el catálogo</h2>
+     <p class="secsub">Un comprobador las emite pero <code>catalog.yaml</code> no las declara: no tienen
+     estado, ni dominancia medida, ni se sabe si deberían bloquear. O se declaran, o se retiran.</p>
+     <div class="dgrid">${hs.map(x=>`<div class="doc"><b>${esc(x)}</b></div>`).join("")}</div>`;
+}
+
+function foot(){
+  document.getElementById("foot").innerHTML =
+    `<b>De dónde salen estos números.</b> <code>${esc(M.source||"")}</code><br>
+     Se regeneran con <code>python3 gen_patron_dataset.py &lt;plan&gt;</code>. Los hallazgos son de
+     <b>${esc(M.date||"?")}</b> sobre el sha <code>${esc(M.sha||"?")}</code> — si el código cambió después,
+     esta página describe el pasado.<br>
+     <b>Lo que esta página NO dice:</b> si el código es correcto. Un patrón mide parecido con lo
+     decidido aquí, no calidad. Para lo otro están los tests y la revisión.`;
+}
+
+kpis();filtros();reglas();docs();huerfanas();foot();
+}
+</script>
+</body>
+</html>

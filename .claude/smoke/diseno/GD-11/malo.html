@@ -1,0 +1,11 @@
+<!doctype html><html lang=es><head><meta charset=utf-8><title>GD-11 malo</title>
+<style>
+  .nav-links { display: flex; gap: 24px; }
+  @media (max-width: 768px) { .nav-links { display: none; } }
+</style></head><body>
+  <nav><ul class="nav-links"><li><a href="/a">Servicios</a></li><li><a href="/b">Contacto</a></li></ul></nav>
+<script>
+  document.querySelector('.menu').addEventListener('click', function () {
+    alert('Menú móvil · usa la versión de escritorio');
+  });
+</script></body></html>

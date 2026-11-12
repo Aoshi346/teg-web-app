@@ -47,8 +47,8 @@
     "viewports": { "type": "array", "items": { "type": "string" } },
 
     "profile": {
-      "enum": ["landing", "herramienta-interna"],
-      "description": "AUD-8. Perfil de rúbrica. En `herramienta-interna` la dimensión fotos_videos es N/A: un informe interno no puede tener fotos de personas y el techo duro de L-D le restaba 0.6 fijos a la media."
+      "enum": ["web-cliente", "producto-panel", "landing", "herramienta-interna"],
+      "description": "AUD-8. Perfil de rúbrica. En `producto-panel` (antes `herramienta-interna`) la dimensión fotos_videos es N/A: una herramienta interna no puede tener fotos de personas y el techo duro de L-D le restaba 0.6 fijos a la media. · DIS-1 (2026-09-18): los nombres canónicos pasan a ser `web-cliente` y `producto-panel` (patterns/diseno/perfiles.yaml). Los dos viejos se conservan en el enum A PROPÓSITO: hay rondas guardadas con ellos y retirarlos las haría incomparables, que es el fallo que este schema existe para evitar. Equivalencias en perfiles.yaml#equivalencias. El enum tiene UN solo dueño: se amplía aquí o en ningún sitio."
     },
     "na_dimensions": {
       "type": "array",

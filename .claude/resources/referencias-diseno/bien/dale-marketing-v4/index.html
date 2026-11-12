@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Dale Marketing — Agencia de marketing y contenido con base en Barcelona. Branding, diseño web, Google Ads, Meta Ads y creación de contenido premium.">
+  <meta name="theme-color" content="#0A0A0A">
+  <title>Dale Marketing — Construimos tu marca en las mentes de las personas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Skip link for accessibility -->
+  <a href="#main" class="skip-link">Saltar al contenido principal</a>
+
+  <!-- ─── Loading Screen ───────────────────────────────────── -->
+  <div id="loading" aria-hidden="true">
+    <div class="loading-inner">
+      <div class="loading-logo">DALE<span>→</span></div>
+      <div class="loading-bar"><div class="loading-fill" id="loadingFill"></div></div>
+      <div class="loading-counter"><span id="loadingCounter">0</span>%</div>
+    </div>
+  </div>
+
+  <!-- ─── Custom Cursor ────────────────────────────────────── -->
+  <div class="cursor-dot"  id="cursorDot"  aria-hidden="true"></div>
+  <div class="cursor-ring" id="cursorRing" aria-hidden="true"></div>
+
+  <!-- ─── Navbar ───────────────────────────────────────────── -->
+  <nav class="navbar" id="navbar" role="navigation" aria-label="Navegación principal">
+    <div class="nav-inner">
+      <a href="#inicio" class="nav-logo" aria-label="Dale Marketing — Inicio">
+        <svg class="logo-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 200" aria-hidden="true" focusable="false">
+          <path d="M 8,10 L 45,8 C 72,8 95,20 108,48 C 118,72 118,100 108,128 C 95,156 72,168 45,168 L 8,166 Z M 45,48 L 45,128 C 60,128 72,118 78,100 C 82,88 82,88 78,76 C 72,58 60,48 45,48 Z" fill="#ffffff"/>
+          <path d="M 128,166 L 158,8 L 198,8 L 228,166 L 195,166 L 190,132 L 166,132 L 161,166 Z M 170,104 L 186,104 L 178,50 Z" fill="#ffffff"/>
+          <path d="M 246,8 L 282,10 L 282,130 L 330,132 L 328,166 L 246,166 Z" fill="#ffffff"/>
+          <path d="M 348,8 L 418,10 L 416,44 L 384,44 L 384,70 L 416,70 L 416,106 L 384,106 L 384,132 L 416,132 L 418,166 L 348,166 Z" fill="#ffffff"/>
+          <path d="M 425,88 L 490,88" stroke="#6ECEC0" stroke-width="8" stroke-linecap="round"/>
+          <path d="M 468,66 L 500,88 L 468,110" stroke="#6ECEC0" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+      </a>
+
+      <ul class="nav-links" role="list">
+        <li><a href="#servicios">Servicios</a></li>
+        <li><a href="#casos">Casos de Éxito</a></li>
+        <li><a href="#proceso">Proceso</a></li>
+        <li><a href="#nosotros">Nosotros</a></li>
+        <li><a href="#faq">FAQ</a></li>
+      </ul>
+
+      <a href="#contacto" class="nav-cta" aria-label="Contactar con Dale Marketing">Hablemos →</a>
+
+      <button class="nav-hamburger" id="navHamburger" aria-label="Abrir menú de navegación" aria-expanded="false" aria-controls="navMobile">
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+
+    <!-- Mobile menu -->
+    <div class="nav-mobile" id="navMobile" aria-hidden="true">
+      <ul role="list">
+        <li><a href="#servicios" class="mobile-link">Servicios</a></li>
+        <li><a href="#casos"     class="mobile-link">Casos de Éxito</a></li>
+        <li><a href="#proceso"   class="mobile-link">Proceso</a></li>
+        <li><a href="#nosotros"  class="mobile-link">Nosotros</a></li>
+        <li><a href="#faq"       class="mobile-link">FAQ</a></li>
+        <li><a href="#contacto"  class="mobile-cta">Hablemos →</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- ─── Main Content ─────────────────────────────────────── -->
+  <main id="main">
+
+    <!-- ═══════════════════════════════════════════════════════
+         1. HERO
+    ════════════════════════════════════════════════════════ -->
+    <section class="hero" id="inicio" aria-label="Inicio">
+
+      <!-- Background elements -->
+      <div class="hero-bg" aria-hidden="true">
+        <div class="hero-gradient"></div>
+        <div class="hero-noise"></div>
+        <!-- Road perspective SVG -->
+        <div class="hero-road-wrap">
+          <svg class="hero-road-svg" viewBox="0 0 1200 500" preserveAspectRatio="xMidYMax meet" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <!-- Perspective lines from horizon point (600, 0) -->
+            <line x1="600" y1="0" x2="0"    y2="500" stroke="rgba(110,206,192,0.15)" stroke-width="1"/>
+            <line x1="600" y1="0" x2="120"  y2="500" stroke="rgba(110,206,192,0.1)"  stroke-width="1"/>
+            <line x1="600" y1="0" x2="260"  y2="500" stroke="rgba(110,206,192,0.08)" stroke-width="1"/>
+            <line x1="600" y1="0" x2="420"  y2="500" stroke="rgba(110,206,192,0.06)" stroke-width="1"/>
+            <!-- Center divider -->
+            <line x1="600" y1="0" x2="600"  y2="500" stroke="rgba(110,206,192,0.45)" stroke-width="1.5"/>
+            <!-- Right side -->
+            <line x1="600" y1="0" x2="780"  y2="500" stroke="rgba(110,206,192,0.06)" stroke-width="1"/>
+            <line x1="600" y1="0" x2="940"  y2="500" stroke="rgba(110,206,192,0.08)" stroke-width="1"/>
+            <line x1="600" y1="0" x2="1080" y2="500" stroke="rgba(110,206,192,0.1)"  stroke-width="1"/>
+            <line x1="600" y1="0" x2="1200" y2="500" stroke="rgba(110,206,192,0.15)" stroke-width="1"/>
+            <!-- Road shoulder lines -->
+            <line x1="600" y1="0" x2="480"  y2="500" stroke="rgba(110,206,192,0.25)" stroke-width="1.5"/>
+            <line x1="600" y1="0" x2="720"  y2="500" stroke="rgba(110,206,192,0.25)" stroke-width="1.5"/>
+            <!-- Horizontal cross-marks (perspective) -->
+            <line x1="530" y1="80"  x2="670" y2="80"  stroke="rgba(110,206,192,0.06)" stroke-width="1"/>
+            <line x1="480" y1="170" x2="720" y2="170" stroke="rgba(110,206,192,0.07)" stroke-width="1"/>
+            <line x1="400" y1="280" x2="800" y2="280" stroke="rgba(110,206,192,0.08)" stroke-width="1"/>
+            <line x1="300" y1="390" x2="900" y2="390" stroke="rgba(110,206,192,0.06)" stroke-width="1"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Hero content -->
+      <div class="hero-content">
+        <!-- DALE Logo -->
+        <div class="hero-logo-wrap" id="heroLogo">
+          <svg class="hero-logo-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 200" aria-label="DALE Marketing" role="img">
+            <!-- D -->
+            <path d="M 8,10 L 45,8 C 72,8 95,20 108,48 C 118,72 118,100 108,128 C 95,156 72,168 45,168 L 8,166 Z M 45,48 L 45,128 C 60,128 72,118 78,100 C 82,88 82,88 78,76 C 72,58 60,48 45,48 Z" fill="#ffffff"/>
+            <!-- A -->
+            <path d="M 128,166 L 158,8 L 198,8 L 228,166 L 195,166 L 190,132 L 166,132 L 161,166 Z M 170,104 L 186,104 L 178,50 Z" fill="#ffffff"/>
+            <!-- L -->
+            <path d="M 246,8 L 282,10 L 282,130 L 330,132 L 328,166 L 246,166 Z" fill="#ffffff"/>
+            <!-- E -->
+            <path d="M 348,8 L 418,10 L 416,44 L 384,44 L 384,70 L 416,70 L 416,106 L 384,106 L 384,132 L 416,132 L 418,166 L 348,166 Z" fill="#ffffff"/>
+            <!-- Arrow -->
+            <path d="M 428,88 L 500,88" stroke="#6ECEC0" stroke-width="9" stroke-linecap="round"/>
+            <path d="M 476,65 L 512,88 L 476,111" stroke="#6ECEC0" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          </svg>
+        </div>
+
+        <!-- Headline -->
+        <h1 class="hero-headline" id="heroHeadline">
+          <span class="word">Construimos</span><span class="word">tu</span><span class="word">marca</span>
+          <span class="word text-mint">en</span><span class="word text-mint">las</span><span class="word text-mint">mentes</span>
+          <span class="word">de</span><span class="word">las</span><span class="word">personas</span>
+        </h1>
+
+        <p class="hero-subline" id="heroSubline">Storytelling &nbsp;·&nbsp; Contenido de Alta Calidad &nbsp;·&nbsp; Marketing Digital</p>
+
+        <div class="hero-ctas" id="heroCtas">
+          <a href="#contacto" class="btn-primary">Hablemos de tu proyecto →</a>
+          <a href="#servicios" class="btn-ghost">Ver servicios ↓</a>
+        </div>
+
+        <div class="hero-badges" id="heroBadges">
+          <span class="badge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Barcelona
+          </span>
+          <span class="badge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            Red Internacional
+          </span>
+          <span class="badge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+            +150% ROI Media
+          </span>
+        </div>
+      </div>
+
+      <!-- Scroll indicator -->
+      <div class="hero-scroll" aria-hidden="true">
+        <span>Scroll</span>
+        <div class="scroll-line"></div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════
+         STATS BAR
+    ════════════════════════════════════════════════════════ -->
+    <div class="stats-bar" aria-label="Cifras destacadas">
+      <div class="container">
+        <div class="stat-item reveal">
+          <div class="stat-number" data-target="200">0<span>+</span></div>
+          <div class="stat-label">Clientes satisfechos<br>en España y Europa</div>
+        </div>
+        <div class="stat-item reveal">
+          <div class="stat-number" data-target="12">0</div>
+          <div class="stat-label">Ciudades europeas<br>en nuestra red</div>
+        </div>
+        <div class="stat-item reveal">
+          <div class="stat-number"><span class="count-prefix">+</span><span data-target="150">0</span><span>%</span></div>
+          <div class="stat-label">ROI medio en<br>campañas de Ads</div>
+        </div>
+        <div class="stat-item reveal">
+          <div class="stat-number" data-target="8">0</div>
+          <div class="stat-label">Años de experiencia<br>en marketing digital</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════
+         2. QUIÉNES SOMOS
+    ════════════════════════════════════════════════════════ -->
+    <section class="section quienes" id="quienes" aria-labelledby="quienes-title">
+      <div class="container">
+        <div class="quienes-grid">
+          <div class="quienes-left reveal">
+            <div class="section-label">Quiénes Somos</div>
+            <p class="big-text">
+              La agencia que convierte tu negocio en una marca que las personas recuerdan
+            </p>
+            <div class="accent-line"></div>
+            <p style="font-size:1rem; color:var(--gray); line-height:1.7;">
+              Fundada en Barcelona, con alcance en toda Europa.
+            </p>
+          </div>
+          <div class="quienes-right reveal">
+            <p>Somos una <strong style="color:var(--white)">agencia de marketing y contenido con base en Barcelona</strong>, especializada en construir marcas que conectan emocionalmente con las personas y generan resultados reales.</p>
+            <p>Nuestra fortaleza es la <strong style="color:var(--mint)">combinación de estrategia, creatividad y tecnología</strong>. No hacemos marketing genérico — diseñamos estrategias personalizadas que reflejan la esencia única de cada negocio.</p>
+            <p>Contamos con una <strong style="color:var(--white)">red internacional de fotógrafos y creadores de contenido</strong> en 12 ciudades europeas, lo que nos permite ofrecer producciones de alta calidad donde y cuando las necesites.</p>
+            <div class="quienes-tags">
+              <span class="tag">Estrategia de marca</span>
+              <span class="tag">Storytelling</span>
+              <span class="tag">Fotografía profesional</span>
+              <span class="tag">Performance marketing</span>
+              <span class="tag">Contenido premium</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════
+         3. SERVICIOS
+    ════════════════════════════════════════════════════════ -->
+    <section class="section servicios" id="servicios" aria-labelledby="servicios-title">
+      <div class="container">
+        <div class="servicios-header reveal">
+          <div class="section-label">Lo que hacemos</div>
+          <h2 class="section-title" id="servicios-title">Servicios que transforman negocios</h2>
+          <p class="section-desc">Cada servicio está diseñado para generar resultados medibles. No ofrecemos soluciones genéricas — construimos estrategias a medida para tu negocio.</p>
+        </div>
+
+        <div class="servicios-grid">
+
+          <!-- 1. Branding -->
+          <article class="service-card reveal" tabindex="0">
+            <span class="service-number">01</span>
+            <div class="service-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </div>
+            <h3 class="service-name">Branding &amp; Estrategia</h3>
+            <p class="service-desc">Construimos la identidad de tu marca desde sus raíces. Una marca sólida es tu activo más valioso.</p>
+            <ul class="service-items">
+              <li>Construcción de marca completa</li>
+              <li>Storytelling de negocio</li>
+              <li>Identidad visual &amp; guía de estilo</li>
+              <li>Posicionamiento de mercado</li>
+            </ul>
+          </article>
+
+          <!-- 2. Web & Logos -->
+          <article class="service-card reveal" tabindex="0">
+            <span class="service-number">02</span>
+            <div class="service-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+            </div>
+            <h3 class="service-name">Diseño Web &amp; Logos</h3>
+            <p class="service-desc">Tu web es tu mejor comercial. Diseñamos sitios que convierten visitantes en clientes desde el primer scroll.</p>
+            <ul class="service-items">
+              <li>Páginas web profesionales</li>
+              <li>Logos memorables y escalables</li>
+              <li>UX/UI optimizado para conversión</li>
+              <li>Landing pages de alto impacto</li>
+            </ul>
+          </article>
+
+          <!-- 3. Google Ads -->
+          <article class="service-card reveal" tabindex="0">
+            <span class="service-number">03</span>
+            <div class="service-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+            </div>
+            <h3 class="service-name">Google Ads</h3>
+            <p class="service-desc">Aparece justo cuando tu cliente ideal te está buscando. Campañas optimizadas para maximizar el ROI.</p>
+            <ul class="service-items">
+              <li>Campañas de búsqueda y display</li>
+              <li>Shopping y Performance Max</li>
+              <li>Remarketing estratégico</li>
+              <li>ROI garantizado y medible</li>
+            </ul>
+          </article>
+
+          <!-- 4. Meta Ads -->
+          <article class="service-card reveal" tabindex="0">
+            <span class="service-number">04</span>
+            <div class="service-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="9"/><line x1="12" y1="15" x2="12" y2="22"/><line x1="2" y1="12" x2="9" y2="12"/><line x1="15" y1="12" x2="22" y2="12"/></svg>
+            </div>
+            <h3 class="service-name">Meta Ads</h3>
+            <p class="service-desc">Facebook e Instagram en manos expertas. Creamos anuncios que detienen el scroll y generan acción.</p>
+            <ul class="service-items">
+              <li>Anuncios que convierten de verdad</li>
+              <li>Segmentación de audiencias precisas</li>
+              <li>Retargeting efectivo</li>
+              <li>Creación de creatividades</li>
+            </ul>
+          </article>
+
+          <!-- 5. Contenido -->
+          <article class="service-card reveal" tabindex="0">
+            <span class="service-number">05</span>
+            <div class="service-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            </div>
+            <h3 class="service-name">Creación de Contenido</h3>
+            <p class="service-desc">Contenido visual que enamora. Fotografía profesional, vídeo marketing y gestión integral de redes sociales.</p>
+            <ul class="service-items">
+              <li>Fotografía gastronómica y producto</li>
+              <li>Vídeo marketing y reels</li>
+              <li>Gestión de redes sociales</li>
+              <li>Estrategia de contenidos</li>
+            </ul>
+          </article>
+
+          <!-- 6. SEO & Copy -->
+          <article class="service-card reveal" tabindex="0">
+            <span class="service-number">06</span>
+            <div class="service-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            </div>
+            <h3 class="service-name">Copywriting &amp; SEO</h3>
+            <p class="service-desc">Las palabras adecuadas en el momento correcto. Textos que venden y posicionamiento orgánico que perdura.</p>
+            <ul class="service-items">
+              <li>Copywriting persuasivo</li>
+              <li>Posicionamiento web (SEO)</li>
+              <li>Email marketing y automatización</li>
+              <li>Blog y marketing de contenidos</li>
+            </ul>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════
+         4. CASOS DE ÉXITO
+    ════════════════════════════════════════════════════════ -->
+    <section class="section casos" id="casos" aria-labelledby="casos-title">
+      <div class="container">
+        <div class="casos-header reveal">
+          <div class="section-label section-label-gold">Casos de Éxito</div>
+          <h2 class="section-title" id="casos-title">Resultados que hablan por sí solos</h2>
+          <p class="section-desc" style="margin:0 auto;">No prometemos resultados, los demostramos. Estos son algunos de los proyectos de los que nos sentimos más orgullosos.</p>
+        </div>
+
+        <!-- CASO 1: Ostaia -->
+        <article class="caso-card reveal" aria-label="Caso de éxito: Ostaia">
+          <div class="caso-inner">
+            <div class="caso-mockup">
+              <div class="caso-mockup-inner">
+                <div class="mockup-bar" aria-hidden="true">
+                  <span class="mockup-dot"></span>
+                  <span class="mockup-dot"></span>
+                  <span class="mockup-dot"></span>
+                  <span class="mockup-url">ostaia.com</span>
+                </div>
+                <div class="mockup-content">
+                  <div class="mockup-placeholder">
+                    <div class="mock-hero-block" style="font-size:2rem; letter-spacing:-0.03em;">
+                      <span style="color:#6ECEC0;">OS</span><span>TAIA</span>
+                    </div>
+                    <div class="mock-grid">
+                      <div class="mock-block" style="background:rgba(110,206,192,0.2); border-color:rgba(110,206,192,0.3);"></div>
+                      <div class="mock-block"></div>
+                      <div class="mock-block"></div>
+                    </div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; flex-shrink:0;">
+                      <div style="height:40px; background:var(--bg-4); border-radius:6px; border:1px solid var(--border);"></div>
+                      <div style="height:40px; background:var(--bg-4); border-radius:6px; border:1px solid var(--border);"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="caso-info">
+              <span class="caso-tag">Restaurante · Barcelona</span>
+              <h3 class="caso-title">Ostaia</h3>
+              <p class="caso-subtitle">Osteria Genovese — Eixample &amp; Poblenou</p>
+              <p class="caso-desc">
+                Ostaia es una auténtica osteria italiana con 2 sedes en Barcelona. Trabajamos su presencia digital desde cero: fotografía gastronómica premium, gestión de redes sociales y una estrategia de contenido que convirtió cada plato en una experiencia que la gente quería vivir en persona.
+              </p>
+              <div class="caso-results">
+                <div class="result-item">
+                  <div class="result-number">+200%</div>
+                  <div class="result-label">Engagement Instagram</div>
+                </div>
+                <div class="result-item">
+                  <div class="result-number">2x</div>
+                  <div class="result-label">Reservas mensuales</div>
+                </div>
+                <div class="result-item">
+                  <div class="result-number">#1</div>
+                  <div class="result-label">Italiana en BCN</div>
+                </div>
+              </div>
+              <div class="caso-services">
+                <span class="caso-service-tag">Fotografía gastronómica</span>
+                <span class="caso-service-tag">Redes sociales</span>
+                <span class="caso-service-tag">Contenido visual</span>
+                <span class="caso-service-tag">Estrategia digital</span>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- CASO 2: Constructora Alba -->
+        <article class="caso-card reverse reveal" aria-label="Caso de éxito: Constructora Alba">
+          <div class="caso-inner">
+            <div class="caso-mockup">
+              <div class="caso-mockup-inner">
+                <div class="mockup-bar" aria-hidden="true">
+                  <span class="mockup-dot"></span>
+                  <span class="mockup-dot"></span>
+                  <span class="mockup-dot"></span>
+                  <span class="mockup-url">constructora-alba.es</span>
+                </div>
+                <div class="mockup-content">
+                  <div class="mockup-placeholder">
+                    <div class="mock-hero-block" style="flex:1.5; background:linear-gradient(135deg, rgba(212,175,55,0.15), rgba(110,206,192,0.08)); border-color:rgba(212,175,55,0.3); font-size:1.6rem; letter-spacing:-0.03em;">
+                      ALBA <span style="color:var(--gold); font-size:0.9rem; display:block; font-weight:400; margin-top:0.25rem;">Constructora</span>
+                    </div>
+                    <div class="mock-grid">
+                      <div class="mock-block" style="background:rgba(212,175,55,0.2); border-color:rgba(212,175,55,0.3);"></div>
+                      <div class="mock-block"></div>
+                      <div class="mock-block"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="caso-info">
+              <span class="caso-tag" style="color:var(--mint); border-color:var(--border-mint); background:var(--mint-dim);">Construcción · Barcelona</span>
+              <h3 class="caso-title">Constructora Alba</h3>
+              <p class="caso-subtitle" style="color:var(--gold);">Reformas y Obra Nueva — Área Metropolitana</p>
+              <p class="caso-desc">
+                Una constructora barcelonesa con gran calidad de trabajo pero invisible digitalmente. Diseñamos su branding completo, construimos su presencia web con portfolio de proyectos, y lanzamos campañas de Google Ads locales que la pusieron en el mapa — literalmente.
+              </p>
+              <div class="caso-results">
+                <div class="result-item">
+                  <div class="result-number" style="color:var(--gold);">+150%</div>
+                  <div class="result-label">Leads cualificados en 6 meses</div>
+                </div>
+                <div class="result-item">
+                  <div class="result-number" style="color:var(--gold);">#1</div>
+                  <div class="result-label">Google "reformas Barcelona"</div>
+                </div>
+                <div class="result-item">
+                  <div class="result-number" style="color:var(--gold);">+300%</div>
+                  <div class="result-label">Facturación anual</div>
+                </div>
+              </div>
+              <div class="caso-services">
+                <span class="caso-service-tag">Branding completo</span>
+                <span class="caso-service-tag">Página web</span>
+                <span class="caso-service-tag">Google Ads local</span>
+                <span class="caso-service-tag">Fotografía proyectos</span>
+                <span class="caso-service-tag">SEO</span>
+              </div>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════
+         5. RED INTERNACIONAL
+    ════════════════════════════════════════════════════════ -->
+    <section class="section red-internacional" id="red" aria-labelledby="red-title">
+      <div class="container">
+        <div class="red-grid">
+          <div class="red-info reveal">
+            <div class="section-label">Red Internacional</div>
+            <h2 class="section-title" id="red-title">Donde tú estés, nosotros también</h2>
+            <p class="section-desc">
+              Contamos con una red de fotógrafos profesionales y creadores de contenido en 12 ciudades europeas. Coordinamos producciones de alto nivel en tu ciudad, con la calidad y el estilo que caracteriza a Dale Marketing.
+            </p>
+            <div class="red-stats">
+              <div class="red-stat">
+                <div class="red-stat-number">12</div>
+                <div class="red-stat-label">Ciudades europeas</div>
+              </div>
+              <div class="red-stat">
+                <div class="red-stat-number">40+</div>
+                <div class="red-stat-label">Creadores en red</div>
+              </div>
+              <div class="red-stat">
+                <div class="red-stat-number">5</div>
+                <div class="red-stat-label">Países activos</div>
+              </div>
+              <div class="red-stat">
+                <div class="red-stat-number">48h</div>
+                <div class="red-stat-label">Respuesta máxima</div>
+              </div>
+            </div>
+            <div class="red-cities" style="margin-bottom:1.5rem;">
+              <span class="city-tag">📍 Barcelona (HQ)</span>
+              <span class="city-tag">Madrid</span>
+              <span class="city-tag">París</span>
+              <span class="city-tag">Lisboa</span>
+              <span class="city-tag">Roma</span>
+              <span class="city-tag">Milán</span>
+              <span class="city-tag">Londres</span>
+              <span class="city-tag">Berlín</span>
+              <span class="city-tag">Amsterdam</span>
+              <span class="city-tag">Bruselas</span>
+              <span class="city-tag">Zürich</span>
+              <span class="city-tag">Viena</span>
+            </div>
+            <a href="#contacto" class="btn-ghost">Consulta disponibilidad →</a>
+          </div>
+
+          <!-- Europe Map SVG -->
+          <div class="red-map-wrap reveal">
+            <svg class="europe-svg" viewBox="0 0 500 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mapa de la red europea de Dale Marketing">
+              <!-- Background grid -->
+              <defs>
+                <pattern id="mapGrid" width="30" height="30" patternUnits="userSpaceOnUse">
+                  <path d="M 30 0 L 0 0 0 30" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+                </pattern>
+                <radialGradient id="glowBCN" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stop-color="#6ECEC0" stop-opacity="0.4"/>
+                  <stop offset="100%" stop-color="#6ECEC0" stop-opacity="0"/>
+                </radialGradient>
+              </defs>
+              <rect width="500" height="420" fill="url(#mapGrid)"/>
+
+              <!-- Simplified Europe silhouette -->
+              <!-- Iberian Peninsula -->
+              <path d="M 105,265 L 112,230 L 125,215 L 140,200 L 165,195 L 190,200 L 208,188 L 215,195 L 218,210 L 215,230 L 220,250 L 210,265 L 195,275 L 180,280 L 162,278 L 145,282 L 128,278 L 115,272 Z" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+              <!-- France -->
+              <path d="M 215,195 L 220,175 L 235,165 L 255,160 L 270,168 L 280,185 L 278,200 L 270,215 L 255,220 L 240,225 L 220,220 L 215,210 Z" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+              <!-- Italy -->
+              <path d="M 265,215 L 275,220 L 285,235 L 295,255 L 305,280 L 300,295 L 290,300 L 282,290 L 278,268 L 270,248 L 262,232 L 260,220 Z" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+              <!-- Germany/Benelux -->
+              <path d="M 255,155 L 270,148 L 290,145 L 308,150 L 320,160 L 322,175 L 310,188 L 290,195 L 275,192 L 262,182 L 258,168 Z" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+              <!-- UK outline -->
+              <path d="M 220,130 L 230,120 L 248,118 L 256,128 L 252,145 L 240,152 L 228,148 L 218,140 Z" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+              <!-- Austria/Switzerland -->
+              <path d="M 285,178 L 308,170 L 330,172 L 340,182 L 335,192 L 318,196 L 300,193 L 288,188 Z" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.12)" stroke-width="1.5"/>
+
+              <!-- Connection lines from Barcelona (HQ) -->
+              <!-- Barcelona to Madrid -->
+              <line class="map-line" x1="172" y1="248" x2="148" y2="238" stroke="rgba(110,206,192,0.25)" stroke-width="1" stroke-dasharray="4,4"/>
+              <!-- Barcelona to Paris -->
+              <line class="map-line" x1="172" y1="248" x2="248" y2="172" stroke="rgba(110,206,192,0.2)" stroke-width="1" stroke-dasharray="4,4"/>
+              <!-- Barcelona to Lisbon -->
+              <line class="map-line" x1="172" y1="248" x2="118" y2="258" stroke="rgba(110,206,192,0.2)" stroke-width="1" stroke-dasharray="4,4"/>
+              <!-- Barcelona to London -->
+              <line class="map-line" x1="172" y1="248" x2="234" y2="135" stroke="rgba(110,206,192,0.15)" stroke-width="1" stroke-dasharray="4,4"/>
+              <!-- Barcelona to Berlin -->
+              <line class="map-line" x1="172" y1="248" x2="308" y2="148" stroke="rgba(110,206,192,0.15)" stroke-width="1" stroke-dasharray="4,4"/>
+              <!-- Barcelona to Rome -->
+              <line class="map-line" x1="172" y1="248" x2="278" y2="255" stroke="rgba(110,206,192,0.15)" stroke-width="1" stroke-dasharray="4,4"/>
+              <!-- Barcelona to Amsterdam -->
+              <line class="map-line" x1="172" y1="248" x2="260" y2="150" stroke="rgba(110,206,192,0.12)" stroke-width="1" stroke-dasharray="4,4"/>
+
+              <!-- HQ glow -->
+              <circle cx="172" cy="248" r="28" fill="url(#glowBCN)"/>
+
+              <!-- City dots -->
+              <!-- Barcelona (HQ) -->
+              <circle cx="172" cy="248" r="7" fill="#6ECEC0" opacity="0.9"/>
+              <circle cx="172" cy="248" r="12" fill="none" stroke="#6ECEC0" stroke-width="1.5" opacity="0.5"/>
+              <circle cx="172" cy="248" r="18" fill="none" stroke="#6ECEC0" stroke-width="1" opacity="0.25" class="pulse-ring"/>
+              <text x="172" y="236" text-anchor="middle" class="map-hq-label">BCN HQ</text>
+
+              <!-- Madrid -->
+              <circle cx="148" cy="238" r="4" fill="#6ECEC0" opacity="0.6" class="map-city-dot"/>
+              <text x="132" y="234" text-anchor="end" class="map-city-label">Madrid</text>
+
+              <!-- Lisbon -->
+              <circle cx="118" cy="258" r="4" fill="#6ECEC0" opacity="0.6" class="map-city-dot"/>
+              <text x="113" y="253" text-anchor="end" class="map-city-label">Lisboa</text>
+
+              <!-- Paris -->
+              <circle cx="248" cy="172" r="4" fill="#6ECEC0" opacity="0.6" class="map-city-dot"/>
+              <text x="252" y="168" text-anchor="start" class="map-city-label">París</text>
+
+              <!-- London -->
+              <circle cx="234" cy="135" r="4" fill="#6ECEC0" opacity="0.6" class="map-city-dot"/>
+              <text x="238" y="131" text-anchor="start" class="map-city-label">Londres</text>
+
+              <!-- Amsterdam -->
+              <circle cx="260" cy="150" r="4" fill="#6ECEC0" opacity="0.6" class="map-city-dot"/>
+              <text x="264" y="146" text-anchor="start" class="map-city-label">Amsterdam</text>
+
+              <!-- Berlin -->
+              <circle cx="308" cy="148" r="4" fill="#6ECEC0" opacity="0.6" class="map-city-dot"/>
+              <text x="312" y="144" text-anchor="start" class="map-city-label">Berlín</text>
+
+              <!-- Rome -->
+              <circle cx="278" cy="255" r="4" fill="#6ECEC0" opacity="0.6" class="map-city-dot"/>
+              <text x="282" y="251" text-anchor="start" class="map-city-label">Roma</text>
+
+              <!-- Milan -->
+              <circle cx="270" cy="220" r="4" fill="#6ECEC0" opacity="0.5" class="map-city-dot"/>
+              <text x="274" y="216" text-anchor="start" class="map-city-label">Milán</text>
+
+              <!-- Zurich -->
+              <circle cx="290" cy="185" r="3.5" fill="#D4AF37" opacity="0.7" class="map-city-dot"/>
+              <text x="294" y="182" text-anchor="start" class="map-city-label" fill="#D4AF37" style="fill:#D4AF37;">Zürich</text>
+
+              <!-- Brussels -->
+              <circle cx="260" cy="162" r="3.5" fill="#6ECEC0" opacity="0.5" class="map-city-dot"/>
+              <text x="254" y="158" text-anchor="end" class="map-city-label">Bruselas</text>
+
+              <!-- Vienna -->
+              <circle cx="330" cy="175" r="3.5" fill="#6ECEC0" opacity="0.5" class="map-city-dot"/>
+              <text x="334" y="171" text-anchor="start" class="map-city-label">Viena</text>
+
+              <!-- Legend -->
+              <circle cx="22" cy="395" r="5" fill="#6ECEC0" opacity="0.8"/>
+              <text x="32" y="399" class="map-city-label" style="fill:rgba(255,255,255,0.5);">Ciudad de la red</text>
+              <circle cx="22" cy="413" r="3.5" fill="#D4AF37" opacity="0.8"/>
+              <text x="32" y="417" class="map-city-label" style="fill:rgba(255,255,255,0.5);">Socio premium</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════
+         6. PROCESO
+    ════════════════════════════════════════════════════════ -->
+    <section class="section proceso" id="proceso" aria-labelledby="proceso-title">
+      <div class="container">
+        <div class="proceso-header reveal">
+          <div class="section-label">Cómo Trabajamos</div>
+          <h2 class="section-title" id="proceso-title">Tu camino al éxito en 5 pasos</h2>
+          <p class="section-desc" style="margin:0 auto;">Un proceso claro, transparente y orientado a resultados. Sabemos que tu tiempo es valioso, y lo respetamos.</p>
+        </div>
+
+        <div class="timeline">
+
+          <div class="timeline-item reveal">
+            <div class="timeline-dot" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            </div>
+            <div class="timeline-step">Paso 01</div>
+            <h3 class="timeline-title">Consulta inicial gratuita</h3>
+            <p class="timeline-desc">Sin compromiso ni presión. En una llamada de 30 minutos conocemos tu negocio, tus objetivos y los desafíos que enfrentas. Queremos entender tu realidad antes de proponer nada.</p>
+          </div>
+
+          <div class="timeline-item reveal">
+            <div class="timeline-dot" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            </div>
+            <div class="timeline-step">Paso 02</div>
+            <h3 class="timeline-title">Estrategia personalizada</h3>
+            <p class="timeline-desc">Analizamos tu mercado, competidores y audiencia para diseñar una estrategia única para tu negocio. Nada genérico — cada plan está construido para tus objetivos específicos y tu presupuesto real.</p>
+          </div>
+
+          <div class="timeline-item reveal">
+            <div class="timeline-dot" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+            </div>
+            <div class="timeline-step">Paso 03</div>
+            <h3 class="timeline-title">Creación de contenido</h3>
+            <p class="timeline-desc">Nuestro equipo de creativos, fotógrafos y diseñadores se pone en marcha. Producimos contenido de alta calidad que refleja la esencia de tu marca y conecta con tu audiencia ideal.</p>
+          </div>
+
+          <div class="timeline-item reveal">
+            <div class="timeline-dot" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"/></svg>
+            </div>
+            <div class="timeline-step">Paso 04</div>
+            <h3 class="timeline-title">Implementación y lanzamiento</h3>
+            <p class="timeline-desc">Lanzamos las campañas, publicamos el contenido y ponemos en marcha todas las piezas de la estrategia. Controlamos cada detalle del lanzamiento para asegurar el mejor inicio posible.</p>
+          </div>
+
+          <div class="timeline-item reveal">
+            <div class="timeline-dot" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+            </div>
+            <div class="timeline-step">Paso 05</div>
+            <h3 class="timeline-title">Optimización continua</h3>
+            <p class="timeline-desc">Analizamos los resultados en tiempo real y optimizamos constantemente. Reportes transparentes, decisiones basadas en datos y siempre buscando mejorar el ROI de cada euro invertido.</p>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════
+         7. TESTIMONIOS
+    ════════════════════════════════════════════════════════ -->
+    <section class="section testimonios" id="testimonios" aria-labelledby="testimonios-title">
+      <div class="container">
+        <div class="testimonios-header reveal">
+          <div class="section-label">Lo que dicen nuestros clientes</div>
+          <h2 class="section-title" id="testimonios-title">Resultados reales, clientes reales</h2>
+        </div>
+        <div class="testimonios-grid">
+
+          <article class="testimonial-card reveal" aria-label="Testimonio de Marco V.">
+            <div class="testimonial-stars" aria-label="5 estrellas">★★★★★</div>
+            <p class="testimonial-text">Leo y su equipo transformaron completamente nuestra presencia online. Antes apenas teníamos seguidores en Instagram, ahora el restaurante está lleno cada fin de semana gracias al contenido que generan. Son parte fundamental de nuestro negocio.</p>
+            <div class="testimonial-author">
+              <div class="author-avatar" aria-hidden="true">M</div>
+              <div>
+                <div class="author-name">Marco V.</div>
+                <div class="author-role">Propietario — Ostaia, Barcelona</div>
+              </div>
+            </div>
+          </article>
+
+          <article class="testimonial-card reveal" aria-label="Testimonio de Sandra M.">
+            <div class="testimonial-stars" aria-label="5 estrellas">★★★★★</div>
+            <p class="testimonial-text">Los mejores fotógrafos con los que hemos trabajado en 10 años. La calidad de las imágenes de producto no tiene comparación, y la forma en que cuentan la historia de nuestra marca en redes es exactamente lo que necesitábamos.</p>
+            <div class="testimonial-author">
+              <div class="author-avatar" aria-hidden="true">S</div>
+              <div>
+                <div class="author-name">Sandra M.</div>
+                <div class="author-role">Directora de Marketing — Moda Premium BCN</div>
+              </div>
+            </div>
+          </article>
+
+          <article class="testimonial-card reveal" aria-label="Testimonio de Carlos R.">
+            <div class="testimonial-stars" aria-label="5 estrellas">★★★★★</div>
+            <p class="testimonial-text">ROI increíble con las campañas de Google Ads. En solo 3 meses triplicamos los leads cualificados y redujimos el coste por adquisición un 40%. Profesionalidad, transparencia y resultados — exactamente lo que buscaba.</p>
+            <div class="testimonial-author">
+              <div class="author-avatar" aria-hidden="true">C</div>
+              <div>
+                <div class="author-name">Carlos R.</div>
+                <div class="author-role">CEO — Startup Tech, Barcelona</div>
+              </div>
+            </div>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════
+         8. SOBRE LEO
+    ════════════════════════════════════════════════════════ -->
+    <section class="section sobre-leo" id="nosotros" aria-labelledby="leo-title">
+      <div class="container">
+        <div class="leo-grid">
+
+          <div class="leo-photo-wrap reveal">
+            <div class="leo-photo-placeholder">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+              </svg>
+              <div style="text-align:center;">
+                <div style="font-family:var(--font-head); font-size:1.1rem; font-weight:600; color:var(--white); margin-bottom:0.4rem;">Leonardo Tabaton</div>
+                <div class="leo-photo-location">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                  Barcelona, España
+                </div>
+              </div>
+            </div>
+            <span class="leo-photo-corner">Fundador</span>
+          </div>
+
+          <div class="leo-info reveal">
+            <div class="section-label">El Equipo</div>
+            <h2 class="leo-name" id="leo-title">Leonardo Tabaton</h2>
+            <p class="leo-role">Life Coach &amp; Marketing Strategist</p>
+            <p class="leo-bio">
+              Con más de 8 años de experiencia en marketing digital y branding, Leonardo fundó Dale Marketing con una misión clara: <strong style="color:var(--white)">ayudar a negocios a contar su historia y crecer</strong> de manera auténtica y sostenible.
+            </p>
+            <p class="leo-bio">
+              Su visión única combina la psicología del comportamiento humano con estrategias de marketing probadas. Como Life Coach certificado, entiende que detrás de cada negocio hay personas con sueños y objetivos concretos.
+            </p>
+            <div class="leo-quote">
+              <p>"El marketing no se trata de vender productos. Se trata de construir relaciones genuinas entre marcas y personas. Cuando lo haces bien, los clientes no te compran — se convierten en seguidores de por vida."</p>
+            </div>
+            <div class="leo-skills">
+              <span class="leo-skill">Brand Strategy</span>
+              <span class="leo-skill">Marketing Digital</span>
+              <span class="leo-skill">Life Coaching</span>
+              <span class="leo-skill">Storytelling</span>
+              <span class="leo-skill">Performance Marketing</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════
+         9. FAQ
+    ════════════════════════════════════════════════════════ -->
+    <section class="section faq" id="faq" aria-labelledby="faq-title">
+      <div class="container">
+        <div class="faq-header reveal">
+          <div class="section-label">Preguntas Frecuentes</div>
+          <h2 class="section-title" id="faq-title">Todo lo que necesitas saber</h2>
+          <p class="section-desc" style="margin:0 auto;">¿Tienes dudas? Normal. Aquí resolvemos las preguntas más habituales. Si no encuentras la tuya, <a href="#contacto" style="color:var(--mint); text-decoration:underline;">escríbenos directamente</a>.</p>
+        </div>
+
+        <div class="faq-list" role="list">
+
+          <div class="faq-item" role="listitem">
+            <button class="faq-question" aria-expanded="false" aria-controls="faq-1">
+              ¿Trabajáis con empresas fuera de Barcelona?
+              <span class="faq-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              </span>
+            </button>
+            <div class="faq-answer" id="faq-1" role="region">
+              <div class="faq-answer-inner">
+                Absolutamente. Aunque nuestra base está en Barcelona, trabajamos con clientes en toda España y Europa. Para servicios digitales como Google Ads, Meta Ads, SEO o diseño web, trabajamos 100% en remoto sin ningún problema. Para producción fotográfica o vídeo, activamos nuestra red internacional de creadores locales para que tengas la misma calidad en tu ciudad.
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item" role="listitem">
+            <button class="faq-question" aria-expanded="false" aria-controls="faq-2">
+              ¿Cuánto cuesta una campaña de Google Ads?
+              <span class="faq-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              </span>
+            </button>
+            <div class="faq-answer" id="faq-2" role="region">
+              <div class="faq-answer-inner">
+                Los costes dependen de tu industria, objetivos y mercado objetivo. En general, manejamos cuentas desde 500€/mes de inversión publicitaria más nuestra tarifa de gestión. Lo que sí podemos garantizar es total transparencia en los resultados y un enfoque obsesivo en el ROI. En la consulta inicial hacemos un análisis gratuito de tu mercado y te damos estimaciones reales.
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item" role="listitem">
+            <button class="faq-question" aria-expanded="false" aria-controls="faq-3">
+              ¿Tenéis fotógrafos en mi ciudad?
+              <span class="faq-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              </span>
+            </button>
+            <div class="faq-answer" id="faq-3" role="region">
+              <div class="faq-answer-inner">
+                Con toda probabilidad, sí. Nuestra red cubre 12 ciudades europeas incluyendo Madrid, Barcelona, Lisboa, París, Roma, Milán, Londres, Berlín, Amsterdam, Bruselas, Zürich y Viena. Todos nuestros fotógrafos están seleccionados y formados para mantener el estilo y calidad característico de Dale Marketing. Si tu ciudad no está en la lista, consúltanos — a menudo podemos arrancar en ciudades nuevas.
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item" role="listitem">
+            <button class="faq-question" aria-expanded="false" aria-controls="faq-4">
+              ¿Cuánto tiempo tarda en verse resultados?
+              <span class="faq-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              </span>
+            </button>
+            <div class="faq-answer" id="faq-4" role="region">
+              <div class="faq-answer-inner">
+                Depende del servicio. Para campañas de Google Ads y Meta Ads los resultados empiezan a verse en las primeras 2-4 semanas, y se optimizan significativamente en los primeros 3 meses. Para SEO, el posicionamiento orgánico es un proceso de 3-6 meses. Para branding y contenido visual, el impacto en engagement y conversión suele verse en el primer mes. Somos honestos sobre los tiempos — nunca prometemos resultados milagrosos de la noche a la mañana.
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item" role="listitem">
+            <button class="faq-question" aria-expanded="false" aria-controls="faq-5">
+              ¿Hacéis webs para todo tipo de negocios?
+              <span class="faq-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              </span>
+            </button>
+            <div class="faq-answer" id="faq-5" role="region">
+              <div class="faq-answer-inner">
+                Sí, aunque tenemos especial experiencia en hostelería, restauración, construcción, moda, consultoría y servicios profesionales. Diseñamos desde landing pages de conversión hasta webs corporativas completas con portfolio. Nuestro enfoque siempre es web que convierte — no solo que queda bonita. Cada web que hacemos está optimizada para SEO y conversión desde el primer día.
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item" role="listitem">
+            <button class="faq-question" aria-expanded="false" aria-controls="faq-6">
+              ¿Cómo funciona el proceso de trabajo contigo?
+              <span class="faq-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              </span>
+            </button>
+            <div class="faq-answer" id="faq-6" role="region">
+              <div class="faq-answer-inner">
+                Empezamos con una consulta inicial gratuita sin compromiso. Si hay fit, preparamos una propuesta estratégica personalizada con presupuesto transparente. Acordamos objetivos medibles, plazos y entregables concretos. Trabajamos con check-ins semanales o quincenales según el proyecto, y recibes reportes regulares con métricas reales. Nunca te dejamos en la oscuridad sobre qué está pasando con tu inversión.
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════════════════
+         10. CONTACTO
+    ════════════════════════════════════════════════════════ -->
+    <section class="section contacto" id="contacto" aria-labelledby="contacto-title">
+      <div class="container">
+        <div class="contacto-inner">
+
+          <div class="contacto-info reveal">
+            <div class="section-label">Hablemos</div>
+            <h2 class="section-title" id="contacto-title">¿Listo para hacer crecer tu marca?</h2>
+            <p class="section-desc">Cuéntanos tu proyecto. Sin presión, sin compromiso. Una conversación puede cambiarlo todo.</p>
+
+            <div style="margin-top:2rem;">
+              <div class="contact-detail">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                Barcelona, España — Red en Europa
+              </div>
+              <div class="contact-detail">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.64 3.4 2 2 0 0 1 3.61 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6 6l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                +34 600 000 000
+              </div>
+              <div class="contact-detail">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                hola@dalemarketing.es
+              </div>
+            </div>
+
+            <div class="contact-social">
+              <!-- Instagram -->
+              <a href="#" class="social-btn" aria-label="Instagram de Dale Marketing">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+              </a>
+              <!-- LinkedIn -->
+              <a href="#" class="social-btn" aria-label="LinkedIn de Dale Marketing">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+              </a>
+              <!-- TikTok -->
+              <a href="#" class="social-btn" aria-label="TikTok de Dale Marketing">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"/></svg>
+              </a>
+              <!-- Facebook -->
+              <a href="#" class="social-btn" aria-label="Facebook de Dale Marketing">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+              </a>
+            </div>
+          </div>
+
+          <div class="reveal">
+            <form class="contact-form" id="contactForm" novalidate aria-label="Formulario de contacto">
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="nombre">Nombre <span class="required" aria-label="campo requerido">*</span></label>
+                  <input class="form-input" type="text" id="nombre" name="nombre" placeholder="Tu nombre" required autocomplete="given-name">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="email">Email <span class="required" aria-label="campo requerido">*</span></label>
+                  <input class="form-input" type="email" id="email" name="email" placeholder="tu@email.com" required autocomplete="email">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="telefono">Teléfono</label>
+                <input class="form-input" type="tel" id="telefono" name="telefono" placeholder="+34 600 000 000" autocomplete="tel">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="proyecto">Tipo de proyecto <span class="required" aria-label="campo requerido">*</span></label>
+                <select class="form-select" id="proyecto" name="proyecto" required>
+                  <option value="" disabled selected>Selecciona un servicio</option>
+                  <option value="branding">Branding &amp; Estrategia</option>
+                  <option value="web">Diseño Web &amp; Logo</option>
+                  <option value="google-ads">Google Ads</option>
+                  <option value="meta-ads">Meta Ads (Facebook/Instagram)</option>
+                  <option value="contenido">Creación de Contenido</option>
+                  <option value="seo">Copywriting &amp; SEO</option>
+                  <option value="todo">Todo incluido / Consultoría</option>
+                  <option value="otro">Otro</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="mensaje">Cuéntanos tu proyecto</label>
+                <textarea class="form-textarea" id="mensaje" name="mensaje" placeholder="¿Qué quieres conseguir? ¿Cuál es tu mayor reto ahora mismo?"></textarea>
+              </div>
+              <button type="submit" class="form-submit" id="formSubmit">
+                Dale, hablamos →
+              </button>
+              <p class="form-note">Respondemos en menos de 24 horas. Sin spam, sin presiones.</p>
+            </form>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ═══════════════════════════════════════════════════════
+       11. FOOTER
+  ════════════════════════════════════════════════════════ -->
+  <footer class="footer" role="contentinfo" aria-label="Pie de página">
+    <div class="container">
+      <div class="footer-main">
+
+        <!-- Brand col -->
+        <div class="footer-brand">
+          <div class="footer-logo">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 200" width="100" height="34" aria-label="Dale Marketing" role="img">
+              <path d="M 8,10 L 45,8 C 72,8 95,20 108,48 C 118,72 118,100 108,128 C 95,156 72,168 45,168 L 8,166 Z M 45,48 L 45,128 C 60,128 72,118 78,100 C 82,88 82,88 78,76 C 72,58 60,48 45,48 Z" fill="#ffffff"/>
+              <path d="M 128,166 L 158,8 L 198,8 L 228,166 L 195,166 L 190,132 L 166,132 L 161,166 Z M 170,104 L 186,104 L 178,50 Z" fill="#ffffff"/>
+              <path d="M 246,8 L 282,10 L 282,130 L 330,132 L 328,166 L 246,166 Z" fill="#ffffff"/>
+              <path d="M 348,8 L 418,10 L 416,44 L 384,44 L 384,70 L 416,70 L 416,106 L 384,106 L 384,132 L 416,132 L 418,166 L 348,166 Z" fill="#ffffff"/>
+              <path d="M 428,88 L 490,88" stroke="#6ECEC0" stroke-width="9" stroke-linecap="round"/>
+              <path d="M 468,66 L 500,88 L 468,110" stroke="#6ECEC0" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            </svg>
+          </div>
+          <p class="footer-tagline">Agencia de marketing y contenido con base en Barcelona. Construimos marcas que conectan y venden.</p>
+          <div class="footer-social">
+            <a href="#" class="social-btn" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></a>
+            <a href="#" class="social-btn" aria-label="LinkedIn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></a>
+            <a href="#" class="social-btn" aria-label="TikTok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"/></svg></a>
+          </div>
+        </div>
+
+        <!-- Services -->
+        <div class="footer-col">
+          <h4>Servicios</h4>
+          <ul>
+            <li><a href="#servicios">Branding &amp; Estrategia</a></li>
+            <li><a href="#servicios">Diseño Web &amp; Logos</a></li>
+            <li><a href="#servicios">Google Ads</a></li>
+            <li><a href="#servicios">Meta Ads</a></li>
+            <li><a href="#servicios">Creación de Contenido</a></li>
+            <li><a href="#servicios">Copywriting &amp; SEO</a></li>
+          </ul>
+        </div>
+
+        <!-- Company -->
+        <div class="footer-col">
+          <h4>Empresa</h4>
+          <ul>
+            <li><a href="#quienes">Quiénes somos</a></li>
+            <li><a href="#casos">Casos de éxito</a></li>
+            <li><a href="#red">Red internacional</a></li>
+            <li><a href="#proceso">Proceso de trabajo</a></li>
+            <li><a href="#nosotros">Sobre Leo</a></li>
+            <li><a href="#faq">FAQ</a></li>
+          </ul>
+        </div>
+
+        <!-- Contact -->
+        <div class="footer-col">
+          <h4>Contacto</h4>
+          <ul>
+            <li><a href="#contacto">Hablar con nosotros</a></li>
+            <li><a href="mailto:hola@dalemarketing.es">hola@dalemarketing.es</a></li>
+            <li><a href="tel:+34600000000">+34 600 000 000</a></li>
+            <li style="color:var(--gray); font-size:0.875rem; pointer-events:none; cursor:default;">Barcelona, España</li>
+            <li style="color:var(--gray); font-size:0.875rem; pointer-events:none; cursor:default;">Red en 12 ciudades EU</li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div class="footer-bottom">
+        <p class="footer-copy">© 2026 <span>Dale Marketing</span>. Todos los derechos reservados.</p>
+        <nav class="footer-legal" aria-label="Legal">
+          <a href="#">Política de Privacidad</a>
+          <a href="#">Aviso Legal</a>
+          <a href="#">Cookies</a>
+        </nav>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ─── Scripts ───────────────────────────────────────────── -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

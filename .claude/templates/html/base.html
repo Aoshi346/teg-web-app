@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="es">
+<!--
+  PLANTILLA BASE · esqueleto + design tokens compartidos para CUALQUIER salida HTML del agente.
+  ── Cómo usar ──────────────────────────────────────────────────────────────
+  Copia este archivo y rellena: <title>, .eyebrow, h1, .lead, y el contenido de <main>.
+  Mantén el bloque <style> :root (tokens) y los helpers JS (toast/copy) para consistencia.
+  Self-contained: CSS y JS inline, sin CDN. Guardar en .claude/docs/html/<slug>-<fecha>.html.
+  Tokens: navy/paper editorial · system fonts · listón = thariqs.github.io/html-effectiveness.
+  Ver rules/html-output.md.
+-->
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>[TÍTULO]</title>
+<style>
+  /* ===== DESIGN TOKENS (no cambiar para mantener consistencia entre páginas) ===== */
+  :root{
+    --ink:#1b1b1f;--muted:#6b6b76;--faint:#6c6c78;--paper:#f6f4ef;--card:#fff;--line:#e4e0d7;
+    --navy:#1b2a4a;--accent:#c2410c;--green:#15803d;--amber:#b45309;--blue:#1d4ed8;--red:#b42318;
+    --radius:14px;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.55}
+  .wrap{max-width:1000px;margin:0 auto;padding:0 22px}
+  /* ===== HERO ===== */
+  header.hero{border-bottom:1px solid var(--line);padding:44px 0 28px;
+    background:radial-gradient(1000px 280px at 82% -45%,#fff,transparent 70%),var(--paper)}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600;margin:0 0 12px}
+  h1{font-size:clamp(26px,4vw,42px);margin:0 0 12px;letter-spacing:-.02em}
+  h1 em{font-style:italic;color:var(--navy)}
+  .lead{font-size:17px;color:var(--muted);max-width:74ch;margin:0}
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+  /* ===== CONTENIDO ===== */
+  section{padding:26px 0;border-bottom:1px solid var(--line)}
+  h2{font-size:21px;margin:0 0 10px;letter-spacing:-.01em}
+  p,li{max-width:76ch}
+  code{font-family:var(--mono);font-size:.88em;background:#efece4;color:var(--navy);padding:2px 6px;border-radius:6px}
+  pre{background:#1b2330;color:#e7ecf3;border-radius:12px;padding:14px 16px;overflow:auto;font-family:var(--mono);font-size:12.5px;line-height:1.55}
+  table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:13.5px;margin:8px 0}
+  th,td{padding:9px 13px;border-bottom:1px solid var(--line);vertical-align:top;text-align:left}
+  th{background:#fbfaf7;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+  tr:last-child td{border-bottom:none}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px}
+  .note{background:#fdebd9;border:1px solid #f3c9a8;border-left:4px solid var(--accent);border-radius:10px;padding:12px 16px;color:#7c2d12;font-size:14px;margin:12px 0}
+  button.btn{font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;border:1px solid var(--navy);background:var(--navy);color:#fff;padding:9px 15px;border-radius:10px}
+  button.btn.ghost{background:#fff;color:var(--navy)} button.btn.copied{background:var(--green);border-color:var(--green)}
+  footer{padding:26px 0 60px;color:var(--faint);font-size:13px}footer a{color:var(--navy)}
+  #toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:8px 16px;border-radius:10px;font-size:13px;opacity:0;transition:.2s;pointer-events:none}
+  #toast.show{opacity:1}
+</style>
+</head>
+<body>
+<header class="hero"><div class="wrap">
+  <p class="eyebrow">[ETIQUETA · contexto]</p>
+  <h1>[Título <em>destacado</em>]</h1>
+  <p class="lead">[Resumen en 1-2 frases de qué es esta página y para quién.]</p>
+  <div class="toolbar">
+    <button class="btn" id="copyBtn">📋 Copiar como markdown</button>
+  </div>
+</div></header>
+
+<main class="wrap">
+  <section>
+    <h2>[Sección]</h2>
+    <p>[Contenido. Usa tablas para datos, <code>code</code> para paths/comandos, .note para avisos.]</p>
+  </section>
+  <!-- añade más <section> según necesites -->
+</main>
+
+<footer class="wrap">Un solo .html autocontenido · snapshot [FECHA]. Convención: rules/html-output.md.</footer>
+
+<script>
+  /* ===== Helpers reutilizables (copia/toast) ===== */
+  const MD = `[contenido a copiar como markdown — rellénalo o genéralo]`;
+  function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1500)}
+  function copy(txt,btn){navigator.clipboard?.writeText(txt).then(()=>ok(btn)).catch(()=>{const t=document.createElement("textarea");t.value=txt;document.body.appendChild(t);t.select();document.execCommand("copy");t.remove();ok(btn)})}
+  function ok(btn){if(!btn)return;btn.classList.add("copied");const o=btn.textContent;btn.textContent="✓ Copiado";toast("Copiado");setTimeout(()=>{btn.classList.remove("copied");btn.textContent=o},1500)}
+  document.getElementById("copyBtn").onclick=e=>copy(MD,e.target);
+</script>
+<div id="toast"></div>
+</body>
+</html>

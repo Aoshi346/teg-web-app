@@ -1,0 +1,119 @@
+{
+ "meta": {
+  "source": "gen_proyecto_graph.py — imports + convención de framework · proyecto open_deep_research",
+  "proyecto": "open_deep_research",
+  "sha": "1b7d2e8",
+  "date": "2026-08-26",
+  "nodes_total": 5,
+  "edges_total": 0,
+  "reduced": false,
+  "ficheros_por_capa": {
+   "agente-grafo": 6,
+   "test": 6,
+   "otro": 4,
+   "config": 2,
+   "agente-estado": 2,
+   "servicio": 2
+  }
+ },
+ "nodes": [
+  {
+   "id": "src/legacy",
+   "label": "legacy",
+   "group": "agente-grafo",
+   "kind": "agente-grafo",
+   "files": [
+    "src/legacy/configuration.py",
+    "src/legacy/__init__.py",
+    "src/legacy/prompts.py",
+    "src/legacy/state.py",
+    "src/legacy/utils.py",
+    "src/legacy/graph.py",
+    "src/legacy/multi_agent.py"
+   ],
+   "loc": 3324,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Common configuration",
+   "n_ficheros": 7
+  },
+  {
+   "id": "src/open_deep_research",
+   "label": "open_deep_research",
+   "group": "agente-grafo",
+   "kind": "agente-grafo",
+   "files": [
+    "src/open_deep_research/configuration.py",
+    "src/open_deep_research/prompts.py",
+    "src/open_deep_research/deep_researcher.py",
+    "src/open_deep_research/state.py",
+    "src/open_deep_research/utils.py"
+   ],
+   "loc": 2361,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Configuration management for the Open Deep Research system.",
+   "n_ficheros": 5
+  },
+  {
+   "id": "tests",
+   "label": "tests",
+   "group": "agente-grafo",
+   "kind": "agente-grafo",
+   "files": [
+    "tests/supervisor_parallel_evaluation.py",
+    "tests/pairwise_evaluation.py",
+    "tests/evaluators.py",
+    "tests/prompts.py",
+    "tests/extract_langsmith_data.py",
+    "tests/run_evaluate.py"
+   ],
+   "loc": 793,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "NOTE: Configure the right dataset and evaluators",
+   "n_ficheros": 6
+  },
+  {
+   "id": "src/legacy/tests",
+   "label": "tests",
+   "group": "agente-grafo",
+   "kind": "agente-grafo",
+   "files": [
+    "src/legacy/tests/conftest.py",
+    "src/legacy/tests/test_report_quality.py",
+    "src/legacy/tests/run_test.py"
+   ],
+   "loc": 478,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "Pytest configuration for open_deep_research tests.",
+   "n_ficheros": 3
+  },
+  {
+   "id": "src/security",
+   "label": "security",
+   "group": "otro",
+   "kind": "otro",
+   "files": [
+    "src/security/auth.py"
+   ],
+   "loc": 156,
+   "fan_in": 0,
+   "fan_out": 0,
+   "desc": "The \"Auth\" object is a container that LangGraph will use to mark our authentication function",
+   "n_ficheros": 1
+  }
+ ],
+ "edges": [],
+ "communities": {
+  "agente-grafo": {
+   "label": "Agente · grafo",
+   "color": "#7c3aed"
+  },
+  "otro": {
+   "label": "Sin clasificar",
+   "color": "#9aa1ad"
+  }
+ }
+}

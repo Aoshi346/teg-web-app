@@ -1,0 +1,60 @@
+# docker-compose de referencia. Dos cosas que parecen detalle y no lo son:
+#   - versiones fijas: el mismo fichero levanta lo mismo dentro de seis meses;
+#   - depends_on con condition: service_healthy: sin eso el backend arranca antes de que Postgres
+#     acepte conexiones y el primer boot muere con un error que no dice nada.
+services:
+  db:
+    image: postgres:16.3-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?falta POSTGRES_PASSWORD en .env}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  cache:
+    image: redis:7.2-alpine
+    command: redis-server --maxmemory 256mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      retries: 10
+
+  broker:
+    image: rabbitmq:3.13-management-alpine
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      retries: 10
+
+  backend:
+    build: ./backend
+    command: gunicorn config.wsgi --bind 0.0.0.0:8000
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      cache:
+        condition: service_healthy
+      broker:
+        condition: service_healthy
+
+  worker:
+    build: ./backend
+    command: celery -A config worker -l info --max-tasks-per-child=100
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      broker:
+        condition: service_healthy
+
+volumes:
+  pgdata:

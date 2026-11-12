@@ -1,0 +1,12 @@
+<!doctype html><html lang=es><head><meta charset=utf-8><title>GD-01 malo</title>
+<style>
+  .reveal { opacity: 0; transform: translateY(40px); }
+  .reveal.visible { opacity: 1; }
+</style></head><body>
+  <section class="reveal"><h1>Este titular no se ve si el JS no corre</h1></section>
+<script>
+  // initReveal se DEFINE y no se llama nunca: una sola aparición en todo el fichero.
+  function initReveal() {
+    document.querySelectorAll('.reveal').forEach(function (e) { e.classList.add('visible'); });
+  }
+</script></body></html>

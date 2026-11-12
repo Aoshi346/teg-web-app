@@ -1,0 +1,187 @@
+# ownership.yaml — contrato de propiedad por directorio (AGT-8)
+#
+# Qué es: cada zona del repo declara POR ESCRITO qué le pertenece, qué puede tocar y qué tiene
+# prohibido. Rita lo cita como REGLA DURA (además de sus precedentes inferidos) y el checker
+# determinista lo aplica sin gastar un token.
+#
+# Origen del concepto: SpecDD (contrato colocado junto al código, herencia vertical). Se roba el
+# concepto y se TIRA el formato `.sdd` — aquí vive en el sistema de patrones que ya teníamos.
+#
+# HERENCIA VERTICAL (la regla del sistema):
+#   el padre RESTRINGE · el hijo solo puede ESTRECHAR, nunca ampliar.
+#   forbids/needs_approval efectivos de un fichero = UNIÓN de los de todos sus ancestros.
+#   can_modify efectivo                            = INTERSECCIÓN de los de todos sus ancestros.
+#   Un hijo que intente permitir algo que el padre prohíbe es un ERROR DE CONFIG (--lint lo caza).
+#
+# CAMPOS
+#   path            prefijo de directorio al que aplica el scope (el más específico gana en prosa)
+#   owns            de qué es responsable esta zona (prosa, para Rita y para humanos)
+#   can_modify      globs que esta zona SÍ puede modificar
+#   forbids         globs prohibidos — el checker falla (exit 1). Dos lecturas, ambas soportadas:
+#                     · si cuelgan del propio fichero cambiado (p.ej. **/.env) → prohibido para todos
+#                     · si son de OTRA zona (report_kit → speckit_dashboard) → solo se comprueban con
+#                       `--from <scope>`, porque hace falta saber DESDE DÓNDE se está trabajando
+#   needs_approval  globs que exigen OK explícito (governance.md §2) — el checker AVISA
+#   depends_on      de qué zonas depende (cambiar allí rompe aquí)
+#   rules           reglas duras NO expresables como path — Rita las cita literalmente
+#   source          la rule/doc que justifica el scope (sin fuente, la línea no entra)
+#
+# LÍMITE HONESTO: una regla declarada envejece igual que el código. Si esta lista deja de
+# mantenerse, la que tiene razón es Rita con sus precedentes medidos. Revisar al cerrar cada plan.
+#
+# Uso:   python3 .claude/patterns/ownership_check.py            # ficheros cambiados
+#        python3 .claude/patterns/ownership_check.py --from .claude/templates/report_kit/   # cross-scope
+#        python3 .claude/patterns/ownership_check.py --lint     # coherencia de la herencia
+#        python3 .claude/patterns/ownership_check.py --explain <ruta>   # contrato efectivo
+
+version: 1
+measured: "2026-08-08"
+
+scopes:
+  - path: .
+    owns: "el repositorio completo — scope raíz: lo que se prohíbe aquí no puede permitirlo ningún hijo"
+    can_modify: ["**"]
+    forbids: ["**/.env", "**/.env.*", "**/*.pem", "**/*.key", "**/secrets.*", "**/credentials.*"]
+    needs_approval: []
+    depends_on: []
+    rules:
+      - "Nunca hardcodear credenciales ni commitear secretos (rules/security.md)."
+      - "Push, merge a main, force-push y destructivos: solo con aprobación (rules/governance.md §2)."
+    source: rules/security.md · rules/governance.md §2
+
+  - path: .claude/
+    owns: "la configuración del harness: rules, skills, agents, hooks, templates, scripts, commands"
+    can_modify: [".claude/**"]
+    forbids: []
+    needs_approval: [".claude/settings.json", ".claude/settings.local.json", ".claude/hooks/**"]
+    depends_on: []
+    rules:
+      - "settings.json y hooks son la capa 4 (rol técnico) y exigen aprobación explícita — governance.md §2 y §6."
+      - "CLAUDE.md se edita SOLO al inicio de sesión: a mitad no se aplica hasta /clear, /compact o reiniciar (harness-gotchas.md §Caché)."
+      - "Techo de ~120 líneas en el CLAUDE.md raíz; el detalle vive en rules/ (harness-gotchas.md)."
+      - "Más de 3 ficheros a crear/editar bajo el .claude/ de OTRO repo → patrón de staging, un solo cp (skill create-agent, paso 3)."
+    source: rules/governance.md §2, §6 · rules/harness-gotchas.md · skills/create-agent/SKILL.md (paso 3, staging)
+
+  - path: .claude/patterns/
+    owns: "el canon de patrones: catálogo, docs por patrón, baseline (deuda aceptada), telemetría y este contrato"
+    can_modify: [".claude/patterns/**"]
+    forbids: []
+    needs_approval: [".claude/patterns/baseline/**"]
+    depends_on: [".claude/hooks/pattern-check.sh"]
+    rules:
+      - "El baseline es deuda aceptada: SOLO un humano lo amplía; se estrecha al arreglar por boy-scout (patterns/README.md)."
+      - "Un patrón entra con dominancia MEDIDA (≥85% activo · 60-85% débil · <60% no es patrón) y ≥2 precedentes file:line."
+      - "Regla de inversión: si una regla nueva marcaría >20-30 sitios existentes, la mala es la regla."
+      - "Excepción auditable: 'pattern-exempt: <id> — razón' en el propio fichero; Rita la respeta siempre."
+    source: .claude/patterns/README.md
+
+  - path: .claude/agents/
+    owns: "las fichas de agente y su memoria (carpeta <agente>/ con memory.md + trend.json)"
+    can_modify: [".claude/agents/**"]
+    forbids: []
+    needs_approval: [".claude/agents/shared/**"]
+    depends_on: [".claude/rules/agent-autonomy-ladder.md"]
+    rules:
+      - "Tocar agents/shared/ obliga a bumpear shared_utils_version en TODOS los agentes que lo usan (agents/README.md)."
+      - "Agente NUEVO: declara error_cost y autonomy_phase en frontmatter Y en el cuerpo (agent-autonomy-ladder.md §6.1)."
+      - "Ningún agente nace en fase 4; en un agente nuevo, sin fase declarada se asume 3 (sombra). La flota existente se anota por boy-scout, no se degrada — agent-autonomy-ladder.md §3."
+      - "Un agente sin memory.md está en fase 1: no se le da efecto."
+    source: .claude/agents/README.md · rules/agent-autonomy-ladder.md
+
+  - path: .claude/skills/
+    owns: "el know-how empaquetado (SKILL.md por skill)"
+    can_modify: [".claude/skills/**"]
+    forbids: []
+    needs_approval: []
+    depends_on: []
+    rules:
+      - "Toda SKILL.md lleva frontmatter YAML con description de triggers concretos (patrón ACTIVO skill-frontmatter-description)."
+      - "Cada skill necesita OWNER: los skills son código y se pudren sin dueño (governance.md §6, capa 2)."
+    source: .claude/patterns/catalog.yaml · rules/governance.md §6
+
+  - path: .claude/rules/
+    owns: "intención y routing; el detalle que no cabe en CLAUDE.md"
+    can_modify: [".claude/rules/**"]
+    forbids: []
+    needs_approval: []
+    depends_on: []
+    rules:
+      - "Toda rule abre con la cabecera '> **Cuándo aplicar:**' (patrón DÉBIL rule-header-cuando-aplicar)."
+      - "Las rules son ADVISORY: lo crítico-si-se-ignora vive en hooks o scripts gate, no en prosa (harness-gotchas.md)."
+    source: .claude/patterns/catalog.yaml · rules/harness-gotchas.md
+
+  - path: .claude/templates/report_kit/
+    owns: "el sistema canónico de informes multi-página (schema único + build + nav)"
+    can_modify: [".claude/templates/report_kit/**"]
+    forbids: ["_archive/2026-10-19/templates/speckit_dashboard/**"]
+    needs_approval: []
+    depends_on: [".claude/templates/html/base.html"]
+    rules:
+      - "El bloque /* SHARED:BEGIN/END */ debe ser IDÉNTICO byte a byte en las 5 plantillas (check_shared_block.py)."
+      - "La topnav se materializa SOLO con render_nav.py desde nav.json; PROHIBIDA a mano (report-kit.md §5)."
+      - "item.schema.json es el único schema de item: si falta un campo se propone ahí, no se improvisa en la página."
+      - "speckit_dashboard/ se archivó el 2026-10-19 (LI-12): no se recupera para informes nuevos ni se toca desde aquí."
+    source: rules/report-kit.md
+
+  - path: .claude/templates/
+    owns: "las plantillas HTML y de documento"
+    can_modify: [".claude/templates/**"]
+    forbids: []
+    needs_approval: []
+    depends_on: []
+    rules:
+      - "Ningún HTML referencia CDN/stylesheet/fonts externos: self-contained o no entra (patrón ACTIVO html-self-contained)."
+    source: .claude/patterns/catalog.yaml · rules/html-output.md
+
+  - path: .docs/plans/
+    owns: "los planes vivos y sus informes (report.json es la fuente; el HTML se regenera)"
+    can_modify: [".docs/plans/**"]
+    forbids: []
+    needs_approval: []
+    depends_on: [".claude/templates/report_kit/"]
+    rules:
+      - "Un plan con meta.closed_at está CONGELADO: no se reabre ni se edita sin limpiar closed_at conscientemente y anotar por qué."
+      - "Las decisiones viven en report.json y se fusionan por id (idempotente); regenerar NUNCA pisa decisiones."
+      - "El HTML del set es derivado: se revisa el JSON, no el HTML (report-kit.md, caveat de diffs)."
+    source: rules/report-kit.md · rules/plan-docs-structure.md
+
+  - path: .claude/patterns/diseno/
+    owns: "el canon de diseño DECLARADO: técnicas, perfiles y su doctrina (tipografía, movimiento, composición, textura, imagen, estructura, demos, direcciones de arte)"
+    can_modify: [".claude/patterns/diseno/**"]
+    forbids: [".claude/resources/referencias-diseno/**"]
+    needs_approval: []
+    depends_on: [".claude/resources/referencias-diseno/"]
+    rules:
+      - "Este cuerpo es DECLARADO, no medido: no invoca la regla de dominancia ≥85% y NUNCA bloquea. Lo que bloquea es scripts/gate_diseno.py y el humano (patterns/README.md §los tres cuerpos)."
+      - "Rita NO lee catalogo-diseno.yaml y hooks/pattern-check.sh no lo grepea. Si algún día hiciera falta que bloqueara, el sitio es catalog.yaml con su dominancia medida, no aquí."
+      - "Toda técnica cita ≥1 precedente que RESUELVE a resources/referencias-diseno/<fichero>:<línea>; el estado (patron ≥2 diseños distintos · anecdota 1 · regla por coste medido) lo comprueba scripts/verificar_precedentes.py, que ABORTA con exit 2 si no puede medir."
+      - "En perfiles.yaml la clave `rubrica` es de la mitad de AUDITORÍA; `dials`, `referencias`, `estructura` y `presupuesto` son de GENERACIÓN. Nadie edita la mitad del otro."
+      - "El presupuesto de 2.500-5.000 líneas es EXCLUSIVO del perfil web-cliente: filtrarlo a producto-panel rompe el molde de 10 ficheros y el origen único de tokens."
+    source: rules/motores-de-diseno.md Parte F · patterns/diseno/README.md
+
+  - path: .claude/resources/referencias-diseno/
+    owns: "el corpus de diseño vendorizado: EVIDENCIA, no doctrina (10 diseños propios de 2026 + el proceso que los produjo)"
+    can_modify: [".claude/resources/referencias-diseno/INDEX.json", ".claude/resources/referencias-diseno/MANIFEST.tsv", ".claude/resources/referencias-diseno/README.md", ".claude/resources/referencias-diseno/anti-patrones.yaml"]
+    forbids: [".claude/resources/referencias-diseno/bien/**", ".claude/resources/referencias-diseno/mal/**", ".claude/resources/referencias-diseno/proceso/**"]
+    needs_approval: []
+    depends_on: []
+    rules:
+      - "Los ficheros de diseño NO se editan: son evidencia fechada y con sha256 en MANIFEST.tsv. Corregir un defecto dentro de una referencia la convierte en otra cosa y rompe todas las citas file:línea que apuntan a ella."
+      - "Se AÑADE con procedencia (origen, fecha, sha256) y con su entrada en INDEX.json, incluidos sus `defectos_conocidos`."
+      - "Tiene techo de 12-15 entradas: meter una exige RETIRAR otra con su razón escrita. Sin tope, el corpus acaba como acaban los CLAUDE.md."
+      - "mal/attomo-digital.html está roto A PROPÓSITO: es el fixture de «contenido invisible si el JS no corre». Arreglarlo destruiría la única prueba real que tenemos de ese fallo."
+    source: resources/referencias-diseno/README.md · rules/motores-de-diseno.md Parte F
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PERSONALIZAR en proyectos derivados — ejemplo de scopes de producto:
+#
+#   - path: backend/apps/billing/
+#     owns: "facturación: modelos, cálculo de precios, integraciones de pago"
+#     can_modify: [backend/apps/billing/**]
+#     forbids: [backend/apps/*/migrations/**]      # migraciones ajenas: nunca desde aquí
+#     needs_approval: [backend/apps/billing/migrations/**]
+#     depends_on: [backend/apps/core/]
+#     rules:
+#       - "El precio no se calcula fuera de este módulo (≥2 precedentes: <file:line>, <file:line>)."
+#     source: docs/adr/0007-billing-boundary.md
+# ─────────────────────────────────────────────────────────────────────────────

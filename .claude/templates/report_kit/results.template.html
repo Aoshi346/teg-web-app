@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="es">
+<!--
+  report_kit/results.template.html — resultados de verificación (verdicts) del report-kit.
+  build.py inyecta report.json en `const DB = ...null;` y render_nav.py rellena la topnav.
+  Muestra SOLO los items con `verdict` (contrato rules/verdict-contract.md: doble evidencia
+  🔎 código / 👁 en vivo). Los sin verdict cuentan como "sin verificar" en la cabecera.
+  Self-contained: tokens de templates/html/base.html, sin CDN. Ver rules/report-kit.md.
+-->
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Resultados</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Crect%20width='100'%20height='100'%20rx='22'%20fill='%231b2a4a'/%3E%3Ctext%20x='50'%20y='70'%20font-size='56'%20font-family='system-ui,sans-serif'%20font-weight='700'%20fill='%23fff'%20text-anchor='middle'%3ER%3C/text%3E%3C/svg%3E">
+<style>
+  /* SHARED:BEGIN */
+  :root{
+    --ink:#1b1b1f;--muted:#6b6b76;--faint:#6c6c78;--paper:#f6f4ef;--card:#fff;--line:#e4e0d7;
+    --navy:#1b2a4a;--accent:#c2410c;--green:#15803d;--amber:#b45309;--blue:#1d4ed8;--red:#b42318;
+    --radius-sm:6px;--radius-md:10px;--radius:14px;--radius-pill:999px;
+    --shadow-modal:0 20px 60px rgba(27,27,31,.28);
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --s-backlog:#6b6b76;--s-doing:#b45309;--s-review:#1d4ed8;--s-done:#15803d;--s-blocked:#b42318;
+    --d-aprobar:#15803d;--d-modificar:#1d4ed8;--d-aplazar:#b45309;--d-descartar:#b42318;
+  }
+  *{box-sizing:border-box}
+  h1{font-size:clamp(24px,3.6vw,38px);margin:0 0 10px;letter-spacing:-.02em;color:var(--ink)}
+  h1 em{font-style:italic;color:var(--navy)}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600;margin:0 0 10px}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px}
+  .kpi b{display:block;font-size:28px;font-weight:700;letter-spacing:-.02em;color:var(--navy);line-height:1.15}
+  .kpi span{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+  .kpi.warn b{color:var(--red)}
+  .badge{display:inline-block;font-size:11px;font-weight:700;padding:3px 10px;border-radius:var(--radius-pill);color:#fff;text-transform:uppercase;letter-spacing:.04em}
+  .nodata{max-width:560px;margin:80px auto;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:28px 32px;text-align:center}
+  .nodata code{font-family:var(--mono);font-size:.9em;background:#efece4;color:var(--navy);padding:2px 6px;border-radius:6px}
+  .icon{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px}
+  .demo-banner{display:flex;align-items:center;gap:8px;background:#fdf3e3;border:1px solid #eed9b0;border-radius:var(--radius-sm);padding:8px 14px;margin:14px 0 0;font-size:12.5px;color:#78350f}
+  .demo-banner .icon{flex:none}
+  .demo-banner[hidden]{display:none}  /* [hidden] pierde ante .demo-banner{display:flex} — sin esto el banner de demo sale SIEMPRE */
+  .audience-note{display:flex;align-items:center;gap:8px;background:#eef1f5;border:1px solid #d7dee8;border-radius:var(--radius-sm);padding:8px 14px;margin:12px 0 0;font-size:12.5px;color:var(--navy)}
+  .audience-note .icon{flex:none}
+  .scroll-hint{display:none;font-size:11px;color:var(--faint);text-align:right;margin:0 0 6px}
+  @media(max-width:767px){.scroll-hint{display:block}}
+  /* nav responsive: la gestiona el bloque que inyecta render_nav.py (fuente única) */
+  /* SHARED:END */
+  html,body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55}
+  body{background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.55;}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 22px}
+
+  /* ===== HERO ===== */
+  header.hero{border-bottom:1px solid var(--line);padding:28px 0 20px}
+  .lead{font-size:13.5px;color:var(--muted);margin:0;font-family:var(--mono)}
+  .vbar{display:flex;height:12px;border-radius:6px;overflow:hidden;margin-top:14px;border:1px solid var(--line);background:var(--card)}
+  .vbar > i{display:block;height:100%}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;font-size:11.5px;color:var(--muted)}
+  .legend .dot{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px;vertical-align:middle}
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:14px}
+  .btn{font-family:var(--sans);font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--navy);background:var(--navy);color:#fff;padding:7px 13px;border-radius:10px}
+  .btn.ghost{background:var(--card);color:var(--navy)}
+  .btn.ghost:hover{background:#efece4}
+
+  /* ===== FILTROS ===== */
+  .filters{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:10px 14px;margin:16px 0}
+  .frow{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:5px 0}
+  .frow > .lbl{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);width:64px;flex:none;font-weight:600}
+  .chip{border:1px solid var(--line);background:var(--card);border-radius:var(--radius-pill);padding:4px 10px;font-size:12px;color:var(--ink);display:inline-flex;align-items:center;gap:6px;cursor:pointer;font-family:var(--sans)}
+  .chip:hover{border-color:var(--faint)}
+  .chip.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+  .chip .n{opacity:.65;font-size:10.5px}
+  .chip .sw{width:8px;height:8px;border-radius:50%}
+  .clearbtn{margin-left:auto;color:var(--muted);border-style:dashed}
+
+  /* ===== CARDS ===== */
+  .pghead{display:flex;align-items:baseline;gap:10px;margin:22px 0 10px}
+  .pghead h2{font-size:16px;margin:0;letter-spacing:-.01em;color:var(--navy)}
+  .pghead .slug{font-family:var(--mono);font-size:11px;color:var(--faint)}
+  .pghead .n{font-size:12px;color:var(--muted)}
+  .rcard{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 18px 16px;margin:0 0 12px}
+  .rhead{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:8px}
+  .prec{display:inline-flex;align-items:center;gap:7px}
+  .prec .ptrack{width:90px;height:9px;border-radius:var(--radius-sm);background:#efece4;overflow:hidden;display:inline-block}
+  .prec .ptrack i{display:block;height:100%;border-radius:var(--radius-sm)}
+  .prec b{font-size:12px}
+  .tag{border-radius:6px;padding:2px 7px;font-size:10.5px;font-weight:700;letter-spacing:.02em}
+  .tag.epic{color:#fff}
+  .tag.pg{background:#efece4;color:var(--navy)}
+  .tag.sev-P0{background:#f7dcd6;color:#8c1c13}
+  .tag.sev-P1{background:#f3e5cf;color:#7c4a03}
+  .tag.sev-P2{background:#f7f5f0;color:var(--muted)}
+  .tag.sev-P3{background:#f1efe9;color:var(--faint)}
+  .tid{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--faint)}
+  .rtitle{font-size:15.5px;margin:0 0 6px;letter-spacing:-.01em}
+  .goal{background:#f5f8f3;border:1px solid #d6dcc8;border-left:4px solid var(--green);border-radius:var(--radius-md);padding:7px 12px;font-size:12.5px;margin:0 0 8px}
+  .goal .glab{font-weight:700;color:var(--green)}
+  .why{border:1px solid var(--line);border-radius:var(--radius-md);background:#fbfaf7;padding:8px 12px;margin:0 0 8px}
+  .icon.inl{vertical-align:-2px;margin-right:3px}
+  .wline{padding:2px 0;font-size:12.5px}
+  .w-code{color:var(--navy)}
+  .w-live{color:var(--blue)}
+  .w-gap{color:var(--amber);font-weight:600}
+  .w-inst{color:var(--muted)}
+  .howto{background:#f8efe4;border:1px solid #ecd9bd;border-radius:var(--radius-md);padding:7px 12px;font-size:12.5px;margin:0 0 8px}
+  .evrow{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;margin-top:10px}
+  .ev{margin:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fbfaf7;display:flex;flex-direction:column}
+  .ev figcaption{display:flex;align-items:center;gap:6px;padding:5px 8px;border-bottom:1px solid var(--line);font-size:10.5px}
+  .ev figcaption small{color:var(--faint);font-weight:400;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .evlab{font-family:var(--mono);font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:1px 6px;border-radius:var(--radius-sm);background:#e9e6de;color:var(--muted)}
+  .evlab.lab-antes{background:#e9e6de;color:var(--muted)}
+  .evlab.lab-actual{background:var(--navy);color:#fff}
+  .evlab.lab-despues{background:var(--green);color:#fff}
+  .ev img{width:100%;max-height:200px;object-fit:cover;display:block;cursor:zoom-in;background:#efece4}
+  .evlink{display:block;padding:12px 10px;font-size:12px;word-break:break-all;color:var(--blue)}
+  .evdata{margin:0;padding:10px;font-family:var(--mono);font-size:11px;white-space:pre-wrap;word-break:break-word;color:var(--navy)}
+  .ph{color:var(--faint);font-size:11.5px;text-align:center;padding:20px 12px;line-height:1.5}
+  .ph code{font-family:var(--mono);font-size:10px}
+  .empty{color:var(--faint);font-size:13px;padding:32px;text-align:center;background:var(--card);border:1px dashed var(--line);border-radius:var(--radius);margin:16px 0}
+
+  /* ===== TIMELINE MULTI-RONDA ===== */
+  section.rounds{margin:28px 0 0;padding-top:18px;border-top:1px solid var(--line)}
+  section.rounds h2{font-size:16px;margin:0 0 10px;color:var(--navy);letter-spacing:-.01em}
+  table.tl{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:13px}
+  .tl th,.tl td{padding:8px 12px;border-bottom:1px solid var(--line);text-align:left}
+  .tl th{background:#fbfaf7;font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+  .tl td.num{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+  .tl tr:last-child td{border-bottom:none}
+  .tl tr.cur td{background:#f4f7f2;font-weight:600}
+  .tl .rbar{display:flex;height:10px;border-radius:var(--radius-sm);overflow:hidden;background:#efece4;min-width:120px}
+  .tl .rbar i{display:block;height:100%}
+
+  /* ===== LIGHTBOX / TOAST ===== */
+  #lightbox{position:fixed;inset:0;background:rgba(27,27,31,.85);display:flex;align-items:center;justify-content:center;z-index:90;padding:24px;cursor:zoom-out;opacity:0;pointer-events:none;transition:opacity .14s}
+  #lightbox.show{opacity:1;pointer-events:auto}
+  #lightbox img{max-width:96%;max-height:92vh;border-radius:8px;box-shadow:var(--shadow-modal)}
+  #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(16px);background:var(--ink);color:#fff;padding:10px 17px;border-radius:10px;opacity:0;transition:.25s;z-index:95;font-size:13px;pointer-events:none}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  footer{padding:22px 0 56px;color:var(--faint);font-size:12px}
+</style>
+</head>
+<body>
+<!-- ICONS:BEGIN -->
+<svg style="display:none" aria-hidden="true">
+  <symbol id="ic-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></symbol>
+  <symbol id="ic-download" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></symbol>
+  <symbol id="ic-upload" viewBox="0 0 24 24"><path d="M12 21V9"/><path d="m7 14 5-5 5 5"/><path d="M5 21h14"/></symbol>
+  <symbol id="ic-refresh" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></symbol>
+  <symbol id="ic-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".6" fill="currentColor"/></symbol>
+  <symbol id="ic-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><circle cx="12" cy="8" r=".6" fill="currentColor"/></symbol>
+  <symbol id="ic-tool" viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 1 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.1 2.1-2-2z"/></symbol><symbol id="ic-search" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10.5 10.5 L14 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol><symbol id="ic-eye" viewBox="0 0 16 16"><path d="M1.5 8 C4 4.2 12 4.2 14.5 8 C12 11.8 4 11.8 1.5 8 Z" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="8" cy="8" r="2" fill="currentColor"/></symbol><symbol id="ic-arrow" viewBox="0 0 16 16"><path d="M2.5 8 H12 M8.6 4 L13 8 L8.6 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol><symbol id="ic-clip" viewBox="0 0 16 16"><rect x="4" y="2.6" width="8" height="11" rx="1.4" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6 2.6 V1.8 H10 V2.6" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6 6.4 H10 M6 9 H10 M6 11.4 H8.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></symbol>
+</svg>
+<!-- ICONS:END -->
+<!-- NAV:BEGIN -->
+<!-- NAV:END -->
+
+<div class="wrap"><div class="demo-banner" id="demoBanner" hidden><svg class="icon"><use href="#ic-info"></use></svg><span><b>Datos de demostración.</b> Este set usa un fixture de ejemplo, no un proyecto real.</span></div></div>
+
+<div id="nodata" class="nodata" hidden>
+  <p class="eyebrow">Report-kit · Resultados</p>
+  <p><b>Sin datos inyectados.</b></p>
+  <p>Esta es la plantilla cruda. Genera el informe con<br><code>python3 build.py &lt;plan-dir&gt;</code><br>para inyectar <code>report.json</code> en esta página.</p>
+</div>
+
+<div id="app">
+  <header class="hero"><div class="wrap">
+    <p class="eyebrow">Report-kit · Resultados de verificación</p>
+    <h1 id="hTitle">Resultados</h1>
+    <p class="lead" id="hSub"></p>
+    <p class="audience-note"><svg class="icon"><use href="#ic-tool"></use></svg> Página técnica — pensada para tu equipo de desarrollo. Puedes saltártela tranquilamente.</p>
+    <div class="kpis" id="kpis"></div>
+    <div class="vbar" id="vbar"></div>
+    <div class="legend" id="legend"></div>
+    <div class="toolbar">
+      <button class="btn" onclick="copyPending(this)"><svg class="icon"><use href="#ic-copy"></use></svg> copiar pendientes (md)</button>
+    </div>
+  </div></header>
+
+  <div class="wrap">
+    <div class="filters" id="filters"></div>
+    <div id="cards"></div>
+    <section class="rounds" id="rounds" style="display:none">
+      <h2>Evolución por ronda</h2>
+      <div style="overflow-x:auto"><table class="tl" id="roundsTable"></table></div>
+      <p style="color:var(--muted);font-size:12px;margin:8px 0 0">Cada fila agrega los verdicts registrados en <code style="font-family:var(--mono)">history[]</code>; la última fila es el estado actual.</p>
+    </section>
+    <footer>Contrato de veredicto: doble evidencia — la línea 🔎 cita código (file:line) y la línea 👁 el sitio en vivo (DOM/screenshot). Un "Hecho" exige ambas. Ver rules/verdict-contract.md.</footer>
+  </div>
+</div>
+
+<div id="lightbox" onclick="closeLight()"><img alt="evidencia ampliada"></div>
+<div id="toast"></div>
+
+<script>
+const DB = /*__DATA__*/null;
+(function(){const m=DB&&DB.meta;if(m&&m.project){const t=`${m.project} · ${m.plan_id||""} · ronda ${m.round||1} · ${m.generated||""}`.toUpperCase();document.querySelectorAll(".eyebrow").forEach(el=>el.textContent=t);}})();
+
+/* ---------- constantes ---------- */
+const VORDER=["done","partial","notdone","blocked","review"];
+const VMAP={done:["Hecho","#15803d"],partial:["Parcial","#b45309"],notdone:["No hecho","#b42318"],blocked:["Bloqueado","#6b6b76"],review:["A revisar","#1d4ed8"]};
+const CONF2PCT={alta:95,media:80,baja:50};
+
+const META=DB?(DB.meta||{}):{};
+const EPICS=META.epics||{};
+let PAGES=[];
+if(DB){
+  PAGES=(META.pages||[]).map(p=>({code:p.code,name:p.name||p.code,slug:p.slug||""}));
+  const known=new Set(PAGES.map(p=>p.code));
+  DB.items.forEach(it=>{const c=it.page||"—";if(!known.has(c)){known.add(c);PAGES.push({code:c,name:c==="—"?"Sin página":c,slug:""});}});
+}
+const PAGEMAP={};PAGES.forEach(p=>PAGEMAP[p.code]=p);
+const F={verdict:new Set(),page:new Set(),epic:new Set()};
+
+/* ---------- helpers ---------- */
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]));}
+function verified(){return DB.items.filter(it=>it.verdict&&VMAP[it.verdict]);}
+function unverified(){return DB.items.filter(it=>!(it.verdict&&VMAP[it.verdict]));}
+function precOf(it){
+  if(it.precision_pct!=null)return it.precision_pct;
+  if(it.confidence&&CONF2PCT[it.confidence]!=null)return CONF2PCT[it.confidence];
+  return null;
+}
+function pcol(p){return p>=90?"#15803d":p>=70?"#b45309":"#b42318";}
+function pageName(c){const p=PAGEMAP[c||"—"];return p?p.name:(c||"—");}
+function epicColor(k){return (EPICS[k]&&EPICS[k].color)||"#6b6b76";}
+function epicTag(k){return k?`<span class="tag epic" style="background:${epicColor(k)}">${esc(k)}</span>`:"";}
+
+/* ---------- filtros ---------- */
+function matches(it){
+  if(F.verdict.size&&!F.verdict.has(it.verdict))return false;
+  if(F.page.size&&!F.page.has(it.page||"—"))return false;
+  if(F.epic.size&&!F.epic.has(it.epic||"_"))return false;
+  return true;
+}
+function visibleV(){return verified().filter(matches);}
+function chip(active,label,n,onclick,sw){return `<button class="chip ${active?'on':''}" onclick="${onclick}">`+(sw?`<span class="sw" style="background:${sw}"></span>`:"")+`${label}${n!=null?` <span class="n">${n}</span>`:""}</button>`;}
+function renderFilters(){
+  const V=verified();let h="";
+  h+=`<div class="frow"><span class="lbl">Veredicto</span>`+
+    VORDER.map(v=>chip(F.verdict.has(v),VMAP[v][0],V.filter(i=>i.verdict===v).length,`tog('verdict','${v}')`,VMAP[v][1])).join("")+
+    `<button class="chip clearbtn" onclick="clearF()">✕ limpiar</button></div>`;
+  h+=`<div class="frow"><span class="lbl">Página</span>`+
+    PAGES.filter(p=>V.some(i=>(i.page||"—")===p.code))
+      .map(p=>chip(F.page.has(p.code),esc(p.code),V.filter(i=>(i.page||"—")===p.code).length,`tog('page','${p.code}')`)).join("")+`</div>`;
+  if(Object.keys(EPICS).length)
+    h+=`<div class="frow"><span class="lbl">Épica</span>`+
+      Object.keys(EPICS).filter(k=>V.some(i=>i.epic===k))
+        .map(k=>chip(F.epic.has(k),`${esc(k)} · ${esc(EPICS[k].name||k)}`,V.filter(i=>i.epic===k).length,`tog('epic','${k}')`,epicColor(k))).join("")+`</div>`;
+  document.getElementById("filters").innerHTML=h;
+}
+function tog(d,v){const s=F[d];s.has(v)?s.delete(v):s.add(v);renderAll();}
+function clearF(){Object.values(F).forEach(s=>s.clear());renderAll();}
+
+/* ---------- cabecera / KPIs ---------- */
+function renderKPIs(){
+  const V=verified(),U=unverified().length,tot=V.length||1;
+  const c={};VORDER.forEach(v=>c[v]=V.filter(i=>i.verdict===v).length);
+  const precs=V.map(precOf).filter(p=>p!=null);
+  const avg=precs.length?Math.round(precs.reduce((a,b)=>a+b,0)/precs.length):null;
+  const pctDone=Math.round(c.done/tot*100);
+  document.getElementById("kpis").innerHTML=
+    `<div class="kpi"><b>${V.length}</b><span>verificados</span></div>`+
+    VORDER.map(v=>`<div class="kpi"><b style="color:${VMAP[v][1]}">${c[v]}</b><span>${VMAP[v][0]}</span></div>`).join("")+
+    `<div class="kpi"><b style="color:${avg!=null?pcol(avg):'var(--faint)'}">${avg!=null?avg+"%":"—"}</b><span>precisión media</span></div>`+
+    `<div class="kpi"><b style="color:var(--green)">${pctDone}%</b><span>done</span></div>`+
+    `<div class="kpi"><b style="color:var(--faint)">${U}</b><span>sin verificar</span></div>`;
+  document.getElementById("vbar").innerHTML=VORDER.map(v=>{
+    const pct=c[v]/tot*100;
+    return pct>0?`<i title="${VMAP[v][0]}: ${c[v]}" style="width:${pct}%;background:${VMAP[v][1]}"></i>`:"";}).join("");
+  document.getElementById("legend").innerHTML=VORDER.map(v=>`<span><span class="dot" style="background:${VMAP[v][1]}"></span>${VMAP[v][0]} (${c[v]})</span>`).join("");
+}
+
+/* ---------- doble evidencia (why) ---------- */
+const WMAP=[["🔎","w-code","ic-search"],["👁","w-live","ic-eye"],["➡","w-gap","ic-arrow"],["📋","w-inst","ic-clip"]];
+function wline(t){
+  let cls="wline";for(const[emo,c] of WMAP){if(t.startsWith(emo)){cls+=" "+c;break;}}
+  let h=esc(t.replace(/\uFE0F/gu,""));
+  for(const[emo,,ic] of WMAP){h=h.split(emo).join(`<svg class="icon inl" aria-hidden="true"><use href="#${ic}"/></svg>`);}
+  return `<div class="${cls}">${h}</div>`;
+}
+function whyHTML(why){
+  if(!why)return"";
+  return `<div class="why">`+why.split(/\n+/).map(l=>{const t=l.trim();return t?wline(t):"";}).join("")+`</div>`;
+}
+
+/* ---------- galería de evidencia ---------- */
+function labClass(l){const s=String(l||"").toLowerCase();
+  if(s.startsWith("antes"))return"lab-antes";
+  if(s.startsWith("actual"))return"lab-actual";
+  if(s.startsWith("despu"))return"lab-despues";
+  return"";}
+function evFig(ev){
+  const cap=`<figcaption><span class="evlab ${labClass(ev.label)}">${esc(ev.label||ev.kind)}</span>`+
+    (ev.caption?`<small>${esc(ev.caption)}</small>`:"")+`</figcaption>`;
+  if(ev.kind==="img")
+    return `<figure class="ev">${cap}<img src="${esc(ev.src)}" alt="${esc(ev.label||'evidencia')}" loading="lazy" onclick="openLight(this.src)" onerror="evFail(this)"></figure>`;
+  if(ev.kind==="link")
+    return `<figure class="ev">${cap}<a class="evlink" href="${esc(ev.src)}" target="_blank" rel="noopener">${esc(ev.src)}</a></figure>`;
+  return `<figure class="ev">${cap}<pre class="evdata">${esc(ev.src)}</pre></figure>`;
+}
+function evFail(img){
+  const src=(img.getAttribute("src")||"").slice(0,90);
+  img.outerHTML=`<div class="ph">imagen no encontrada<br><code>${esc(src)}</code></div>`;
+}
+function gallery(it){
+  if(!(it.evidence&&it.evidence.length))return"";
+  return `<div class="evrow">${it.evidence.map(evFig).join("")}</div>`;
+}
+
+/* ---------- cards ---------- */
+function cardHTML(it){
+  const m=VMAP[it.verdict],p=precOf(it);
+  return `<article class="rcard">
+    <div class="rhead">
+      <span class="badge" style="background:${m[1]}">${m[0]}</span>
+      ${p!=null?`<span class="prec" title="precisión/confianza${it.confidence?' ('+esc(it.confidence)+')':''}"><span class="ptrack"><i style="width:${p}%;background:${pcol(p)}"></i></span><b style="color:${pcol(p)}">${p}%</b></span>`:""}
+      ${epicTag(it.epic)}
+      <span class="tag pg">${esc(pageName(it.page))}</span>
+      ${it.severity?`<span class="tag sev-${it.severity}">${it.severity}</span>`:""}
+      <span class="tid">${esc(it.id)}</span>
+    </div>
+    <h3 class="rtitle">${esc(it.title)}</h3>
+    ${it.goal?`<p class="goal"><span class="glab"><svg class="icon"><use href="#ic-target"></use></svg> Criterio:</span> ${esc(it.goal)}</p>`:""}
+    ${whyHTML(it.why)}
+    ${it.verdict!=="done"&&it.howto?`<div class="howto"><b>Qué falta:</b> ${esc(it.howto)}</div>`:""}
+    ${gallery(it)}
+  </article>`;
+}
+function renderCards(){
+  const vis=visibleV(),box=document.getElementById("cards");
+  if(!vis.length){
+    box.innerHTML=`<div class="empty">${verified().length?"Sin items para estos filtros.":"Aún no hay items con veredicto — corre la verificación (skill feedback-audit, paso 4) y regenera el informe."}</div>`;
+    return;
+  }
+  let h="";
+  PAGES.forEach(pg=>{
+    const list=vis.filter(i=>(i.page||"—")===pg.code);if(!list.length)return;
+    h+=`<div class="pghead"><h2>${esc(pg.name)}</h2>${pg.slug?`<span class="slug">/${esc(pg.slug)}</span>`:""}<span class="n">${list.length} item${list.length>1?"s":""}</span></div>`;
+    h+=list.map(cardHTML).join("");
+  });
+  box.innerHTML=h;
+}
+
+/* ---------- timeline multi-ronda ---------- */
+function renderTimeline(){
+  const V=verified(),rounds={};
+  V.forEach(it=>(it.history||[]).forEach(h=>{
+    if(h.round==null)return;
+    const r=rounds[h.round]=rounds[h.round]||{date:"",counts:{}};
+    if(h.verdict&&VMAP[h.verdict])r.counts[h.verdict]=(r.counts[h.verdict]||0)+1;
+    if(h.date&&h.date>r.date)r.date=h.date;
+  }));
+  const keys=Object.keys(rounds).map(Number).sort((a,b)=>a-b);
+  const sec=document.getElementById("rounds");
+  if(!keys.length){sec.style.display="none";return;}
+  sec.style.display="block";
+  const rbar=c=>{const tot=VORDER.reduce((a,v)=>a+(c[v]||0),0)||1;
+    return `<span class="rbar">${VORDER.map(v=>{const n=c[v]||0;
+      return n?`<i style="width:${n/tot*100}%;background:${VMAP[v][1]}" title="${VMAP[v][0]}: ${n}"></i>`:"";}).join("")}</span>`;};
+  let h=`<tr><th>Ronda</th><th>Fecha</th>${VORDER.map(v=>`<th style="text-align:right">${VMAP[v][0]}</th>`).join("")}<th>Distribución</th></tr>`;
+  keys.forEach(k=>{
+    const r=rounds[k];
+    h+=`<tr><td><b>R${k}</b></td><td style="font-family:var(--mono);font-size:11.5px;color:var(--muted)">${esc(r.date||"—")}</td>`+
+      VORDER.map(v=>`<td class="num" style="color:${VMAP[v][1]}">${r.counts[v]||0}</td>`).join("")+
+      `<td>${rbar(r.counts)}</td></tr>`;
+  });
+  const cur={};V.forEach(it=>{cur[it.verdict]=(cur[it.verdict]||0)+1;});
+  h+=`<tr class="cur"><td>Actual${META.round?` (R${META.round})`:""}</td><td style="font-family:var(--mono);font-size:11.5px;color:var(--muted)">${esc(META.generated||"—")}</td>`+
+    VORDER.map(v=>`<td class="num" style="color:${VMAP[v][1]}">${cur[v]||0}</td>`).join("")+
+    `<td>${rbar(cur)}</td></tr>`;
+  document.getElementById("roundsTable").innerHTML=h;
+}
+
+/* ---------- copiar pendientes ---------- */
+function copyPending(btn){
+  const pend=verified().filter(it=>it.verdict!=="done");
+  if(!pend.length){toast("No hay pendientes: todo está en done");return;}
+  let md=`# ${META.title||"Plan"} — pendientes de verificación (${pend.length} · ${new Date().toISOString().slice(0,10)})\n\n`;
+  PAGES.forEach(pg=>{
+    const list=pend.filter(i=>(i.page||"—")===pg.code);if(!list.length)return;
+    md+=`## ${pg.name}\n`;
+    list.forEach(it=>{
+      const box=it.verdict==="blocked"?"!":" ";
+      md+=`- [${box}] \`${it.id}\` (${it.verdict}${precOf(it)!=null?" "+precOf(it)+"%":""}) ${it.title}`;
+      if(it.howto)md+=`\n  - qué falta: ${it.howto}`;
+      md+=`\n`;
+    });
+    md+=`\n`;
+  });
+  copy(md,btn);
+}
+function copy(txt,btn){
+  (navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject())
+    .then(()=>toast("Pendientes copiados (markdown)"))
+    .catch(()=>{const t=document.createElement("textarea");t.value=txt;document.body.appendChild(t);t.select();document.execCommand("copy");t.remove();toast("Pendientes copiados (markdown)");});
+}
+
+/* ---------- lightbox / toast ---------- */
+function openLight(src){const l=document.getElementById("lightbox");l.querySelector("img").src=src;l.classList.add("show");}
+function closeLight(){document.getElementById("lightbox").classList.remove("show");}
+let toastT;
+function toast(m){const e=document.getElementById("toast");e.textContent=m;e.classList.add("show");clearTimeout(toastT);toastT=setTimeout(()=>e.classList.remove("show"),1700);}
+
+/* ---------- init ---------- */
+function renderAll(){renderKPIs();renderFilters();renderCards();renderTimeline();}
+function init(){
+  document.title="Resultados — "+(META.title||META.plan_id||"report-kit");
+  document.getElementById("hTitle").textContent=(META.title||"Resultados");
+  document.getElementById("hSub").textContent=
+    [META.project,META.plan_id,"ronda "+(META.round||1),META.generated?("generado "+META.generated):null,META.site||null]
+    .filter(Boolean).join(" · ");
+  if(META.demo===true||(META.project==="tech-lead-template"&&META.plan_id==="report-kit-demo"))document.getElementById("demoBanner").hidden=false;
+  renderAll();
+}
+if(!DB){
+  document.getElementById("app").style.display="none";
+  document.getElementById("nodata").hidden=false;
+}else{
+  init();
+}
+</script>
+</body>
+</html>

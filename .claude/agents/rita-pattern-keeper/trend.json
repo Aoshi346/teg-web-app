@@ -1,0 +1,8 @@
+{
+  "agent": "rita-pattern-keeper",
+  "app": "teg-web-app",
+  "mode": "sombra",
+  "last_updated": "2026-11-12",
+  "metrics_note": "address_rate simulado por ronda de sombra = hallazgos que el equipo habría aplicado / emitidos; por PATRÓN, con retirada automática del patrón (nunca global). Éxito = volumen DECRECIENTE.",
+  "rounds": []
+}

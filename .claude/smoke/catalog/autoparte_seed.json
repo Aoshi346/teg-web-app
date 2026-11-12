@@ -1,0 +1,467 @@
+{
+ "catalog": "Semilla de elvion-autoparte-demo (apps/catalog/demo_data.py, convertida el 2026-10-31; datos de EJEMPLO, referencias inventadas)",
+ "references_required": true,
+ "families": [
+  {
+   "id": "combustible",
+   "name": "Sistema de combustible",
+   "parent": null,
+   "decisive_attributes": [
+    "engine"
+   ]
+  },
+  {
+   "id": "bombas",
+   "name": "Bombas de gasolina",
+   "parent": "combustible",
+   "decisive_attributes": [
+    "engine"
+   ]
+  },
+  {
+   "id": "iluminacion",
+   "name": "Iluminación",
+   "parent": null,
+   "decisive_attributes": [
+    "side"
+   ]
+  },
+  {
+   "id": "suspension",
+   "name": "Suspensión",
+   "parent": null,
+   "decisive_attributes": [
+    "side",
+    "position"
+   ]
+  },
+  {
+   "id": "transmision",
+   "name": "Transmisión y embrague",
+   "parent": null,
+   "decisive_attributes": [
+    "engine"
+   ]
+  },
+  {
+   "id": "direccion",
+   "name": "Dirección",
+   "parent": null,
+   "decisive_attributes": [
+    "side"
+   ]
+  },
+  {
+   "id": "frenos",
+   "name": "Sistema de frenos",
+   "parent": null,
+   "decisive_attributes": [
+    "side",
+    "position"
+   ]
+  },
+  {
+   "id": "motor",
+   "name": "Motor",
+   "parent": null,
+   "decisive_attributes": [
+    "engine"
+   ]
+  },
+  {
+   "id": "refrigeracion",
+   "name": "Refrigeración",
+   "parent": null,
+   "decisive_attributes": [
+    "engine"
+   ]
+  }
+ ],
+ "products": [
+  {
+   "id": "bomba-gasolina-aveo",
+   "name": "Bomba de gasolina Chevrolet Aveo 1.6",
+   "family": "bombas",
+   "kind": "SIMPLE",
+   "attributes": {
+    "engine": "1.6"
+   },
+   "references": [
+    {
+     "kind": "oem",
+     "value": "96-335250"
+    },
+    {
+     "kind": "mfr_ref",
+     "value": "FE0521"
+    }
+   ],
+   "offer": {
+    "price": 62.0,
+    "currency": "USD",
+    "stock": null,
+    "available": true
+   },
+   "is_active": true,
+   "retired_at": null,
+   "cross_sell_ids": [],
+   "upsell_ids": [],
+   "grouped_products": []
+  },
+  {
+   "id": "bombin-croche-aveo",
+   "name": "Cilindro auxiliar de embrague Chevrolet Aveo",
+   "family": "transmision",
+   "kind": "SIMPLE",
+   "attributes": {},
+   "references": [
+    {
+     "kind": "oem",
+     "value": "96-31 4498"
+    }
+   ],
+   "offer": {
+    "price": 28.5,
+    "currency": "USD",
+    "stock": null,
+    "available": true
+   },
+   "is_active": true,
+   "retired_at": null,
+   "cross_sell_ids": [],
+   "upsell_ids": [],
+   "grouped_products": []
+  },
+  {
+   "id": "kit-croche-aveo",
+   "name": "Kit de embrague Chevrolet Aveo 1.6",
+   "family": "transmision",
+   "kind": "SIMPLE",
+   "attributes": {
+    "engine": "1.6"
+   },
+   "references": [
+    {
+     "kind": "oem",
+     "value": "96-566868"
+    }
+   ],
+   "offer": {
+    "price": 115.0,
+    "currency": "USD",
+    "stock": null,
+    "available": true
+   },
+   "is_active": true,
+   "retired_at": null,
+   "cross_sell_ids": [],
+   "upsell_ids": [],
+   "grouped_products": []
+  },
+  {
+   "id": "faro-corolla-izq",
+   "name": "Faro delantero izquierdo Toyota Corolla",
+   "family": "iluminacion",
+   "kind": "SIMPLE",
+   "attributes": {
+    "side": "left",
+    "position": "delantera"
+   },
+   "references": [
+    {
+     "kind": "oem",
+     "value": "81170-02150"
+    }
+   ],
+   "offer": {
+    "price": 78.0,
+    "currency": "USD",
+    "stock": null,
+    "available": false
+   },
+   "is_active": true,
+   "retired_at": null,
+   "cross_sell_ids": [],
+   "upsell_ids": [],
+   "grouped_products": []
+  },
+  {
+   "id": "amortiguador-spark-del",
+   "name": "Amortiguador delantero Chevrolet Spark",
+   "family": "suspension",
+   "kind": "SIMPLE",
+   "attributes": {
+    "position": "delantera"
+   },
+   "references": [
+    {
+     "kind": "oem",
+     "value": "96-535168"
+    }
+   ],
+   "offer": {
+    "price": 41.0,
+    "currency": "USD",
+    "stock": null,
+    "available": true
+   },
+   "is_active": true,
+   "retired_at": null,
+   "cross_sell_ids": [],
+   "upsell_ids": [],
+   "grouped_products": []
+  },
+  {
+   "id": "tripoide-fiesta",
+   "name": "Junta homocinética Ford Fiesta",
+   "family": "transmision",
+   "kind": "SIMPLE",
+   "attributes": {},
+   "references": [
+    {
+     "kind": "oem",
+     "value": "2S6W-3B437-AA"
+    }
+   ],
+   "offer": {
+    "price": 54.0,
+    "currency": "USD",
+    "stock": null,
+    "available": true
+   },
+   "is_active": true,
+   "retired_at": null,
+   "cross_sell_ids": [],
+   "upsell_ids": [],
+   "grouped_products": []
+  },
+  {
+   "id": "munon-aveo",
+   "name": "Muñón delantero derecho Chevrolet Aveo",
+   "family": "suspension",
+   "kind": "SIMPLE",
+   "attributes": {
+    "side": "right"
+   },
+   "references": [
+    {
+     "kind": "oem",
+     "value": "96-535219"
+    }
+   ],
+   "offer": null,
+   "is_active": true,
+   "retired_at": null,
+   "cross_sell_ids": [],
+   "upsell_ids": [],
+   "grouped_products": []
+  },
+  {
+   "id": "meseta-optra-der",
+   "name": "Meseta delantera derecha Chevrolet Optra",
+   "family": "suspension",
+   "kind": "SIMPLE",
+   "attributes": {
+    "side": "right"
+   },
+   "references": [
+    {
+     "kind": "oem",
+     "value": "96-415156"
+    }
+   ],
+   "offer": {
+    "price": 47.5,
+    "currency": "USD",
+    "stock": null,
+    "available": true
+   },
+   "is_active": true,
+   "retired_at": null,
+   "cross_sell_ids": [],
+   "upsell_ids": [],
+   "grouped_products": []
+  },
+  {
+   "id": "cajetin-aveo",
+   "name": "Cajetín de dirección Chevrolet Aveo",
+   "family": "direccion",
+   "kind": "SIMPLE",
+   "attributes": {},
+   "references": [
+    {
+     "kind": "oem",
+     "value": "96-535216"
+    }
+   ],
+   "offer": {
+    "price": 185.0,
+    "currency": "USD",
+    "stock": null,
+    "available": false
+   },
+   "is_active": true,
+   "retired_at": null,
+   "cross_sell_ids": [],
+   "upsell_ids": [],
+   "grouped_products": []
+  },
+  {
+   "id": "pastillas-corolla-del",
+   "name": "Pastillas de freno delanteras Toyota Corolla",
+   "family": "frenos",
+   "kind": "SIMPLE",
+   "attributes": {
+    "position": "delantera"
+   },
+   "references": [
+    {
+     "kind": "oem",
+     "value": "04465-02220"
+    },
+    {
+     "kind": "gtin",
+     "value": "7891234567890"
+    }
+   ],
+   "offer": {
+    "price": 34.0,
+    "currency": "USD",
+    "stock": null,
+    "available": true
+   },
+   "is_active": true,
+   "retired_at": null,
+   "cross_sell_ids": [],
+   "upsell_ids": [],
+   "grouped_products": []
+  },
+  {
+   "id": "correa-tiempo-aveo",
+   "name": "Correa de tiempo Chevrolet Aveo 1.6",
+   "family": "motor",
+   "kind": "SIMPLE",
+   "attributes": {
+    "engine": "1.6,1.8"
+   },
+   "references": [
+    {
+     "kind": "oem",
+     "value": "96-350526"
+    }
+   ],
+   "offer": {
+    "price": 19.9,
+    "currency": "USD",
+    "stock": null,
+    "available": true
+   },
+   "is_active": true,
+   "retired_at": null,
+   "cross_sell_ids": [],
+   "upsell_ids": [],
+   "grouped_products": []
+  },
+  {
+   "id": "bomba-agua-aveo",
+   "name": "Bomba de agua Chevrolet Aveo 1.6",
+   "family": "refrigeracion",
+   "kind": "SIMPLE",
+   "attributes": {
+    "engine": "1.6"
+   },
+   "references": [
+    {
+     "kind": "oem",
+     "value": "96-352650"
+    }
+   ],
+   "offer": {
+    "price": 36.0,
+    "currency": "USD",
+    "stock": null,
+    "available": true
+   },
+   "is_active": true,
+   "retired_at": null,
+   "cross_sell_ids": [],
+   "upsell_ids": [],
+   "grouped_products": []
+  },
+  {
+   "id": "rotula-aveo",
+   "name": "Rótula inferior Chevrolet Aveo",
+   "family": "suspension",
+   "kind": "SIMPLE",
+   "attributes": {},
+   "references": [
+    {
+     "kind": "oem",
+     "value": "96-535087"
+    }
+   ],
+   "offer": {
+    "price": 16.5,
+    "currency": "USD",
+    "stock": null,
+    "available": true
+   },
+   "is_active": true,
+   "retired_at": null,
+   "cross_sell_ids": [],
+   "upsell_ids": [],
+   "grouped_products": []
+  },
+  {
+   "id": "filtro-aceite-corolla",
+   "name": "Filtro de aceite Toyota Corolla",
+   "family": "motor",
+   "kind": "SIMPLE",
+   "attributes": {},
+   "references": [
+    {
+     "kind": "oem",
+     "value": "90915-YZZD2"
+    }
+   ],
+   "offer": {
+    "price": 7.2,
+    "currency": "USD",
+    "stock": null,
+    "available": true
+   },
+   "is_active": true,
+   "retired_at": null,
+   "cross_sell_ids": [],
+   "upsell_ids": [],
+   "grouped_products": []
+  },
+  {
+   "id": "radiador-optra",
+   "name": "Radiador Chevrolet Optra 1.8",
+   "family": "refrigeracion",
+   "kind": "SIMPLE",
+   "attributes": {
+    "engine": "1.8"
+   },
+   "references": [
+    {
+     "kind": "oem",
+     "value": "96-553378"
+    }
+   ],
+   "offer": {
+    "price": 98.0,
+    "currency": "USD",
+    "stock": null,
+    "available": false
+   },
+   "is_active": true,
+   "retired_at": null,
+   "cross_sell_ids": [],
+   "upsell_ids": [],
+   "grouped_products": []
+  }
+ ],
+ "policies": []
+}

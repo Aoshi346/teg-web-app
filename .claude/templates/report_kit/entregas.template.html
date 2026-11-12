@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="es">
+<!--
+  report_kit/fuentes.template.html — los informes de investigación que hay DETRÁS de los items.
+  build.py escanea <plan>/sources/*.md, calcula meta.sources (título, tamaño, épicas, nº de items)
+  y lo inyecta aquí. La página solo se genera si el plan tiene carpeta sources/ con .md dentro:
+  sin ella, render_nav omite la pestaña (no deja enlace muerto).
+  Self-contained: tokens de templates/html/base.html, sin CDN. Ver rules/report-kit.md.
+-->
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Entregas</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Crect%20width='100'%20height='100'%20rx='22'%20fill='%231b2a4a'/%3E%3Ctext%20x='50'%20y='70'%20font-size='56'%20font-family='system-ui,sans-serif'%20font-weight='700'%20fill='%23fff'%20text-anchor='middle'%3EF%3C/text%3E%3C/svg%3E">
+<style>
+  /* SHARED:BEGIN */
+  :root{
+    --ink:#1b1b1f;--muted:#6b6b76;--faint:#6c6c78;--paper:#f6f4ef;--card:#fff;--line:#e4e0d7;
+    --navy:#1b2a4a;--accent:#c2410c;--green:#15803d;--amber:#b45309;--blue:#1d4ed8;--red:#b42318;
+    --radius-sm:6px;--radius-md:10px;--radius:14px;--radius-pill:999px;
+    --shadow-modal:0 20px 60px rgba(27,27,31,.28);
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --s-backlog:#6b6b76;--s-doing:#b45309;--s-review:#1d4ed8;--s-done:#15803d;--s-blocked:#b42318;
+    --d-aprobar:#15803d;--d-modificar:#1d4ed8;--d-aplazar:#b45309;--d-descartar:#b42318;
+  }
+  *{box-sizing:border-box}
+  h1{font-size:clamp(24px,3.6vw,38px);margin:0 0 10px;letter-spacing:-.02em;color:var(--ink)}
+  h1 em{font-style:italic;color:var(--navy)}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600;margin:0 0 10px}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px}
+  .kpi b{display:block;font-size:28px;font-weight:700;letter-spacing:-.02em;color:var(--navy);line-height:1.15}
+  .kpi span{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+  .kpi.warn b{color:var(--red)}
+  .badge{display:inline-block;font-size:11px;font-weight:700;padding:3px 10px;border-radius:var(--radius-pill);color:#fff;text-transform:uppercase;letter-spacing:.04em}
+  .nodata{max-width:560px;margin:80px auto;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:28px 32px;text-align:center}
+  .nodata code{font-family:var(--mono);font-size:.9em;background:#efece4;color:var(--navy);padding:2px 6px;border-radius:6px}
+  .icon{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px}
+  .demo-banner{display:flex;align-items:center;gap:8px;background:#fdf3e3;border:1px solid #eed9b0;border-radius:var(--radius-sm);padding:8px 14px;margin:14px 0 0;font-size:12.5px;color:#78350f}
+  .demo-banner .icon{flex:none}
+  .demo-banner[hidden]{display:none}  /* [hidden] pierde ante .demo-banner{display:flex} — sin esto el banner de demo sale SIEMPRE */
+  .audience-note{display:flex;align-items:center;gap:8px;background:#eef1f5;border:1px solid #d7dee8;border-radius:var(--radius-sm);padding:8px 14px;margin:12px 0 0;font-size:12.5px;color:var(--navy)}
+  .audience-note .icon{flex:none}
+  .scroll-hint{display:none;font-size:11px;color:var(--faint);text-align:right;margin:0 0 6px}
+  @media(max-width:767px){.scroll-hint{display:block}}
+  /* nav responsive: la gestiona el bloque que inyecta render_nav.py (fuente única) */
+  /* SHARED:END */
+  html,body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55}
+  body{background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.55;}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 22px}
+
+  /* ===== HERO ===== */
+  header.hero{border-bottom:1px solid var(--line);padding:28px 0 20px}
+  .lead{font-size:13.5px;color:var(--muted);margin:0;font-family:var(--mono)}
+  .vbar{display:flex;height:12px;border-radius:6px;overflow:hidden;margin-top:14px;border:1px solid var(--line);background:var(--card)}
+  .vbar > i{display:block;height:100%}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px;font-size:11.5px;color:var(--muted)}
+  .legend .dot{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px;vertical-align:middle}
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:14px}
+  .btn{font-family:var(--sans);font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--navy);background:var(--navy);color:#fff;padding:7px 13px;border-radius:10px}
+  .btn.ghost{background:var(--card);color:var(--navy)}
+  .btn.ghost:hover{background:#efece4}
+
+
+  /* ===== FUENTES ===== */
+  .srcgrid{display:flex;flex-direction:column;gap:12px;margin:18px 0 26px}
+  .src{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:15px 17px}
+  .src h3{margin:0 0 4px;font-size:15.5px;letter-spacing:-.01em;color:var(--navy)}
+  .src .file{font-family:var(--mono);font-size:11px;color:var(--faint)}
+  .src p.res{margin:8px 0 10px;color:var(--ink);font-size:14px}
+  .src .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:12px;color:var(--muted)}
+  .pill{border:1px solid var(--line);border-radius:var(--radius-pill);padding:3px 9px;font-size:11.5px;background:var(--paper)}
+  .pill.ep{color:#fff;border:0}
+  .open{margin-left:auto;font-family:var(--sans);font-size:12.5px;font-weight:600;text-decoration:none;
+    border:1px solid var(--navy);color:var(--navy);background:var(--card);border-radius:10px;padding:6px 12px}
+  .open:hover{background:var(--navy);color:#fff}
+  .src-md{font-family:var(--mono);font-size:11px;color:var(--faint);text-decoration:none;padding:6px 4px}
+  .src-md:hover{color:var(--navy);text-decoration:underline}
+  .note{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--navy);
+    border-radius:var(--radius);padding:13px 16px;margin:16px 0;font-size:14px}
+  footer{border-top:1px solid var(--line);margin-top:26px;padding:16px 0 40px;color:var(--muted);font-size:12.5px}
+</style>
+</head>
+<body>
+<!-- ICONS:BEGIN -->
+<svg style="display:none" aria-hidden="true">
+  <symbol id="ic-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></symbol>
+  <symbol id="ic-download" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></symbol>
+  <symbol id="ic-upload" viewBox="0 0 24 24"><path d="M12 21V9"/><path d="m7 14 5-5 5 5"/><path d="M5 21h14"/></symbol>
+  <symbol id="ic-refresh" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></symbol>
+  <symbol id="ic-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".6" fill="currentColor"/></symbol>
+  <symbol id="ic-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><circle cx="12" cy="8" r=".6" fill="currentColor"/></symbol>
+  <symbol id="ic-tool" viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 1 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.1 2.1-2-2z"/></symbol><symbol id="ic-search" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10.5 10.5 L14 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol><symbol id="ic-eye" viewBox="0 0 16 16"><path d="M1.5 8 C4 4.2 12 4.2 14.5 8 C12 11.8 4 11.8 1.5 8 Z" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="8" cy="8" r="2" fill="currentColor"/></symbol><symbol id="ic-arrow" viewBox="0 0 16 16"><path d="M2.5 8 H12 M8.6 4 L13 8 L8.6 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol><symbol id="ic-clip" viewBox="0 0 16 16"><rect x="4" y="2.6" width="8" height="11" rx="1.4" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6 2.6 V1.8 H10 V2.6" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6 6.4 H10 M6 9 H10 M6 11.4 H8.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></symbol>
+</svg>
+<!-- ICONS:END -->
+<!-- NAV:BEGIN -->
+<!-- NAV:END -->
+
+<div id="nodata" class="nodata" hidden>
+  <p class="eyebrow">Report-kit · Entregas</p>
+  <p><b>Sin datos inyectados.</b></p>
+  <p>Genera el dataset con<br><code>python3 gen_entregas_dataset.py &lt;plan-dir&gt;</code><br>y después <code>python3 build.py &lt;plan-dir&gt;</code>.</p>
+</div>
+
+<div id="app">
+  <header class="hero"><div class="wrap">
+    <p class="eyebrow" id="eyebrow">Report-kit · Entregas</p>
+    <h1>Qué se ha entregado</h1>
+    <p class="lead">Ramas vivas, commits y pull requests. El código está a un clic, no aquí.</p>
+    <div class="kpis" id="kpis"></div>
+    <div id="modo"></div>
+  </div></header>
+
+  <div class="wrap">
+    <h2 class="sec">Ramas</h2>
+    <p class="secsub" id="ramasub"></p>
+    <div id="ramas"></div>
+
+    <div id="prs"></div>
+
+    <h2 class="sec">Commits</h2>
+    <p class="secsub" id="commitsub"></p>
+    <div class="ctipos" id="ctipos"></div>
+    <div id="commits"></div>
+
+    <footer id="foot"></footer>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<style>
+  .kpis{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:11px 15px;min-width:110px}
+  .kpi b{display:block;font-size:25px;line-height:1.15;font-family:var(--mono)}
+  .kpi span{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+  .kpi.warn b{color:#c2410c}
+  .modobox{background:#f6f4ef;border:1px solid var(--line);border-radius:9px;padding:10px 13px;margin-top:14px;font-size:12.5px;line-height:1.55}
+  .modobox code{font-family:var(--mono);font-size:11.5px;background:var(--card);padding:1px 5px;border-radius:4px}
+  .sec{margin:32px 0 4px;font-size:19px}
+  .secsub{margin:0 0 12px;color:var(--muted);font-size:13px}
+  .rama{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:11px 14px;margin-bottom:7px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .rama.actual{border-color:var(--ink)}
+  .rama .n{font-family:var(--mono);font-size:13px;font-weight:700}
+  .rama .tag{font-size:10px;text-transform:uppercase;letter-spacing:.05em;background:var(--ink);color:var(--paper);padding:2px 7px;border-radius:999px}
+  .rama .tag.base{background:#15803d}
+  .rama .meta{margin-left:auto;font-size:11.5px;color:var(--muted);font-family:var(--mono)}
+  .rama .div{font-family:var(--mono);font-size:11.5px}
+  .rama .div .a{color:#15803d}
+  .rama .div .b{color:#c2410c}
+  .ctipos{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+  .ct{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:3px 11px;font-size:12px;cursor:pointer}
+  .ct.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .ct .n{opacity:.6;margin-left:5px;font-family:var(--mono);font-size:11px}
+  .commit{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:10px 13px;margin-bottom:6px}
+  .ctop{display:flex;gap:9px;align-items:baseline;flex-wrap:wrap}
+  .ctipo{font-size:10px;text-transform:uppercase;letter-spacing:.05em;padding:2px 7px;border-radius:999px;font-weight:700;background:#ecebe6;color:#6b6b6b}
+  .ctipo.feat{background:#dcfce7;color:#15803d}
+  .ctipo.fix{background:#fee2e2;color:#b91c1c}
+  .ctipo.docs{background:#dbeafe;color:#1d4ed8}
+  .ctipo.refactor{background:#fef3c7;color:#b45309}
+  .commit .t{font-size:13.5px;font-weight:600;line-height:1.4}
+  .commit .sha{margin-left:auto;font-family:var(--mono);font-size:11.5px;color:var(--muted);text-decoration:none}
+  .commit .sha:hover{color:var(--ink);text-decoration:underline}
+  .commit .fs{margin-top:6px;font-family:var(--mono);font-size:11px;color:var(--muted);line-height:1.6}
+  .commit .fs span{display:inline-block;background:var(--paper);border:1px solid var(--line);border-radius:5px;padding:1px 6px;margin:2px 4px 0 0}
+  .pr{background:var(--card);border:1px solid var(--line);border-left:3px solid #2563eb;border-radius:9px;padding:11px 14px;margin-bottom:7px}
+  footer{margin:40px 0 30px;padding-top:14px;border-top:1px solid var(--line);color:var(--muted);font-size:12px;line-height:1.6}
+</style>
+
+<script>
+const DB = /*__DATA__*/null;
+const META = /*__META__*/null;
+
+if(!DB||!DB.commits){document.getElementById("nodata").hidden=false;document.getElementById("app").style.display="none";}
+else{
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const M=DB.meta||{};
+let T=null;
+
+if(META) document.getElementById("eyebrow").textContent =
+  [META.project,META.plan_id,M.rama_actual?("rama "+M.rama_actual):null,M.date].filter(Boolean).join(" · ");
+
+document.getElementById("kpis").innerHTML=[
+  {n:M.n_ramas,l:"ramas"},{n:M.n_commits,l:"commits"},
+  {n:M.modo==="git+gh"?M.n_prs:"—",l:"pull requests"},
+  {n:M.sin_commitear,l:"sin commitear",warn:M.sin_commitear>0}
+].map(k=>`<div class="kpi ${k.warn?"warn":""}"><b>${esc(k.n)}</b><span>${k.l}</span></div>`).join("");
+
+document.getElementById("modo").innerHTML = M.modo==="git+gh"
+  ? `<div class="modobox"><b>Modo completo</b> (git + <code>gh</code>): se ven los pull requests con su
+      estado de revisión y sus checks.</div>`
+  : `<div class="modobox"><b>Modo git.</b> Se ven ramas, commits y ficheros tocados, y cada commit
+      enlaza a su página. <b>No</b> se ve el estado de los pull requests${M.gh_motivo?` — ${esc(M.gh_motivo)}`:""}.
+      Para verlos hace falta <code>gh</code>, que es dependencia de sistema y se decide por proyecto.
+      Esta página funciona igual sin él; simplemente enseña menos, y lo dice.</div>`;
+
+/* Ramas: lo que importa de una rama es su EDAD y cuánto se ha alejado de la base.
+   Una rama de más de dos días es la señal que rules/trunk-based-flow.md pide vigilar. */
+function ramas(){
+  document.getElementById("ramasub").textContent =
+    `Comparadas con ${M.base}. Lo que se mira de una rama es cuánto se ha alejado: por encima de dos días, los conflictos dejan de ser de tres líneas.`;
+  document.getElementById("ramas").innerHTML = (DB.ramas||[]).map(r=>`
+    <div class="rama ${r.actual?"actual":""}">
+      <span class="n">${esc(r.nombre)}</span>
+      ${r.actual?`<span class="tag">aquí</span>`:""}
+      ${r.es_base?`<span class="tag base">base</span>`:""}
+      ${!r.es_base?`<span class="div"><span class="a">+${r.delante}</span> / <span class="b">−${r.detras}</span></span>`:""}
+      <span class="meta">${esc(r.autor||"")} · ${esc(r.ultimo_rel||"")}</span>
+    </div>`).join("");
+}
+
+function tipos(){
+  const cs=DB.commits||[];
+  const t={};
+  cs.forEach(c=>{const k=c.tipo||"otros";t[k]=(t[k]||0)+1;});
+  document.getElementById("ctipos").innerHTML =
+    `<button class="ct ${T===null?"on":""}" onclick="setT(null)">Todos<span class="n">${cs.length}</span></button>`+
+    Object.entries(t).sort((a,b)=>b[1]-a[1]).map(([k,n])=>
+      `<button class="ct ${T===k?"on":""}" onclick="setT('${esc(k)}')">${esc(k)}<span class="n">${n}</span></button>`).join("");
+}
+function setT(t){T=t;tipos();commits();}
+
+function commits(){
+  const cs=(DB.commits||[]).filter(c=>T===null||(c.tipo||"otros")===T);
+  document.getElementById("commitsub").textContent =
+    `Los ${DB.commits.length} últimos de ${M.rama_actual}. Cada uno enlaza a su diff: aquí está el qué, no el código.`;
+  document.getElementById("commits").innerHTML = cs.map(c=>`
+    <div class="commit">
+      <div class="ctop">
+        <span class="ctipo ${esc(c.tipo||"")}">${esc(c.tipo||"—")}${c.scope?" · "+esc(c.scope):""}</span>
+        <span class="t">${esc(c.titulo)}</span>
+        ${c.url?`<a class="sha" href="${esc(c.url)}" target="_blank" rel="noopener">${esc(c.corto)} ↗</a>`
+               :`<span class="sha">${esc(c.corto)}</span>`}
+      </div>
+      <div class="fs">${esc(c.autor)} · ${esc(c.rel)} · ${c.n_ficheros} ficheros
+        <br>${(c.ficheros||[]).map(f=>`<span>${esc(f)}</span>`).join("")}
+        ${c.n_ficheros>(c.ficheros||[]).length?`<span>+${c.n_ficheros-c.ficheros.length}</span>`:""}</div>
+    </div>`).join("") || `<p class="secsub">Ningún commit de ese tipo.</p>`;
+}
+
+function prs(){
+  if(M.modo!=="git+gh"||!(DB.prs||[]).length)return;
+  document.getElementById("prs").innerHTML =
+    `<h2 class="sec">Pull requests abiertos</h2>
+     <p class="secsub">Con su estado de revisión. El diff está en GitHub.</p>`+
+    DB.prs.map(p=>`<div class="pr">
+      <div class="ctop"><span class="ctipo">#${p.number}</span><span class="t">${esc(p.title)}</span>
+        <a class="sha" href="${esc(p.url)}" target="_blank" rel="noopener">abrir ↗</a></div>
+      <div class="fs">${esc((p.author||{}).login||"")} · ${esc(p.headRefName||"")} ·
+        +${p.additions||0}/−${p.deletions||0} ${p.isDraft?"· borrador":""}
+        ${p.reviewDecision?"· "+esc(p.reviewDecision):"· sin revisar"}</div>
+    </div>`).join("");
+}
+
+document.getElementById("foot").innerHTML =
+  `<b>De dónde sale.</b> <code>${esc(M.source||"")}</code> · repo <code>${esc(M.repo||"")}</code>
+   ${M.remoto?`· <a href="${esc(M.remoto)}" target="_blank" rel="noopener">${esc(M.remoto)}</a>`:""}<br>
+   Es una foto de <b>${esc(M.date||"?")}</b>: se regenera con
+   <code>python3 gen_entregas_dataset.py &lt;plan&gt;</code>.<br>
+   <b>Lo que NO dice:</b> si lo entregado funciona. Un commit verde no es una prueba —
+   eso es <a href="pruebas.html">Pruebas</a> y <a href="results.html">Resultados</a>.`;
+
+ramas();tipos();commits();prs();
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="es">
+<!--
+  PLANTILLA · status / report (Tier 1).  Rellena KPIS, SHIPPED, SLIPPED, CHART, TIMELINE.
+  Para reportes semanales, post-mortems, resúmenes que se escanean. Self-contained.
+-->
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>[Status] — [periodo]</title>
+<style>
+  :root{--ink:#1b1b1f;--muted:#6b6b76;--paper:#f6f4ef;--card:#fff;--line:#e4e0d7;--navy:#1b2a4a;--accent:#c2410c;--green:#15803d;--amber:#b45309;--red:#b42318;--mono:ui-monospace,Menlo,Consolas,monospace;--sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+  *{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.5}
+  .wrap{max-width:820px;margin:0 auto;padding:40px 24px 60px}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin:0 0 8px}
+  h1{font-size:30px;margin:0 0 4px;letter-spacing:-.02em}.sub{color:var(--muted);margin:0 0 24px;font-size:14px}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:26px}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .stat .n{font-size:26px;font-weight:700}.stat .l{font-family:var(--mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:6px}
+  h2{font-size:15px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:26px 0 10px;font-family:var(--mono)}
+  table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:14px}
+  th,td{text-align:left;padding:9px 13px;border-bottom:1px solid var(--line)}th{background:#fbfaf7;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+  tr:last-child td{border-bottom:none}
+  .pill{font-family:var(--mono);font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px}.ok{background:#dcfce7;color:var(--green)}.slip{background:#fef3c7;color:var(--amber)}
+  .chart{display:flex;align-items:flex-end;gap:10px;height:130px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px}
+  .bar{flex:1;background:linear-gradient(var(--navy),#33518a);border-radius:6px 6px 0 0;position:relative;min-height:4px}
+  .bar span{position:absolute;bottom:-20px;left:0;right:0;text-align:center;font-family:var(--mono);font-size:11px;color:var(--muted)}
+  .timeline{border-left:2px solid var(--line);margin-left:8px;padding-left:18px}
+  .ev{position:relative;margin:0 0 12px;font-size:14px}.ev::before{content:"";position:absolute;left:-25px;top:6px;width:9px;height:9px;border-radius:50%;background:var(--navy)}.ev .t{font-family:var(--mono);font-size:11px;color:var(--muted)}
+  button{font-family:var(--sans);font-weight:600;cursor:pointer;border:1px solid var(--navy);background:var(--navy);color:#fff;padding:9px 15px;border-radius:9px;margin-top:26px}button.copied{background:var(--green);border-color:var(--green)}
+  footer{margin-top:30px;color:#9a9aa4;font-size:12px;font-family:var(--mono)}
+</style>
+</head>
+<body><div class="wrap">
+  <p class="eyebrow">[Status · periodo]</p>
+  <h1>[Equipo / Proyecto] — [periodo]</h1>
+  <p class="sub">[Una línea de contexto. Optimizado para escaneo.]</p>
+
+  <div class="stats" id="stats"><!-- rellena con KPIs -->
+    <div class="stat"><div class="n">0</div><div class="l">[KPI 1]</div></div>
+    <div class="stat"><div class="n">0</div><div class="l">[KPI 2]</div></div>
+    <div class="stat"><div class="n">0</div><div class="l">[KPI 3]</div></div>
+    <div class="stat"><div class="n">0</div><div class="l">[KPI 4]</div></div>
+  </div>
+
+  <h2>Qué shipeó / qué se atrasó</h2>
+  <table><thead><tr><th>Item</th><th>Owner</th><th>Estado</th></tr></thead><tbody>
+    <tr><td>[item]</td><td>[owner]</td><td><span class="pill ok">shipped</span></td></tr>
+    <tr><td>[item]</td><td>[owner]</td><td><span class="pill slip">slip → [siguiente]</span></td></tr>
+  </tbody></table>
+
+  <h2>[Métrica] (chart)</h2>
+  <div class="chart" id="chart"><!-- una .bar por punto; altura % -->
+    <div class="bar" style="height:40%"><span>L</span></div>
+    <div class="bar" style="height:70%"><span>M</span></div>
+    <div class="bar" style="height:55%"><span>X</span></div>
+    <div class="bar" style="height:90%"><span>J</span></div>
+    <div class="bar" style="height:30%"><span>V</span></div>
+  </div>
+
+  <h2>Timeline</h2>
+  <div class="timeline">
+    <div class="ev"><div class="t">[hora]</div>[evento].</div>
+    <div class="ev"><div class="t">[hora]</div>[evento].</div>
+  </div>
+
+  <button id="copy">📋 Copiar como markdown</button>
+  <footer>Un solo .html autocontenido · sin dependencias · rules/html-output.md</footer>
+</div>
+<script>
+  const MD = `# [Status] — [periodo]\n- [KPIs]\n## Shipped\n- [items]\n## Slipped\n- [items]\n## Timeline\n- [hh:mm] [evento]`;
+  const b=document.getElementById("copy");
+  b.addEventListener("click",async()=>{try{await navigator.clipboard.writeText(MD)}catch(e){const t=document.createElement("textarea");t.value=MD;document.body.appendChild(t);t.select();document.execCommand("copy");t.remove()}b.classList.add("copied");b.textContent="✓ Copiado";setTimeout(()=>{b.classList.remove("copied");b.textContent="📋 Copiar como markdown"},1600)});
+</script>
+</body>
+</html>

@@ -1,0 +1,102 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# perfiles.yaml — los dos tipos de interfaz que hace esta casa, y qué cambia en cada uno.
+#
+# Decisión de Miller (2026-09-18): «hacemos landings, webs de clientes, productos, paneles
+# y web apps para clientes». Son DOS trabajos distintos con el mismo pipeline, no uno.
+#
+# ⚠️ FICHERO DE DOS DUEÑOS, partido POR CLAVE. Escrito aquí para que nadie defina lo mismo
+#    dos veces:
+#      dials · referencias · estructura · presupuesto · tecnicas_*   → mitad de GENERACIÓN
+#      rubrica                                                        → mitad de AUDITORÍA
+#    Nadie edita la mitad del otro. `ownership_check.py` no llega al nivel de clave: esto es
+#    una convención escrita, y su límite honesto es que se sostiene sola.
+#
+# Dónde se ELIGE el perfil: en el frontmatter de `.docs/core/design-system.md` del proyecto
+#   (`perfil: web-cliente`). Es la única variable que leen las skills; así ninguna se duplica.
+# ─────────────────────────────────────────────────────────────────────────────
+version: 1
+declarado: true
+source: patterns/diseno/README.md · resources/referencias-diseno/INDEX.json
+generado: "2026-09-18"
+
+# ⚠️ LOS DIALES SON TECHOS, NO VALORES POR DEFECTO. Lo aclara `movimiento.md` §9 y se repetía
+# solo en la skill, que es el sitio donde menos se busca: `producto-panel` lleva `movimiento: 1`
+# y su DEFAULT es 0 — el 1 es lo máximo que se permite si una acción del usuario lo justifica.
+# Leerlo como default produce exactamente lo contrario de lo que pretende el perfil: un panel
+# lleno de reveals «porque el dial decía 1».
+#   variacion · movimiento · densidad → techo permitido
+#   Lo que se USA se declara en `design-system.md` §0b y §4c, proyecto a proyecto.
+
+perfiles:
+  - id: web-cliente
+    que_es: "landing o web de un cliente: tiene que convencer a un desconocido en diez segundos"
+    quien_la_ve: "alguien que llega una vez, con prisa, probablemente desde el móvil"
+    dials:
+      variacion: alta      # 3-5 direcciones de arte DISTINTAS antes de elegir
+      movimiento: 2        # nivel premium permitido si la metáfora del sector lo pide
+      densidad: baja       # aire, titulares grandes, medida de línea corta
+      audacia: "un elemento memorable por página; el resto, disciplinado"
+    referencias:
+      - bien/yessmassage-v7.html
+      - bien/kalinayoga-v6.html
+      - bien/kalinayoga-v4.html
+      - bien/dale-marketing-v4/index.html
+      - bien/elevaiti-v5.html
+    estructura: estructura-de-pagina.md#web-cliente
+    presupuesto:
+      ficheros: 1
+      lineas_css: "2500-5000"
+      dependencias_de_red: 0
+      por_que: >
+        Medido en el corpus: las versiones que gustaron tienen 2.500-5.000 líneas de CSS escrito a
+        mano en un fichero único. Las que un modelo barato generó en 1-2 minutos (170-990 líneas)
+        NO fueron las elegidas por el humano ni una sola vez. El presupuesto no es capricho: es la
+        diferencia entre una dirección de arte y un boceto.
+    tecnicas_obligatorias: [T5, T11b, T18, T21, T23]
+    tecnicas_prohibidas: []
+    rubrica: null   # ← la escribe la mitad de AUDITORÍA (Ola 6). null = todavía no existe.
+
+  - id: producto-panel
+    que_es: "producto, panel o web app para un cliente: alguien va a volver cada día"
+    quien_la_ve: "la misma persona, muchas veces, con una tarea concreta que repetir"
+    dials:
+      variacion: baja      # 2 variantes ESTRUCTURALES (tabla/lista/tarjetas), no mundos visuales
+      movimiento: 1        # solo el que responde a una acción y dice qué cambió
+      densidad: alta       # tablas, filtros, información por pantalla
+      audacia: "contenida al shell y al estado vacío"
+    referencias:
+      - bien/consultorpro.html
+      - bien/elevaiti-v7.html
+    estructura: estructura-de-pagina.md#producto-panel
+    presupuesto:
+      ficheros: "el molde de 10 de patterns/stack/frontend-nueva-pantalla.md"
+      lineas_css: "n/a — Tailwind + un solo @theme"
+      dependencias_de_red: "las del stack"
+      por_que: >
+        ⚠️ El presupuesto de 2.500-5.000 líneas es EXCLUSIVO de `web-cliente`. Si se filtra aquí
+        rompe el molde de 10 ficheros y el origen único de tokens, que son justo lo que hace
+        mantenible un panel. Es un anti-pattern, no un matiz.
+    tecnicas_obligatorias: [T5, T11b, T23]
+    tecnicas_prohibidas: [T14, T15, T16]   # Lenis, cursor propio y botón magnético en una
+                                           # herramienta de trabajo: estorban y marean
+    rubrica: null   # ← la escribe la mitad de AUDITORÍA (Ola 6)
+
+# ─────────────────────────────────────────────────────────────────────────────
+# LÍMITE DECLARADO — dos perfiles no cubren todo, y se supo al primer ejemplo.
+#
+# `examples/marca-lumi/` es una conversación en el móvil de un particular que llega desde un
+# anuncio: NO es una landing, y tampoco es un panel al que alguien vuelve cada día. Se declara
+# `producto-panel` porque es producto y no marketing, pero su dial de DENSIDAD va bajo, no alto.
+#
+# La salida correcta cuando un proyecto no encaja: **declararlo en su design-system.md §0b y
+# desviarse del dial con la razón escrita** — no forzar el perfil ni inventar un tercero. Un
+# tercer perfil entra el día que haya DOS proyectos que lo pidan, no antes; si no, esto crece
+# hasta que nadie sabe cuál elegir, que es como mueren las taxonomías.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# Compatibilidad con lo que ya existe: `templates/trend-delta.schema.json` nació con
+# `landing` y `herramienta-interna`. Se mapean así, y el enum del schema los acepta los cuatro
+# para que las rondas viejas sigan siendo comparables con las nuevas (AUD-7).
+equivalencias:
+  landing: web-cliente
+  herramienta-interna: producto-panel

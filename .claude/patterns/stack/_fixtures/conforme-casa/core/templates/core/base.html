@@ -1,0 +1,7 @@
+{# Plantilla base del proyecto. Vive bajo core/templates/core/ — el subdirectorio con el nombre
+   de la app NO es decoración: es lo que impide que dos apps colisionen en la misma ruta. #}
+<!doctype html>
+<html lang="es">
+  <head><title>{% block titulo %}Expedientes{% endblock %}</title></head>
+  <body>{% block contenido %}{% endblock %}</body>
+</html>

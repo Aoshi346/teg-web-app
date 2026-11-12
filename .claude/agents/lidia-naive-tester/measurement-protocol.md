@@ -9,8 +9,8 @@
 > esto. Es para quien vaya a medirla.
 >
 > **Origen:** AUD-2 · AUD-4 · AUD-6 · AUD-12 · AUD-13 · AUD-16 del plan
-> `.docs/plans/2026-08-07-ai4dev-specs-adopcion` (los 6 aprobados como *diseño de experimento*).
-> Análisis de fondo: `sources/L-auditoria-agentes-persona.md` y `sources/M-mejorar-lidia-medible.md`.
+> `_archive/2026-10-19/planes-cerrados/2026-08-07-ai4dev-specs-adopcion` (los 6 aprobados como *diseño de experimento*; archivado el 19-10).
+> Análisis de fondo: `sources/L-auditoria-agentes-persona.md` de ese plan y `.docs/core/ai4dev/M-mejorar-lidia-medible.md`.
 
 ---
 
@@ -70,7 +70,8 @@ AUD-3 congelar ✅ → instrumentación ✅ (AUD-1/7/8/9/10/11) → recálculo d
 ```
 
 **Presupuesto de RAM.** Cada pasada abre navegador y **cuenta doble** (`rules/ram-pytest.md`):
-máximo 3 instancias **con navegador** (ese tope NO se deriva: cuentan doble), nunca solapadas con
+como mucho el tope de instancias **con navegador** que da `check-ram.sh --explain` (ese tope NO se
+deriva: cuentan doble), nunca solapadas con
 `pytest`. Las pasadas se serializan o van de dos en dos.
 Coste unitario medido: una ronda de Lidia = 25-33 capturas ≈ 3.6-4.0 MB en disco.
 

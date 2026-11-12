@@ -1,0 +1,43 @@
+# G2 en CI: dependencias vulnerables, SBOM y cadena de suministro (sub-ola 2.23, SE-18).
+# Se copia a .github/workflows/deps-gate.yml. Todo lo de fuera va FIJADO: las Actions por SHA de commit y
+# osv-scanner por versión y SHA-256 (un binario descargado sin comprobar es justo lo que este gate persigue).
+# Subir una versión es una decisión: resuelve la etiqueta a su commit, cambia SHA y comentario a la vez, y
+# corre `python3 .claude/scripts/gate_deps.py . --solo cadena` (falla si queda una etiqueta).
+name: deps-gate
+
+on:
+  pull_request:
+  push:
+    branches: [develop, main]
+  schedule:
+    - cron: "17 5 * * 1"     # los CVE aparecen DESPUÉS de instalar: un repo quieto se vuelve vulnerable solo
+
+permissions:
+  contents: read
+
+jobs:
+  g2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - name: osv-scanner v2.7.0 (binario fijado y comprobado)
+        run: |
+          set -euo pipefail
+          curl -fsSL -o osv-scanner https://github.com/google/osv-scanner/releases/download/v2.7.0/osv-scanner_linux_amd64
+          echo "160c6253e2922e9e0a6a9771c5c4c40a4b3c6090b34a3cdd5e80c96cc2e4218b  osv-scanner" | sha256sum -c -
+          chmod +x osv-scanner
+
+      - name: G2 (vulnerabilidades con arreglo, cadena de suministro y SBOM)
+        run: python3 .claude/scripts/gate_deps.py . --osv ./osv-scanner --sbom sbom.cdx.json
+        # 0 bien · 1 hallazgos · 2 no se pudo medir: los tres paran el job, y el 2 NO es un verde.
+
+      - name: SBOM como artefacto de release
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: sbom-cyclonedx
+          path: sbom.cdx.json
+          if-no-files-found: warn

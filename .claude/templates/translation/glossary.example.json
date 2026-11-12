@@ -1,0 +1,25 @@
+{
+  "source": "es",
+  "targets": ["en", "ca"],
+  "dontTranslate": [
+    "BCNLIP", "Instituto Cervantes", "DELE", "SIELE", "Barcelona",
+    "WhatsApp", "Instagram", "nombres propios", "URLs", "códigos de curso"
+  ],
+  "terms": {
+    "español general": { "en": "general Spanish", "ca": "espanyol general" },
+    "clases privadas": { "en": "private lessons", "ca": "classes privades" },
+    "SOLICITAR INFORMACIÓN": { "en": "REQUEST INFO", "ca": "SOL·LICITAR INFORMACIÓ" },
+    "Reservar plaza": { "en": "Book your spot", "ca": "Reservar plaça" }
+  },
+  "tone": {
+    "en": "Warm, professional, student-facing marketing copy. US/International English. Avoid literal translation; localize idioms.",
+    "ca": "Proper i professional, català central, registre estàndard."
+  },
+  "preserve": [
+    "HTML tags and attributes (incl. <span class=\"...\">)",
+    "placeholders: {var}, %s, %(name)s, {{ moustache }}",
+    "WordPress shortcodes [..], block comments <!-- wp:... -->",
+    "URLs, emails, phone numbers, prices/numbers"
+  ],
+  "_notes": "dontTranslate y preserve son críticos: nunca traducir marcas/códigos ni romper HTML/placeholders. terms fija consistencia entre páginas. Revisión nativa obligatoria antes de publicar."
+}

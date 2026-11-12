@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="es">
+<!--
+  PLANTILLA INTEGRACIONES · mapa de servicios externos (cards + SVG sistema-en-el-centro / radial).
+  ── Cómo usar ──────────────────────────────────────────────────────────────
+  1) Define las integraciones en INTEGRATIONS del <script>:
+     {id,name,dir:"in"|"out"|"both", auth:"OAuth|API key|HMAC|…", status:"real"|"mock"|"planned",
+      desc, files:[...]}
+  2) La grid de cards y el diagrama radial (sistema en el centro, integraciones alrededor,
+     flecha según `dir`) se dibujan solos desde esos datos.
+  Tier 1/2 (rules/html-output.md). Self-contained, sin CDN, tokens = base.html.
+  Ejemplo = integraciones genéricas (Stripe, SendGrid, S3, ManyChat, Webhook entrante).
+  Parte de un plan multi-página (lleva la .topnav; ver hub.html / nav-partial.html).
+-->
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>[Proyecto] · Integraciones</title>
+<style>
+  :root{
+    --ink:#1b1b1f;--muted:#6b6b76;--faint:#9a9aa4;--paper:#f6f4ef;--card:#fff;--line:#e4e0d7;
+    --navy:#1b2a4a;--accent:#c2410c;--green:#15803d;--blue:#1d4ed8;--violet:#6d28d9;--red:#b42318;--amber:#b45309;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.55}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 22px}
+  .topnav{position:sticky;top:0;z-index:20;background:rgba(246,244,239,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+  .topnav .wrap{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:9px 22px}
+  .topnav .brand{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--navy);font-weight:700;margin-right:8px}
+  .topnav a{font-size:13px;color:var(--muted);text-decoration:none;padding:6px 10px;border-radius:8px}
+  .topnav a:hover{background:#efece4;color:var(--navy)} .topnav a.active{background:var(--navy);color:#fff}
+  header.hero{padding:34px 0 14px}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600;margin:0 0 10px}
+  h1{font-size:clamp(24px,3.6vw,38px);margin:0 0 8px;letter-spacing:-.02em}h1 em{font-style:italic;color:var(--navy)}
+  .lead{font-size:16px;color:var(--muted);max-width:78ch;margin:0}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;margin:14px 0 4px;font-size:12.5px;color:var(--muted)}
+  .legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:middle}
+  section{padding:8px 0 16px}
+  h2{font-size:18px;margin:22px 0 12px;letter-spacing:-.01em}
+  .radial{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;overflow:auto}
+  svg{width:100%;height:auto;display:block;max-width:640px;margin:0 auto}
+  .hub rect{fill:var(--navy)} .hub text{fill:#fff;font-weight:700;font-size:13px;font-family:var(--sans)}
+  .spoke{stroke:#c8ccd4;stroke-width:1.6;fill:none}
+  .spoke.out{marker-end:url(#ar)} .spoke.in{marker-start:url(#ar)} .spoke.both{marker-end:url(#ar);marker-start:url(#ar)}
+  .ext rect{stroke-width:1.4;rx:9} .ext text{font-family:var(--sans);font-size:11px;font-weight:600;fill:var(--ink)}
+  .ext.real rect{fill:#ecfdf3;stroke:#bbe6c8} .ext.mock rect{fill:#fef6e7;stroke:#f0d9a8} .ext.planned rect{fill:#f1f1f4;stroke:#dcdce2}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(255px,1fr));gap:14px}
+  .icard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:15px 17px;border-left:3px solid var(--line)}
+  .icard.real{border-left-color:var(--green)} .icard.mock{border-left-color:var(--amber)} .icard.planned{border-left-color:var(--faint)}
+  .icard .top{display:flex;align-items:center;gap:8px;margin-bottom:3px}
+  .icard h3{margin:0;font-size:15.5px;color:var(--navy)}
+  .icard .st{margin-left:auto;font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.05em;padding:2px 8px;border-radius:99px}
+  .icard .st.real{background:#ecfdf3;color:var(--green)} .icard .st.mock{background:#fef6e7;color:var(--amber)} .icard .st.planned{background:#f1f1f4;color:var(--muted)}
+  .icard p{margin:6px 0 10px;font-size:13px;color:var(--muted)}
+  .icard .kv{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;margin-bottom:8px}
+  .icard .kv b{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.05em;color:var(--faint);font-weight:600;display:block}
+  .icard .dir{font-weight:600;color:var(--navy)}
+  .icard code{font-family:var(--mono);font-size:11px;background:#efece4;color:var(--navy);padding:1px 6px;border-radius:6px;margin:2px 4px 0 0;display:inline-block}
+  footer{padding:26px 0 60px;color:var(--faint);font-size:13px}
+</style>
+</head>
+<body>
+<nav class="topnav"><div class="wrap">
+  <span class="brand">[PROYECTO]</span>
+  <a href="index.html">Overview</a>
+  <a href="architecture.html">Arquitectura</a>
+  <a href="scope-and-boundaries.html">Alcance</a>
+  <a href="data-model.html">Datos</a>
+  <a href="user-flows.html">Flujos</a>
+  <a href="integrations.html" class="active">Integraciones</a>
+  <a href="parallelization.html">Paralelización</a>
+  <a href="dashboard.html">Dashboard</a>
+</div></nav>
+
+<header class="hero"><div class="wrap">
+  <p class="eyebrow">Integraciones · servicios externos</p>
+  <h1>Mapa de <em>integraciones</em></h1>
+  <p class="lead">El sistema en el centro; cada servicio externo alrededor. La flecha indica dirección (entrada / salida / ambas) y el color, si está conectado de verdad o aún en mock.</p>
+  <div class="legend">
+    <span><i style="background:#15803d"></i>Real (conectado)</span>
+    <span><i style="background:#b45309"></i>Mock (simulado)</span>
+    <span><i style="background:#9a9aa4"></i>Planned (pendiente)</span>
+  </div>
+</div></header>
+
+<main class="wrap">
+  <section>
+    <h2>Diagrama radial</h2>
+    <div class="radial">
+      <svg id="svg" viewBox="0 0 640 460" role="img" aria-label="Mapa radial de integraciones">
+        <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#9aa1ad"/></marker></defs>
+        <g id="spokes"></g>
+        <g class="hub" id="hub"></g>
+        <g id="exts"></g>
+      </svg>
+    </div>
+  </section>
+
+  <section>
+    <h2>Detalle por integración</h2>
+    <div class="grid" id="cards"></div>
+  </section>
+</main>
+
+<footer class="wrap">Integraciones generadas desde datos · un .html autocontenido · snapshot [FECHA].</footer>
+
+<script>
+  /* ===== EDITA AQUÍ: integraciones (ejemplo genérico) ===== */
+  const SYSTEM="[Sistema]";
+  const INTEGRATIONS=[
+    {id:"stripe",name:"Stripe",dir:"out",auth:"API key",status:"planned",desc:"Cobros y suscripciones. Aún no conectado en esta fase.",files:["integrations/stripe/"]},
+    {id:"sendgrid",name:"SendGrid",dir:"out",auth:"API key",status:"real",desc:"Envío de emails transaccionales (alta, verificación).",files:["integrations/email/sendgrid.py"]},
+    {id:"s3",name:"Storage S3",dir:"both",auth:"IAM key",status:"real",desc:"Almacena los CSV exportados y los adjuntos.",files:["core/storage/s3.py"]},
+    {id:"manychat",name:"ManyChat",dir:"in",auth:"HMAC",status:"mock",desc:"Webhooks entrantes de mensajería. En mock tras factory hasta validar firma.",files:["integrations/manychat/"]},
+    {id:"webhook",name:"Webhook in",dir:"in",auth:"HMAC",status:"real",desc:"Eventos entrantes de terceros; valida firma + anti-replay.",files:["api/webhooks/"]}
+  ];
+
+  const DIR_LABEL={in:"Entrada →",out:"→ Salida",both:"↔ Ambas"};
+  const NS="http://www.w3.org/2000/svg";
+  const CX=290,CY=230,R=160,HW=150,HH=50; // centro, radio, semianchos del hub
+
+  // hub central
+  document.getElementById("hub").innerHTML=
+    `<rect x="${CX-HW/2}" y="${CY-HH/2}" width="${HW}" height="${HH}" rx="12"/><text x="${CX}" y="${CY+5}" text-anchor="middle">${SYSTEM}</text>`;
+
+  const spokes=document.getElementById("spokes"),exts=document.getElementById("exts");
+  const n=INTEGRATIONS.length;
+  INTEGRATIONS.forEach((it,i)=>{
+    const ang=(-90 + i*(360/n))*Math.PI/180;
+    const ex=CX+Math.cos(ang)*R, ey=CY+Math.sin(ang)*R;
+    // línea hub→externo
+    const l=document.createElementNS(NS,"line");
+    l.setAttribute("x1",CX);l.setAttribute("y1",CY);l.setAttribute("x2",ex);l.setAttribute("y2",ey);
+    l.setAttribute("class","spoke "+it.dir);spokes.appendChild(l);
+    // caja externa
+    const w=Math.max(78,it.name.length*8+20);
+    const g=document.createElementNS(NS,"g");g.setAttribute("class","ext "+it.status);
+    g.setAttribute("transform",`translate(${ex-w/2},${ey-16})`);
+    g.innerHTML=`<rect width="${w}" height="32" rx="9"/><text x="${w/2}" y="20" text-anchor="middle">${it.name}</text>`;
+    exts.appendChild(g);
+  });
+
+  // cards
+  document.getElementById("cards").innerHTML=INTEGRATIONS.map(it=>`
+    <div class="icard ${it.status}">
+      <div class="top"><h3>${it.name}</h3><span class="st ${it.status}">${it.status}</span></div>
+      <p>${it.desc}</p>
+      <div class="kv">
+        <div><b>Dirección</b><span class="dir">${DIR_LABEL[it.dir]}</span></div>
+        <div><b>Auth</b><span>${it.auth}</span></div>
+      </div>
+      ${it.files&&it.files.length?it.files.map(f=>`<code>${f}</code>`).join(""):""}
+    </div>`).join("");
+</script>
+</body>
+</html>

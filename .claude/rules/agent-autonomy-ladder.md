@@ -1,8 +1,7 @@
 ---
 paths:
-  - ".docs/feedback/**"
+  - ".claude/agents/**"
 ---
-
 # Escalera de autonomía del agente — promoción, no-delegables y escalado por incertidumbre
 
 > **Cuándo aplicar:** al **crear un agente nuevo** (decidir en qué fase entra), al **darle o quitarle
@@ -16,7 +15,7 @@ paths:
 > **Relacionado:** `governance.md` (§2 catálogo de acciones · §3 los 3 niveles del TL · §3.1 autonomía
 > por tipo de tarea), `plan-gates.md` (Gate 0b: clarificación inversa antes de planear),
 > `verdict-contract.md` (`review`/`blocked` en la SALIDA; aquí gobernamos la INTERRUPCIÓN en curso),
-> `agent-teams.md`, `blackboard.md`, `self-improvement-loop.md`, `agents/README.md`.
+> `parallelization.md` (§Agent Teams, §Pizarra), `self-improvement-loop.md`, `agents/README.md`.
 
 ---
 
@@ -41,7 +40,7 @@ y no estaba nombrada. Nombrarla la hace reutilizable para todo agente nuevo.
 |---|---|---|---|---|
 | **1** | **I DO · YOU WATCH** | Observa. Se le pasa trabajo ya hecho y produce su salida **contra un resultado conocido** (replay) | Hace el trabajo y compara | Un auditor nuevo re-audita una wave ya cerrada y se contrasta con el `REPORT.md` real |
 | **2** | **I DO · YOU DO** | Trabaja **a la vez** que el humano sobre el mismo input; se comparan las dos salidas | Trabaja en paralelo y revisa las diferencias | Pol revisando un plan que el TL ya revisó |
-| **3** | **YOU DO · I WATCH** (**modo sombra**) | Trabaja solo de principio a fin y **escribe su informe**, pero su salida **no tiene efecto**: no comenta PRs, no bloquea, no cierra tareas | Lee el informe y anota qué habría aplicado | **Rita hoy** → `.docs/feedback/rita/<fecha>/REPORT.md` + la telemetría de patrones del template |
+| **3** | **YOU DO · I WATCH** (**modo sombra**) | Trabaja solo de principio a fin y **escribe su informe**, pero su salida **no tiene efecto**: no comenta PRs, no bloquea, no cierra tareas | Lee el informe y anota qué habría aplicado | **Rita hoy** → `.docs/feedback/rita/<fecha>/REPORT.md` + `patterns/telemetry.jsonl` |
 | **4** | **YOU DO** | Trabaja y su salida **tiene efecto** dentro de su ámbito declarado | Revisa por muestreo y en los gates de `governance.md` §2 | Los auditores del `/qa-loop`, cuyo score cuenta para el gate |
 
 **La responsabilidad no se delega.** Sube la fase de un agente y sigue siendo tuyo el resultado; por
@@ -59,6 +58,15 @@ la evidencia. Lo que la rule fija es **que haya evidencia y que esté escrita**,
 | 3 → 4 | **N=5 rondas en sombra** con address-rate simulado alto (hallazgos que el equipo habría aplicado / total) y sin falso positivo de severidad alta | `telemetry.jsonl` del agente / `trend.json` |
 | Degradación | **1 incidente** causado por su salida, o 2 rondas seguidas con FP de severidad alta → baja una fase | anotar el porqué en su `memory.md` |
 
+**El «0 hallazgos falsos» de un auditor visual se mide, no se estima:** `scripts/calibrar_auditor.py
+<fixture> <findings.json>` compara sus hallazgos con los defectos plantados de `smoke/calibracion/`
+(`A-limpio`, `B-landing`) y da **recall**, **falsos positivos** y **trampas condenadas** (defectos
+aparentes con su razón escrita al lado: condenarlos es un FP). La clave vive fuera del proyecto
+(`~/.claude/calibracion-diseno/`) y la crea `smoke/calibracion/plantar.py`; sin ella el script sale con
+2 y lo dice, no con un 0 % que parezca bueno (comprobado el 2026-10-21). Para los auditores de código
+(Roberto, Pilar) el fixture es `smoke/calibracion/auditores/` (`montar.py`) y la clave se pasa con
+`--clave`; un hallazgo `nit` o `pre-existing` fuera de la clave sale aparte y lo adjudica una persona.
+
 Reglas del proceso:
 
 1. **Quién decide:** el Usuario (o el Supervisor si el Usuario lo delegó **por escrito** para ese agente).
@@ -67,8 +75,9 @@ Reglas del proceso:
    Para un agente **nuevo**, si no está escrita se asume **fase 3** (sombra: reporta, no tiene efecto).
    ⚠️ Esto **no degrada retroactivamente** a la flota existente: los agentes que ya operan con efecto
    (los del `/qa-loop`, por ejemplo) están de facto en fase 4 y se les anota la fase al tocarlos por
-   otra razón — boy-scout, no una migración masiva. Hoy solo tres la llevan escrita:
-   `rita-pattern-keeper` (3), `ignacio-roig` (4), `pol-product-advisor` (4).
+   otra razón — boy-scout, no una migración masiva. Cuando se escribió esto solo tres la llevaban
+   escrita (`rita-pattern-keeper` 3, `ignacio-roig` 4, `pol-product-advisor` 4); el recuento vivo,
+   agente por agente, es la tabla generada de `agents/README.md` §0 (el 2026-10-20, todos).
 3. **La promoción es por ámbito, no global**: se puede dar fase 4 en "detectar `description:` que falta"
    y mantener fase 3 en "juzgar si un patrón nuevo aplica".
 4. **La degradación no es un castigo, es información**: si un agente baja de fase, el fallo suele
@@ -81,7 +90,7 @@ entran en la escalera en ninguna fase.
 
 | No delegable | Por qué | Qué se hace en su lugar |
 |---|---|---|
-| **Confidencial** — secretos, credenciales, datos personales reales, contratos, datos de clientes | El blast radius de una prompt injection o de un log accidental no se revierte; el sandbox limita el daño pero **no previene la inyección** | Datos sintéticos o de-identificados; el agente trabaja contra un esquema, nunca contra la tabla real (las reglas de seguridad del template (no copiadas aquí)) |
+| **Confidencial** — secretos, credenciales, datos personales reales, contratos, datos de clientes | El blast radius de una prompt injection o de un log accidental no se revierte; el sandbox limita el daño pero **no previene la inyección** | Datos sintéticos o de-identificados; el agente trabaja contra un esquema, nunca contra la tabla real (`rules/security.md`) |
 | **Urgente sin tiempo de verificar** — hotfix en producción, incidente en curso | Delegar exige explicar y **verificar**; si no hay tiempo para lo segundo, no es delegación, es apostar | Lo hace el humano; el agente ayuda en paralelo (diagnóstico, búsqueda) sin escribir en producción. Post-mortem después (`governance.md` §8) |
 | **Alto riesgo con un agente no preparado** — agente recién creado, sin memoria, sin patrones del repo, o fuera de su dominio declarado | Es la combinación que produce el fallo caro: máxima libertad con mínimo contexto | Fase 1-2 primero, sobre trabajo de bajo riesgo, hasta que su `memory.md` tenga contenido real |
 
@@ -139,7 +148,7 @@ calibran igual: contra inflación de nota. Falta el eje de **asimetría**.
 
 | El error caro es… | Cómo sesga el umbral | Qué hace de más | Ejemplos en casa |
 |---|---|---|---|
-| **Falso negativo** (se me escapa) | Umbral **bajo**: ante la duda, reportar | Acepta ruido; su informe marca la confianza de cada hallazgo | `sofia-pentester`, `priya-privacy-auditor`, `quim-data-integrity`, `marco-qa-breaker`, `ignacio-roig` (adversarial por diseño: baseline 3.0, ≥10 findings) |
+| **Falso negativo** (se me escapa) | Umbral **bajo**: ante la duda, reportar | Acepta ruido; su informe marca la confianza de cada hallazgo | `sofia-pentester`, `priya-privacy-auditor`, `rafa-retrieval-engineer`, `marco-qa-breaker`, `ignacio-roig` (adversarial por diseño: baseline 3.0, ≥10 findings) |
 | **Falso positivo** (marco lo correcto) | Umbral **alto**: ante la duda, callar | Exige evidencia dura antes de hablar (Rita: ≥2 precedentes `file:line` o silencio) | `rita-pattern-keeper`, `code-review-gate` y cualquier gate que **bloquee** (un FP para el trabajo de otro) |
 | **Simétrico** | Umbral medio; el sesgo lo pone el contexto de la tarea | Declara en cada informe qué asumió | `pol-product-advisor`, `/otto` |
 
@@ -181,6 +190,8 @@ auditar la flota; **cuerpo para que el agente se calibre de verdad**.
 [ ] Disparadores de parada de §5 aplicables a su dominio
 [ ] Ninguna de las 3 clases no-delegables de §4 entra en su ámbito
 [ ] memory.md creada (aunque sea vacía) — un agente sin memoria está en fase 1
+[ ] Las 4 condiciones de alta de `audit-team.md` §6b (juicio propio, error_cost, fixture si es juez,
+    owner:) — `python3 .claude/scripts/fleet_policy.py`
 ```
 
 ---

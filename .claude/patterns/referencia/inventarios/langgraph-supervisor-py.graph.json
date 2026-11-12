@@ -1,0 +1,67 @@
+{
+ "meta": {
+  "source": "gen_proyecto_graph.py — imports + convención de framework · proyecto langgraph-supervisor-py",
+  "proyecto": "langgraph-supervisor-py",
+  "sha": "88859b3",
+  "date": "2026-08-26",
+  "nodes_total": 2,
+  "edges_total": 1,
+  "reduced": false,
+  "ficheros_por_capa": {
+   "test": 3,
+   "otro": 3,
+   "agente-grafo": 2
+  }
+ },
+ "nodes": [
+  {
+   "id": "langgraph_supervisor",
+   "label": "langgraph_supervisor",
+   "group": "agente-grafo",
+   "kind": "agente-grafo",
+   "files": [
+    "langgraph_supervisor/supervisor.py",
+    "langgraph_supervisor/__init__.py",
+    "langgraph_supervisor/agent_name.py",
+    "langgraph_supervisor/handoff.py"
+   ],
+   "loc": 839,
+   "fan_in": 5,
+   "fan_out": 0,
+   "desc": "get the tool functions wrapped in a tool class from the ToolNode",
+   "n_ficheros": 4
+  },
+  {
+   "id": "tests",
+   "label": "tests",
+   "group": "agente-grafo",
+   "kind": "agente-grafo",
+   "files": [
+    "tests/__init__.py",
+    "tests/test_supervisor.py",
+    "tests/test_supervisor_functional_api.py",
+    "tests/test_agent_name.py"
+   ],
+   "loc": 785,
+   "fan_in": 0,
+   "fan_out": 5,
+   "desc": "Tests for the supervisor module.",
+   "n_ficheros": 4
+  }
+ ],
+ "edges": [
+  {
+   "from": "tests",
+   "to": "langgraph_supervisor",
+   "kind": "importa",
+   "weight": 5,
+   "evidence": "EXTRACTED"
+  }
+ ],
+ "communities": {
+  "agente-grafo": {
+   "label": "Agente · grafo",
+   "color": "#7c3aed"
+  }
+ }
+}

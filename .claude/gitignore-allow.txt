@@ -1,0 +1,4 @@
+# Ignorado a propósito (check_gitignore.py). `docs/` en .gitignore deja fuera la documentación local
+# (architecture, flows, use-cases, superpowers…); lo que SÍ se versiona de docs/ se añadió con -f.
+docs/**
+frontend/docs/**

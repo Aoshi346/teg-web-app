@@ -1,0 +1,11 @@
+{
+ "_comment": "Plantilla (sub-ola 2.23, SE-18). Se copia a .claude/deps-excepciones.json. Una excepción es una deuda con fecha: sin `razon` o con `caduca` pasada, gate_deps.py la rechaza y la vulnerabilidad vuelve a contar. `id` puede ser el de GHSA, CVE o PYSEC (vale cualquiera de los alias del grupo); `paquete` es opcional y la limita a un paquete.",
+ "excepciones": [
+  {
+   "id": "GHSA-xxxx-xxxx-xxxx",
+   "paquete": "nombre-del-paquete",
+   "razon": "Qué la hace aceptable (p. ej. la función afectada no se llama: ruta y línea) y quién lo decidió.",
+   "caduca": "2026-12-31"
+  }
+ ]
+}

@@ -1,0 +1,289 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# catalogo-diseno.yaml — las técnicas del canon de diseño DECLARADO.
+#
+# NO es `../catalog.yaml`, y la diferencia es el fichero entero:
+#   ../catalog.yaml   patrones MEDIDOS en ESTE repo (dominancia ≥85%). Los lee Rita.
+#                     Los aplica `hooks/pattern-check.sh`. Bloquean.
+#   este fichero      técnicas DECLARADAS, medidas en un corpus AJENO a este repo
+#                     (`resources/referencias-diseno/`, 10 diseños propios de 2026).
+#                     Rita NO lo lee. `pattern-check.sh` NO lo grepea. NO bloquea nada.
+#
+# Por qué se puede hacer esto sin romper la regla de dominancia: precedente GAP-1 de
+# `../README.md` §1 — las 10 reglas `ag-*` están medidas en dos repos y los dos son
+# nuestros, así que siguen en `sombra` y su comprobador imprime esa procedencia. Aquí
+# pasa lo mismo, un escalón más abajo: DIEZ DISEÑOS DE UN SOLO EQUIPO NO SON DOMINANCIA.
+# Puede ser simplemente nuestro gusto, y por eso nada de aquí bloquea.
+#
+# ESTADOS — y esta columna es la mitad del valor del fichero:
+#   patron    la técnica aparece en ≥2 diseños DISTINTOS del corpus
+#   anecdota  aparece en UNO solo. Se conserva porque es útil, pero no se presenta
+#             como «así se hace aquí»: se presenta como «esto lo hicimos una vez»
+#   regla     no entra por frecuencia sino por el COSTE MEDIDO de no hacerlo
+#             (hoy solo T11b, y su justificación es el fallo real de attomo)
+#
+# Cada precedente se verificó con `sed -n` antes de escribirlo, y
+# `scripts/verificar_precedentes.py` lo vuelve a comprobar en cada cambio: si un fichero
+# del corpus se mueve o se acorta, este catálogo falla en vez de mentir.
+# ─────────────────────────────────────────────────────────────────────────────
+version: 1
+declarado: true
+medido_en: resources/referencias-diseno   # corpus externo a este repo
+generado: "2026-09-18"
+bloquea: false
+lee_rita: false
+
+tecnicas:
+  - id: T1
+    enunciado: "Titular display de tres líneas con UNA en itálica serif que carga el núcleo semántico"
+    eje: tipografia
+    perfiles: [web-cliente]
+    doc: tipografia.md
+    estado: patron
+    precedentes: ["bien/kalinayoga-v6.html:326", "bien/kalinayoga-v4.html:39", "bien/elevaiti-v2.html:2075"]
+    conflicto_con: "frontend-design lista «accenting just a single word or phrase in a headline» como señal de IA. Ver tipografia.md §Conflicto: el tell es el cromo aplicado a cualquier tema; esto es una decisión de composición que la dirección de arte tiene que justificar."
+
+  - id: T2
+    enunciado: "Emparejamiento tipográfico elegido por SECTOR; en `web-cliente`, Inter nunca va sola"
+    eje: tipografia
+    perfiles: [web-cliente]
+    doc: tipografia.md
+    estado: patron
+    precedentes: ["bien/kalinayoga-v4.html:40", "bien/kalinayoga-v6.html:50"]
+    contraejemplo: "bien/consultorpro.html:8 — carga SOLO Inter, y es correcto: es el único diseño de perfil `producto-panel` del corpus. Una herramienta de trabajo no necesita voz tipográfica, necesita no estorbar."
+    nota: "Medido: de los 8 diseños `web-cliente`, ninguno deja Inter sola. La regla se acotó al perfil cuando la medición encontró su excepción, en vez de escribirla como absoluta y fallar a la primera."
+
+  - id: T3
+    enunciado: "Escala tipográfica fluida con clamp(), con el display muy apretado de interlineado"
+    eje: tipografia
+    perfiles: [web-cliente, producto-panel]
+    doc: tipografia.md
+    estado: patron
+    precedentes: ["bien/consultorpro.html:57", "bien/dale-marketing-v4/styles.css:81", "bien/kalinayoga-v6.html:56"]
+
+  - id: T3b
+    enunciado: "Micro-etiqueta con tracking contra un display enorme: el contraste de escala ES la composición"
+    eje: tipografia
+    perfiles: [web-cliente]
+    doc: tipografia.md
+    estado: patron
+    precedentes: ["bien/kalinayoga-v4.html:75", "bien/dale-marketing-v4/styles.css:71"]
+    nota: >
+      Rango MEDIDO en el corpus: .05em a .28em, y el máximo real es 0.28em — no «.2-.45em», que es
+      lo que decía la primera versión de esta fila de memoria. Las micro-etiquetas viven en .2-.28em.
+      Corregido el 2026-09-18 al medirlo (`grep -rhoE "letter-spacing: *0?\.[0-9]+em"`).
+
+  - id: T4
+    enunciado: "Eyebrow con filete o con número de sección"
+    eje: tipografia
+    perfiles: [web-cliente]
+    doc: tipografia.md
+    estado: patron
+    precedentes: ["bien/dale-marketing-v4/styles.css:66", "bien/elevaiti-v53.html:88", "bien/consultorpro.html:1679"]
+    conflicto_con: "cluster 5 de frontend-design («a tracked-out ALL-CAPS eyebrow label above every heading»). Tope: máximo 2 rasgos de los 5 clusters por página, cada uno justificado en la ficha de la dirección."
+
+  - id: T5
+    enunciado: "Sombras TEÑIDAS con el oscuro de marca, nunca negro puro"
+    eje: textura
+    perfiles: [web-cliente, producto-panel]
+    doc: textura-y-profundidad.md
+    estado: patron
+    precedentes: ["bien/elevaiti-v53.html:71", "bien/consultorpro.html:96"]
+    antipatron_asociado: R4   # agents/shared/red-flags.sh
+    nota: "elevaiti-v53 usa rgba(13,27,42,.06) —su azul medianoche— y consultorpro rgba(160,5,5,.35) —su oxblood—. La sombra se funde con el fondo en vez de ensuciarlo."
+
+  - id: T5b
+    enunciado: "Tokens de easing y duración declarados, no valores sueltos por el CSS"
+    eje: movimiento
+    perfiles: [web-cliente, producto-panel]
+    doc: movimiento.md
+    estado: patron
+    precedentes: ["bien/dale-marketing-v4/styles.css:31", "bien/yessmassage-v7.html:75", "bien/elevaiti-v53.html:22"]
+    nota: "Dos diseños distintos llegaron al MISMO valor: cubic-bezier(.16,1,.3,1). Es lo más parecido a dominancia que hay en este corpus."
+
+  - id: T6
+    enunciado: "Acento por tarjeta mediante custom property heredada (--pillar-color)"
+    eje: textura
+    perfiles: [web-cliente]
+    doc: textura-y-profundidad.md
+    estado: anecdota
+    precedentes: ["bien/kalinayoga-v6.html:553"]
+
+  - id: T7
+    enunciado: "Número fantasma: cifra grande, muy bajo contraste, esquina de la tarjeta, no seleccionable"
+    eje: composicion
+    perfiles: [web-cliente]
+    doc: composicion.md
+    estado: patron
+    precedentes: ["bien/kalinayoga-v6.html:582", "bien/dale-marketing-v4/styles.css:612"]
+    conflicto_con: "frontend-design avisa de los marcadores numerados 01/02/03 cuando el contenido NO es una secuencia. Comprobar que lo es antes de usarlo."
+
+  - id: T8
+    enunciado: "Grano con feTurbulence SVG inline en data-uri (cero peticiones)"
+    eje: textura
+    perfiles: [web-cliente]
+    doc: textura-y-profundidad.md
+    estado: patron
+    precedentes: ["mal/attomo-digital.html:97", "bien/elevaiti-v5.html:200", "bien/dale-marketing-v4/styles.css:351"]
+
+  - id: T9
+    enunciado: "Rejilla enmascarada con radial-gradient + orbes difuminados como profundidad del hero"
+    eje: composicion
+    perfiles: [web-cliente]
+    doc: composicion.md
+    estado: patron
+    precedentes: ["bien/elevaiti-v5.html:335", "mal/attomo-digital.html:240"]
+
+  - id: T10
+    enunciado: "Rejilla con filete: gap de 1-2px sobre fondo teñido en vez de bordes"
+    eje: composicion
+    perfiles: [web-cliente, producto-panel]
+    doc: composicion.md
+    estado: patron
+    precedentes: ["bien/elevaiti-v53.html:118", "bien/elevaiti-v7.html:1251", "bien/kalinayoga-v4.html:590"]
+
+  - id: T11
+    enunciado: "Motor de reveal por defecto: IntersectionObserver + transición CSS larga"
+    eje: movimiento
+    perfiles: [web-cliente]
+    doc: movimiento.md
+    estado: patron
+    precedentes: ["bien/elevaiti-v53.html:535", "bien/dale-marketing-v4/script.js:610", "bien/elevaiti-v2.html:2519"]
+    conflicto_con: "frontend-design: «fade-and-slide-up entrances on each section […] read as AI-generated». Tiene razón en la CANTIDAD (un momento orquestado por página); nosotros en el MECANISMO. Lo que lo salva de ser relleno es T18."
+
+  - id: T11b
+    enunciado: "Mejora progresiva: ningún contenido depende del JS para ser visible (body.js-ready)"
+    eje: movimiento
+    perfiles: [web-cliente, producto-panel]
+    doc: movimiento.md
+    estado: regla
+    precedentes: ["bien/elevaiti-v53.html:94"]
+    contraejemplo: "mal/attomo-digital.html:1441 — initGSAP() se define y NUNCA se llama (una sola aparición en el fichero), así que .reveal{opacity:0} de :1006 deja la página entera invisible. Y está DESPLEGADA así."
+    antipatron_asociado: GD-01
+    por_que_es_regla_y_no_patron: >
+      Aparece en UN solo diseño, así que por frecuencia sería anécdota. Entra como regla por el
+      coste medido de no aplicarla: el contraejemplo es una página real, publicada, que no se ve.
+      Es el único sitio de este catálogo donde la justificación no es la frecuencia.
+
+  - id: T12
+    enunciado: "Nivel premium: timeline de entrada GSAP + ScrollTrigger con scrub"
+    eje: movimiento
+    perfiles: [web-cliente]
+    doc: movimiento.md
+    estado: patron
+    precedentes: ["bien/dale-marketing-v4/script.js:3", "bien/elevaiti-v5.html:16"]
+    aviso: "El tercer diseño que lo usa (attomo) es justo el que está roto por esta vía. GSAP sube el techo y sube el riesgo: exige T11b."
+
+  - id: T13
+    enunciado: "Revelado por palabras con máscara, partido a mano (sin SplitText)"
+    eje: movimiento
+    perfiles: [web-cliente]
+    doc: movimiento.md
+    estado: anecdota
+    precedentes: ["bien/dale-marketing-v4/styles.css:383", "bien/dale-marketing-v4/script.js:166"]
+    nota: "Dos ficheros, UN solo diseño. Por eso es anécdota y no patrón."
+
+  - id: T14
+    enunciado: "Scroll suavizado con Lenis"
+    eje: movimiento
+    perfiles: [web-cliente]
+    doc: movimiento.md
+    estado: anecdota
+    precedentes: ["mal/attomo-digital.html:14"]
+    prohibido_en: [producto-panel]
+
+  - id: T15
+    enunciado: "Cursor propio: punto + anillo con retardo por lerp"
+    eje: movimiento
+    perfiles: [web-cliente]
+    doc: movimiento.md
+    estado: patron
+    precedentes: ["bien/dale-marketing-v4/script.js:67", "mal/attomo-digital.html:1403"]
+    prohibido_en: [producto-panel]
+    antipatron_asociado: GD-06
+    aviso: "Nunca con `cursor:none` global (attomo:48 y :315). Solo bajo @media (hover:hover)."
+
+  - id: T16
+    enunciado: "Botón magnético y tarjeta con tilt 3D"
+    eje: movimiento
+    perfiles: [web-cliente]
+    doc: movimiento.md
+    estado: anecdota
+    precedentes: ["mal/attomo-digital.html:1572"]
+    prohibido_en: [producto-panel]
+
+  - id: T17
+    enunciado: "Micro-interacción de botón con ::before (barrido de brillo o de relleno)"
+    eje: movimiento
+    perfiles: [web-cliente]
+    doc: movimiento.md
+    estado: patron
+    precedentes: ["bien/elevaiti-v2.html:300", "bien/yessmassage-v7.html:717"]
+
+  - id: T18
+    enunciado: "El movimiento EXPRESA el sector: se nombra la metáfora antes de animar nada"
+    eje: movimiento
+    perfiles: [web-cliente]
+    doc: movimiento.md
+    estado: patron
+    precedentes: ["bien/yessmassage-v7.html:228", "bien/kalinayoga-v6.html:285"]
+    contraejemplo: "bien/elevaiti-v7.html:321 — `@keyframes float` genérico: se mueve, pero no dice nada del negocio. Es la diferencia exacta entre movimiento y relleno."
+    nota: "`breathe` en un sitio de masaje y `floatPlant` en uno de yoga. Es la técnica que más separa este corpus de una página generada, y la única que no se puede copiar de un catálogo."
+
+  - id: T19
+    enunciado: "Formas orgánicas: blobs que mutan con border-radius y divisores de onda"
+    eje: composicion
+    perfiles: [web-cliente]
+    doc: composicion.md
+    estado: anecdota
+    precedentes: ["bien/yessmassage-v7.html:538"]
+
+  - id: T20
+    enunciado: "Marquesina con bordes difuminados por máscara y pausa al hover"
+    eje: composicion
+    perfiles: [web-cliente]
+    doc: composicion.md
+    estado: patron
+    precedentes: ["bien/elevaiti-v5.html:484", "bien/yessmassage-v7.html:2340", "mal/attomo-digital.html:548"]
+
+  - id: T21
+    enunciado: "Foto con overlay teñido de marca, aspect-ratio fijo y zoom contenido al hover"
+    eje: imagen
+    perfiles: [web-cliente]
+    doc: imagen.md
+    estado: patron
+    precedentes: ["bien/kalinayoga-v6.html:261", "bien/dale-marketing-v4/styles.css:865", "bien/kalinayoga-v4.html:710"]
+
+  - id: T22
+    enunciado: "Para B2B: enseñar el PRODUCTO funcionando en vez de ilustrarlo"
+    eje: estructura
+    perfiles: [web-cliente]
+    doc: demo-de-producto.md
+    estado: anecdota
+    precedentes: ["bien/elevaiti-v5.html:756", "bien/elevaiti-v5.html:2366"]
+    por_que_sigue_importando: >
+      Degradada de `patron` a `anecdota` el 2026-09-18, y el matiz merece leerse: las dos piezas
+      están en UN solo diseño… que es **el PRIMERO del ranking humano**. O sea que por frecuencia es
+      una anécdota y por resultado es lo mejor que hizo esta casa. Son dos ejes distintos y el
+      catálogo solo sabe contar el primero — por eso la columna `estado` mide frecuencia y esta nota
+      dice lo otro. Quien la use, que sepa que la apuesta se apoya en una elección de quien paga,
+      no en una costumbre.
+    nota: >
+      Las dos son de elevaiti-v5, PRIMERA del ranking humano: el chat con indicador de escritura
+      (:756) y la calculadora con tres deslizadores reales (:2366). · CORREGIDO el 2026-09-18: aquí
+      se citaba `elevaiti-v7.html:1801` como calculadora y **no lo es** — es una tarjeta flotante
+      con la cifra «ROI Automatización +347%». v7 tiene CERO `type="range"`. El `RANKING.csv` se la
+      atribuye a V7 y el fichero dice otra cosa; la discrepancia se deja escrita en
+      demo-de-producto.md §1 en vez de resolverla a favor de lo que quedaba mejor.
+
+  - id: T23
+    enunciado: "Andamiaje de accesibilidad: skip link, aria-expanded, Escape, y reduced-motion en CSS Y en JS"
+    eje: a11y
+    perfiles: [web-cliente, producto-panel]
+    doc: movimiento.md
+    estado: anecdota
+    precedentes: ["bien/dale-marketing-v4/index.html:17", "bien/dale-marketing-v4/styles.css:310", "bien/dale-marketing-v4/script.js:11"]
+    antipatron_asociado: GD-05
+    nota: >
+      Tres ficheros, UN solo diseño de nueve. Ese número es el hallazgo: el corpus es bueno en
+      tipografía y en movimiento, y flojo en accesibilidad — 6 de 9 quitan el outline sin reponer el
+      foco (GD-12). Se cita por lo primero, NO por lo segundo, y conviene decirlo cada vez.

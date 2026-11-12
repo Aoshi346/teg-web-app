@@ -1,0 +1,532 @@
+<!doctype html>
+<html lang="es">
+<!--
+  report_kit/pruebas.template.html — MANUAL DE PRUEBAS MANUALES (US-3).
+  Dos mitades por item: (a) el guion que sigue una PERSONA (qué abrir, qué hacer, qué debe ver) y
+  (b) qué verificó ya el agente y con qué evidencia, para no repetir trabajo.
+  El guion sale de item.manual_test (derivado de los criterios de aceptación de tasks.md, formato
+  Dado/Cuando/Entonces — SPEC-3); si un item no lo trae, se deriva un paso desde `goal` y se
+  etiqueta como derivado. Lo que marca la persona vive en item.tested (KEEP: persiste igual que
+  las decisiones — localStorage o disco vía server.py).
+  build.py inyecta report.json en `const DB = ...null;` y render_nav.py rellena la topnav.
+  Self-contained: tokens de templates/html/base.html, sin CDN. Ver rules/report-kit.md.
+-->
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Manual de pruebas</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Crect%20width='100'%20height='100'%20rx='22'%20fill='%231b2a4a'/%3E%3Ctext%20x='50'%20y='70'%20font-size='56'%20font-family='system-ui,sans-serif'%20font-weight='700'%20fill='%23fff'%20text-anchor='middle'%3ER%3C/text%3E%3C/svg%3E">
+<style>
+  /* SHARED:BEGIN */
+  :root{
+    --ink:#1b1b1f;--muted:#6b6b76;--faint:#6c6c78;--paper:#f6f4ef;--card:#fff;--line:#e4e0d7;
+    --navy:#1b2a4a;--accent:#c2410c;--green:#15803d;--amber:#b45309;--blue:#1d4ed8;--red:#b42318;
+    --radius-sm:6px;--radius-md:10px;--radius:14px;--radius-pill:999px;
+    --shadow-modal:0 20px 60px rgba(27,27,31,.28);
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --s-backlog:#6b6b76;--s-doing:#b45309;--s-review:#1d4ed8;--s-done:#15803d;--s-blocked:#b42318;
+    --d-aprobar:#15803d;--d-modificar:#1d4ed8;--d-aplazar:#b45309;--d-descartar:#b42318;
+  }
+  *{box-sizing:border-box}
+  h1{font-size:clamp(24px,3.6vw,38px);margin:0 0 10px;letter-spacing:-.02em;color:var(--ink)}
+  h1 em{font-style:italic;color:var(--navy)}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600;margin:0 0 10px}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px}
+  .kpi b{display:block;font-size:28px;font-weight:700;letter-spacing:-.02em;color:var(--navy);line-height:1.15}
+  .kpi span{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+  .kpi.warn b{color:var(--red)}
+  .badge{display:inline-block;font-size:11px;font-weight:700;padding:3px 10px;border-radius:var(--radius-pill);color:#fff;text-transform:uppercase;letter-spacing:.04em}
+  .nodata{max-width:560px;margin:80px auto;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:28px 32px;text-align:center}
+  .nodata code{font-family:var(--mono);font-size:.9em;background:#efece4;color:var(--navy);padding:2px 6px;border-radius:6px}
+  .icon{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-2px}
+  .demo-banner{display:flex;align-items:center;gap:8px;background:#fdf3e3;border:1px solid #eed9b0;border-radius:var(--radius-sm);padding:8px 14px;margin:14px 0 0;font-size:12.5px;color:#78350f}
+  .demo-banner .icon{flex:none}
+  .demo-banner[hidden]{display:none}  /* [hidden] pierde ante .demo-banner{display:flex} — sin esto el banner de demo sale SIEMPRE */
+  .audience-note{display:flex;align-items:center;gap:8px;background:#eef1f5;border:1px solid #d7dee8;border-radius:var(--radius-sm);padding:8px 14px;margin:12px 0 0;font-size:12.5px;color:var(--navy)}
+  .audience-note .icon{flex:none}
+  .scroll-hint{display:none;font-size:11px;color:var(--faint);text-align:right;margin:0 0 6px}
+  @media(max-width:767px){.scroll-hint{display:block}}
+  /* nav responsive: la gestiona el bloque que inyecta render_nav.py (fuente única) */
+  /* SHARED:END */
+  html,body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55}
+  .wrap{max-width:1000px;margin:0 auto;padding:0 22px}
+  a{color:var(--blue)}
+  .hide{display:none!important}
+  header.hero{border-bottom:1px solid var(--line);padding:28px 0 20px}
+  .lead{font-size:13.5px;color:var(--muted);margin:0;font-family:var(--mono)}
+  .intro{font-size:14.5px;color:var(--ink);max-width:76ch;margin:10px 0 0}
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:14px}
+  button{font-family:var(--sans)}
+  .btn{font-size:13px;font-weight:600;cursor:pointer;border:1px solid var(--navy);background:var(--navy);color:#fff;padding:7px 13px;border-radius:10px}
+  .btn.ghost{background:var(--card);color:var(--navy)}
+  .btn.ghost:hover{background:#efece4}
+  .btn.sm{padding:5px 10px;font-size:12px}
+  .saveind{display:inline-flex;align-items:center;gap:7px;font-size:12px;padding:6px 11px;border-radius:var(--radius-pill);border:1px solid var(--line);background:var(--card);color:var(--muted)}
+  .saveind .led{width:8px;height:8px;border-radius:50%;background:var(--faint)}
+  .saveind.disk .led{background:var(--green)}
+  .saveind.local .led{background:var(--amber)}
+  .saveind.saving .led{background:var(--blue)}
+
+  /* ===== filtros ===== */
+  .filters{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:10px 14px;margin:16px 0}
+  .frow{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:5px 0}
+  .frow > .lbl{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);width:78px;flex:none;font-weight:600}
+  .chip{border:1px solid var(--line);background:var(--card);border-radius:var(--radius-pill);padding:4px 10px;font-size:12px;color:var(--ink);display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+  .chip:hover{border-color:var(--faint)}
+  .chip.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+  .chip .n{opacity:.65;font-size:10.5px}
+  .chip .sw{width:8px;height:8px;border-radius:50%}
+
+  /* ===== tarjeta de prueba ===== */
+  .tcard{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);margin:0 0 16px;overflow:hidden}
+  .tcard.pass{border-left:4px solid var(--green)}
+  .tcard.failed{border-left:4px solid var(--red)}
+  .tcard > .th{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid var(--line);background:#fbfaf7}
+  .tcard > .th .ttl{font-weight:700;color:var(--navy);font-size:14.5px}
+  .tag{border-radius:6px;padding:2px 7px;font-size:10.5px;font-weight:700;letter-spacing:.02em}
+  .tag.id{background:#efece4;color:var(--navy);font-family:var(--mono);font-weight:600}
+  .tag.epic{color:#fff}
+  .tag.st{color:#fff;text-transform:uppercase}
+  .tag.verd{color:#fff}
+  .tag.derived{background:#f3e5cf;color:#7c4a03}
+  .prog{margin-left:auto;font-family:var(--mono);font-size:11.5px;color:var(--muted);white-space:nowrap}
+  .halves{display:grid;grid-template-columns:1fr 340px;gap:0}
+  @media(max-width:900px){.halves{grid-template-columns:1fr}}
+  .manual{padding:12px 16px 14px}
+  .agentbox{padding:12px 16px 14px;background:#fbfaf7;border-left:1px solid var(--line)}
+  @media(max-width:900px){.agentbox{border-left:0;border-top:1px solid var(--line)}}
+  .hlab{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:600;margin:0 0 9px}
+  .prereq{background:#f4f6fb;border-left:3px solid var(--navy);border-radius:8px;padding:8px 12px;font-size:12.5px;margin:0 0 11px}
+  .prereq code{font-family:var(--mono);font-size:.9em}
+
+  .tstep{display:grid;grid-template-columns:26px 1fr auto;gap:9px;align-items:start;padding:9px 0;border-top:1px dashed #eee9df}
+  .tstep:first-of-type{border-top:0}
+  .tstep .num{font-family:var(--mono);font-size:11px;color:var(--faint);background:#efece4;border-radius:50%;width:22px;height:22px;line-height:22px;text-align:center;font-weight:700}
+  .tstep.ok{background:linear-gradient(90deg,rgba(21,128,61,.07),transparent 60%)}
+  .tstep.ko{background:linear-gradient(90deg,rgba(180,35,24,.07),transparent 60%)}
+  .tstep.ok .num{background:var(--green);color:#fff}
+  .tstep.ko .num{background:var(--red);color:#fff}
+  .sdo{font-size:13.5px}
+  .ssee{font-size:13px;color:var(--muted);margin-top:3px}
+  .ssee b,.sdo b{color:var(--navy)}
+  .marks{display:flex;gap:4px;flex:none}
+  .mk{border:1px solid var(--line);background:var(--card);border-radius:8px;padding:4px 9px;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;line-height:1.3}
+  .mk:hover{border-color:var(--navy)}
+  .okbtn.on{background:var(--green);border-color:var(--green);color:#fff}
+  .kobtn.on{background:var(--red);border-color:var(--red);color:#fff}
+  .pendbtn.on{background:#efece4;border-color:var(--faint);color:var(--ink)}
+  .snote{grid-column:2/-1;margin-top:6px}
+  .inp{width:100%;border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-family:var(--sans);font-size:12.5px;color:var(--ink);background:var(--card)}
+  .inp::placeholder{color:var(--faint)}
+  textarea.inp{min-height:44px;resize:vertical}
+  .shot{margin-top:7px}
+  .shot img{max-width:230px;max-height:150px;border:1px solid var(--line);border-radius:8px;cursor:zoom-in;display:block;background:#efece4}
+  .shot figcaption{font-size:10.5px;color:var(--faint);margin-top:3px}
+
+  /* ===== caso conversacional ===== */
+  .tcase{border-top:1px dashed #eee9df;padding:10px 0}
+  .tcase:first-of-type{border-top:0}
+  .cgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media(max-width:700px){.cgrid{grid-template-columns:1fr}}
+  .cbox{font-size:12.5px}
+  .cbox .clab{font-family:var(--mono);font-size:9.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);display:block;margin-bottom:3px}
+  .csaid{background:#eef1f5;border-radius:9px;padding:7px 11px;color:var(--navy)}
+  .cwant{background:#f5f8f3;border-radius:9px;padding:7px 11px}
+  .crow{display:flex;gap:8px;align-items:flex-start;margin-top:8px}
+  .crow .marks{padding-top:1px}
+
+  /* ===== lo que verificó el agente ===== */
+  .vhead2{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+  .wline{padding:2px 0;font-size:12.5px}
+  .w-code{color:var(--navy)} .w-live{color:var(--blue)} .w-gap{color:var(--amber);font-weight:600} .w-inst{color:var(--muted)}
+  .icon.inl{vertical-align:-2px;margin-right:3px}
+  .howto{background:#f8efe4;border:1px solid #ecd9bd;border-radius:8px;padding:7px 11px;font-size:12.5px;margin-top:8px}
+  .evrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:9px}
+  .evrow img{width:96px;height:64px;object-fit:cover;border:1px solid var(--line);border-radius:7px;cursor:zoom-in;background:#efece4}
+  .evrow .evother{font-size:11.5px;color:var(--muted);border:1px dashed var(--line);border-radius:7px;padding:6px 9px;max-width:100%;word-break:break-all}
+  .noev{font-size:12px;color:var(--faint)}
+  .goalq{font-size:12.5px;color:var(--muted);margin:0 0 8px}
+
+  #lightbox{position:fixed;inset:0;background:rgba(27,27,31,.85);display:flex;align-items:center;justify-content:center;z-index:90;padding:24px;cursor:zoom-out;opacity:0;pointer-events:none;transition:opacity .14s}
+  #lightbox.show{opacity:1;pointer-events:auto}
+  #lightbox img{max-width:96%;max-height:92vh;border-radius:8px;box-shadow:var(--shadow-modal)}
+  #export{position:fixed;inset:0;background:rgba(27,27,31,.5);display:flex;align-items:center;justify-content:center;z-index:80;padding:20px;opacity:0;pointer-events:none;transition:opacity .14s}
+  #export.show{opacity:1;pointer-events:auto}
+  #export .mbox{background:var(--card);border-radius:var(--radius);max-width:760px;width:100%;max-height:82vh;display:flex;flex-direction:column;box-shadow:var(--shadow-modal)}
+  #export h3{margin:0;padding:13px 18px;border-bottom:1px solid var(--line);font-size:15px}
+  #export textarea{flex:1;border:0;padding:14px 18px;font-family:var(--mono);font-size:12px;resize:none;outline:none;min-height:280px}
+  #export .mfoot{padding:12px 18px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end}
+  #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(16px);background:var(--ink);color:#fff;padding:10px 17px;border-radius:10px;opacity:0;transition:.25s;z-index:95;font-size:13px;pointer-events:none}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  footer{padding:20px 0 56px;color:var(--faint);font-size:12px}
+
+  /* el manual se imprime: es un guion que la gente sigue con el papel al lado */
+  @media print{
+    .topnav,.toolbar,.filters,.marks,.scroll-hint,#toast,#export,#lightbox{display:none!important}
+    body{background:#fff}
+    .tcard{break-inside:avoid;border:1px solid #ccc}
+    .agentbox{background:#fff}
+  }
+</style>
+</head>
+<body>
+<!-- ICONS:BEGIN -->
+<svg style="display:none" aria-hidden="true">
+  <symbol id="ic-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></symbol>
+  <symbol id="ic-download" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></symbol>
+  <symbol id="ic-upload" viewBox="0 0 24 24"><path d="M12 21V9"/><path d="m7 14 5-5 5 5"/><path d="M5 21h14"/></symbol>
+  <symbol id="ic-refresh" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></symbol>
+  <symbol id="ic-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".6" fill="currentColor"/></symbol>
+  <symbol id="ic-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><circle cx="12" cy="8" r=".6" fill="currentColor"/></symbol>
+  <symbol id="ic-tool" viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 1 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.1 2.1-2-2z"/></symbol><symbol id="ic-search" viewBox="0 0 16 16"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M10.5 10.5 L14 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol><symbol id="ic-eye" viewBox="0 0 16 16"><path d="M1.5 8 C4 4.2 12 4.2 14.5 8 C12 11.8 4 11.8 1.5 8 Z" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="8" cy="8" r="2" fill="currentColor"/></symbol><symbol id="ic-arrow" viewBox="0 0 16 16"><path d="M2.5 8 H12 M8.6 4 L13 8 L8.6 12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol><symbol id="ic-clip" viewBox="0 0 16 16"><rect x="4" y="2.6" width="8" height="11" rx="1.4" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6 2.6 V1.8 H10 V2.6" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6 6.4 H10 M6 9 H10 M6 11.4 H8.6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></symbol>
+</svg>
+<!-- ICONS:END -->
+<!-- NAV:BEGIN -->
+<!-- NAV:END -->
+
+<div class="wrap"><div class="demo-banner" id="demoBanner" hidden><svg class="icon"><use href="#ic-info"></use></svg><span><b>Datos de demostración.</b> Este set usa un fixture de ejemplo, no un proyecto real.</span></div></div>
+
+<div id="nodata" class="nodata" hidden>
+  <p class="eyebrow">Report-kit · Pruebas</p>
+  <p><b>Sin datos inyectados.</b></p>
+  <p>Esta es la plantilla cruda. Genera el informe con<br><code>python3 build.py &lt;plan-dir&gt;</code><br>para inyectar <code>report.json</code> en esta página.</p>
+</div>
+
+<div id="app">
+  <header class="hero"><div class="wrap">
+    <p class="eyebrow">Report-kit · Pruebas</p>
+    <h1 id="hTitle">Manual de pruebas manuales</h1>
+    <p class="lead" id="hSub"></p>
+    <p class="intro">Esto es para <b>probarlo tú</b>. Cada tarjeta tiene dos mitades: a la izquierda el
+      <b>guion paso a paso</b> — qué abrir, qué hacer y qué debes ver — y a la derecha <b>qué verificó ya
+      el agente</b> y con qué evidencia, para que no repitas su trabajo. Marca cada paso según lo pruebas:
+      se guarda igual que las decisiones del dashboard.</p>
+    <div class="kpis" id="kpis"></div>
+    <div class="toolbar">
+      <span id="saveind" class="saveind local"><span class="led"></span><span id="saveTxt">solo navegador</span></span>
+      <button class="btn ghost" onclick="exportMD()"><svg class="icon"><use href="#ic-copy"></use></svg> copiar resultado (md)</button>
+      <button class="btn ghost" onclick="window.print()"><svg class="icon"><use href="#ic-clip"></use></svg> Imprimir el guion</button>
+      <button class="btn ghost" onclick="resetTested()"><svg class="icon"><use href="#ic-refresh"></use></svg> Borrar mis marcas</button>
+    </div>
+  </div></header>
+
+  <main class="wrap">
+    <div class="audience-note"><svg class="icon"><use href="#ic-info"></use></svg><span id="srcNote"></span></div>
+    <div class="filters" id="filters"></div>
+    <div id="cards"></div>
+    <footer id="footnote"></footer>
+  </main>
+</div>
+
+<div id="lightbox" onclick="closeLight()"><img alt="evidencia ampliada"></div>
+<div id="export" onclick="if(event.target.id==='export')closeExport()">
+  <div class="mbox">
+    <h3 id="exportTitle">Resultado de las pruebas</h3>
+    <textarea id="exportText" readonly></textarea>
+    <div class="mfoot">
+      <button class="btn" onclick="copyExport()"><svg class="icon"><use href="#ic-copy"></use></svg> Copiar al portapapeles</button>
+      <button class="btn ghost" onclick="closeExport()">Cerrar</button>
+    </div>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script>
+const DB = /*__DATA__*/null;
+(function(){const m=DB&&DB.meta;if(m&&m.project){const t=`${m.project} · ${m.plan_id||""} · ronda ${m.round||1} · ${m.generated||""}`.toUpperCase();document.querySelectorAll(".eyebrow").forEach(el=>el.textContent=t);}})();
+
+const META=DB?(DB.meta||{}):{};
+const EPICS=META.epics||{};
+const STLABEL={backlog:"Backlog",doing:"En curso",review:"Revisión",done:"Hecho",blocked:"Bloqueado"};
+const SHEX={backlog:"#6b6b76",doing:"#b45309",review:"#1d4ed8",done:"#15803d",blocked:"#b42318"};
+const VMAP={done:["Hecho","#15803d"],partial:["Parcial","#b45309"],notdone:["No hecho","#b42318"],blocked:["Bloqueado","#6b6b76"],review:["A revisar","#1d4ed8"]};
+let backend=false;
+const F={epic:new Set(),status:new Set(),res:new Set()};
+
+/* ---------- persistencia dual — MISMO contrato que dashboard.html ----------
+   Comparten clave de localStorage, así que las dos páginas deben serializar la lista x-keep
+   COMPLETA: si una omitiera un campo, la última en guardar lo borraría. Aquí el campo propio es
+   `tested` (lo que marca la persona); el resto se conserva intacto. */
+function lsKey(){return "tlr::"+(META.project||"proj")+"::"+(META.plan_id||"plan")+"::v1";}
+function keepOf(it){return {status:it.status,decision:(it.decision===undefined?null:it.decision),note:it.note||"",
+  severity:it.severity||null,effort:it.effort||null,evidence:Array.isArray(it.evidence)?it.evidence:[],
+  tested:(it.tested&&typeof it.tested==="object")?it.tested:{},
+  nocturno:(it.nocturno&&typeof it.nocturno==="object")?it.nocturno:{}};}
+function applyKeep(it,o){
+  if(!o)return;
+  if(o.status)it.status=o.status;
+  if("decision"in o)it.decision=o.decision;
+  if("note"in o)it.note=o.note;
+  if(o.severity)it.severity=o.severity;
+  if(o.effort)it.effort=o.effort;
+  if(Array.isArray(o.evidence))it.evidence=o.evidence;
+  if(o.tested&&typeof o.tested==="object")it.tested=o.tested;
+  if(o.nocturno&&typeof o.nocturno==="object")it.nocturno=o.nocturno;  /* la marca de run nocturno la escribe el dashboard; aquí solo se conserva */
+}
+function snapshot(){const m={};DB.items.forEach(it=>m[it.id]=keepOf(it));return m;}
+function applyLocal(){try{const m=JSON.parse(localStorage.getItem(lsKey()))||{};DB.items.forEach(it=>applyKeep(it,m[it.id]));}catch(e){}}
+let saveT;
+function save(){
+  try{localStorage.setItem(lsKey(),JSON.stringify(snapshot()));}catch(e){}
+  if(!backend)return;
+  setInd("saving");clearTimeout(saveT);
+  saveT=setTimeout(()=>{
+    fetch("api/save",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({items:DB.items})})
+      .then(r=>{if(!r.ok)throw 0;setInd("disk");})
+      .catch(()=>{backend=false;setInd("local");toast("Sin servidor: guardado solo en navegador");});
+  },500);
+}
+function setInd(mode){
+  const e=document.getElementById("saveind"),t=document.getElementById("saveTxt");
+  e.className="saveind "+mode;
+  t.textContent=mode==="disk"?"guardado en disco":mode==="saving"?"guardando…":"solo navegador";
+}
+async function boot(){
+  try{
+    const r=await fetch("api/health",{cache:"no-store"});
+    if(!r.ok)throw 0;
+    backend=true;
+    try{
+      const dj=await(await fetch("report.json",{cache:"no-store"})).json();
+      if(dj&&dj.items){const by={};dj.items.forEach(x=>by[x.id]=x);DB.items.forEach(it=>{if(by[it.id])applyKeep(it,keepOf(by[it.id]));});}
+    }catch(e){}
+    setInd("disk");
+  }catch(e){backend=false;applyLocal();setInd("local");}
+  document.getElementById("footnote").innerHTML=backend
+    ?'Modo <b>servidor</b>: cada paso que marcas se guarda en <code>report.json</code> (campo <code>tested</code>), así que tu agente lo ve.'
+    :'Modo <b>estático</b>: tus marcas se guardan en este navegador. Para que el agente las vea, levanta <code>python3 server.py</code> en la carpeta del plan, o usa "copiar resultado (md)".';
+  render();
+}
+
+/* ---------- helpers ---------- */
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]));}
+function find(id){return DB.items.find(x=>x.id===id);}
+function epicColor(k){return (EPICS[k]&&EPICS[k].color)||"#6b6b76";}
+const WMAP=[["🔎","w-code","ic-search"],["👁","w-live","ic-eye"],["➡","w-gap","ic-arrow"],["📋","w-inst","ic-clip"]];
+function wline(t){
+  let cls="wline";for(const[emo,c] of WMAP){if(t.startsWith(emo)){cls+=" "+c;break;}}
+  let h=esc(t.replace(/\uFE0F/gu,""));
+  for(const[emo,,ic] of WMAP){h=h.split(emo).join(`<svg class="icon inl" aria-hidden="true"><use href="#${ic}"/></svg>`);}
+  return `<div class="${cls}">${h}</div>`;
+}
+function whyHTML(why){if(!why)return"";return why.split(/\n+/).map(l=>{const t=l.trim();return t?wline(t):"";}).join("");}
+
+/* ---------- el guion ----------
+   Fuente 1: item.manual_test (lo escribe el agente desde los criterios de aceptación de tasks.md).
+   Fuente 2 (fallback honesto): un paso derivado de `goal`. Sale genérico a propósito y se marca
+   como DERIVADO — es el aviso de que a ese item le falta criterio de aceptación de verdad. */
+function scriptOf(it){
+  const mt=it.manual_test||{};
+  const steps=Array.isArray(mt.steps)?mt.steps.filter(s=>s&&s.id):[];
+  const cases=Array.isArray(mt.cases)?mt.cases.filter(c=>c&&c.id):[];
+  if(steps.length||cases.length)return {steps:steps,cases:cases,prereq:mt.prereq||"",url:mt.url||"",derived:false};
+  if(!it.goal)return null;
+  return {derived:true,prereq:mt.prereq||"",url:mt.url||"",cases:[],
+    steps:[{id:it.id+"-g1",action:"Comprueba a mano: "+(it.title||it.id).replace(/\.$/,""),expect:it.goal}]};
+}
+function stKeys(sc){return sc.steps.map(s=>s.id).concat(sc.cases.map(c=>c.id));}
+function markOf(it,k){return (it.tested&&it.tested[k])||{};}
+function setMark(id,k,ok){
+  const it=find(id);if(!it)return;
+  it.tested=it.tested&&typeof it.tested==="object"?it.tested:{};
+  const cur=it.tested[k]||{};
+  if(cur.ok===ok)ok=null;                       // volver a pulsar = deshacer
+  it.tested[k]=Object.assign({},cur,{ok:ok,at:new Date().toISOString()});
+  if(ok!==false)delete it.tested[k].note;       // la nota es del fallo
+  save();render();
+}
+function setField(id,k,field,v){
+  const it=find(id);if(!it)return;
+  it.tested=it.tested&&typeof it.tested==="object"?it.tested:{};
+  it.tested[k]=Object.assign({},it.tested[k]||{},{[field]:v,at:new Date().toISOString()});
+  save();                                        // sin re-render: no perder el foco al escribir
+}
+function tally(it,sc){
+  const ks=stKeys(sc);let ok=0,ko=0;
+  ks.forEach(k=>{const m=markOf(it,k);if(m.ok===true)ok++;else if(m.ok===false)ko++;});
+  return {total:ks.length,ok:ok,ko:ko,pend:ks.length-ok-ko};
+}
+
+/* ---------- filtros ---------- */
+function testable(){return DB.items.map(it=>({it:it,sc:scriptOf(it)})).filter(x=>x.sc);}
+function matches(x){
+  if(F.epic.size&&!F.epic.has(x.it.epic||"_"))return false;
+  if(F.status.size&&!F.status.has(x.it.status))return false;
+  if(F.res.size){
+    const t=tally(x.it,x.sc);
+    const r=t.ko?"ko":(t.pend===0?"ok":(t.ok||t.ko?"curso":"pend"));
+    if(!F.res.has(r))return false;
+  }
+  return true;
+}
+function tog(d,v){const s=F[d];s.has(v)?s.delete(v):s.add(v);render();}
+function clearF(){Object.values(F).forEach(s=>s.clear());render();}
+function chip(active,label,n,onclick,sw){return `<button class="chip ${active?'on':''}" onclick="${onclick}">`+(sw?`<span class="sw" style="background:${sw}"></span>`:"")+`${label}${n!=null?` <span class="n">${n}</span>`:""}</button>`;}
+
+/* ---------- render ---------- */
+function render(){
+  const all=testable();
+  const cnt=p=>all.filter(p).length;
+  const res=x=>{const t=tally(x.it,x.sc);return t.ko?"ko":(t.pend===0?"ok":(t.ok?"curso":"pend"));};
+  let h=`<div class="frow"><span class="lbl">Resultado</span>`+
+    chip(F.res.has("pend"),"Sin probar",cnt(x=>res(x)==="pend"),`tog('res','pend')`,"#c9c4b8")+
+    chip(F.res.has("curso"),"A medias",cnt(x=>res(x)==="curso"),`tog('res','curso')`,"#b45309")+
+    chip(F.res.has("ok"),"Pasa",cnt(x=>res(x)==="ok"),`tog('res','ok')`,"#15803d")+
+    chip(F.res.has("ko"),"Falla",cnt(x=>res(x)==="ko"),`tog('res','ko')`,"#b42318")+
+    `<button class="chip" style="margin-left:auto;border-style:dashed;color:var(--muted)" onclick="clearF()">✕ limpiar</button></div>`;
+  h+=`<div class="frow"><span class="lbl">Estado</span>`+Object.keys(STLABEL).map(s=>
+    chip(F.status.has(s),STLABEL[s],cnt(x=>x.it.status===s),`tog('status','${s}')`,SHEX[s])).join("")+`</div>`;
+  if(Object.keys(EPICS).length)
+    h+=`<div class="frow"><span class="lbl">Épica</span>`+Object.keys(EPICS).map(k=>
+      chip(F.epic.has(k),esc(k)+" · "+esc(EPICS[k].name||k),cnt(x=>x.it.epic===k),`tog('epic','${k}')`,epicColor(k))).join("")+`</div>`;
+  document.getElementById("filters").innerHTML=h;
+
+  const vis=all.filter(matches);
+  let TS=0,TOK=0,TKO=0,derived=0;
+  all.forEach(x=>{const t=tally(x.it,x.sc);TS+=t.total;TOK+=t.ok;TKO+=t.ko;if(x.sc.derived)derived++;});
+  document.getElementById("kpis").innerHTML=
+    `<div class="kpi"><b>${all.length}</b><span>items con guion</span></div>`+
+    `<div class="kpi"><b>${TS}</b><span>pasos a probar</span></div>`+
+    `<div class="kpi"><b style="color:var(--green)">${TOK}</b><span>pasan</span></div>`+
+    `<div class="kpi ${TKO?'warn':''}"><b style="color:${TKO?'var(--red)':'var(--faint)'}">${TKO}</b><span>fallan</span></div>`+
+    `<div class="kpi"><b style="color:var(--accent)">${TS-TOK-TKO}</b><span>sin probar</span></div>`;
+  document.getElementById("srcNote").innerHTML=
+    `El guion sale de los <b>criterios de aceptación</b> de cada item. `+
+    (derived?`<b>${derived}</b> de ${all.length} items no tienen pasos escritos y su guion se ha <b>derivado del objetivo</b> `+
+      `(marcado <span class="tag derived">derivado</span>): sale genérico. Para que salga bueno, escribe los pasos en `+
+      `<code>tasks.md</code> con <code>test: lo que haces → lo que debe pasar</code> (o <code>case:</code> para un chatbot).`
+     :`Los ${all.length} items traen pasos escritos.`)+
+    (DB.items.length>all.length?` ${DB.items.length-all.length} items del plan no tienen ni pasos ni objetivo, así que no aparecen aquí.`:"");
+
+  document.getElementById("cards").innerHTML=vis.length?vis.map(card).join(""):
+    `<div class="nodata" style="margin:30px auto"><p>Sin items para estos filtros.</p></div>`;
+}
+
+function card(x){
+  const it=x.it,sc=x.sc,t=tally(it,sc);
+  const cls=t.ko?"failed":(t.total&&t.pend===0?"pass":"");
+  const v=VMAP[it.verdict];
+  return `<section class="tcard ${cls}">`+
+    `<div class="th"><span class="tag id">${esc(it.id)}</span>`+
+      (it.epic?`<span class="tag epic" style="background:${epicColor(it.epic)}">${esc(it.epic)}</span>`:"")+
+      `<span class="ttl">${esc(it.title)}</span>`+
+      `<span class="tag st" style="background:${SHEX[it.status]}">${STLABEL[it.status]}</span>`+
+      (sc.derived?`<span class="tag derived" title="Sin pasos escritos: derivado del objetivo del item">derivado</span>`:"")+
+      `<span class="prog">${t.ok}/${t.total} ok${t.ko?` · ${t.ko} fallan`:""}</span></div>`+
+    `<div class="halves">`+
+      `<div class="manual"><p class="hlab">Pruébalo tú — paso a paso</p>`+
+        (it.goal?`<p class="goalq">Se considera hecho cuando: <b>${esc(it.goal)}</b></p>`:"")+
+        ((sc.prereq||sc.url)?`<div class="prereq">${sc.prereq?`<b>Antes de empezar:</b> ${esc(sc.prereq)}`:""}`+
+          `${sc.url?`${sc.prereq?"<br>":""}<b>Dónde:</b> <code>${esc(sc.url)}</code>`:""}</div>`:"")+
+        sc.steps.map((s,i)=>stepHTML(it,s,i)).join("")+
+        (sc.cases.length?`<p class="hlab" style="margin-top:14px">Qué le dices al bot y qué debería contestar</p>`+
+          sc.cases.map(c=>caseHTML(it,c)).join(""):"")+
+      `</div>`+
+      `<div class="agentbox"><p class="hlab">Esto ya lo verificó el agente</p>`+
+        (v?`<div class="vhead2"><span class="tag verd" style="background:${v[1]}">${v[0]}</span>`+
+            (it.precision_pct!=null?`<b style="color:${v[1]};font-size:12.5px">${it.precision_pct}%</b>`:"")+
+            (it.confidence?`<span style="color:var(--muted);font-size:11.5px">confianza ${esc(it.confidence)}</span>`:"")+`</div>`
+          :`<p class="noev">Sin veredicto del agente todavía — este item lo estrenas tú.</p>`)+
+        whyHTML(it.why)+
+        (it.verdict!=="done"&&it.howto?`<div class="howto"><b>Qué falta:</b> ${esc(it.howto)}</div>`:"")+
+        evidenceHTML(it)+
+      `</div>`+
+    `</div></section>`;
+}
+
+function stepHTML(it,s,i){
+  const m=markOf(it,s.id),st=m.ok===true?"ok":m.ok===false?"ko":"";
+  return `<div class="tstep ${st}"><span class="num">${i+1}</span>`+
+    `<div><div class="sdo"><b>Haz:</b> ${esc(s.action)}</div>`+
+      (s.given?`<div class="ssee"><b>Partiendo de:</b> ${esc(s.given)}</div>`:"")+
+      (s.expect?`<div class="ssee"><b>Debes ver:</b> ${esc(s.expect)}</div>`:"")+
+      (s.shot?`<figure class="shot"><img src="${esc(s.shot)}" alt="captura de referencia" loading="lazy" onclick="openLight(this.src)" onerror="this.parentNode.remove()"><figcaption>captura de referencia</figcaption></figure>`:"")+
+    `</div>`+
+    marksHTML(it.id,s.id,m)+
+    (m.ok===false?`<div class="snote"><input class="inp" placeholder="¿qué pasó en vez de eso?" value="${esc(m.note||"")}" oninput="setField('${esc(it.id)}','${esc(s.id)}','note',this.value)"></div>`:"")+
+  `</div>`;
+}
+function caseHTML(it,c){
+  const m=markOf(it,c.id),st=m.ok===true?"ok":m.ok===false?"ko":"";
+  return `<div class="tcase ${st}">`+
+    `<div class="cgrid">`+
+      `<div class="cbox"><span class="clab">Tú escribes</span><div class="csaid">${esc(c.input)}</div></div>`+
+      `<div class="cbox"><span class="clab">Debería responder</span><div class="cwant">${esc(c.expected||"—")}</div></div>`+
+    `</div>`+
+    `<div class="crow"><textarea class="inp" placeholder="pega aquí lo que respondió de verdad" `+
+      `oninput="setField('${esc(it.id)}','${esc(c.id)}','actual',this.value)">${esc(m.actual||"")}</textarea>`+
+      marksHTML(it.id,c.id,m)+`</div>`+
+  `</div>`;
+}
+function marksHTML(id,k,m){
+  return `<div class="marks">`+
+    `<button class="mk okbtn ${m.ok===true?'on':''}" onclick="setMark('${esc(id)}','${esc(k)}',true)" title="Pasa">✓</button>`+
+    `<button class="mk kobtn ${m.ok===false?'on':''}" onclick="setMark('${esc(id)}','${esc(k)}',false)" title="Falla">✕</button>`+
+  `</div>`;
+}
+function evidenceHTML(it){
+  const ev=Array.isArray(it.evidence)?it.evidence:[];
+  if(!ev.length)return `<p class="noev" style="margin-top:9px">Sin capturas adjuntas.</p>`;
+  return `<div class="evrow">`+ev.map(e=>e.kind==="img"
+    ?`<img src="${esc(e.src)}" alt="${esc(e.label||'evidencia')}" title="${esc(e.label||'')} ${esc(e.caption||'')}" loading="lazy" onclick="openLight(this.src)" onerror="this.remove()">`
+    :`<span class="evother">${esc(e.label||e.kind)}: ${esc(String(e.src).slice(0,120))}</span>`).join("")+`</div>`;
+}
+
+/* ---------- export / reset / varios ---------- */
+function exportMD(){
+  const all=testable();
+  let md=`# ${META.title||"Plan"} — pruebas manuales (${new Date().toISOString().slice(0,10)})\n\n`;
+  let any=false;
+  all.forEach(x=>{
+    const t=tally(x.it,x.sc);
+    if(!t.ok&&!t.ko)return;
+    any=true;
+    md+=`## \`${x.it.id}\` ${x.it.title} — ${t.ok}/${t.total} ok${t.ko?`, ${t.ko} fallan`:""}\n`;
+    x.sc.steps.forEach((s,i)=>{const m=markOf(x.it,s.id);if(m.ok==null)return;
+      md+=`- [${m.ok?"x":" "}] ${i+1}. ${s.action}${s.expect?` → ${s.expect}`:""}`+
+        (m.ok===false?` — **FALLA**${m.note?`: ${m.note}`:""}`:"")+`\n`;});
+    x.sc.cases.forEach(c=>{const m=markOf(x.it,c.id);if(m.ok==null&&!m.actual)return;
+      md+=`- [${m.ok?"x":" "}] «${c.input}» → esperado: ${c.expected||"—"}`+
+        (m.actual?` · real: ${m.actual}`:"")+(m.ok===false?" — **FALLA**":"")+`\n`;});
+    md+=`\n`;
+  });
+  if(!any){toast("Todavía no has marcado ningún paso");return;}
+  document.getElementById("exportTitle").textContent="Resultado de tus pruebas (pegar en tasks.md o al agente)";
+  document.getElementById("exportText").value=md;
+  document.getElementById("export").classList.add("show");
+}
+function closeExport(){document.getElementById("export").classList.remove("show");}
+function copyExport(){
+  const t=document.getElementById("exportText");t.select();
+  (navigator.clipboard?navigator.clipboard.writeText(t.value):Promise.reject())
+    .then(()=>toast("Copiado")).catch(()=>{document.execCommand("copy");toast("Copiado");});
+}
+function resetTested(){
+  if(!confirm("¿Borrar TODAS tus marcas de prueba? (no toca decisiones ni estados)"))return;
+  DB.items.forEach(it=>it.tested={});
+  save();render();toast("Marcas borradas");
+}
+function openLight(src){const l=document.getElementById("lightbox");l.querySelector("img").src=src;l.classList.add("show");}
+function closeLight(){document.getElementById("lightbox").classList.remove("show");}
+let toastT;
+function toast(m){const e=document.getElementById("toast");e.textContent=m;e.classList.add("show");clearTimeout(toastT);toastT=setTimeout(()=>e.classList.remove("show"),1700);}
+
+function init(){
+  document.title="Pruebas — "+(META.title||META.plan_id||"report-kit");
+  document.getElementById("hSub").textContent=
+    [META.project,META.plan_id,"ronda "+(META.round||1),META.generated?("generado "+META.generated):null,META.site||null]
+    .filter(Boolean).join(" · ");
+  if(META.demo===true||(META.project==="tech-lead-template"&&META.plan_id==="report-kit-demo"))document.getElementById("demoBanner").hidden=false;
+  boot();
+}
+if(!DB){
+  document.getElementById("app").style.display="none";
+  document.getElementById("nodata").hidden=false;
+}else{
+  init();
+}
+</script>
+</body>
+</html>

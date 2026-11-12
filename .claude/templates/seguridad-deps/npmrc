@@ -1,0 +1,10 @@
+# Se copia a .npmrc en la raíz de un proyecto npm (sub-ola 2.23, SE-34).
+# Los scripts de instalación de las dependencias NO se ejecutan: un postinstall malicioso (s1ngularity, Nx,
+# 26-08-2025) no corre con tus credenciales al hacer `npm install`. pnpm >= 10.26.0 ya lo hace por defecto y
+# hace innecesario este fichero; con npm o yarn clásico, esto es lo que lo consigue.
+ignore-scripts=true
+
+# El precio: un paquete que necesita compilar algo (esbuild, sharp, husky, playwright) pide el paso explícito,
+# y queda escrito en el proyecto en vez de ocurrir a ciegas:
+#   npm rebuild esbuild sharp
+#   npx playwright install chromium

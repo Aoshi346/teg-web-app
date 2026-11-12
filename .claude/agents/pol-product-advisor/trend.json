@@ -1,0 +1,36 @@
+{
+  "agent": "pol-product-advisor",
+  "app": "teg-web-app",
+  "last_updated": "2026-11-12",
+  "scope": "asesoría de producto/requisitos — mejorar / añadir / quitar-simplificar / gaps de requisitos, priorizado por valor×esfuerzo y anclado en personas y negocio; modo pre-ejecución: review de planes/diseños (gaps + recortes)",
+  "standard_baseline": "Product/requirements advisory — verificar features de dominio/competidores con WebSearch antes de proponer; ajustar ambición a etapa y presupuesto",
+  "cubos": [
+    "Mejorar (existe, puede aportar más)",
+    "Añadir (feature/requisito nuevo con valor)",
+    "Quitar / Simplificar (scope creep, YAGNI, no usado)",
+    "Gap de requisitos (sin especificar / preguntas de kickoff)"
+  ],
+  "prioriza_por": "valor × esfuerzo (quick wins primero) · need vs nice-to-have · anclado a persona/objetivo",
+  "metrics_note": "address_rate por ronda = sugerencias con decisión del cliente / sugerencias emitidas — si un tipo de sugerencia se ignora N rondas, dejar de emitirlo",
+  "history": [
+    {
+      "round": 1,
+      "date": "2026-08-07",
+      "mode": "pre-ejecución (plan/diseño)",
+      "target": "TPL-1: report-kit (W3) + Otto (W4) + /project-setup (W5)",
+      "findings_count": {
+        "gap": 8,
+        "quitar": 1,
+        "añadir": 1,
+        "mejorar": 0
+      },
+      "top_findings": [
+        "G1: Otto/Pol/report_kit no se propagan a proyectos nuevos vía create-agent — rompe el propio ejemplo de /project-setup",
+        "G2: CSS/tokens duplicados sin fuente única entre las 5 plantillas del report-kit (causa raíz de F-001 y los findings sistémicos de QA)",
+        "QS1: INDEX.md/CATALOG.md/plan-dashboard siguen enrutando al sistema legacy sin mencionar report-kit"
+      ],
+      "decisions_pending": 9,
+      "address_rate": null
+    }
+  ]
+}

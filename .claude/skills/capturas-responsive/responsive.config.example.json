@@ -1,0 +1,23 @@
+{
+  "base": "http://127.0.0.1:8080",
+  "paginas": [
+    { "pagina": "inicio", "ruta": "/", "titulo": "Página de inicio", "hero": true },
+    { "pagina": "contacto", "ruta": "/contacto", "titulo": "Formulario de contacto",
+      "llenar": { "nombre": "Ana", "email": "ana@ejemplo.test" }, "movilVertical": false, "extra": false }
+  ],
+  "tamanos": [
+    [320, 568], [360, 640], [360, 800], [375, 667], [390, 844], [412, 915], [430, 932],
+    [640, 360], [844, 390],
+    [768, 1024], [820, 1180], [1024, 768],
+    [1280, 800], [1440, 900], [1920, 1080]
+  ],
+  "tamanosExtra": [
+    { "w": 360, "h": 560, "etiqueta": "Instagram" },
+    { "w": 390, "h": 664, "etiqueta": "Instagram" },
+    { "w": 412, "h": 760, "etiqueta": "Instagram" }
+  ],
+  "selectores": {
+    "flotante": "#flotante",
+    "hero": ".hero a.boton"
+  }
+}
