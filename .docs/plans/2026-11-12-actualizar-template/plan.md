@@ -2,7 +2,8 @@
 
 > Fecha: 2026-11-12 · Origen: T-237 (sesión del template, rama `aoshi-develop`, CORE `8edf90a8a06e`)
 > Estado: **APROBADO el 2026-11-12** (D1 «solo el template», D2 frontend + Aitor, D3 Lidia + persona Daniela).
-> Pendiente de ejecutar. No se ha tocado nada del harness.
+> **EJECUTADO el 2026-11-12** en `chore/actualizar-template` (8 commits, `028bff1..efded09`). Falta: merge a
+> `development` (READY_MERGE) y push, de Aoshi.
 
 ## 1. Dónde estamos (medido hoy)
 
@@ -113,3 +114,29 @@ Un commit por paso, con rutas explícitas.
 ## 6. Fuera de este plan
 
 Retomar el desarrollo de la app y la vuelta a producción.
+
+## 7. Resultado (2026-11-12)
+
+- `template_diff.py`: **CORE al día** (`CORE_VERSION` 8edf90a8a06e) · 0 STALE · 0 DIVERGENTE · 0 LOCAL ·
+  0 RETIRADO. Los 168 MISSING son piezas fuera del perfil; los 2 «LOCAL POSTERIOR» son los README
+  regenerados de `agents/` y `skills/` (listan lo instalado aquí).
+- `check_mechanisms.py`: OK, ningún mecanismo roto (314 avisos de citas a piezas fuera del perfil).
+- `check_instrucciones.py` (del template): dentro del presupuesto; siempre cargados `CLAUDE.md` +
+  `governance` + `code-style`.
+- `claude -p "/context"` tras el commit: **36,1k tokens al arrancar** (memoria 10k: `.claude/CLAUDE.md`
+  y `governance.md`).
+- Arranque con hooks: todos los del proyecto salen con 0 (los `exit 126` son de un plugin global de
+  la máquina, carta-investors, ajeno al repo).
+- App intacta: en `backend/` y `frontend/` solo cambian los README de tests (sin nombres de workers).
+
+**Desviaciones del plan:** (1) `backend/CLAUDE.md` y `frontend/CLAUDE.md` pasaron a `docs/backend.md`
+y `docs/frontend.md` en vez de al archivo: son documentación del dominio. (2) No se corrió
+`ensure_hooks.py`: proponía `yolo-politica` y `agent-registry-log` en SubagentStop, que el
+`settings.json` del template no registra; se copió el del template entero. (3) `.gitignore`:
+`gitignore-base` del template no trae `.claude/.config-snapshot/` ni 5 entradas más que el template
+sí ignora; añadidas a mano (mejora pendiente en el template). (4) La regla `docs/` se mantiene (hay
+documentación local sin versionar) y se declara en `.claude/gitignore-allow.txt`.
+
+**Al fusionar:** el checkout principal tiene ficheros IGNORADOS en `.claude/state/` (resultados de
+workers de abril que nunca se versionaron). Al desaparecer la regla de `.gitignore` aparecerán como
+sin versionar: se mueven a `.claude/_archive/2026-11-12-actualizar/local/state/` junto a los demás.
