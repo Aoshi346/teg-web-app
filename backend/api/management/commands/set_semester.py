@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand
 
+
 class Command(BaseCommand):
     help = "Set academic period for all projects (or by type) to the given value. Default is 2026-02."
 

@@ -111,8 +111,9 @@ def presentation(db, day, project):
 
 def test_presentation_juror_model_is_importable():
     """PresentationJuror can be imported and is a Django model subclass."""
-    from api.models import PresentationJuror
     from django.db import models
+
+    from api.models import PresentationJuror
 
     assert issubclass(PresentationJuror, models.Model)
 

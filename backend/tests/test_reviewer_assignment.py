@@ -4,7 +4,7 @@ import pytest
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 
-from api.models import Evaluation, Project
+from api.models import Evaluation
 
 User = get_user_model()
 

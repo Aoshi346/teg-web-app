@@ -798,7 +798,7 @@ class TestDispatchSemesterActivated:
         from api.notifications import dispatch_semester_activated
 
         actor = _make_user(role="Administrador")
-        students = [_make_user(role="Estudiante") for _ in range(4)]
+        _students = [_make_user(role="Estudiante") for _ in range(4)]
         semester = _make_semester(period="2026-06")
 
         dispatch_semester_activated(semester, actor)

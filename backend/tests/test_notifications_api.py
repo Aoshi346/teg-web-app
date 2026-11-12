@@ -94,7 +94,6 @@ def _make_notification(recipient, *, kind="evaluation_received", title="Test", b
 class TestNotificationModel:
     @pytest.mark.django_db
     def test_required_fields_present(self, user_a):
-        from api.models import Notification
 
         n = _make_notification(user_a)
         assert n.pk is not None
@@ -109,21 +108,18 @@ class TestNotificationModel:
 
     @pytest.mark.django_db
     def test_read_at_defaults_to_none(self, user_a):
-        from api.models import Notification
 
         n = _make_notification(user_a)
         assert n.read_at is None
 
     @pytest.mark.django_db
     def test_payload_defaults_to_empty_dict(self, user_a):
-        from api.models import Notification
 
         n = _make_notification(user_a)
         assert n.payload == {}
 
     @pytest.mark.django_db
     def test_link_url_defaults_to_empty_string(self, user_a):
-        from api.models import Notification
 
         n = _make_notification(user_a)
         assert n.link_url == ""
@@ -278,7 +274,6 @@ class TestUnreadCount:
 class TestMarkRead:
     @pytest.mark.django_db
     def test_mark_read_sets_read_at(self, user_a, client_a):
-        from api.models import Notification
 
         n = _make_notification(user_a)
         assert n.read_at is None
@@ -308,7 +303,6 @@ class TestMarkRead:
 
     @pytest.mark.django_db
     def test_mark_read_is_idempotent(self, user_a, client_a):
-        from api.models import Notification
 
         already_read = timezone.now()
         n = _make_notification(user_a, read_at=already_read)
@@ -361,7 +355,6 @@ class TestMarkAllRead:
 
     @pytest.mark.django_db
     def test_mark_all_read_does_not_touch_other_users_rows(self, user_a, user_b, client_a):
-        from api.models import Notification
 
         _make_notification(user_a)
         n_b1 = _make_notification(user_b)

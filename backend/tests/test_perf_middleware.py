@@ -5,7 +5,6 @@ DEBUG=True, and are absent on non-/api/ paths.
 """
 
 import pytest
-from django.test import override_settings
 from rest_framework.test import APIClient
 
 

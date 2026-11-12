@@ -14,10 +14,10 @@ Business rules under test:
 - --dry-run prints the would-delete count without deleting any rows.
 """
 
-import pytest
-from io import StringIO
 from datetime import timedelta
+from io import StringIO
 
+import pytest
 from django.contrib.auth import get_user_model
 from django.core.management import call_command
 from django.utils import timezone

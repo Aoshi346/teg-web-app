@@ -3,8 +3,8 @@ from . import _bootstrap
 
 _bootstrap.setup()
 
-from .users import seed_users  # noqa: E402
 from .semesters import seed_semesters  # noqa: E402
+from .users import seed_users  # noqa: E402
 
 
 def main() -> None:

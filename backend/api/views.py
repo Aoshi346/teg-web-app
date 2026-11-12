@@ -13,7 +13,6 @@ from rest_framework.permissions import BasePermission
 from rest_framework.response import Response
 
 from .lifecycle import InvalidTransition, next_state
-from .throttles import LoginAccountThrottle, LoginIPThrottle
 from .models import (
     AttachedFile,
     Comment,
@@ -53,6 +52,7 @@ from .serializers import (
     SessionTrackSerializer,
     UserSerializer,
 )
+from .throttles import LoginAccountThrottle, LoginIPThrottle
 
 
 def _truthy(value):

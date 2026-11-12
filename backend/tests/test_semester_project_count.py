@@ -1,7 +1,8 @@
 import pytest
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
-from api.models import Semester, Project
+
+from api.models import Project, Semester
 
 User = get_user_model()
 

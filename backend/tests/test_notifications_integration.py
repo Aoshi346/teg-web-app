@@ -381,7 +381,7 @@ class TestCommentCreateWiring:
     @pytest.mark.django_db
     def test_comment_notification_created_for_project_participants(self):
         """When a tutor posts a comment, student and reviewer get comment_added rows."""
-        admin = _make_user(role="Administrador")
+        _admin = _make_user(role="Administrador")
         student = _make_user(role="Estudiante")
         jurado = _make_user(role="Jurado")
         tutor = _make_user(role="Tutor")
@@ -472,7 +472,7 @@ class TestSemesterActivateWiring:
         student_a = _make_user(role="Estudiante")
         student_b = _make_user(role="Estudiante")
         # Non-student users should NOT receive the notification
-        tutor = _make_user(role="Tutor")
+        _tutor = _make_user(role="Tutor")
 
         semester = Semester.objects.create(
             period="2099-01",

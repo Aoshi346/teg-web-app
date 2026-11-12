@@ -5,12 +5,11 @@ Phase RED: all tests expected to fail until ProjectViewSet.destroy is
 gated to Administrador and perform_destroy handles file cleanup.
 """
 
-import os
 import datetime
+import os
 
 import pytest
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import override_settings
 
 from api.models import (
     AttachedFile,

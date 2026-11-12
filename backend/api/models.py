@@ -220,6 +220,9 @@ class Semester(models.Model):
     class Meta:
         ordering = ["-period"]
 
+    def __str__(self):
+        return self.period
+
     @property
     def label(self):
         month_map = dict(self.MONTH_CHOICES)
@@ -228,9 +231,6 @@ class Semester(models.Model):
         end_year = year + 1 if self.end_month < self.start_month else year
         end = f"{month_map.get(self.end_month, '?')} {end_year}"
         return f"{start} – {end}"
-
-    def __str__(self):
-        return self.period
 
 
 class Comment(models.Model):
@@ -384,12 +384,15 @@ class SessionLog(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     last_active_at = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True)
-    user_agent = models.TextField(null=True, blank=True)
+    user_agent = models.TextField(null=True, blank=True)  # noqa: DJ001 — cambiarlo pide migración
 
     class Meta:
         ordering = ['-last_active_at']
         verbose_name = 'Session Log'
         verbose_name_plural = 'Session Logs'
+
+    def __str__(self):
+        return f"Session for {self.user.email} ({self.device}/{self.browser})"
 
     def save(self, *args, **kwargs):
         if self.user_agent:
@@ -398,9 +401,6 @@ class SessionLog(models.Model):
             if not self.browser:
                 self.browser = _get_browser_from_user_agent(self.user_agent)
         super().save(*args, **kwargs)
-
-    def __str__(self):
-        return f"Session for {self.user.email} ({self.device}/{self.browser})"
 
 
 class StateOverride(models.Model):

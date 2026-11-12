@@ -5,8 +5,8 @@ Idempotent: re-running updates the matching email's fields in place.
 """
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass, field
-from typing import Iterable
 
 from . import _bootstrap
 
