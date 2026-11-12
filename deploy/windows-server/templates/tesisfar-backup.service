@@ -1,0 +1,7 @@
+[Unit]
+Description=TesisFar: copia de seguridad diaria
+
+[Service]
+Type=oneshot
+User=@USER@
+ExecStart=@BASE@/bin/backup.sh

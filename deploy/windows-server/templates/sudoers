@@ -1,0 +1,4 @@
+# TesisFar: update.sh (usuario @USER@) reinicia sus propios servicios sin contraseña. Nada más.
+@USER@ ALL=(root) NOPASSWD: /usr/bin/systemctl restart tesisfar-backend.service tesisfar-frontend.service
+@USER@ ALL=(root) NOPASSWD: /usr/bin/systemctl stop tesisfar-backend.service
+@USER@ ALL=(root) NOPASSWD: /usr/bin/systemctl start tesisfar-backend.service

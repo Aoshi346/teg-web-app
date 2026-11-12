@@ -1,0 +1,15 @@
+[Unit]
+Description=TesisFar frontend (Next.js en 127.0.0.1:3000)
+After=network-online.target tesisfar-backend.service
+
+[Service]
+User=@USER@
+WorkingDirectory=@BASE@/current/frontend
+Environment=NODE_ENV=production
+Environment=NEXT_TELEMETRY_DISABLED=1
+ExecStart=/usr/bin/node @BASE@/current/frontend/node_modules/next/dist/bin/next start -H 127.0.0.1 -p 3000
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

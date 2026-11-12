@@ -1,0 +1,10 @@
+[Unit]
+Description=TesisFar: busca una versión nueva en GitHub y la despliega
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=@USER@
+ExecStart=@BASE@/bin/update.sh
+TimeoutStartSec=45min

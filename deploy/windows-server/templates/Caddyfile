@@ -1,0 +1,46 @@
+# Caddy escucha SOLO en 127.0.0.1:8080. La única entrada desde internet es Tailscale Funnel
+# (HTTPS en el puerto 443 de https://@PUBLIC_HOST@), que reenvía aquí.
+{
+	admin off
+	auto_https off
+	servers {
+		trusted_proxies static 127.0.0.1/32 ::1/128
+	}
+}
+
+:8080 {
+	bind 127.0.0.1
+	encode zstd gzip
+
+	request_body {
+		max_size 60MB
+	}
+
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options SAMEORIGIN
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
+
+	handle /django-static/* {
+		root * @BASE@/data
+		file_server
+	}
+
+	handle /media/* {
+		root * @BASE@/data
+		file_server
+	}
+
+	@django path /api/* /admin/*
+	handle @django {
+		reverse_proxy 127.0.0.1:8000 {
+			header_up X-Forwarded-Proto https
+		}
+	}
+
+	handle {
+		reverse_proxy 127.0.0.1:3000
+	}
+}
