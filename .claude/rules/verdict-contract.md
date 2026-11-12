@@ -1,8 +1,14 @@
 ---
 paths:
-  - ".docs/feedback/**"
+  - ".docs/plans/*/feedback-audit/**"
+  - "**/verdicts.json"
+  - "**/findings.json"
+  - "**/impacto.json"
+  - ".claude/workflows/review-branch.js"
+  - ".claude/workflows/bug-sweep.js"
+  - ".claude/templates/feedback_audit/**"
+  - ".claude/skills/feedback-audit/**"
 ---
-
 # Contrato de veredicto — verificación estructurada con doble evidencia
 
 > **Cuándo aplicar:** siempre que un agente **verifica si algo está hecho** contra una fuente de
@@ -13,10 +19,10 @@ paths:
 >
 > **NO aplicar:** para generar copy, planear, o tareas sin un "¿está hecho?" que verificar.
 >
-> **Relacionado:** `verification.md` (gate de 4 niveles), `qa-loop.md`, `e2e-stability.md`,
+> **Relacionado:** `verification.md` (gate de 4 niveles y §Estabilidad E2E), `qa-loop.md`,
 > comando `speckit.specify` (escribe los criterios en Gherkin que esta rule verifica), skill
 > `feedback-audit` (lo usa como `schema` de su workflow), `verification-loops`, `ux-reviewer`,
-> `code-review-gate`; agentes auditores (`rita-pattern-keeper`, `ignacio-roig`, `sofia-pentester`…).
+> `code-review-gate`; agentes auditores (`roberto-clean-code`, `pilar-impacto-produccion`, `rita-pattern-keeper`, `ignacio-roig`, `sofia-pentester`…).
 
 ---
 
@@ -38,6 +44,10 @@ viewport      enum           desktop | mobile
 — extensión SBI-I (QA-4), opcional pero recomendada en hallazgos de auditoría —
 impact        string         consecuencia CONCRETA del hallazgo (a quién afecta y en qué), no la severidad
 intent        enum|string    deliberate | unknown | accident  (+ la razón si es deliberate)
+
+— obligatorio en todo informe de auditor (regla 6, EQ-37) —
+unconfirmed   list           [{what, where_looked, why_not}]: lo que no se pudo confirmar, dónde se
+                             miró y por qué no bastó. Vacía solo si se dice dónde se miró igualmente
 ```
 
 Este es el **JSON Schema** que un workflow pasa como `schema` a cada agente verificador
@@ -76,6 +86,33 @@ Ejemplo real (de una auditoría):
 4. **Trazabilidad al origen**: si el item viene de una cita textual (feedback de cliente, criterio
    de un doc), conserva la cita **verbatim** (`texto_original`) para CTRL+F — no la parafrasees como
    si fuera la fuente.
+5. **Si la petición era de USO, `done` exige la pantalla.** Antes de dar algo por hecho, una
+   pregunta obligatoria: **¿quién va a usar esto, y desde qué pantalla?** Si la respuesta es «una
+   persona» y no hay pantalla (ni otra vía que esa persona tenga de verdad), el veredicto es
+   **`partial`**, con `howto` diciendo qué pantalla falta. «Arreglado en el backend» no es arreglado
+   cuando lo pedido era poder hacer algo. Y quien encarga un frente de arreglo nombra la pantalla
+   esperada, no solo el comportamiento.
+
+   *Ejemplo (fitapp, 2026-10-07, FX-C → FX-E):* el Usuario pidió un simulador de correo «que pueda
+   cambiar a modo real en cualquier momento». El frente entregó modelo, modo conmutable, bandeja por
+   API y comando, con **20 tests en verde**, y lo dio por arreglado — **sin ninguna pantalla**: la
+   invitación remitía a «tu bandeja de correos» y la clienta a «pídele el código a tu entrenador», y
+   el Usuario solo podía cambiar de modo por consola. Lo cazó el TL al ver cero ficheros de pantalla
+   en el diff; hizo falta un quinto frente. Con esta regla el veredicto habría sido:
+   ```
+   🔎 Código:  done — backend completo (modelo, modo conmutable, bandeja por API, comando) · 20 tests en verde
+   👁 En vivo:  notdone — ninguna ruta de la app enseña la bandeja; el cambio de modo solo va por consola
+   ➡️ Qué falta: la pantalla de bandeja (entrenador y clienta) y el interruptor de modo para el Usuario
+   → verdict: partial
+   ```
+
+6. **Lo no confirmado se marca, y se dice dónde se miró.** Todo informe de auditor cierra con un
+   bloque «No confirmado» (`unconfirmed` en JSON): cada cosa que no se pudo comprobar, **dónde se
+   buscó** (fichero, URL, comando con su salida) y por qué no bastó. «No encontré nada» sin decir
+   dónde se buscó no es un resultado: se lee como «está bien» y es un hueco. Es la recomendación de
+   la guía de prompting de Opus 5.5 (*«Mark anything you couldn't confirm, and say where you
+   looked»*). Lo lleva cada ficha de auditor en un bloque idéntico (`SHARED:BEGIN no-confirmado`),
+   y `scripts/check_shared_block.py` falla si a un auditor le falta o diverge.
 
 ## Extensión SBI-I — Impact, Intent y "solo lo observado" (QA-4)
 
@@ -130,6 +167,54 @@ git log --oneline -S "retry_on_empty_body" -- src/payments/
 > Consecuencia operativa: un hallazgo con `intent: deliberate` **baja de severidad o desaparece**.
 > Esto es lo que separa a un auditor útil de uno al que se deja de leer.
 
+### 2b. Intent simétrico — el descarte necesita el mismo listón que el hallazgo
+
+§2 protege del **falso positivo** (condenar lo deliberado), y el caveat del reviewer adversarial de
+`verification.md` §Nivel 4 vigila la misma dirección. **Nadie vigilaba la contraria: el hallazgo
+descartado a ojo.** La asimetría, en palabras de Vera (elvion, ronda 6, 2026-08-25): *«un hallazgo
+equivocado se discute; uno descartado a ojo desaparece sin dejar rastro»*. El falso positivo entra en
+el informe y alguien lo tumba; el falso negativo por descarte no existe para nadie.
+
+**La regla:** toda entrada de `falsos_positivos_evitados` (o cualquier «lo miré y no es nada») cita
+**qué se midió** para descartarla, con el mismo nivel de evidencia que un hallazgo. Antes de
+descartar, tres preguntas:
+
+1. ¿Qué premisa sostiene el descarte?
+2. ¿La he **observado** (DOM, salida de un comando) o la he **deducido** (leyendo el código)?
+3. Si la he deducido, **la mido**.
+
+*Ejemplo:* Vera auditó sus 9 descartes de la ronda: 8 citaban una medición y 1 no — «el CTA al 40 %
+no cuenta porque WCAG exime la interfaz inactiva», con la premisa **leída en el código**. Medida con un
+`MutationObserver`: `disabled=true · opacity=0.4`. El descarte era correcto, **pero por suerte hasta
+medirlo**. En la misma ronda, dos textos de la cabecera descartados a mano: con el instrumento ya capaz
+de leer degradados, uno cumplía y el otro no.
+
+```
+falsos_positivos_evitados:
+  - id: CTA-40
+    premisa: "el botón está inactivo, y WCAG 1.4.3 exime la interfaz inactiva"
+    observada: sí — MutationObserver sobre el botón: disabled=true · opacity=0.4
+```
+
+**El límite, declarado por su autora:** cubre los descartes que llegaron a **registrarse**. No
+alcanza lo que se descartó sin darse cuenta —lo que se mira medio segundo y se resuelve como
+«normal»—: eso no deja entrada que auditar. Es la misma asimetría, un nivel más abajo.
+
+### 2c. Un hallazgo repetido se reabre cuando alguien lo usa para justificar trabajo
+
+Un número que se repite ronda tras ronda deja de examinarse: pasa a ser decorado del informe. El
+disparador para volver a medirlo **no es el número de rondas** —«a la tercera» produce churn: hay
+hallazgos en su séptima ronda que reabrir cada vez es trabajo sin destino— sino **cuándo cambia de
+manos**: el día que alguien lo cita para **proponer o justificar trabajo**, se vuelve a medir **y se
+clasifica**. *Un recuento sin clasificar no es una medida.*
+
+*Ejemplo (elvion):* Ignacio reportó «116 `!important` en el kiosco» durante cuatro rondas, y el TL
+llegó a proponer una pasada entera para retirarlos. Medidos y clasificados: **56 reglas, 54 del shim
+del widget y 1 del kiosco** —el puente deliberado hacia un bundle que no envía sus utilidades,
+documentado en el propio fichero (`WIDGET OVERRIDE`) a doscientas líneas de donde se contaba—. La
+ronda de retirada no habría movido nada. Las palabras de Ignacio: *«le apliqué la pregunta de Intent
+a tu `limit=0` y no se me ocurrió aplicármela a mi propio hallazgo recurrente»*.
+
 ### 3. Solo comportamientos observados directamente — nunca de oídas
 
 **Regla dura, no negociable:** un verificador reporta **únicamente lo que ha visto él mismo** — el
@@ -168,7 +253,7 @@ plan de su propia verificación**, y esta rule solo tiene que ejecutarlo.
 
 | Cláusula Gherkin | Qué es al verificar | Campo del esquema |
 |---|---|---|
-| **Dado que** [contexto] | el estado inicial que hay que montar (seed, login, datos) | precondición del test — ver `e2e-stability.md` §1 |
+| **Dado que** [contexto] | el estado inicial que hay que montar (seed, login, datos) | precondición del test — ver `verification.md` §E2E-1 |
 | **Cuando** [acción] | el paso reproducible que ejecuta el verificador | `howto` / `📋 Instrucción` |
 | **Entonces** [resultado] | la aserción observable → decide el `verdict` | `why` (con la evidencia 🔎/👁) |
 
@@ -197,7 +282,7 @@ criterio está mal escrito — devuélvelo a la spec en vez de verificarlo a ojo
 
 ## Mapeo verdict → status del dashboard (puente, no colisión)
 
-El `verdict` (eje "¿está hecho?") y el `status` Kanban del dashboard (`speckit_dashboard/`, eje "¿en
+El `verdict` (eje "¿está hecho?") y el `status` Kanban del dashboard (el del report-kit; antes `speckit_dashboard/`, eje "¿en
 qué fase del flujo está?": `backlog/doing/review/done/blocked`) comparten 3 palabras. **No son lo
 mismo** — son ejes distintos — pero hay un puente directo, el que aplica `reconcile.py` (`V2STATUS`):
 
@@ -225,9 +310,17 @@ mismo** — son ejes distintos — pero hay un puente directo, el que aplica `re
 - ❌ Confundir **severidad** con **Impact**: `P1` no explica qué le pasa al usuario.
 - ❌ Sustentar un `done` en el informe de otro agente en vez de en observación propia (de oídas).
 - ❌ Verificar a ojo un criterio cuyo "entonces" no es observable → devuélvelo a la spec.
+- ❌ Descartar un hallazgo con una premisa **deducida** del código y no observada → el descarte
+  necesita el mismo listón que el hallazgo (§2b).
+- ❌ Proponer trabajo apoyándose en un recuento repetido sin volver a medirlo y clasificarlo (§2c).
+- ❌ `done` sobre una petición de uso que no tiene pantalla («arreglado en el backend») → `partial` (regla 5).
+- ❌ Un informe sin bloque «No confirmado», o un «sin hallazgos» que no dice dónde se miró (regla 6).
 
 ---
 
-_Rule version: 1.1 · adaptado de un harness de auditoría en producción (bcnlip) ·
+_Rule version: 1.3 · 2026-10-31 (sub-ola 3.02, EQ-37): regla 6 «No confirmado y dónde miré», campo
+`unconfirmed` y su comprobador; `roberto-clean-code` en Relacionado. · v1.2 · 2026-10-21 (sub-ola 2.16, MO-52): §2b descarte simétrico y §2c reapertura de un
+hallazgo repetido (de elvion), regla 5 «¿desde qué pantalla?» (de fitapp). · v1.1 · adaptado de un
+harness de auditoría en producción (bcnlip) ·
 v1.1 (2026-08-08): extensión SBI-I (Impact · Intent · solo-lo-observado, QA-4) y puente
 Gherkin→verificación (SPEC-3)_

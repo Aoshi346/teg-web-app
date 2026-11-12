@@ -34,7 +34,9 @@
 - Crear archivos y componentes
 - Refactorizar código existente
 - Run tests (respetando límites de RAM en `CLAUDE.md`)
-- `git commit` a la branch de trabajo (feature/* o develop según política del proyecto)
+- `git commit` a la branch de trabajo, con rutas explícitas. Default: `develop` (`code-style.md`
+  §Branches); si el `CONFIGURACION.yaml` del proyecto dice otra cosa (`git_commit: usuario`,
+  `git_branching: rama-por-issue`), manda el proyecto: entonces se deja listo y se avisa (`READY_COMMIT`)
 - Install **project deps** (`pip install pkg`, `npm install pkg`, `poetry add pkg`)
 - Crear migraciones Django y aplicarlas en dev/staging
 
@@ -80,6 +82,13 @@ Los tres niveles de arriba gradúan por **madurez del TL**, y §2 gradúa por **
 | **Semi-mecánica** — refactor con criterio (extraer módulo, partir un fichero), aplicar un fix conocido a variantes distintas | **Media**: plan corto primero, luego ejecuta el plan | Los de arriba + el plan escrito antes (`[PLAN]` en `PROGRESS.log`) |
 | **Lógica nueva o decisión de producto** — reglas de negocio, contratos de API públicos, esquema de datos, UX de un flujo principal, pricing | **Baja**: SpecKit y los gates de §2 y §2-Usuario | Todo lo anterior **no basta**: aquí el test verde no prueba que la decisión sea correcta |
 
+**`/batch`** (la skill integrada que parte un cambio en 5-30 unidades, cada una en su worktree) **solo para
+la fila «mecánica y verificable»**, y siempre después de `bash .claude/hooks/check-ram.sh --explain`: cada
+unidad es un subagente con su worktree y cuenta contra el tope de la máquina (decisión BATCH-G9-14 del
+Usuario, 22-10; `rules/goal-vs-loop.md`).
+
+**Y por zona** (`audit-team.md` §9): con el `zonas.yaml` del proyecto firmado, una ruta **roja** baja a autonomía baja sea cual sea el tipo de tarea (`zona.py <rutas>`).
+
 **Cuándo NO aplica "mecánica y verificable"** (el límite honesto): si el módulo **no tiene tests**, o los que tiene no fallarían ante el error que temes, la tarea deja de ser verificable y baja a autonomía media aunque el trabajo sea mecánico. El guardrail es el test, no la etiqueta.
 
 > Referencia del sector citada en el material de origen (AI4DEVS M17.4): Amazon publica en torno al **70% del código transpilado por IA sin supervisión humana** — *"ya son muy buenos haciendo transpiling […] incorporando ciertos guardrails puedes arriesgar más"*. Es un dato de terceros sobre su contexto, no una medición nuestra; lo que adoptamos es el criterio, no el porcentaje.
@@ -89,7 +98,10 @@ Los tres niveles de arriba gradúan por **madurez del TL**, y §2 gradúa por **
 ## 4. Protocolo de Comunicación
 
 ### Cuándo notificar
-Usar el canal estándar del proyecto (ej. `openclaw gateway wake`, Slack, Telegram). Estados canónicos:
+Por el canal que exista en la máquina; en la de casa es Telegram, con
+`python3 .claude/scripts/avisar.py "[PROYECTO] [ESTADO]: [mensaje]"` (sale con 1 y dice por qué si no
+llega; `--comprobar` mira el canal sin mandar nada). `DONE` y `BLOCKED` los manda además solo el hook
+`notify-telegram.sh` (Stop) cuando `PROGRESS.json` pasa a `completed` o `blocked`. Estados canónicos:
 
 - `INICIO`: empiezo tarea
 - `READY_MERGE`: worktree listo, esperando aprobación de merge
@@ -102,7 +114,7 @@ Usar el canal estándar del proyecto (ej. `openclaw gateway wake`, Slack, Telegr
 ### Fuente de verdad de estado
 **`PROGRESS.json` en la raíz del proyecto** es la única fuente de verdad para el estado de la tarea. El Supervisor lo lee sin parsear logs. Mantén `task`, `status`, `checklist[*].done` actualizados en vivo (no en batch).
 
-Ver `CLAUDE.md` para el formato canónico de `PROGRESS.json`.
+Formato canónico de `PROGRESS.json`: `rules/progress-tracking.md`.
 
 ---
 
@@ -124,26 +136,11 @@ Ver `CLAUDE.md` para el formato canónico de `PROGRESS.json`.
 
 ---
 
-## 6. Las 5 capas por ROL HUMANO — quién construye y quién solo usa
+## 6. Las 5 capas por ROL HUMANO
 
-Todo lo anterior reparte autonomía **entre agentes**. Esta sección reparte responsabilidad **entre personas**: en una instalación con varios departamentos (marketing, ventas, operaciones) hay que dejar escrito quién construye la configuración y quién solo la consume. Sin esto, termina alguien de marketing editando `settings.json`.
-
-| Capa | Qué es | Quién la toca | Quién NO |
-|---|---|---|---|
-| **1 · `CLAUDE.md`** | Contexto de toda la organización: qué hacemos, tono de marca, líneas rojas | El rol técnico (CTO / dueño del harness), con **input** de negocio | Nadie más lo edita. El caché TTL 5 min lo hace además caro de tocar a mitad de sesión (`harness-gotchas.md`) |
-| **2 · Skills** | El know-how empaquetado (`.claude/skills/`) — cómo se hace bien cada cosa | El rol técnico. Cada skill necesita **owner**: los skills son código y se pudren sin dueño | El rol no técnico |
-| **3 · Slash commands** | `.claude/commands/` — **la ÚNICA capa que toca el rol no técnico**: escribe `/comando <argumento>` y obtiene resultado | Los construye el rol técnico; **los ejecuta cualquiera** | — |
-| **4 · Hooks** | `.claude/hooks/` + `settings.json` — el enforcement determinista (RAM, formato, permisos) | **Solo** el rol técnico. Tocar `settings.json` requiere además aprobación explícita (§2) | Todos los demás |
-| **5 · Programado / headless** | Cron, `claude -p … --max-turns N`, agentes en background, informes recurrentes | **Solo** el rol técnico (gasta dinero sin nadie mirando) | Todos los demás |
-
-**La frase que resume el reparto** (fuente: *"5 Marketing Workflows con Claude Code"*, Rezvani 2026): *"El CTO construye la infraestructura […] El equipo de marketing corre los workflows. Tipean `/competitor-report` y obtienen resultados. **NO abren archivos de configuración. NO escriben prompts. Corren comandos.**"*
-
-Consecuencias prácticas:
-
-1. **Si un rol no técnico necesita algo nuevo, el entregable es un comando**, no un instructivo para editar ficheros. Si te encuentras explicando dónde está `settings.json`, el diseño falló.
-2. **Permisos al revés para roles no técnicos**: el default de dev es *allow amplio, deny estrecho*; para un rol no técnico se empieza **denegando todo** y se abre solo el directorio de su trabajo. Ver las reglas de seguridad del template (no copiadas aquí) y `documentation/settings-examples/`.
-3. **La capa 3 es la superficie de contrato**: si cambias lo que hace un comando, cambias el trabajo de otra persona — avísalo como cambio de interfaz, no como refactor interno.
-4. **Esto no sustituye a §2**: un comando ejecutado por un rol no técnico sigue estando sujeto a los approval gates (no puede deployar por el hecho de estar en la capa 3).
+Quien no programa **solo ejecuta slash commands**; `CLAUDE.md`, skills, hooks, `settings.json` y lo
+programado los toca solo el rol técnico (y `settings.json`, además, con aprobación, §2). Tabla y
+consecuencias: `rules/human-role-layers.md` (entra sola al tocar settings, comandos o hooks).
 
 ---
 
@@ -167,6 +164,7 @@ Consecuencias prácticas:
 
 ---
 
-_Rule version: 1.1 · 2026-08-08 — añadidos §3.1 (autonomía por tipo de tarea, AGT-6) y §6 (las 5 capas
+_Rule version: 1.2 · 2026-10-28 — el detalle de §6 pasa a `human-role-layers.md` (con `paths:`, MO-46) ·
+v1.1 · 2026-08-08 — añadidos §3.1 (autonomía por tipo de tarea, AGT-6) y §6 (las 5 capas
 por rol humano, ND-4); anti-patterns y "cuándo NO aplica" pasan a §7 y §8. El eje de PROCESO
 (promoción de agentes, escalado por incertidumbre, coste FP/FN) vive en `agent-autonomy-ladder.md`._

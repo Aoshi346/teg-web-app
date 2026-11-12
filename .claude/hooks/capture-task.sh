@@ -6,10 +6,10 @@
 # petición, así que recordarlas dependía del agente entre veinte tareas — y eso falla siempre.
 #
 # POR QUÉ UN HOOK Y NO UNA SKILL. Una skill hay que acordarse de invocarla, que es el mismo fallo.
-# Esto corre SIEMPRE (criterio de capas del template: si el coste de ignorarlo es alto, baja de capa).
+# Esto corre SIEMPRE (`rules/layer-decision.md`: si el coste de ignorarlo es alto, baja de capa).
 #
 # DOS COSAS, en este orden:
-#   1. Registra la petición en el TASKS.md del PLAN activo (no en la raíz: decisión del Usuario).
+#   1. Registra la petición en el pending-tasks.md del PLAN activo (no en la raíz: decisión del Usuario).
 #   2. Reinyecta las pendientes en el contexto del turno, para que estén delante y no en la memoria.
 #
 # LO QUE NO HACE: decidir qué va a background. Eso lo decide el Usuario; el hook solo anota.
@@ -17,8 +17,21 @@
 DIR="${CLAUDE_PROJECT_DIR:-$(pwd)}"
 REG="$DIR/.claude/scripts/tasks_registry.py"
 [ -f "$REG" ] || exit 0
+# Con datos personales o de salud REALES en desarrollo (CONFIGURACION.yaml, sub-ola 2.29, SE-41) no se
+# escribe cada prompt en un fichero que leen todas las sesiones: el prompt puede llevar esos datos.
+# Lo decidió a mano develop (EvoPreven); aquí es el defecto, aunque el hook siga registrado.
+grep -qE "^[[:space:]]*datos_reales_desarrollo:[[:space:]]*[\"']?s[ií]" \
+  "$DIR/.claude/CONFIGURACION.yaml" 2>/dev/null && exit 0
+
+# OPT-IN por proyecto (MO-19): solo registra donde CONFIGURACION.yaml lo activa con `capture_task: si`.
+# Antes corría en TODO derivado y vertía cada prompt en un fichero compartido; ahora se enciende a
+# propósito. Sin el fichero o sin la clave: no registra ni reinyecta nada.
+grep -qE "^[[:space:]]*capture_task:[[:space:]]*[\"']?s[ií]" \
+  "$DIR/.claude/CONFIGURACION.yaml" 2>/dev/null || exit 0
 
 PROMPT=$(cat)   # UserPromptSubmit entrega el prompt por stdin
+# La redacción (secretos + datos personales) la hace `tasks_registry.py add` con la librería compartida
+# `scripts/redactar.py` (U.06) ANTES de escribir en pending-tasks.md; si no puede importarla, no registra.
 
 # El prompt puede venir como JSON o como texto plano según el harness: se acepta lo que llegue.
 TXT=$(printf '%s' "$PROMPT" | python3 -c "
@@ -38,8 +51,13 @@ N=${#LIMPIO}
 # Las NOTIFICACIONES DEL SISTEMA no son peticiones del Usuario y no deben entrar en el registro:
 # ensucian la lista con ruido de máquina y hacen que se deje de leer, que es lo contrario de para
 # lo que existe. Se detectan por su envoltorio, que es literal y estable.
+# Los INFORMES DE SUBAGENTES también llegan como turno (`<agent-message …>` + «[Subagent hand-back]»)
+# y tampoco son peticiones: en aquila-erp (2026-09-30) siete agentes en paralelo metieron nueve
+# informes en el registro como si fueran tareas del Usuario.
 ES_SISTEMA=0
-printf '%s' "$LIMPIO" | grep -qE '<task-notification>|<system-reminder>|<cross-session-message|\[Cross-session|SYSTEM NOTIFICATION|\[SYSTEM' && ES_SISTEMA=1
+# Los informes de subagentes (`<agent-message>`, «[Subagent hand-back]») tampoco: se colaban como
+# peticiones y se reinyectaban en cada turno (125 en 7 proyectos, 2026-10-17).
+printf '%s' "$LIMPIO" | grep -qE '<task-notification>|<system-reminder>|<cross-session-message|\[Cross-session|SYSTEM NOTIFICATION|\[SYSTEM|<agent-message|\[Subagent hand-back\]' && ES_SISTEMA=1
 
 if [ "$ES_SISTEMA" -eq 0 ] && [ "$N" -ge 25 ] && ! printf '%s' "$LIMPIO" | grep -qiE '^(si|no|vale|ok|gracias|sí|dale|perfecto|adelante|correcto)[.! ]*$'; then
     python3 "$REG" add "$LIMPIO" >/dev/null 2>&1

@@ -1,4 +1,9 @@
-# Memoria de Daniela (naive tester) — teg-web-app
+# Memoria de Lidia (naive tester) — teg-web-app
+
+> **Persona por defecto en este proyecto: Daniela** (abajo, «Quien soy»). Desde el 2026-11-12 el agente
+> es la Lidia del template (D3 del plan `.docs/plans/2026-11-12-actualizar-template/`): se lanza en el
+> modo «persona pasada al lanzarla» con Daniela, salvo que se pida otra. La versión renombrada del
+> agente está en `_archive/2026-11-12-actualizar/divergente/agents/lidia-naive-tester.md`.
 
 > Ultima actualizacion: 2026-09-21 · **v0: instalacion, sin rondas todavia**
 
