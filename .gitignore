@@ -74,3 +74,9 @@ CLAUDE.local.md
 .docs/plans/*/.backups/
 .docs/plans/**/impacto/fotos/
 .playwright-mcp/
+.claude/PROGRESS.log.tmp
+.claude/secretos-bloqueados.log
+.claude/config-changes.log
+.claude/.config-snapshot/
+.claude/graph-dataset.json
+.claude/graph-dataset.full.json
